@@ -252,23 +252,63 @@ private extension HomeRootView {
                 .buttonStyle(.plain)
             }
             
-            NavigationLink {
-                DailyLogHistoryView(store: dailyLogStore)
-            } label: {
-                Label("每日紀錄", systemImage: "square.and.pencil")
-            }
+            // 👇 放在 ForEach(TimeSlot...) 後面
+            Divider().padding(.vertical, 6)
+            
+            Text("功能")
+                .font(.headline)
             
             NavigationLink {
-                FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore)
+                LGCategoryHubView(
+                    category: .tools,
+                    wishStore: wishStore,
+                    ledgerStore: ledgerStore,
+                    dailyLogStore: dailyLogStore,
+                    closeDrawer: { withAnimation { isDrawerOpen = false } }
+                )
             } label: {
-                Label("財務", systemImage: "creditcard")
+                Label("工具功能", systemImage: "wrench.and.screwdriver")
             }
+            .simultaneousGesture(TapGesture().onEnded { withAnimation { isDrawerOpen = false } })
             
             NavigationLink {
-                MandalaChartScreen()
+                LGCategoryHubView(
+                    category: .roles,
+                    wishStore: wishStore,
+                    ledgerStore: ledgerStore,
+                    dailyLogStore: dailyLogStore,
+                    closeDrawer: { withAnimation { isDrawerOpen = false } }
+                )
             } label: {
-                Label("曼陀羅圖表", systemImage: "square.grid.3x3")
+                Label("角色設定", systemImage: "person.crop.circle")
             }
+            .simultaneousGesture(TapGesture().onEnded { withAnimation { isDrawerOpen = false } })
+            
+            NavigationLink {
+                LGCategoryHubView(
+                    category: .growth,
+                    wishStore: wishStore,
+                    ledgerStore: ledgerStore,
+                    dailyLogStore: dailyLogStore,
+                    closeDrawer: { withAnimation { isDrawerOpen = false } }
+                )
+            } label: {
+                Label("自我成長", systemImage: "chart.line.uptrend.xyaxis")
+            }
+            .simultaneousGesture(TapGesture().onEnded { withAnimation { isDrawerOpen = false } })
+            
+            NavigationLink {
+                LGCategoryHubView(
+                    category: .help,
+                    wishStore: wishStore,
+                    ledgerStore: ledgerStore,
+                    dailyLogStore: dailyLogStore,
+                    closeDrawer: { withAnimation { isDrawerOpen = false } }
+                )
+            } label: {
+                Label("困難幫助", systemImage: "lifepreserver")
+            }
+            .simultaneousGesture(TapGesture().onEnded { withAnimation { isDrawerOpen = false } })
             
             Spacer()
             
@@ -373,5 +413,129 @@ private struct ContentPanel: View {
         .padding(.trailing, 12)
         .padding(.vertical, 12)
         .shadow(radius: 12)
+    }
+}
+
+// MARK: - 大分類（加 LG 前綴避免撞名）
+enum LGCategory: String, CaseIterable, Identifiable {
+    case tools = "工具功能"
+    case roles = "角色設定"
+    case growth = "自我成長"
+    case help = "困難幫助"
+    
+    var id: String { rawValue }
+    
+    var systemImage: String {
+        switch self {
+        case .tools: return "wrench.and.screwdriver"
+        case .roles: return "person.crop.circle"
+        case .growth: return "chart.line.uptrend.xyaxis"
+        case .help: return "lifepreserver"
+        }
+    }
+}
+
+// MARK: - 分類首頁：點大分類後進來，再點細項
+struct LGCategoryHubView: View {
+    let category: LGCategory
+    
+    // 直接把你 HomeRootView 需要用到的依賴傳進來（最省事、最好接）
+    let wishStore: WishStore
+    let ledgerStore: LedgerStore
+    let dailyLogStore: DailyLogStore
+    
+    let closeDrawer: () -> Void
+    
+    var body: some View {
+        List {
+            Section {
+                Label(category.rawValue, systemImage: category.systemImage)
+                    .font(.headline)
+                Text("在這裡選擇細部功能")
+                    .foregroundStyle(.secondary)
+            }
+            
+            Section("功能") {
+                contentLinks
+            }
+        }
+        .navigationTitle(category.rawValue)
+        .onAppear { closeDrawer() } // 進來就把 Drawer 關掉（體感更好）
+    }
+    
+    @ViewBuilder
+    private var contentLinks: some View {
+        switch category {
+        case .tools:
+            NavigationLink {
+                FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore)
+            } label: {
+                Label("財務", systemImage: "creditcard")
+            }
+            
+            NavigationLink {
+                Text("選緘溝通板（待接上）")
+                    .navigationTitle("選緘溝通板")
+            } label: {
+                Label("選緘溝通板", systemImage: "bubble.left.and.bubble.right")
+            }
+            
+        case .roles:
+            NavigationLink {
+                Text("能力五角圖（待接上）")
+                    .navigationTitle("能力五角圖")
+            } label: {
+                Label("能力五角圖", systemImage: "pentagon")
+            }
+            
+            NavigationLink {
+                Text("角色優勢（待接上）")
+                    .navigationTitle("角色優勢")
+            } label: {
+                Label("角色優勢 / 特性", systemImage: "bolt.heart")
+            }
+            
+            NavigationLink {
+                Text("裝備系統（待接上）")
+                    .navigationTitle("裝備系統")
+            } label: {
+                Label("裝備系統", systemImage: "backpack")
+            }
+            
+        case .growth:
+            NavigationLink {
+                DailyLogHistoryView(store: dailyLogStore)
+            } label: {
+                Label("每日紀錄", systemImage: "square.and.pencil")
+            }
+            
+            NavigationLink {
+                MandalaChartScreen()
+            } label: {
+                Label("曼陀羅圖表", systemImage: "square.grid.3x3")
+            }
+            
+            NavigationLink {
+                Text("近況檢視折線圖（待接上）")
+                    .navigationTitle("近況檢視")
+            } label: {
+                Label("近況檢視（折線圖）", systemImage: "chart.line.uptrend.xyaxis")
+            }
+            
+        case .help:
+            NavigationLink {
+                Text("動力筆記（待接上）")
+                    .navigationTitle("動力筆記")
+            } label: {
+                Label("動力筆記", systemImage: "note.text")
+            }
+            
+            NavigationLink {
+                Text("在意清單（待接上）")
+                    .navigationTitle("在意清單")
+            } label: {
+                Label("在意清單", systemImage: "checklist")
+            }
+        }
     }
 }
