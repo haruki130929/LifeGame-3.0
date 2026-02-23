@@ -1,8 +1,27 @@
 import SwiftUI
 
+// MARK: - HomeRootView (Shell)
+// 只負責：NavigationStack + 全域疊層（FAB）
+// 真正的主畫面內容放在 HomeContentView，結構更乾淨。
 struct HomeRootView: View {
+    @EnvironmentObject private var fab: FabStore
     
-    // MARK: - Environment
+    var body: some View {
+        NavigationStack {
+            HomeContentView()
+        }
+        .overlay(alignment: .bottomTrailing) {
+            FabButton()
+                .padding(.trailing, 16)
+                .padding(.bottom, 16)
+        }
+    }
+}
+
+// MARK: - HomeContentView (Main Screen Content)
+private struct HomeContentView: View {
+    
+    // MARK: Environment
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var calendarStore: CalendarStore
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
@@ -11,7 +30,7 @@ struct HomeRootView: View {
     @EnvironmentObject private var wishStore: WishStore
     @EnvironmentObject private var ledgerStore: LedgerStore
     
-    // MARK: - Local Stores
+    // MARK: Local Stores
     @StateObject private var slotConfig = SlotCardConfigStore()
     @StateObject private var todoStore = TodoQuadrantStore()
     
@@ -23,85 +42,126 @@ struct HomeRootView: View {
     // ✅ 重要：不要每次進 DailyLog 都 new 一個
     @StateObject private var dailyLogStore = DailyLogStore()
     
-    // MARK: - UI State
+    // MARK: UI State
     @State private var isDrawerOpen = false
     @State private var currentSlot: TimeSlot = .morning
     @State private var isContentOpen = false
     @State private var tomorrowRing = TomorrowRingPlan.sample
     
-    // MARK: - Calendar UI State
+    // MARK: Calendar UI State
     @State private var monthOffset = 0
     private let cal = Calendar.current
+    private let rangeProvider = CalendarRangeProvider()
     
     private var monthDate: Date {
         cal.date(byAdding: .month, value: monthOffset, to: Date()) ?? Date()
     }
     
-    private let rangeProvider = CalendarRangeProvider()
-    
     // ✅ Drawer/Panel 打開時，底下內容不要吃點擊（避免誤點）
     private var isOverlayPresented: Bool { isDrawerOpen || isContentOpen }
     
+    private let drawerWidth: CGFloat = 260
+    private let contentPanelWidth: CGFloat = 420
+    
+    // MARK: View
     var body: some View {
         ZStack {
-            // ✅ 背景只當背景：不吃觸控（修「看不到但擋住」）
-            ThemeBackgroundView(style: theme.backgroundStyle) { Color.clear }
-                .ignoresSafeArea()
-                .allowsHitTesting(false)
-            
-            ScrollView {
-                VStack(spacing: 12) {
-                    headerBar
-                    slotContent
-                }
-                .padding(.horizontal, 12)
-                .padding(.bottom, 16)
-                .padding(.top, 10)
-            }
-            .toolbar(.hidden, for: .navigationBar)
-            .allowsHitTesting(!isOverlayPresented)
-            
-            // Drawer mask
-            if isDrawerOpen {
-                Color.black.opacity(0.25)
-                    .ignoresSafeArea()
-                    .onTapGesture { withAnimation { isDrawerOpen = false } }
-                    .zIndex(50)
-            }
-            
-            drawerView
-                .allowsHitTesting(isDrawerOpen)
-                .zIndex(60)
-            
-            // Right panel
-            if isContentOpen {
-                Color.black.opacity(0.25)
-                    .ignoresSafeArea()
-                    .onTapGesture { withAnimation(.spring()) { isContentOpen = false } }
-                    .zIndex(200)
-                
-                ContentPanel(isOpen: $isContentOpen, game: game, mood: moodStore)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
-                    .transition(.move(edge: .trailing))
-                    .zIndex(210)
-            }
+            backgroundLayer
+            mainScrollContent
         }
-        .overlay(alignment: .bottomTrailing) {
-            FabButton()
-                .padding(.trailing, 16)
-                .padding(.bottom, 16)
-                .allowsHitTesting(!isOverlayPresented)
+        .toolbar(.hidden, for: .navigationBar)
+        .allowsHitTesting(!isOverlayPresented)
+        
+        // Drawer & Panel overlays
+        .overlay { drawerMaskLayer }
+        .overlay(alignment: .leading) { drawerPanelLayer }
+        
+        .overlay { contentMaskLayer }
+        .overlay(alignment: .trailing) { contentPanelLayer }
+        
+        // FAB 在 Shell 上，但 Drawer/Panel 開啟時不希望誤觸
+        .onChange(of: isOverlayPresented) { _, presented in
+            // 如果你想在遮罩打開時也能點 FAB，把 Shell 裡的 allowsHitTesting 改掉即可
+            // 這裡先不動 FAB，本次重構不改行為
         }
+        
         .onAppear { setupFab() }
     }
 }
 
-// MARK: - FAB
-private extension HomeRootView {
+// MARK: - Layers
+private extension HomeContentView {
+    
+    var backgroundLayer: some View {
+        ThemeBackgroundView(style: theme.backgroundStyle) { Color.clear }
+            .ignoresSafeArea()
+            .allowsHitTesting(false)
+    }
+    
+    var mainScrollContent: some View {
+        ScrollView {
+            VStack(spacing: 12) {
+                headerBar
+                slotContent
+            }
+            .padding(.horizontal, 12)
+            .padding(.bottom, 16)
+            .padding(.top, 10)
+        }
+    }
+}
+
+// MARK: - Drawer & Panel
+private extension HomeContentView {
+    
+    var drawerMaskLayer: some View {
+        Group {
+            if isDrawerOpen {
+                Color.black.opacity(0.25)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut) { isDrawerOpen = false }
+                    }
+            }
+        }
+    }
+    
+    var drawerPanelLayer: some View {
+        drawerContent
+            .frame(width: drawerWidth)
+            .offset(x: isDrawerOpen ? 0 : -drawerWidth - 20)
+            .animation(.easeInOut(duration: 0.22), value: isDrawerOpen)
+            .allowsHitTesting(isDrawerOpen)
+    }
+    
+    var contentMaskLayer: some View {
+        Group {
+            if isContentOpen {
+                Color.black.opacity(0.25)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.spring()) { isContentOpen = false }
+                    }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    var contentPanelLayer: some View {
+        if isContentOpen {
+            ContentPanel(isOpen: $isContentOpen, game: game, mood: moodStore)
+                .frame(width: contentPanelWidth)
+                .transition(.move(edge: .trailing))
+                .zIndex(1)
+        }
+    }
+}
+
+// MARK: - FAB Actions
+private extension HomeContentView {
     func setupFab() {
         fab.setActions([
             FabAction(title: "每日紀錄", systemImage: "square.and.pencil") {
-                // 你之後要改成真導覽（NavigationPath）再接
                 print("FAB: DailyLog")
             },
             FabAction(title: "行事曆", systemImage: "calendar") {
@@ -115,12 +175,12 @@ private extension HomeRootView {
 }
 
 // MARK: - Header
-private extension HomeRootView {
+private extension HomeContentView {
     var headerBar: some View {
         HStack(spacing: 10) {
             
             Button {
-                withAnimation { isDrawerOpen.toggle() }
+                withAnimation(.easeInOut) { isDrawerOpen.toggle() }
             } label: {
                 Image(systemName: "line.3.horizontal")
                     .frame(width: 44, height: 44)
@@ -146,7 +206,7 @@ private extension HomeRootView {
 }
 
 // MARK: - Slot content
-private extension HomeRootView {
+private extension HomeContentView {
     
     var slotContent: some View {
         let items = slotConfig.items(for: currentSlot)
@@ -216,17 +276,7 @@ private extension HomeRootView {
 }
 
 // MARK: - Drawer
-private extension HomeRootView {
-    
-    var drawerView: some View {
-        HStack(spacing: 0) {
-            if isDrawerOpen {
-                drawerContent
-                    .transition(.move(edge: .leading))
-            }
-            Spacer()
-        }
-    }
+private extension HomeContentView {
     
     var drawerContent: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -238,7 +288,7 @@ private extension HomeRootView {
             ForEach(TimeSlot.allCases) { slot in
                 Button {
                     currentSlot = slot
-                    withAnimation { isDrawerOpen = false }
+                    withAnimation(.easeInOut) { isDrawerOpen = false }
                 } label: {
                     HStack {
                         Image(systemName: slot.systemImage)
@@ -252,23 +302,15 @@ private extension HomeRootView {
                 .buttonStyle(.plain)
             }
             
-            NavigationLink {
-                DailyLogHistoryView(store: dailyLogStore)
-            } label: {
-                Label("每日紀錄", systemImage: "square.and.pencil")
-            }
+            Divider().padding(.vertical, 6)
             
-            NavigationLink {
-                FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore)
-            } label: {
-                Label("財務", systemImage: "creditcard")
-            }
+            Text("功能")
+                .font(.headline)
             
-            NavigationLink {
-                MandalaChartScreen()
-            } label: {
-                Label("曼陀羅圖表", systemImage: "square.grid.3x3")
-            }
+            categoryLink(.tools, label: "工具功能", systemImage: "wrench.and.screwdriver")
+            categoryLink(.roles, label: "角色設定", systemImage: "person.crop.circle")
+            categoryLink(.growth, label: "自我成長", systemImage: "chart.line.uptrend.xyaxis")
+            categoryLink(.help, label: "困難幫助", systemImage: "lifepreserver")
             
             Spacer()
             
@@ -289,14 +331,30 @@ private extension HomeRootView {
             .padding(.bottom, 12)
         }
         .padding(12)
-        .frame(width: 260)
+        .frame(maxHeight: .infinity, alignment: .top)
         .background(.ultraThinMaterial)
         .ignoresSafeArea()
+    }
+    
+    func categoryLink(_ category: LGCategory, label: String, systemImage: String) -> some View {
+        NavigationLink {
+            LGCategoryHubView(
+                category: category,
+                wishStore: wishStore,
+                ledgerStore: ledgerStore,
+                dailyLogStore: dailyLogStore,
+                closeDrawer: { withAnimation(.easeInOut) { isDrawerOpen = false } }
+            )
+        } label: {
+            Label(label, systemImage: systemImage)
+        }
+        .simultaneousGesture(TapGesture().onEnded {
+            withAnimation(.easeInOut) { isDrawerOpen = false }
+        })
     }
 }
 
 // MARK: - Minimal cards
-
 private struct QuickStartCard: View {
     @ObservedObject var key3Store: Key3Store
     
@@ -338,8 +396,6 @@ private struct ContentPanel: View {
     @ObservedObject var mood: MoodStore
     
     var body: some View {
-        let width: CGFloat = 420
-        
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("Content")
@@ -367,11 +423,134 @@ private struct ContentPanel: View {
             Spacer()
         }
         .padding(16)
-        .frame(width: width)
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18))
         .padding(.trailing, 12)
         .padding(.vertical, 12)
         .shadow(radius: 12)
+    }
+}
+
+// MARK: - 大分類（加 LG 前綴避免撞名）
+enum LGCategory: String, CaseIterable, Identifiable {
+    case tools = "工具功能"
+    case roles = "角色設定"
+    case growth = "自我成長"
+    case help = "困難幫助"
+    
+    var id: String { rawValue }
+    
+    var systemImage: String {
+        switch self {
+        case .tools: return "wrench.and.screwdriver"
+        case .roles: return "person.crop.circle"
+        case .growth: return "chart.line.uptrend.xyaxis"
+        case .help: return "lifepreserver"
+        }
+    }
+}
+
+// MARK: - 分類首頁：點大分類後進來，再點細項
+struct LGCategoryHubView: View {
+    let category: LGCategory
+    
+    // 直接把你 HomeRootView 需要用到的依賴傳進來（最省事、最好接）
+    let wishStore: WishStore
+    let ledgerStore: LedgerStore
+    let dailyLogStore: DailyLogStore
+    
+    let closeDrawer: () -> Void
+    
+    var body: some View {
+        List {
+            Section {
+                Label(category.rawValue, systemImage: category.systemImage)
+                    .font(.headline)
+                Text("在這裡選擇細部功能")
+                    .foregroundStyle(.secondary)
+            }
+            
+            Section("功能") {
+                contentLinks
+            }
+        }
+        .navigationTitle(category.rawValue)
+        .onAppear { closeDrawer() }
+    }
+    
+    @ViewBuilder
+    private var contentLinks: some View {
+        switch category {
+        case .tools:
+            NavigationLink {
+                FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore)
+            } label: {
+                Label("財務", systemImage: "creditcard")
+            }
+            
+            NavigationLink {
+                Text("選緘溝通板（待接上）")
+                    .navigationTitle("選緘溝通板")
+            } label: {
+                Label("選緘溝通板", systemImage: "bubble.left.and.bubble.right")
+            }
+            
+        case .roles:
+            NavigationLink {
+                Text("能力五角圖（待接上）")
+                    .navigationTitle("能力五角圖")
+            } label: {
+                Label("能力五角圖", systemImage: "pentagon")
+            }
+            
+            NavigationLink {
+                Text("角色優勢（待接上）")
+                    .navigationTitle("角色優勢")
+            } label: {
+                Label("角色優勢 / 特性", systemImage: "bolt.heart")
+            }
+            
+            NavigationLink {
+                Text("裝備系統（待接上）")
+                    .navigationTitle("裝備系統")
+            } label: {
+                Label("裝備系統", systemImage: "backpack")
+            }
+            
+        case .growth:
+            NavigationLink {
+                DailyLogHistoryView(store: dailyLogStore)
+            } label: {
+                Label("每日紀錄", systemImage: "square.and.pencil")
+            }
+            
+            NavigationLink {
+                MandalaChartScreen()
+            } label: {
+                Label("曼陀羅圖表", systemImage: "square.grid.3x3")
+            }
+            
+            NavigationLink {
+                Text("近況檢視折線圖（待接上）")
+                    .navigationTitle("近況檢視")
+            } label: {
+                Label("近況檢視（折線圖）", systemImage: "chart.line.uptrend.xyaxis")
+            }
+            
+        case .help:
+            NavigationLink {
+                Text("動力筆記（待接上）")
+                    .navigationTitle("動力筆記")
+            } label: {
+                Label("動力筆記", systemImage: "note.text")
+            }
+            
+            NavigationLink {
+                Text("在意清單（待接上）")
+                    .navigationTitle("在意清單")
+            } label: {
+                Label("在意清單", systemImage: "checklist")
+            }
+        }
     }
 }
