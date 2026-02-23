@@ -1,12 +1,31 @@
 import Foundation
 
-// MARK: - Enums (PDF 選項一模一樣)
+// MARK: - 基本選項
 
 enum Weather: String, CaseIterable, Codable, Identifiable {
     case sunny = "晴"
     case rainy = "雨"
     var id: String { rawValue }
 }
+
+// MARK: - 可忘記紀錄的時間（起床時間用）
+
+enum OptionalLogTime: Codable, Equatable {
+    case unknown
+    case time(Date)
+    
+    var isUnknown: Bool {
+        if case .unknown = self { return true }
+        return false
+    }
+    
+    var dateValue: Date? {
+        if case .time(let d) = self { return d }
+        return nil
+    }
+}
+
+// MARK: - 情緒與心理狀態
 
 enum MoodChangeType: String, CaseIterable, Codable, Identifiable {
     case stable = "穩定"
@@ -18,6 +37,15 @@ enum MoodChangeReason: String, CaseIterable, Codable, Identifiable {
     case anxiety = "焦慮"
     case chat = "聊天"
     case favorite = "做喜歡的事"
+    case other = "其他"
+    var id: String { rawValue }
+}
+
+enum StabilizeMethod: String, CaseIterable, Codable, Identifiable {
+    case selfHarm = "手受傷"
+    case weightedBlanket = "壓力毯"
+    case plushBracelet = "毛絨手環"
+    case hairPulling = "拔頭髮"
     case other = "其他"
     var id: String { rawValue }
 }
@@ -47,19 +75,39 @@ enum AnxietySymptom: String, CaseIterable, Codable, Identifiable {
     var id: String { rawValue }
 }
 
+// MARK: - 衝動行為
+
 enum ImpulseLevel: String, CaseIterable, Codable, Identifiable {
     case none = "無"
-    case mild = "有，輕微"
-    case medium = "有，中等"
-    case severe = "有，嚴重"
-    case other = "有，其他"
+    case mild = "輕微"
+    case medium = "中等"
+    case severe = "嚴重"
+    case other = "其他"
     var id: String { rawValue }
 }
 
+enum ImpulseType: String, CaseIterable, Codable, Identifiable {
+    case selfHarm = "手受傷"
+    case hairPulling = "拔頭髮"
+    case impulseShopping = "衝動購物"
+    case stayingUp = "熬夜"
+    case other = "其他"
+    var id: String { rawValue }
+}
+
+enum ImpulseSeverity: String, CaseIterable, Codable, Identifiable, Hashable {
+    case mild = "輕微"
+    case medium = "中等"
+    case severe = "嚴重"
+    var id: String { rawValue }
+}
+
+// MARK: - 睡眠
+
 enum SleepLatency: String, CaseIterable, Codable, Identifiable {
-    case under30 = "３０分鐘內"
-    case under60 = "３０分鐘～１小時內"
-    case over60 = "超過１小時以上"
+    case under30 = "30分鐘以內"
+    case under60 = "30分鐘～1小時內"
+    case over60 = "超過1小時以上"
     var id: String { rawValue }
 }
 
@@ -67,6 +115,15 @@ enum SleepQuality: String, CaseIterable, Codable, Identifiable {
     case good = "不錯（起床之後很有動力做事，情緒穩定，不太感到疲勞）"
     case normal = "普通（起床之後可以做事）"
     case bad = "不好（難以起床做事或容易感到疲勞）"
+    var id: String { rawValue }
+}
+
+// MARK: - 課業與專注
+
+enum TodoCompletion: String, CaseIterable, Codable, Identifiable {
+    case allDone = "是，全部完成"
+    case noneDone = "否，全部沒完成"
+    case partial = "部分完成"
     var id: String { rawValue }
 }
 
@@ -96,11 +153,13 @@ enum DifficultyReason: String, CaseIterable, Codable, Identifiable {
     var id: String { rawValue }
 }
 
+// MARK: - 身體狀況
+
 enum PainArea: String, CaseIterable, Codable, Identifiable {
     case headache = "頭痛"
-    case cheekbone = "右肩頰骨內側"
-    case elbow = "右手肘"
-    case wrist = "右手腕"
+    case rightShoulderBlade = "右肩胛骨內側"
+    case rightElbow = "右手肘"
+    case rightWrist = "右手腕"
     var id: String { rawValue }
 }
 
@@ -116,35 +175,20 @@ enum BodyLateReason: String, CaseIterable, Codable, Identifiable {
     case stiff = "肢體僵硬"
     case cannotSpeak = "無法開口"
     case tired = "疲勞"
-    case other = "其他"
-    var id: String { rawValue }
-}
-
-enum StabilizeMethod: String, CaseIterable, Codable, Identifiable {
-    case selfHarm = "手受傷"
-    case weightedBlanket = "壓力毯"
-    case plushBracelet = "毛絨手環"
-    case hairPulling = "拔頭髮"      // ✅ 新增
-    case other = "其他"
-    var id: String { rawValue }
-}
-
-enum ImpulseType: String, CaseIterable, Codable, Identifiable {
-    case selfHarm = "手受傷"
     case hairPulling = "拔頭髮"
-    case impulseShopping = "衝動購物" // ✅ 新增
-    case stayingUp = "熬夜"           // ✅ 新增
+    case other = "其他"
     var id: String { rawValue }
 }
 
-enum ImpulseSeverity: String, CaseIterable, Codable, Identifiable, Hashable {
-    case mild = "輕微"
-    case medium = "中等"
-    case severe = "嚴重"
-    var id: String { rawValue }
+// MARK: - 備註照片
+
+struct DailyLogPhoto: Identifiable, Codable, Equatable {
+    var id: UUID = UUID()
+    var imageData: Data
+    var caption: String = ""
 }
 
-// MARK: - Model
+// MARK: - 主 Model
 
 struct DailyLogEntry: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
@@ -152,11 +196,14 @@ struct DailyLogEntry: Identifiable, Codable, Equatable {
     // 基本
     var date: Date = .now
     var weather: Weather = .sunny
-    var wakeTime: Date = .now
     
-    // 情緒與心理狀態
-    var overallMoodScore: Int = 0
-    var anxietyScore: Int = 0
+    // 起床（可忘記）＋ 上床（必填但用 30 分鐘刻度）
+    var wakeTime: OptionalLogTime = .time(.now)
+    var bedTime: OptionalLogTime = .time(.now)
+    
+    // 情緒與心理狀態（滑動桿 1~10）
+    var overallMoodScore: Int = 5
+    var anxietyScore: Int = 5
     
     // 情緒變化
     var moodChangeType: MoodChangeType = .stable
@@ -166,7 +213,7 @@ struct DailyLogEntry: Identifiable, Codable, Equatable {
     var stabilizeMethodsForMoodChange: Set<StabilizeMethod> = []
     var stabilizeOtherTextForMoodChange: String = ""
     
-    // 是否出現焦慮（選一個等級）
+    // 是否出現焦慮
     var anxietyLevel: AnxietyLevel = .none
     var anxietyReasons: Set<AnxietyReason> = []
     var anxietyOtherText: String = ""
@@ -176,22 +223,18 @@ struct DailyLogEntry: Identifiable, Codable, Equatable {
     var stabilizeMethodsForAnxiety: Set<StabilizeMethod> = []
     var stabilizeOtherTextForAnxiety: String = ""
     
-    // 衝動行為
-    var impulseLevel: ImpulseLevel = .none
-    var impulseTypes: Set<ImpulseType> = []
-    var impulseOtherText: String = ""
-    var impulseSeverities: Set<ImpulseSeverity> = []              // ✅ 多選等級
-    var impulseTypesBySeverity: [ImpulseSeverity: Set<ImpulseType>] = [:]  // ✅ 每個等級底下的行為
-    var impulseOtherTextBySeverity: [ImpulseSeverity: String] = [:]        // ✅ 每個等級的其他文字
+    // 衝動行為（可同時勾輕微/中等/嚴重，每個程度各自一組選項）
+    var impulseSeverities: Set<ImpulseSeverity> = []
+    var impulseTypesBySeverity: [ImpulseSeverity: Set<ImpulseType>] = [:]
+    var impulseOtherTextBySeverity: [ImpulseSeverity: String] = [:]
     
-    // 睡眠狀況
-    var bedTime: Date = .now
+    // 睡眠
     var sleepLatency: SleepLatency = .under30
-    var sleepHours: Double = 0
+    var sleepHours: OptionalLogDouble = .value(7.0)   // 0.5 單位
     var sleepQuality: SleepQuality = .normal
     
     // 課業與專注力
-    var todoCompletion: String = "是，全部完成" // 用文字，保持和 PDF 一致
+    var todoCompletion: TodoCompletion = .allDone
     var todoPartialDone: Int = 0
     var todoPartialTotal: Int = 0
     
@@ -202,22 +245,34 @@ struct DailyLogEntry: Identifiable, Codable, Equatable {
     var unfinished: Bool = false
     var unfinishedCount: Int = 0
     var unfinishedTotal: Int = 0
-    
     var difficultyReasons: Set<DifficultyReason> = []
     var difficultyOtherText: String = ""
     
     // 身體狀況
-    var fatigueScore: Int = 0
-    
-    // 疼痛（PDF 是「勾選疼痛的地方＋分數」）
+    var fatigueScore: Int = 5   // 改成表單 Slider
     var painAreas: Set<PainArea> = []
     var painScoreByArea: [PainArea: Int] = [:]
     
-    // 身體覺察
     var bodyNoticeTiming: BodyNoticeTiming = .quick
     var bodyLateReasons: Set<BodyLateReason> = []
     var bodyLateOtherText: String = ""
     
-    // 特別觀察到的事情
+    // 特別觀察（文字 + 多張照片）
     var specialObservation: String = ""
+    var photos: [DailyLogPhoto] = []
+}
+
+enum OptionalLogDouble: Codable, Equatable {
+    case unknown
+    case value(Double)
+    
+    var isUnknown: Bool {
+        if case .unknown = self { return true }
+        return false
+    }
+    
+    var doubleValue: Double? {
+        if case .value(let v) = self { return v }
+        return nil
+    }
 }
