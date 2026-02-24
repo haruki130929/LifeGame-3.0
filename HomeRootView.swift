@@ -72,11 +72,11 @@ private struct HomeContentView: View {
         .overlay(alignment: .leading) { drawerPanelLayer }
         .overlay { contentMaskLayer }
         .overlay(alignment: .trailing) { contentPanelLayer }
-        
         .onAppear { setupFab(for: currentSlot) }
         .onChange(of: currentSlot) {
             setupFab(for: currentSlot)
         }
+        .onAppear { setupFab() }
     }
 }
 
@@ -162,6 +162,11 @@ private extension HomeContentView {
             FabAction(title: "行事曆", systemImage: "calendar") {
                 print("FAB: Calendar")
             }
+    func setupFab() {
+        fab.setActions([
+            FabAction(title: "每日紀錄", systemImage: "square.and.pencil") { print("FAB: DailyLog") },
+            FabAction(title: "行事曆", systemImage: "calendar") { print("FAB: Calendar") },
+            FabAction(title: "編輯卡片", systemImage: "slider.horizontal.3") { print("FAB: EditCards") }
         ])
     }
 }
