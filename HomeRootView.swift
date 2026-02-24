@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - HomeRootView (Shell)
 // 只負責：NavigationStack + 全域疊層（FAB）
-// 真正的主畫面內容放在 HomeContentView，結構更乾淨。
+// 真正的主畫面內容放在 HomeContentView
 struct HomeRootView: View {
     @EnvironmentObject private var fab: FabStore
     
@@ -20,27 +20,23 @@ struct HomeRootView: View {
 
 // MARK: - HomeContentView (Main Screen Content)
 private struct HomeContentView: View {
-    
     // MARK: Environment
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var calendarStore: CalendarStore
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
     @EnvironmentObject private var fab: FabStore
-    
     @EnvironmentObject private var wishStore: WishStore
     @EnvironmentObject private var ledgerStore: LedgerStore
     
     // MARK: Local Stores
     @StateObject private var slotConfig = SlotCardConfigStore()
     @StateObject private var todoStore = TodoQuadrantStore()
-    
     @StateObject private var game = LifeGame()
     @StateObject private var history = HistoryStore()
     @StateObject private var key3Store = Key3Store()
     @StateObject private var moodStore = MoodStore()
-    
     // ✅ 重要：不要每次進 DailyLog 都 new 一個
-    @StateObject private var dailyLogStore = DailyLogStore()
+    private var dailyLogStore = DailyLogStore()
     
     // MARK: UI State
     @State private var isDrawerOpen = false
@@ -52,14 +48,12 @@ private struct HomeContentView: View {
     @State private var monthOffset = 0
     private let cal = Calendar.current
     private let rangeProvider = CalendarRangeProvider()
-    
     private var monthDate: Date {
         cal.date(byAdding: .month, value: monthOffset, to: Date()) ?? Date()
     }
     
     // ✅ Drawer/Panel 打開時，底下內容不要吃點擊（避免誤點）
     private var isOverlayPresented: Bool { isDrawerOpen || isContentOpen }
-    
     private let drawerWidth: CGFloat = 260
     private let contentPanelWidth: CGFloat = 420
     
@@ -75,15 +69,8 @@ private struct HomeContentView: View {
         // Drawer & Panel overlays
         .overlay { drawerMaskLayer }
         .overlay(alignment: .leading) { drawerPanelLayer }
-        
         .overlay { contentMaskLayer }
         .overlay(alignment: .trailing) { contentPanelLayer }
-        
-        // FAB 在 Shell 上，但 Drawer/Panel 開啟時不希望誤觸
-        .onChange(of: isOverlayPresented) { _, presented in
-            // 如果你想在遮罩打開時也能點 FAB，把 Shell 裡的 allowsHitTesting 改掉即可
-            // 這裡先不動 FAB，本次重構不改行為
-        }
         
         .onAppear { setupFab() }
     }
@@ -91,7 +78,6 @@ private struct HomeContentView: View {
 
 // MARK: - Layers
 private extension HomeContentView {
-    
     var backgroundLayer: some View {
         ThemeBackgroundView(style: theme.backgroundStyle) { Color.clear }
             .ignoresSafeArea()
@@ -113,7 +99,6 @@ private extension HomeContentView {
 
 // MARK: - Drawer & Panel
 private extension HomeContentView {
-    
     var drawerMaskLayer: some View {
         Group {
             if isDrawerOpen {
@@ -146,8 +131,7 @@ private extension HomeContentView {
         }
     }
     
-    @ViewBuilder
-    var contentPanelLayer: some View {
+    @ViewBuilder var contentPanelLayer: some View {
         if isContentOpen {
             ContentPanel(isOpen: $isContentOpen, game: game, mood: moodStore)
                 .frame(width: contentPanelWidth)
@@ -161,15 +145,9 @@ private extension HomeContentView {
 private extension HomeContentView {
     func setupFab() {
         fab.setActions([
-            FabAction(title: "每日紀錄", systemImage: "square.and.pencil") {
-                print("FAB: DailyLog")
-            },
-            FabAction(title: "行事曆", systemImage: "calendar") {
-                print("FAB: Calendar")
-            },
-            FabAction(title: "編輯卡片", systemImage: "slider.horizontal.3") {
-                print("FAB: EditCards")
-            }
+            FabAction(title: "每日紀錄", systemImage: "square.and.pencil") { print("FAB: DailyLog") },
+            FabAction(title: "行事曆", systemImage: "calendar") { print("FAB: Calendar") },
+            FabAction(title: "編輯卡片", systemImage: "slider.horizontal.3") { print("FAB: EditCards") }
         ])
     }
 }
@@ -178,7 +156,7 @@ private extension HomeContentView {
 private extension HomeContentView {
     var headerBar: some View {
         HStack(spacing: 10) {
-            
+            // 左：抽屜
             Button {
                 withAnimation(.easeInOut) { isDrawerOpen.toggle() }
             } label: {
@@ -189,17 +167,33 @@ private extension HomeContentView {
             }
             .buttonStyle(.plain)
             
+            // 中：標題
             VStack(alignment: .leading, spacing: 2) {
                 Text("現在")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                
                 HStack(spacing: 6) {
                     Image(systemName: currentSlot.systemImage)
                     Text(currentSlot.rawValue)
                         .font(.headline)
                 }
             }
+            
+            Spacer()
+            
+            // ✅ 右：加回「→」按鈕（開右側面板）
+            Button {
+                withAnimation(.spring()) { isContentOpen = true }
+            } label: {
+                Image(systemName: "arrow.right")
+                    .font(.headline)
+                    .frame(width: 44, height: 44)
+                    .background(.thinMaterial)
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            .buttonStyle(.plain)
+            .disabled(isDrawerOpen || isContentOpen)
+            .opacity((isDrawerOpen || isContentOpen) ? 0.5 : 1)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -207,7 +201,6 @@ private extension HomeContentView {
 
 // MARK: - Slot content
 private extension HomeContentView {
-    
     var slotContent: some View {
         let items = slotConfig.items(for: currentSlot)
         return DashboardGrid(items: items) { item in
@@ -215,10 +208,8 @@ private extension HomeContentView {
         }
     }
     
-    @ViewBuilder
-    func cardView(_ item: CardItem) -> some View {
+    @ViewBuilder func cardView(_ item: CardItem) -> some View {
         switch item.type {
-            
         case .quickStart:
             QuickStartCard(key3Store: key3Store)
             
@@ -277,10 +268,8 @@ private extension HomeContentView {
 
 // MARK: - Drawer
 private extension HomeContentView {
-    
     var drawerContent: some View {
         VStack(alignment: .leading, spacing: 12) {
-            
             Text("一天")
                 .font(.headline)
                 .padding(.top, 12)
@@ -348,9 +337,11 @@ private extension HomeContentView {
         } label: {
             Label(label, systemImage: systemImage)
         }
-        .simultaneousGesture(TapGesture().onEnded {
-            withAnimation(.easeInOut) { isDrawerOpen = false }
-        })
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                withAnimation(.easeInOut) { isDrawerOpen = false }
+            }
+        )
     }
 }
 
@@ -361,8 +352,7 @@ private struct QuickStartCard: View {
     var body: some View {
         DashboardCardContainer {
             VStack(alignment: .leading, spacing: 6) {
-                Text("快速開始")
-                    .font(.headline)
+                Text("快速開始").font(.headline)
                 Text("今天先選一件事開始")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
@@ -378,10 +368,7 @@ private struct TodayStatusCard: View {
     var body: some View {
         DashboardCardContainer {
             VStack(alignment: .leading, spacing: 10) {
-                HStack {
-                    Text("今日狀態").font(.headline)
-                    Spacer()
-                }
+                HStack { Text("今日狀態").font(.headline); Spacer() }
                 HStack { Text("HP"); Spacer(); Text("\(game.hp.current)") }
                 HStack { Text("FP"); Spacer(); Text("\(game.fp.current)") }
                 HStack { Text("MP"); Spacer(); Text("\(game.mp.current)") }
@@ -398,11 +385,8 @@ private struct ContentPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Content")
-                    .font(.title2).bold()
-                
+                Text("Content").font(.title2).bold()
                 Spacer()
-                
                 Button {
                     withAnimation(.spring()) { isOpen = false }
                 } label: {
@@ -453,12 +437,9 @@ enum LGCategory: String, CaseIterable, Identifiable {
 // MARK: - 分類首頁：點大分類後進來，再點細項
 struct LGCategoryHubView: View {
     let category: LGCategory
-    
-    // 直接把你 HomeRootView 需要用到的依賴傳進來（最省事、最好接）
     let wishStore: WishStore
     let ledgerStore: LedgerStore
     let dailyLogStore: DailyLogStore
-    
     let closeDrawer: () -> Void
     
     var body: some View {
@@ -478,77 +459,43 @@ struct LGCategoryHubView: View {
         .onAppear { closeDrawer() }
     }
     
-    @ViewBuilder
-    private var contentLinks: some View {
+    @ViewBuilder private var contentLinks: some View {
         switch category {
         case .tools:
-            NavigationLink {
-                FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore)
-            } label: {
+            NavigationLink { FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore) } label: {
                 Label("財務", systemImage: "creditcard")
             }
-            
-            NavigationLink {
-                Text("選緘溝通板（待接上）")
-                    .navigationTitle("選緘溝通板")
-            } label: {
+            NavigationLink { Text("選緘溝通板（待接上）").navigationTitle("選緘溝通板") } label: {
                 Label("選緘溝通板", systemImage: "bubble.left.and.bubble.right")
             }
             
         case .roles:
-            NavigationLink {
-                Text("能力五角圖（待接上）")
-                    .navigationTitle("能力五角圖")
-            } label: {
+            NavigationLink { Text("能力五角圖（待接上）").navigationTitle("能力五角圖") } label: {
                 Label("能力五角圖", systemImage: "pentagon")
             }
-            
-            NavigationLink {
-                Text("角色優勢（待接上）")
-                    .navigationTitle("角色優勢")
-            } label: {
+            NavigationLink { Text("角色優勢（待接上）").navigationTitle("角色優勢") } label: {
                 Label("角色優勢 / 特性", systemImage: "bolt.heart")
             }
-            
-            NavigationLink {
-                Text("裝備系統（待接上）")
-                    .navigationTitle("裝備系統")
-            } label: {
+            NavigationLink { Text("裝備系統（待接上）").navigationTitle("裝備系統") } label: {
                 Label("裝備系統", systemImage: "backpack")
             }
             
         case .growth:
-            NavigationLink {
-                DailyLogHistoryView(store: dailyLogStore)
-            } label: {
+            NavigationLink { DailyLogHistoryView(store: dailyLogStore) } label: {
                 Label("每日紀錄", systemImage: "square.and.pencil")
             }
-            
-            NavigationLink {
-                MandalaChartScreen()
-            } label: {
+            NavigationLink { MandalaChartScreen() } label: {
                 Label("曼陀羅圖表", systemImage: "square.grid.3x3")
             }
-            
-            NavigationLink {
-                Text("近況檢視折線圖（待接上）")
-                    .navigationTitle("近況檢視")
-            } label: {
+            NavigationLink { Text("近況檢視折線圖（待接上）").navigationTitle("近況檢視") } label: {
                 Label("近況檢視（折線圖）", systemImage: "chart.line.uptrend.xyaxis")
             }
             
         case .help:
-            NavigationLink {
-                Text("動力筆記（待接上）")
-                    .navigationTitle("動力筆記")
-            } label: {
+            NavigationLink { Text("動力筆記（待接上）").navigationTitle("動力筆記") } label: {
                 Label("動力筆記", systemImage: "note.text")
             }
-            
-            NavigationLink {
-                Text("在意清單（待接上）")
-                    .navigationTitle("在意清單")
-            } label: {
+            NavigationLink { Text("在意清單（待接上）").navigationTitle("在意清單") } label: {
                 Label("在意清單", systemImage: "checklist")
             }
         }
