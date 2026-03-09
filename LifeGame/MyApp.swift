@@ -9,9 +9,6 @@ struct LifeGameApp: App {
     @State private var keyValueStore: KeyValueStore?
     @State private var startupError: String?
 
-    /// 初始化失敗時的 fallback 容器（in-memory，讓 .modelContainer 不會 crash）
-    private let fallbackContainer: ModelContainer
-
     // MARK: - 既有的 Store（保持不動）
     @StateObject private var theme = ThemeStore()
     @StateObject private var calendarStore = CalendarStore()
@@ -29,14 +26,7 @@ struct LifeGameApp: App {
         // 2. 讀取儲存模式偏好
         let config = StorageConfiguration()
 
-        // 3. 準備 fallback in-memory 容器
-        let fallback = try! ModelContainer(
-            for: KeyValueRecord.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-        )
-        self.fallbackContainer = fallback
-
-        // 4. 嘗試建立 StorageCoordinator（兩次機會）
+        // 3. 嘗試建立 StorageCoordinator（兩次機會）
         var coord: StorageCoordinator?
         var errorMessage: String?
 
@@ -54,7 +44,7 @@ struct LifeGameApp: App {
             }
         }
 
-        // 5. 設定舊版 StorageManager + KeyValueStore
+        // 4. 設定舊版 StorageManager + KeyValueStore
         if let coord {
             StorageManager.coordinator = coord
         }
@@ -87,6 +77,8 @@ struct LifeGameApp: App {
                     .environmentObject(moodHistory)
                     // 主題套用（tint、深淺模式、字體倍率）
                     .applyTheme()
+                    // SwiftData 容器（只在 coordinator 可用時掛載）
+                    .modelContainer(coordinator.modelContainer)
                     .id(storageConfig.currentMode)
             } else {
                 StorageErrorView(
@@ -95,7 +87,6 @@ struct LifeGameApp: App {
                 )
             }
         }
-        .modelContainer(coordinator?.modelContainer ?? fallbackContainer)
     }
 
     // MARK: - Retry
