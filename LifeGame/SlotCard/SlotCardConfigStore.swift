@@ -53,8 +53,8 @@ final class SlotCardConfigStore: ObservableObject {
         // ✅ 到這裡才第一次碰 self
         self.config = initialConfig
         
-        print("✅ SlotCardConfigStore init")
-        print("morning types:", config.morning.map { $0.type.rawValue })
+        debugLog("✅ SlotCardConfigStore init")
+        debugLog("morning types:", config.morning.map { $0.type.rawValue })
     }
     
     func items(for slot: TimeSlot) -> [CardItem] {

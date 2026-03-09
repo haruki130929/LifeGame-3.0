@@ -4,9 +4,13 @@ import SwiftData
 @main
 struct LifeGameApp: App {
     // MARK: - 新的統一儲存層
-    @State private var coordinator: StorageCoordinator
+    @State private var coordinator: StorageCoordinator?
     @State private var storageConfig: StorageConfiguration
-    @State private var keyValueStore: KeyValueStore
+    @State private var keyValueStore: KeyValueStore?
+    @State private var startupError: String?
+
+    /// 初始化失敗時的 fallback 容器（in-memory，讓 .modelContainer 不會 crash）
+    private let fallbackContainer: ModelContainer
 
     // MARK: - 既有的 Store（保持不動）
     @StateObject private var theme = ThemeStore()
@@ -25,49 +29,134 @@ struct LifeGameApp: App {
         // 2. 讀取儲存模式偏好
         let config = StorageConfiguration()
 
-        // 3. 建立 StorageCoordinator（容錯：如果失敗就清除偏好重試）
-        let coord: StorageCoordinator
+        // 3. 準備 fallback in-memory 容器
+        let fallback = try! ModelContainer(
+            for: KeyValueRecord.self,
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+        )
+        self.fallbackContainer = fallback
+
+        // 4. 嘗試建立 StorageCoordinator（兩次機會）
+        var coord: StorageCoordinator?
+        var errorMessage: String?
+
         do {
             coord = try StorageCoordinator(configuration: config)
         } catch {
-            print("⚠️ 第一次初始化失敗，重置偏好後重試：\(error)")
+            debugLog("⚠️ 第一次初始化失敗，重置偏好後重試：\(error)")
             config.clearPendingMode()
             config.setMode(.local)
             do {
                 coord = try StorageCoordinator(configuration: config)
             } catch {
-                fatalError("無法初始化儲存系統：\(error.localizedDescription)")
+                debugLog("❌ 儲存系統無法初始化：\(error)")
+                errorMessage = error.localizedDescription
             }
         }
 
-        // 4. 讓舊版 StorageManager 也使用新的容器
-        StorageManager.coordinator = coord
+        // 5. 設定舊版 StorageManager + KeyValueStore
+        if let coord {
+            StorageManager.coordinator = coord
+        }
 
-        // 5. 建立 KeyValueStore
-        let kvStore = KeyValueStore { coord.mainContext }
+        let kvStore: KeyValueStore? = coord.map { c in
+            KeyValueStore { c.mainContext }
+        }
 
         _coordinator = State(initialValue: coord)
         _storageConfig = State(initialValue: config)
         _keyValueStore = State(initialValue: kvStore)
+        _startupError = State(initialValue: errorMessage)
     }
 
     var body: some Scene {
         WindowGroup {
-            HomeRootContainerView()
-                // 新的儲存層
-                .environment(coordinator)
-                .environment(storageConfig)
-                .environment(keyValueStore)
-                // 既有的 Store
-                .environmentObject(theme)
-                .environmentObject(calendarStore)
-                .environmentObject(calendarSettings)
-                .environmentObject(fab)
-                .environmentObject(wishStore)
-                .environmentObject(ledgerStore)
-                .environmentObject(moodHistory)
-                .id(storageConfig.currentMode)
+            if let coordinator, let keyValueStore, startupError == nil {
+                HomeRootContainerView()
+                    // 新的儲存層
+                    .environment(coordinator)
+                    .environment(storageConfig)
+                    .environment(keyValueStore)
+                    // 既有的 Store
+                    .environmentObject(theme)
+                    .environmentObject(calendarStore)
+                    .environmentObject(calendarSettings)
+                    .environmentObject(fab)
+                    .environmentObject(wishStore)
+                    .environmentObject(ledgerStore)
+                    .environmentObject(moodHistory)
+                    // 主題套用（tint、深淺模式、字體倍率）
+                    .applyTheme()
+                    .id(storageConfig.currentMode)
+            } else {
+                StorageErrorView(
+                    errorMessage: startupError ?? "未知錯誤",
+                    onRetry: retryInitialization
+                )
+            }
         }
-        .modelContainer(coordinator.modelContainer)
+        .modelContainer(coordinator?.modelContainer ?? fallbackContainer)
+    }
+
+    // MARK: - Retry
+
+    private func retryInitialization() {
+        let config = StorageConfiguration()
+        config.clearPendingMode()
+        config.setMode(.local)
+
+        do {
+            let coord = try StorageCoordinator(configuration: config)
+            StorageManager.coordinator = coord
+
+            self.coordinator = coord
+            self.storageConfig = config
+            self.keyValueStore = KeyValueStore { coord.mainContext }
+            self.startupError = nil
+        } catch {
+            self.startupError = error.localizedDescription
+        }
+    }
+}
+
+// MARK: - 儲存錯誤畫面
+
+private struct StorageErrorView: View {
+    let errorMessage: String
+    let onRetry: () -> Void
+
+    var body: some View {
+        VStack(spacing: 24) {
+            Spacer()
+
+            Image(systemName: "externaldrive.badge.exclamationmark")
+                .font(.system(size: 56))
+                .foregroundStyle(.red.opacity(0.7))
+
+            Text("儲存系統無法啟動")
+                .font(.title2.bold())
+
+            Text(errorMessage)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 32)
+
+            Button(action: onRetry) {
+                Label("重試", systemImage: "arrow.clockwise")
+                    .font(.headline)
+                    .padding(.horizontal, 32)
+                    .padding(.vertical, 12)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(.blue)
+
+            Text("如果問題持續，請嘗試重新啟動 App\n或檢查裝置儲存空間")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+                .multilineTextAlignment(.center)
+
+            Spacer()
+        }
     }
 }

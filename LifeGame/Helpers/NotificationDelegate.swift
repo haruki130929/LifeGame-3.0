@@ -10,7 +10,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
                                 willPresent notification: UNNotification,
                                 withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
         
-        print("✅ willPresent called:", notification.request.identifier)
+        debugLog("✅ willPresent called:", notification.request.identifier)
         completionHandler([.banner, .list, .sound, .badge])
     }
 }

@@ -54,10 +54,10 @@ final class DailyLogMigrator {
             // 可選：把舊檔備份起來避免佔空間（先不刪，改名更安全）
             // try backupOldFile()
             
-            print("✅ DailyLog migrate done. inserted=\(inserted)")
+            debugLog("✅ DailyLog migrate done. inserted=\(inserted)")
         } catch {
             // 不打旗標：讓下次還能再試
-            print("❌ DailyLog migrate failed: \(error)")
+            debugLog("❌ DailyLog migrate failed: \(error)")
         }
     }
     

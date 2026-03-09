@@ -10,20 +10,19 @@ enum StorageManager {
     static var coordinator: StorageCoordinator?
 
     @MainActor
-    private static var container: ModelContainer {
-        guard let coordinator else {
-            fatalError("StorageManager: StorageCoordinator 尚未初始化")
-        }
-        return coordinator.modelContainer
+    private static var container: ModelContainer? {
+        coordinator?.modelContainer
     }
 
     static func save<T: Codable>(_ value: T, forKey key: String) {
         do {
             let data = try JSONEncoder().encode(value)
 
-            let context = MainActor.assumeIsolated {
-                ModelContext(container)
+            guard let container = MainActor.assumeIsolated({ container }) else {
+                debugLog("StorageManager.save: coordinator 尚未初始化，跳過")
+                return
             }
+            let context = ModelContext(container)
 
             let descriptor = FetchDescriptor<KeyValueRecord>(
                 predicate: #Predicate { $0.key == key }
@@ -38,15 +37,18 @@ enum StorageManager {
 
             try context.save()
         } catch {
-            print("Storage save failed:", error)
+            debugLog("Storage save failed:", error)
         }
     }
 
     static func load<T: Codable>(_ type: T.Type, forKey key: String) -> T? {
         do {
-            let context = MainActor.assumeIsolated {
-                ModelContext(container)
+            guard let container = MainActor.assumeIsolated({ container }) else {
+                debugLog("StorageManager.load: coordinator 尚未初始化，跳過")
+                return nil
             }
+            let context = ModelContext(container)
+
             let descriptor = FetchDescriptor<KeyValueRecord>(
                 predicate: #Predicate { $0.key == key }
             )
@@ -55,16 +57,19 @@ enum StorageManager {
             }
             return try JSONDecoder().decode(type, from: record.data)
         } catch {
-            print("Storage load failed:", error)
+            debugLog("Storage load failed:", error)
             return nil
         }
     }
 
     static func remove(forKey key: String) {
         do {
-            let context = MainActor.assumeIsolated {
-                ModelContext(container)
+            guard let container = MainActor.assumeIsolated({ container }) else {
+                debugLog("StorageManager.remove: coordinator 尚未初始化，跳過")
+                return
             }
+            let context = ModelContext(container)
+
             let descriptor = FetchDescriptor<KeyValueRecord>(
                 predicate: #Predicate { $0.key == key }
             )
@@ -73,7 +78,7 @@ enum StorageManager {
                 try context.save()
             }
         } catch {
-            print("Storage remove failed:", error)
+            debugLog("Storage remove failed:", error)
         }
     }
 }

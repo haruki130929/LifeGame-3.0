@@ -14,11 +14,16 @@ final class DailyLogStore: ObservableObject {
     init(context: ModelContext? = nil) {
         if let context {
             self.context = context
-        } else {
-            guard let coord = StorageManager.coordinator else {
-                fatalError("StorageCoordinator 尚未初始化")
-            }
+        } else if let coord = StorageManager.coordinator {
             self.context = ModelContext(coord.modelContainer)
+        } else {
+            // coordinator 尚未初始化 → 用臨時 in-memory 容器，避免 crash
+            debugLog("⚠️ DailyLogStore: StorageCoordinator 尚未初始化，使用 in-memory 容器")
+            let fallback = try! ModelContainer(
+                for: DailyLogRecord.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+            self.context = ModelContext(fallback)
         }
         load()
     }
@@ -52,7 +57,7 @@ final class DailyLogStore: ObservableObject {
             try context.save()
             load()
         } catch {
-            print("DailyLogStore upsert failed:", error)
+            debugLog("DailyLogStore upsert failed:", error)
         }
     }
     
@@ -74,7 +79,7 @@ final class DailyLogStore: ObservableObject {
             try context.save()
             load()
         } catch {
-            print("DailyLogStore delete failed:", error)
+            debugLog("DailyLogStore delete failed:", error)
         }
     }
     
@@ -91,7 +96,7 @@ final class DailyLogStore: ObservableObject {
             arr.sort { $0.date > $1.date }
             self.entries = arr
         } catch {
-            print("DailyLogStore load failed:", error)
+            debugLog("DailyLogStore load failed:", error)
             self.entries = []
         }
     }

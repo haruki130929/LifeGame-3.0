@@ -39,10 +39,10 @@ final class StorageCoordinator {
             do {
                 self.modelContainer = try Self.createContainer(mode: pending, schema: schema)
                 configuration.confirmModeSwitch()
-                print("✅ 儲存模式已切換：\(currentMode) → \(pending)")
+                debugLog("✅ 儲存模式已切換：\(currentMode) → \(pending)")
             } catch {
                 // 新模式失敗（例如 iCloud 不可用）→ 回退到當前模式
-                print("⚠️ 切換模式失敗，回退到 \(currentMode)：\(error)")
+                debugLog("⚠️ 切換模式失敗，回退到 \(currentMode)：\(error)")
                 configuration.clearPendingMode()
                 self.modelContainer = try Self.createContainer(mode: currentMode, schema: schema)
             }
@@ -80,7 +80,7 @@ final class StorageCoordinator {
         do {
             return try ModelContainer(for: schema, configurations: [config])
         } catch {
-            print("❌ 建立容器失敗 (\(mode)):", error)
+            debugLog("❌ 建立容器失敗 (\(mode)):", error)
             throw StorageError.containerCreationFailed(underlying: error)
         }
     }

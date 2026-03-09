@@ -13,17 +13,23 @@ struct SettingsView: View {
     @State private var draftCustomAccentHex: String = ""
     @State private var draftAppearance: ThemeStore.AppAppearance = .system
     
+    // MARK: - 通知（即時生效，不走 draft 模式）
+    @State private var hourlyMoodEnabled: Bool = false
+    private let hourlyMoodEnabledKey = "hourlyMoodReminderEnabled_v1"
+
     // MARK: - UI
     @State private var hasLoaded = false
     
     var body: some View {
         Form {
             storageSection
+            notificationSection
             previewSection
             appearanceSection
             accentSection
             backgroundSection
             textSection
+            aboutSection
         }
         .navigationTitle("設定")
         .toolbar {
@@ -41,6 +47,7 @@ struct SettingsView: View {
         .onAppear {
             guard !hasLoaded else { return }
             loadFromTheme()
+            loadNotificationSettings()
             hasLoaded = true
         }
     }
@@ -60,6 +67,34 @@ private extension SettingsView {
                     Text("儲存方式")
                 }
             }
+        }
+    }
+
+    var notificationSection: some View {
+        Section {
+            Toggle("每小時提醒記錄心情", isOn: $hourlyMoodEnabled)
+                .onChange(of: hourlyMoodEnabled) { _, newValue in
+                    StorageManager.save(newValue, forKey: hourlyMoodEnabledKey)
+
+                    if newValue {
+                        NotificationManager.requestPermissionIfNeeded { granted in
+                            DispatchQueue.main.async {
+                                if granted {
+                                    NotificationManager.scheduleHourlyMoodReminder(minute: 0)
+                                } else {
+                                    hourlyMoodEnabled = false
+                                    StorageManager.save(false, forKey: hourlyMoodEnabledKey)
+                                }
+                            }
+                        }
+                    } else {
+                        NotificationManager.cancelHourlyMoodReminder()
+                    }
+                }
+        } header: {
+            Text("通知")
+        } footer: {
+            Text("開啟後每小時會提醒你記錄心情溫度（0～10）")
         }
     }
 
@@ -124,6 +159,29 @@ private extension SettingsView {
         }
     }
     
+    var aboutSection: some View {
+        Section("關於") {
+            HStack {
+                Text("版本")
+                Spacer()
+                Text(appVersionString)
+                    .foregroundStyle(.secondary)
+            }
+            HStack {
+                Text("開發者")
+                Spacer()
+                Text("はるき")
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var appVersionString: String {
+        let version = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "?"
+        return "\(version) (\(build))"
+    }
+
     var textSection: some View {
         Section("文字") {
             VStack(alignment: .leading, spacing: 8) {
@@ -144,6 +202,26 @@ private extension SettingsView {
 // MARK: - Draft helpers
 private extension SettingsView {
     
+    func loadNotificationSettings() {
+        if let v: Bool = StorageManager.load(Bool.self, forKey: hourlyMoodEnabledKey) {
+            hourlyMoodEnabled = v
+        }
+
+        // 重開 app 時，如果開關是 on，補排一次避免系統清掉排程
+        if hourlyMoodEnabled {
+            NotificationManager.requestPermissionIfNeeded { granted in
+                DispatchQueue.main.async {
+                    if granted {
+                        NotificationManager.scheduleHourlyMoodReminder(minute: 0)
+                    } else {
+                        hourlyMoodEnabled = false
+                        StorageManager.save(false, forKey: hourlyMoodEnabledKey)
+                    }
+                }
+            }
+        }
+    }
+
     func loadFromTheme() {
         draftFontScale = theme.fontScale
         draftBackgroundStyle = theme.backgroundStyle

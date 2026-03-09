@@ -45,7 +45,7 @@ final class MigrationManager {
             } else if modelType is BagItemModel.Type {
                 try migrateBagItems(from: source, to: destination)
             } else {
-                print("⚠️ MigrationManager: 未知的 model type \(modelType)，跳過遷移")
+                debugLog("⚠️ MigrationManager: 未知的 model type \(modelType)，跳過遷移")
             }
         } catch {
             throw StorageError.migrationFailed(underlying: error)

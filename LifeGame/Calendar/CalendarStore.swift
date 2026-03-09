@@ -22,7 +22,7 @@ final class CalendarStore: ObservableObject {
         do {
             return try await eventStore.requestFullAccessToEvents()
         } catch {
-            print("行事曆授權失敗：\(error)")
+            debugLog("行事曆授權失敗：\(error)")
             return false
         }
     }
@@ -43,7 +43,7 @@ final class CalendarStore: ObservableObject {
                 try eventStore.save(ekEvent, span: .thisEvent)
                 appleEventIdentifier = ekEvent.eventIdentifier
             } catch {
-                print("寫入 Apple 行事曆失敗：\(error)")
+                debugLog("寫入 Apple 行事曆失敗：\(error)")
             }
         }
         
@@ -66,7 +66,7 @@ final class CalendarStore: ObservableObject {
                 do {
                     try eventStore.remove(ekEvent, span: .thisEvent)
                 } catch {
-                    print("刪除 Apple 行事曆事件失敗：\(error)")
+                    debugLog("刪除 Apple 行事曆事件失敗：\(error)")
                 }
             }
         }

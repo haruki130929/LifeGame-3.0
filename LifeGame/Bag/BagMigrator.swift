@@ -50,7 +50,7 @@ final class BagMigrator {
         // defaults.removeObject(forKey: itemsKey)
         // defaults.removeObject(forKey: checkedKey)
         
-        print("✅ Bag migrate done. count=\(oldItems.count)")
+        debugLog("✅ Bag migrate done. count=\(oldItems.count)")
     }
     
     private func upsert(item: BagItem, isChecked: Bool) {

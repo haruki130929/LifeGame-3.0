@@ -81,6 +81,6 @@ extension LifeGame {
     func settleToday() {
         // 先留著：之後可以在這裡寫「把今日狀態寫進回顧 / 歷史」
         // 例如：history.add(...)
-        print("✅ settleToday")
+        debugLog("✅ settleToday")
     }
 }

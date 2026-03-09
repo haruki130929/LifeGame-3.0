@@ -64,9 +64,9 @@ enum NotificationManager {
         
         center.add(req) { err in
             if let err = err {
-                print("❌ scheduleDailySettleReminder error:", err)
+                debugLog("❌ scheduleDailySettleReminder error:", err)
             } else {
-                print("✅ scheduled daily \(String(format: "%02d:%02d", hour, minute))")
+                debugLog("✅ scheduled daily \(String(format: "%02d:%02d", hour, minute))")
             }
         }
     }
@@ -74,13 +74,13 @@ enum NotificationManager {
     static func cancelDailySettleReminder() {
         UNUserNotificationCenter.current()
             .removePendingNotificationRequests(withIdentifiers: [settleReminderID])
-        print("🗑️ canceled daily reminder")
+        debugLog("🗑️ canceled daily reminder")
     }
     
     // MARK: - Debug / Test
     static func debugPrintAuthStatus() {
         UNUserNotificationCenter.current().getNotificationSettings { s in
-            print("🔐 auth =", s.authorizationStatus.rawValue,
+            debugLog("🔐 auth =", s.authorizationStatus.rawValue,
                   "alert =", s.alertSetting.rawValue,
                   "sound =", s.soundSetting.rawValue,
                   "badge =", s.badgeSetting.rawValue)
@@ -89,8 +89,8 @@ enum NotificationManager {
     
     static func debugPrintPending() {
         UNUserNotificationCenter.current().getPendingNotificationRequests { reqs in
-            print("📌 Pending notifications:")
-            reqs.forEach { print("•", $0.identifier, $0.trigger ?? "") }
+            debugLog("📌 Pending notifications:")
+            reqs.forEach { debugLog("•", $0.identifier, $0.trigger ?? "") }
         }
     }
     
@@ -98,7 +98,7 @@ enum NotificationManager {
     static func scheduleTestIn10Seconds() {
         requestPermissionIfNeeded { granted in
             guard granted else {
-                print("❌ no permission")
+                debugLog("❌ no permission")
                 return
             }
             
@@ -116,9 +116,9 @@ enum NotificationManager {
             
             UNUserNotificationCenter.current().add(req) { err in
                 if let err = err {
-                    print("❌ scheduleTestIn10Seconds error:", err)
+                    debugLog("❌ scheduleTestIn10Seconds error:", err)
                 } else {
-                    print("✅ scheduled test in 10s")
+                    debugLog("✅ scheduled test in 10s")
                 }
             }
         }

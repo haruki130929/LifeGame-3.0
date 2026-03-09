@@ -27,10 +27,14 @@ final class MoodHistoryStore: ObservableObject {
         let clamped = min(10, max(0, score))
         
         let calendar = Calendar.current
-        let hourStart = calendar.dateInterval(of: .hour, for: date)!.start
-        
+        guard let hourStart = calendar.dateInterval(of: .hour, for: date)?.start else {
+            return false
+        }
+
         if let last = points.last {
-            let lastHourStart = calendar.dateInterval(of: .hour, for: last.timestamp)!.start
+            guard let lastHourStart = calendar.dateInterval(of: .hour, for: last.timestamp)?.start else {
+                return false
+            }
             if lastHourStart == hourStart {
                 return false
             }
@@ -52,7 +56,7 @@ final class MoodHistoryStore: ObservableObject {
             let data = try JSONEncoder().encode(points)
             UserDefaults.standard.set(data, forKey: saveKey)
         } catch {
-            print("MoodHistoryStore save error:", error)
+            debugLog("MoodHistoryStore save error:", error)
         }
     }
     
@@ -62,7 +66,7 @@ final class MoodHistoryStore: ObservableObject {
             points = try JSONDecoder().decode([MoodPoint].self, from: data)
             points.sort { $0.timestamp < $1.timestamp }
         } catch {
-            print("MoodHistoryStore load error:", error)
+            debugLog("MoodHistoryStore load error:", error)
         }
     }
 }
