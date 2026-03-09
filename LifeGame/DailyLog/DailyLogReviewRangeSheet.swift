@@ -1,0 +1,396 @@
+import SwiftUI
+
+struct DailyLogReviewRangeSheet: View {
+    let allEntries: [DailyLogEntry]
+    
+    @Environment(\.dismiss) private var dismiss
+    
+    @State private var startDate: Date = Calendar.current.date(byAdding: .day, value: -7, to: .now) ?? .now
+    @State private var endDate: Date = .now
+    
+    @State private var appliedStart: Date? = nil
+    @State private var appliedEnd: Date? = nil
+    
+    var body: some View {
+        NavigationStack {
+            Group {
+                if let s = appliedStart, let e = appliedEnd {
+                    DailyLogReviewListView(entries: filteredEntries(from: s, to: e))
+                } else {
+                    Form {
+                        Section("選擇時間期限") {
+                            DatePicker("開始日期", selection: $startDate, displayedComponents: .date)
+                            DatePicker("結束日期", selection: $endDate, displayedComponents: .date)
+                            
+                            Button {
+                                let (s, e) = normalizedRange(start: startDate, end: endDate)
+                                appliedStart = s
+                                appliedEnd = e
+                            } label: {
+                                Label("套用並檢視", systemImage: "eye")
+                            }
+                        }
+                        
+                        Section {
+                            Text("會完整列出此期間內所有每日紀錄，直接用滾輪滑動檢視。")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+            .navigationTitle("檢視每日紀錄")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("關閉") { dismiss() }
+                }
+                if appliedStart != nil {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button("重選區間") {
+                            appliedStart = nil
+                            appliedEnd = nil
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    private func normalizedRange(start: Date, end: Date) -> (Date, Date) {
+        let cal = Calendar.current
+        let s = cal.startOfDay(for: min(start, end))
+        let e = cal.startOfDay(for: max(start, end))
+        return (s, e)
+    }
+    
+    private func filteredEntries(from start: Date, to end: Date) -> [DailyLogEntry] {
+        let cal = Calendar.current
+        let startDay = cal.startOfDay(for: start)
+        let endDay = cal.startOfDay(for: end)
+        
+        return allEntries
+            .filter { entry in
+                let d = cal.startOfDay(for: entry.date)
+                return d >= startDay && d <= endDay
+            }
+            .sorted { $0.date < $1.date }
+    }
+}
+
+// MARK: - 滾動清單頁
+private struct DailyLogReviewListView: View {
+    let entries: [DailyLogEntry]
+    
+    var body: some View {
+        if entries.isEmpty {
+            ContentUnavailableView("沒有資料", systemImage: "tray", description: Text("此期間沒有每日紀錄。"))
+                .padding()
+        } else {
+            ScrollView {
+                LazyVStack(spacing: 12) {
+                    ForEach(entries) { entry in
+                        DailyLogFullReviewCard(entry: entry)
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 12)
+            }
+        }
+    }
+}
+
+// MARK: - 單筆完整檢視卡片
+private struct DailyLogFullReviewCard: View {
+    let entry: DailyLogEntry
+    
+    // ✅ 照片放大預覽狀態
+    @State private var isPreviewPresented = false
+    @State private var previewIndex = 0
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            header
+            
+            Divider().opacity(0.5)
+            
+            basicBlock
+            moodBlock
+            anxietyBlock
+            impulseBlock
+            sleepBlock
+            studyBlock
+            bodyBlock
+            
+            if !entry.specialObservation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                SectionTitle("特別觀察")
+                Text(entry.specialObservation)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            
+            if !entry.photos.isEmpty {
+                SectionTitle("照片（\(entry.photos.count)）")
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 10) {
+                        ForEach(Array(entry.photos.enumerated()), id: \.element.id) { index, p in
+                            VStack(alignment: .leading, spacing: 6) {
+                                if let uiImage = UIImage(data: p.imageData) {
+                                    ZStack(alignment: .bottomTrailing) {
+                                        Image(uiImage: uiImage)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 160, height: 110)
+                                            .clipped()
+                                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                                        
+                                        // ✅ 放大提示圖示
+                                        Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                            .font(.caption)
+                                            .foregroundStyle(.white)
+                                            .padding(5)
+                                            .background(.black.opacity(0.35))
+                                            .clipShape(RoundedRectangle(cornerRadius: 6))
+                                            .padding(6)
+                                    }
+                                    // ✅ 點擊放大
+                                    .onTapGesture {
+                                        previewIndex = index
+                                        isPreviewPresented = true
+                                    }
+                                }
+                                if !p.caption.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                    Text(p.caption)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .frame(width: 160, alignment: .leading)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(12)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        // ✅ 全螢幕預覽（複用 DailyLogPhotosSection 裡的 PhotoFullscreenPreview）
+        .fullScreenCover(isPresented: $isPreviewPresented) {
+            PhotoFullscreenPreview(
+                photos: entry.photos,
+                currentIndex: $previewIndex
+            )
+        }
+    }
+    
+    private var header: some View {
+        HStack {
+            Text(entry.date, format: .dateTime.year().month().day())
+                .font(.headline)
+            Spacer()
+            Text(entry.weather.rawValue)
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+        }
+    }
+    
+    // MARK: - Blocks
+    
+    private var basicBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionTitle("基本")
+            Text("起床：\(timeText(entry.wakeTime))")
+            Text("上床：\(timeText(entry.bedTime))")
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+    
+    private var moodBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionTitle("情緒與心理狀態")
+            chipLine([
+                "情緒 \(entry.overallMoodScore)/10",
+                "焦慮 \(entry.anxietyScore)/10",
+                "疲勞 \(entry.fatigueScore)/10"
+            ])
+            
+            if entry.moodChangeType == .higher {
+                Text("情緒變化：變高")
+                if !entry.moodChangeReasons.isEmpty {
+                    Text("原因：\(join(entry.moodChangeReasons.map{$0.rawValue}, otherText: entry.moodChangeReasons.contains(.other) ? entry.moodChangeOtherText : ""))")
+                }
+                if !entry.moodChangeDurationText.isEmpty {
+                    Text("持續時間：\(entry.moodChangeDurationText)")
+                }
+                if !entry.stabilizeMethodsForMoodChange.isEmpty {
+                    Text("穩定方式：\(join(entry.stabilizeMethodsForMoodChange.map{$0.rawValue}, otherText: entry.stabilizeMethodsForMoodChange.contains(.other) ? entry.stabilizeOtherTextForMoodChange : ""))")
+                }
+            } else {
+                Text("情緒變化：穩定")
+            }
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+    
+    private var anxietyBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionTitle("是否出現焦慮")
+            Text("程度：\(entry.anxietyLevel.rawValue)")
+            
+            if entry.anxietyLevel != .none {
+                if !entry.anxietyReasons.isEmpty {
+                    Text("原因：\(join(entry.anxietyReasons.map{$0.rawValue}, otherText: entry.anxietyReasons.contains(.other) ? entry.anxietyOtherText : ""))")
+                }
+                if !entry.anxietyDurationText.isEmpty {
+                    Text("持續時間：\(entry.anxietyDurationText)")
+                }
+                if !entry.anxietySymptoms.isEmpty {
+                    Text("表現：\(join(entry.anxietySymptoms.map{$0.rawValue}, otherText: entry.anxietySymptoms.contains(.other) ? entry.anxietySymptomOtherText : ""))")
+                }
+                if !entry.stabilizeMethodsForAnxiety.isEmpty {
+                    Text("穩定方式：\(join(entry.stabilizeMethodsForAnxiety.map{$0.rawValue}, otherText: entry.stabilizeMethodsForAnxiety.contains(.other) ? entry.stabilizeOtherTextForAnxiety : ""))")
+                }
+            }
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+    
+    private var impulseBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionTitle("衝動行為")
+            
+            if entry.impulseSeverities.isEmpty {
+                Text("無")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(entry.impulseSeverities.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { sev in
+                    let set = entry.impulseTypesBySeverity[sev] ?? []
+                    let names = set.map { $0.rawValue }
+                    let other = set.contains(.other) ? (entry.impulseOtherTextBySeverity[sev] ?? "") : ""
+                    Text("\(sev.rawValue)：\(join(names, otherText: other))")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+    
+    private var sleepBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionTitle("睡眠狀況")
+            Text("入睡所需時間：\(entry.sleepLatency.rawValue)")
+            Text("睡眠時長：\(sleepHoursText)")
+            Text("睡眠品質：\(entry.sleepQuality.rawValue.components(separatedBy: "（").first ?? entry.sleepQuality.rawValue)")
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+    
+    private var studyBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionTitle("課業與專注力")
+            Text("待辦完成：\(entry.todoCompletion.rawValue)")
+            
+            if entry.todoCompletion == .partial {
+                Text("部分完成：\(entry.todoPartialDone)/\(entry.todoPartialTotal) 項")
+            }
+            
+            Text("專注度：\(entry.focusQuality.rawValue)")
+            
+            if entry.focusQuality == .cannotFocus {
+                if !entry.cannotFocusReasons.isEmpty {
+                    Text("可能原因：\(join(entry.cannotFocusReasons.map{$0.rawValue}, otherText: entry.cannotFocusReasons.contains(.other) ? entry.cannotFocusOtherText : ""))")
+                }
+            }
+            
+            if entry.unfinished {
+                Text("未完成：\(entry.unfinishedCount)/\(entry.unfinishedTotal) 項")
+                if !entry.difficultyReasons.isEmpty {
+                    Text("困難：\(join(entry.difficultyReasons.map{$0.rawValue}, otherText: entry.difficultyReasons.contains(.other) ? entry.difficultyOtherText : ""))")
+                }
+            } else {
+                Text("未完成事項：無")
+            }
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+    
+    private var bodyBlock: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            SectionTitle("身體狀況")
+            
+            if entry.painAreas.isEmpty {
+                Text("疼痛：無")
+            } else {
+                let list = entry.painAreas.map { area -> String in
+                    let score = entry.painScoreByArea[area] ?? 1
+                    return "\(area.rawValue)（\(score)/10）"
+                }
+                Text("疼痛：\(list.joined(separator: "、"))")
+            }
+            
+            Text("注意到身體狀況：\(entry.bodyNoticeTiming.rawValue)")
+            if entry.bodyNoticeTiming == .none && !entry.bodyLateReasons.isEmpty {
+                Text("原因：\(join(entry.bodyLateReasons.map{$0.rawValue}, otherText: entry.bodyLateReasons.contains(.other) ? entry.bodyLateOtherText : ""))")
+            }
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+    
+    // MARK: - Helpers
+    
+    private func timeText(_ t: OptionalLogTime) -> String {
+        switch t {
+        case .unknown: return "忘記"
+        case .time(let d): return d.formatted(date: .omitted, time: .shortened)
+        }
+    }
+    
+    private var sleepHoursText: String {
+        switch entry.sleepHours {
+        case .unknown: return "忘記"
+        case .value(let h): return "\(String(format: "%.1f", h)) 小時"
+        }
+    }
+    
+    private func join(_ items: [String], otherText: String) -> String {
+        let trimmedOther = otherText.trimmingCharacters(in: .whitespacesAndNewlines)
+        var base = items.filter { $0 != "其他" }
+        if items.contains("其他"), !trimmedOther.isEmpty {
+            base.append("其他：\(trimmedOther)")
+        } else if items.contains("其他") {
+            base.append("其他")
+        }
+        return base.isEmpty ? "--" : base.joined(separator: "、")
+    }
+    
+    private func chipLine(_ items: [String]) -> some View {
+        HStack(spacing: 8) {
+            ForEach(items, id: \.self) { s in
+                Text(s)
+                    .font(.caption)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(.ultraThinMaterial)
+                    .clipShape(Capsule())
+            }
+            Spacer(minLength: 0)
+        }
+    }
+}
+
+private struct SectionTitle: View {
+    let text: String
+    init(_ text: String) { self.text = text }
+    
+    var body: some View {
+        Text(text)
+            .font(.subheadline.weight(.semibold))
+            .foregroundStyle(.primary)
+    }
+}
