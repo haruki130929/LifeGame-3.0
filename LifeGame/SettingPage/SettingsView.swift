@@ -13,8 +13,9 @@ struct SettingsView: View {
     @State private var draftCustomAccentHex: String = ""
     @State private var draftAppearance: ThemeStore.AppAppearance = .system
     
-    // MARK: - 通知（即時生效，不走 draft 模式）
-    @State private var hourlyMoodEnabled: Bool = false
+    // MARK: - 通知（也走 draft 模式，按儲存才生效）
+    @State private var draftHourlyMoodEnabled: Bool = false
+    @State private var initialHourlyMoodEnabled: Bool = false
     private let hourlyMoodEnabledKey = "hourlyMoodReminderEnabled_v1"
 
     // MARK: - UI
@@ -41,6 +42,8 @@ struct SettingsView: View {
                     saveToTheme()
                     dismiss()
                 }
+                .fontWeight(isDirty ? .semibold : .regular)
+                .foregroundStyle(isDirty ? Color.accentColor : Color.gray.opacity(0.45))
                 .disabled(!isDirty)
             }
         }
@@ -72,25 +75,7 @@ private extension SettingsView {
 
     var notificationSection: some View {
         Section {
-            Toggle("每小時提醒記錄心情", isOn: $hourlyMoodEnabled)
-                .onChange(of: hourlyMoodEnabled) { _, newValue in
-                    StorageManager.save(newValue, forKey: hourlyMoodEnabledKey)
-
-                    if newValue {
-                        NotificationManager.requestPermissionIfNeeded { granted in
-                            DispatchQueue.main.async {
-                                if granted {
-                                    NotificationManager.scheduleHourlyMoodReminder(minute: 0)
-                                } else {
-                                    hourlyMoodEnabled = false
-                                    StorageManager.save(false, forKey: hourlyMoodEnabledKey)
-                                }
-                            }
-                        }
-                    } else {
-                        NotificationManager.cancelHourlyMoodReminder()
-                    }
-                }
+            Toggle("每小時提醒記錄心情", isOn: $draftHourlyMoodEnabled)
         } header: {
             Text("通知")
         } footer: {
@@ -203,23 +188,9 @@ private extension SettingsView {
 private extension SettingsView {
     
     func loadNotificationSettings() {
-        if let v: Bool = StorageManager.load(Bool.self, forKey: hourlyMoodEnabledKey) {
-            hourlyMoodEnabled = v
-        }
-
-        // 重開 app 時，如果開關是 on，補排一次避免系統清掉排程
-        if hourlyMoodEnabled {
-            NotificationManager.requestPermissionIfNeeded { granted in
-                DispatchQueue.main.async {
-                    if granted {
-                        NotificationManager.scheduleHourlyMoodReminder(minute: 0)
-                    } else {
-                        hourlyMoodEnabled = false
-                        StorageManager.save(false, forKey: hourlyMoodEnabledKey)
-                    }
-                }
-            }
-        }
+        let saved = StorageManager.load(Bool.self, forKey: hourlyMoodEnabledKey) ?? false
+        draftHourlyMoodEnabled = saved
+        initialHourlyMoodEnabled = saved
     }
 
     func loadFromTheme() {
@@ -237,7 +208,8 @@ private extension SettingsView {
         draftAccentPreset != theme.accentPreset ||
         draftUseCustomAccent != theme.useCustomAccent ||
         draftCustomAccentHex != theme.customAccentHex ||
-        draftAppearance != theme.appearance
+        draftAppearance != theme.appearance ||
+        draftHourlyMoodEnabled != initialHourlyMoodEnabled
     }
     
     var draftAccentColor: Color {
@@ -251,7 +223,7 @@ private extension SettingsView {
         // 依序套用並存入 UserDefaults（ThemeStore 裡面已做 set...）
         theme.setFontScale(draftFontScale)
         theme.setBackgroundStyle(draftBackgroundStyle)
-        
+
         if draftUseCustomAccent {
             theme.setCustomAccentHex(draftCustomAccentHex)
             theme.setUseCustomAccent(true)
@@ -259,9 +231,29 @@ private extension SettingsView {
             theme.setAccentPreset(draftAccentPreset)
             theme.setUseCustomAccent(false)
         }
-        
+
         theme.setAppearance(draftAppearance)
-        
+
+        // 通知設定
+        if draftHourlyMoodEnabled != initialHourlyMoodEnabled {
+            StorageManager.save(draftHourlyMoodEnabled, forKey: hourlyMoodEnabledKey)
+
+            if draftHourlyMoodEnabled {
+                NotificationManager.requestPermissionIfNeeded { granted in
+                    DispatchQueue.main.async {
+                        if granted {
+                            NotificationManager.scheduleHourlyMoodReminder(minute: 0)
+                        } else {
+                            // 權限被拒，回存 false
+                            StorageManager.save(false, forKey: hourlyMoodEnabledKey)
+                        }
+                    }
+                }
+            } else {
+                NotificationManager.cancelHourlyMoodReminder()
+            }
+        }
+
         // 若善甯有某些地方不會自動刷新，可保險 bump 一次
         theme.bumpRefresh()
     }
