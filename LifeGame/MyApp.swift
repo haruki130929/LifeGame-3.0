@@ -20,16 +20,24 @@ struct LifeGameApp: App {
     init() {
         // 1. 註冊所有 @Model 類型
         StorageCoordinator.registerModelType(DailyLogRecord.self)
+        StorageCoordinator.registerModelType(BagItemModel.self)
 
         // 2. 讀取儲存模式偏好
         let config = StorageConfiguration()
 
-        // 3. 建立 StorageCoordinator
+        // 3. 建立 StorageCoordinator（容錯：如果失敗就清除偏好重試）
         let coord: StorageCoordinator
         do {
             coord = try StorageCoordinator(configuration: config)
         } catch {
-            fatalError("無法初始化儲存系統：\(error.localizedDescription)")
+            print("⚠️ 第一次初始化失敗，重置偏好後重試：\(error)")
+            config.clearPendingMode()
+            config.setMode(.local)
+            do {
+                coord = try StorageCoordinator(configuration: config)
+            } catch {
+                fatalError("無法初始化儲存系統：\(error.localizedDescription)")
+            }
         }
 
         // 4. 讓舊版 StorageManager 也使用新的容器

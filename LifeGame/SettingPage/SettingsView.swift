@@ -18,6 +18,7 @@ struct SettingsView: View {
     
     var body: some View {
         Form {
+            storageSection
             previewSection
             appearanceSection
             accentSection
@@ -47,7 +48,21 @@ struct SettingsView: View {
 
 // MARK: - Sections
 private extension SettingsView {
-    
+
+    var storageSection: some View {
+        Section("資料") {
+            NavigationLink {
+                StorageSettingsView()
+            } label: {
+                HStack {
+                    Image(systemName: "externaldrive.fill.badge.icloud")
+                        .foregroundStyle(.blue)
+                    Text("儲存方式")
+                }
+            }
+        }
+    }
+
     var previewSection: some View {
         Section("預覽") {
             ThemePreviewCard(

@@ -15,7 +15,8 @@ struct HomeRootContainerView: View {
     @StateObject private var game = LifeGame()
     @StateObject private var moodStore = MoodStore()
     @StateObject private var slotCardStore = SlotCardConfigStore()
-    
+    @StateObject private var monthlyScoreStore = MonthlyScoreStore()
+
     // MARK: - Non-observable (不需要 UI 更新就維持 let)
     private let dailyLogStore = DailyLogStore()
     
@@ -31,5 +32,6 @@ struct HomeRootContainerView: View {
         .environmentObject(ledgerStore)
         .environmentObject(fab)
         .environmentObject(calendarStore)
+        .environmentObject(monthlyScoreStore)
     }
 }

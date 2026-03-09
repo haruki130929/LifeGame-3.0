@@ -34,16 +34,16 @@ struct HomeDashboardContentView: View {
                     toolsCards
                     
                 case .role:
-                    placeholderCards(title: "角色頁卡片（先佔位）")
-                    
+                    comingSoonPlaceholder(title: "角色", icon: "person.crop.circle")
+
                 case .growth:
-                    placeholderCards(title: "成長頁卡片（先佔位）")
-                    
+                    comingSoonPlaceholder(title: "成長", icon: "chart.line.uptrend.xyaxis")
+
                 case .help:
-                    placeholderCards(title: "幫助頁卡片（先佔位）")
-                    
+                    comingSoonPlaceholder(title: "幫助", icon: "lifepreserver")
+
                 case .diary:
-                    placeholderCards(title: "日記頁卡片（先佔位）")
+                    comingSoonPlaceholder(title: "日記", icon: "book")
                 }
                 
                 Spacer(minLength: 0)
@@ -84,20 +84,18 @@ struct HomeDashboardContentView: View {
         }
     }
     
-    // MARK: - Placeholder (先讓你切 tab 看得到變化)
-    private func placeholderCards(title: String) -> some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 240), spacing: 12)],
-            spacing: 12
-        ) {
-            DashboardCardContainer {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(title).font(.headline)
-                    Text("之後把這一頁的卡片放進來")
-                        .font(.footnote)
-                        .foregroundStyle(.secondary)
-                }
-            }
+    // MARK: - Coming Soon
+    private func comingSoonPlaceholder(title: String, icon: String) -> some View {
+        VStack(spacing: 16) {
+            Spacer().frame(height: 40)
+            Image(systemName: icon)
+                .font(.system(size: 40))
+                .foregroundStyle(.tertiary)
+            Text("\(title)功能即將推出")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Spacer()
         }
+        .frame(maxWidth: .infinity)
     }
 }

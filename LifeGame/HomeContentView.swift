@@ -18,6 +18,7 @@ struct HomeContentView: View {
     
     @State private var isDrawerOpen = false
     @State private var isContentOpen = false
+    @State private var showMoodScreen = false
     private var isOverlayPresented: Bool { isDrawerOpen || isContentOpen }
     
     var body: some View {
@@ -116,34 +117,34 @@ struct HomeContentView: View {
             HomeRightPanelHost(
                 isOpen: $isContentOpen,
                 game: game,
-                moodStore: moodStore
+                moodStore: moodStore,
+                onNavigateToMood: {
+                    withAnimation(DrawerPanel.panelSpring) { isContentOpen = false }
+                    // 稍微延遲，等右面板關閉後再導航
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        showMoodScreen = true
+                    }
+                }
             )
         }
-        
+
         .navigationDestination(isPresented: $showSlotCardEditor) {
             SlotCardEditorView(store: slotCardStore)
+        }
+        .navigationDestination(isPresented: $showMoodScreen) {
+            MoodThermometerScreen()
         }
     }
 }
 
 // MARK: - FAB helpers
 private extension HomeContentView {
+    /// 從 SlotCard 設定動態產生可導航的 FeatureID 清單
     var currentFabFeatures: [FeatureID] {
-        switch currentSlot {
-        case .morning:
-            return [.calendar, .diary]
-            
-        case .afternoon:
-            return [.calendar, .ledger]
-            
-        case .night:
-            return [.diary, .wish]
-            
-        default:
-            return [.calendar]
-        }
+        slotCardStore.items(for: currentSlot)
+            .compactMap { $0.type.featureID }   // 過濾掉 quickStart / todayStatus / editCards
     }
-    
+
     func refreshFabMenu() {
         fab.apply(context: .home(timeSlot: currentSlot, features: currentFabFeatures))
     }

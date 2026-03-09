@@ -92,9 +92,35 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
 
 // MARK: - CardItem
 
+// MARK: - CardType → FeatureID 對應
+
+extension CardType {
+    /// 這張卡片是否代表可導航的功能（FAB 選單用）
+    var isNavigableFeature: Bool {
+        featureID != nil
+    }
+
+    /// 卡片對應的 FeatureID（非功能型卡片回傳 nil）
+    var featureID: FeatureID? {
+        switch self {
+        case .quickStart:             return nil          // 不是功能入口
+        case .todayStatus:            return nil          // 純顯示
+        case .editCards:              return nil          // 編輯用，不導航
+        case .calendar:               return .calendar
+        case .dailyLog:               return .dailyLog
+        case .todoQuadrant:           return .todoQuadrant
+        case .tomorrowRing:           return .tomorrowRing
+        case .bagRequired:            return .bagRequired
+        case .monthlyScoreCalendar:   return .monthlyScoreCalendar
+        }
+    }
+}
+
+// MARK: - CardItem
+
 struct CardItem: Identifiable, Codable, Equatable {
     var type: CardType
     var size: CardSize
-    
+
     var id: String { type.rawValue }
 }

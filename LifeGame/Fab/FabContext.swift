@@ -6,6 +6,13 @@ enum FeatureID: Hashable {
     case wish
     case ledger
     case settings
+    // ── 新增：對應 SlotCard 卡片 ──
+    case dailyLog
+    case todoQuadrant
+    case tomorrowRing
+    case bagRequired
+    case monthlyScoreCalendar
+    case moodThermometer
 }
 
 enum FabContext {

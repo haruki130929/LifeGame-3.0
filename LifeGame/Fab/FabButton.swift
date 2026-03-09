@@ -2,34 +2,36 @@ import SwiftUI
 
 struct FabButton: View {
     @EnvironmentObject var fab: FabStore
-    
+
     @State private var btnScale: CGFloat = 1.0
     @State private var btnRotation: Double = 0
     @State private var isAnimating = false
     @State private var showMenuItems: Bool = false
     @State private var showSubItems: Bool = false
-    
+
     private let fabCircleSize: CGFloat = 60
     private let fabCircleBg = Color.white.opacity(0.14)
     private let pillBg = Color.white.opacity(0.12)
     private let pillStroke = Color.white.opacity(0.10)
     private let subPillBg = Color.white.opacity(0.18)
     private let itemDelay: Double = 0.04
-    
+
     var body: some View {
-        HStack(alignment: .bottom, spacing: 12) {
-            if fab.showSubMenu && fab.isExpanded {
-                subMenuView
-                    .transition(.move(edge: .trailing).combined(with: .opacity))
-            }
-            
-            VStack(alignment: .trailing, spacing: 10) {
+        VStack(alignment: .trailing, spacing: 10) {
+            // 功能選單 + 細部選單（底部切齊）
+            HStack(alignment: .bottom, spacing: 12) {
+                if fab.showSubMenu && fab.isExpanded {
+                    subMenuView
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
+
                 mainMenuView
-                mainButton
             }
+
+            mainButton
         }
     }
-    
+
     @ViewBuilder private var mainMenuView: some View {
         if fab.isExpanded {
             VStack(alignment: .trailing, spacing: 8) {
@@ -40,10 +42,14 @@ struct FabButton: View {
             .transition(.move(edge: .bottom).combined(with: .opacity))
         }
     }
-    
+
     private func mainMenuItem(index: Int, item: FabAction) -> some View {
-        let isSelected = fab.selectedFeature.map { title(for: $0) == item.title } ?? false
-        
+        // 用 FabStore 的 title(for:) 比對 selectedFeature
+        let isSelected: Bool = {
+            guard let selected = fab.selectedFeature else { return false }
+            return fab.title(for: selected) == item.title
+        }()
+
         return Button {
             item.action()
         } label: {
@@ -75,15 +81,22 @@ struct FabButton: View {
             value: showMenuItems
         )
     }
-    
+
     private var subMenuView: some View {
         VStack(alignment: .trailing, spacing: 8) {
             ForEach(fab.subActions.indices, id: \.self) { index in
                 subMenuItem(index: index, item: fab.subActions[index])
             }
         }
+        .onAppear {
+            // 確保 subMenuView 出現時觸發動畫
+            // onChange 在 view 首次進入 hierarchy 時可能不會觸發
+            withAnimation(.spring(response: 0.26, dampingFraction: 0.72)) {
+                showSubItems = true
+            }
+        }
     }
-    
+
     private func subMenuItem(index: Int, item: FabAction) -> some View {
         Button {
             item.action()
@@ -114,7 +127,7 @@ struct FabButton: View {
             showSubItems = isShowing
         }
     }
-    
+
     private var mainButton: some View {
         Button {
             if fab.isExpanded {
@@ -137,7 +150,7 @@ struct FabButton: View {
         .buttonStyle(.plain)
         .disabled(isAnimating)
     }
-    
+
     private func expandSequence() {
         guard !isAnimating else { return }
         isAnimating = true
@@ -156,13 +169,14 @@ struct FabButton: View {
             isAnimating = false
         }
     }
-    
+
     private func collapseSequence() {
         guard !isAnimating else { return }
         isAnimating = true
         Task { @MainActor in
             showMenuItems = false
             showSubItems = false
+            fab.hideSubMenu()          // 重置細部選單狀態，下次展開乾淨
             let totalDelay = Double(max(fab.actions.count - 1, 0)) * itemDelay
             let waitForItems = UInt64((totalDelay + 0.04) * 1_000_000_000)
             try? await Task.sleep(nanoseconds: waitForItems)
@@ -176,17 +190,6 @@ struct FabButton: View {
             withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) { btnScale = 1.0 }
             try? await Task.sleep(nanoseconds: 120_000_000)
             isAnimating = false
-        }
-    }
-    
-    // ✅ .lifeGame 已移除
-    private func title(for feature: FeatureID) -> String {
-        switch feature {
-        case .calendar: return "行事曆"
-        case .diary:    return "日記"
-        case .wish:     return "願望"
-        case .ledger:   return "記帳"
-        case .settings: return "設定"
         }
     }
 }

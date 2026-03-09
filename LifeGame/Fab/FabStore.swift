@@ -10,10 +10,10 @@ struct FabAction: Identifiable {
 
 @MainActor
 final class FabStore: ObservableObject {
-    enum Route: Identifiable, Equatable {  // ✅ 加上 Equatable
+    enum Route: Identifiable, Equatable {
         case addCalendarEvent
         case navigate(FeatureID)
-        
+
         var id: String {
             switch self {
             case .addCalendarEvent:    return "addCalendarEvent"
@@ -21,30 +21,30 @@ final class FabStore: ObservableObject {
             }
         }
     }
-    
+
     @Published var isExpanded: Bool = false
     @Published private(set) var actions: [FabAction] = []
     @Published private(set) var subActions: [FabAction] = []
     @Published var showSubMenu: Bool = false
     @Published var selectedFeature: FeatureID? = nil
     @Published var route: Route? = nil
-    
+
     private var featureStack: [[FabAction]] = []
-    
+
     func setRootActions(_ actions: [FabAction]) {
         featureStack = [actions]
         self.actions = actions
         hideSubMenu()
         collapse()
     }
-    
+
     func pushActions(_ actions: [FabAction]) {
         featureStack.append(actions)
         self.actions = actions
         hideSubMenu()
         collapse()
     }
-    
+
     func popActions() {
         guard featureStack.count > 1 else { return }
         featureStack.removeLast()
@@ -52,21 +52,21 @@ final class FabStore: ObservableObject {
         hideSubMenu()
         collapse()
     }
-    
+
     func collapse() {
         withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
             isExpanded = false
         }
         hideSubMenu()
     }
-    
+
     func toggle() {
         withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
             isExpanded.toggle()
         }
         if !isExpanded { hideSubMenu() }
     }
-    
+
     func selectFeature(_ feature: FeatureID) {
         selectedFeature = feature
         subActions = makeSubActions(for: feature)
@@ -74,14 +74,14 @@ final class FabStore: ObservableObject {
             showSubMenu = true
         }
     }
-    
+
     func hideSubMenu() {
         withAnimation(.spring(response: 0.22, dampingFraction: 0.82)) {
             showSubMenu = false
             selectedFeature = nil
         }
     }
-    
+
     func apply(context: FabContext) {
         switch context {
         case let .home(_, features):
@@ -90,7 +90,9 @@ final class FabStore: ObservableObject {
             pushActions(makeDetailActions(for: feature))
         }
     }
-    
+
+    // MARK: - Home Actions（從 SlotCard 卡片 → FAB 選單項目）
+
     private func makeHomeActions(features: [FeatureID]) -> [FabAction] {
         features.map { feature in
             FabAction(
@@ -106,14 +108,12 @@ final class FabStore: ObservableObject {
             }
         }
     }
-    
+
+    // MARK: - Sub Actions（點擊功能後，左側展開的細部選單）
+
     private func makeSubActions(for feature: FeatureID) -> [FabAction] {
-        var result: [FabAction] = [
-            FabAction(title: "返回", systemImage: "chevron.backward") { [weak self] in
-                self?.hideSubMenu()
-            }
-        ]
-        
+        var result: [FabAction] = []
+
         switch feature {
         case .calendar:
             result += [
@@ -124,9 +124,6 @@ final class FabStore: ObservableObject {
                     self?.route = .addCalendarEvent; self?.collapse()
                 },
                 FabAction(title: "今天", systemImage: "sun.max") { [weak self] in
-                    self?.route = .navigate(.calendar); self?.collapse()
-                },
-                FabAction(title: "切換月/週", systemImage: "arrow.left.arrow.right") { [weak self] in
                     self?.route = .navigate(.calendar); self?.collapse()
                 }
             ]
@@ -169,67 +166,182 @@ final class FabStore: ObservableObject {
                     self?.route = .navigate(.settings); self?.collapse()
                 }
             ]
+
+        // ── 新增的卡片功能 ──
+        case .dailyLog:
+            result += [
+                FabAction(title: "每日紀錄", systemImage: "square.and.pencil") { [weak self] in
+                    self?.route = .navigate(.dailyLog); self?.collapse()
+                },
+                FabAction(title: "新增紀錄", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .navigate(.dailyLog); self?.collapse()
+                }
+            ]
+        case .todoQuadrant:
+            result += [
+                FabAction(title: "待辦清單", systemImage: "list.bullet.clipboard") { [weak self] in
+                    self?.route = .navigate(.todoQuadrant); self?.collapse()
+                },
+                FabAction(title: "新增待辦", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .navigate(.todoQuadrant); self?.collapse()
+                }
+            ]
+        case .tomorrowRing:
+            result += [
+                FabAction(title: "時間圓環", systemImage: "clock") { [weak self] in
+                    self?.route = .navigate(.tomorrowRing); self?.collapse()
+                },
+                FabAction(title: "編輯排程", systemImage: "pencil.circle") { [weak self] in
+                    self?.route = .navigate(.tomorrowRing); self?.collapse()
+                }
+            ]
+        case .bagRequired:
+            result += [
+                FabAction(title: "收拾書包", systemImage: "backpack") { [weak self] in
+                    self?.route = .navigate(.bagRequired); self?.collapse()
+                },
+                FabAction(title: "編輯清單", systemImage: "checklist") { [weak self] in
+                    self?.route = .navigate(.bagRequired); self?.collapse()
+                }
+            ]
+        case .monthlyScoreCalendar:
+            result += [
+                FabAction(title: "本月結算", systemImage: "calendar.badge.clock") { [weak self] in
+                    self?.route = .navigate(.monthlyScoreCalendar); self?.collapse()
+                },
+                FabAction(title: "查看統計", systemImage: "chart.bar") { [weak self] in
+                    self?.route = .navigate(.monthlyScoreCalendar); self?.collapse()
+                }
+            ]
+        case .moodThermometer:
+            result += [
+                FabAction(title: "心情溫度計", systemImage: "heart.text.square") { [weak self] in
+                    self?.route = .navigate(.moodThermometer); self?.collapse()
+                },
+                FabAction(title: "記錄心情", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .navigate(.moodThermometer); self?.collapse()
+                }
+            ]
         }
-        
+
         return result
     }
-    
+
+    // MARK: - Detail Actions（進入功能頁面後的 FAB）
+
     private func makeDetailActions(for feature: FeatureID) -> [FabAction] {
         var result: [FabAction] = [
             FabAction(title: "返回", systemImage: "chevron.backward") { [weak self] in
                 self?.popActions()
             }
         ]
-        
+
         switch feature {
         case .calendar:
             result += [
                 FabAction(title: "新增行程", systemImage: "calendar.badge.plus") { [weak self] in
                     self?.route = .addCalendarEvent; self?.collapse()
-                },
-                FabAction(title: "今天", systemImage: "sun.max") { print("TODO: 回到今天") },
-                FabAction(title: "切換月/週", systemImage: "arrow.left.arrow.right") { print("TODO: 切換月週") }
+                }
             ]
         case .diary:
             result += [
-                FabAction(title: "新增日記", systemImage: "square.and.pencil") { print("TODO: 新增日記") },
-                FabAction(title: "搜尋日記", systemImage: "magnifyingglass") { print("TODO: 搜尋日記") }
+                FabAction(title: "新增日記", systemImage: "square.and.pencil") { [weak self] in
+                    self?.route = .navigate(.diary); self?.collapse()
+                }
             ]
         case .ledger:
             result += [
-                FabAction(title: "新增支出", systemImage: "minus.circle") { print("TODO: 新增支出") },
-                FabAction(title: "新增收入", systemImage: "plus.circle") { print("TODO: 新增收入") }
+                FabAction(title: "新增支出", systemImage: "minus.circle") { [weak self] in
+                    self?.route = .navigate(.ledger); self?.collapse()
+                },
+                FabAction(title: "新增收入", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .navigate(.ledger); self?.collapse()
+                }
             ]
         case .wish:
             result += [
-                FabAction(title: "新增願望", systemImage: "sparkles") { print("TODO: 新增願望") }
+                FabAction(title: "新增願望", systemImage: "sparkles") { [weak self] in
+                    self?.route = .navigate(.wish); self?.collapse()
+                }
             ]
         case .settings:
             result += [
-                FabAction(title: "偏好設定", systemImage: "gearshape") { print("TODO: 偏好設定") }
+                FabAction(title: "偏好設定", systemImage: "gearshape") { [weak self] in
+                    self?.route = .navigate(.settings); self?.collapse()
+                }
+            ]
+        case .dailyLog:
+            result += [
+                FabAction(title: "新增紀錄", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .navigate(.dailyLog); self?.collapse()
+                }
+            ]
+        case .todoQuadrant:
+            result += [
+                FabAction(title: "新增待辦", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .navigate(.todoQuadrant); self?.collapse()
+                }
+            ]
+        case .tomorrowRing:
+            result += [
+                FabAction(title: "編輯排程", systemImage: "pencil.circle") { [weak self] in
+                    self?.route = .navigate(.tomorrowRing); self?.collapse()
+                }
+            ]
+        case .bagRequired:
+            result += [
+                FabAction(title: "編輯清單", systemImage: "checklist") { [weak self] in
+                    self?.route = .navigate(.bagRequired); self?.collapse()
+                }
+            ]
+        case .monthlyScoreCalendar:
+            result += [
+                FabAction(title: "查看統計", systemImage: "chart.bar") { [weak self] in
+                    self?.route = .navigate(.monthlyScoreCalendar); self?.collapse()
+                }
+            ]
+        case .moodThermometer:
+            result += [
+                FabAction(title: "記錄心情", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .navigate(.moodThermometer); self?.collapse()
+                }
             ]
         }
-        
+
         return result
     }
-    
-    private func title(for feature: FeatureID) -> String {
+
+    // MARK: - FeatureID → 顯示文字 / 圖示
+
+    func title(for feature: FeatureID) -> String {
         switch feature {
-        case .calendar: return "行事曆"
-        case .diary:    return "日記"
-        case .wish:     return "願望"
-        case .ledger:   return "記帳"
-        case .settings: return "設定"
+        case .calendar:               return "行事曆"
+        case .diary:                  return "日記"
+        case .wish:                   return "願望"
+        case .ledger:                 return "記帳"
+        case .settings:               return "設定"
+        case .dailyLog:               return "每日紀錄"
+        case .todoQuadrant:           return "待辦四象限"
+        case .tomorrowRing:           return "時間圓環"
+        case .bagRequired:            return "收拾書包"
+        case .monthlyScoreCalendar:   return "本月結算"
+        case .moodThermometer:        return "心情溫度計"
         }
     }
-    
-    private func icon(for feature: FeatureID) -> String {
+
+    func icon(for feature: FeatureID) -> String {
         switch feature {
-        case .calendar: return "calendar"
-        case .diary:    return "book"
-        case .wish:     return "sparkles"
-        case .ledger:   return "creditcard"
-        case .settings: return "gearshape"
+        case .calendar:               return "calendar"
+        case .diary:                  return "book"
+        case .wish:                   return "sparkles"
+        case .ledger:                 return "creditcard"
+        case .settings:               return "gearshape"
+        case .dailyLog:               return "square.and.pencil"
+        case .todoQuadrant:           return "list.bullet.clipboard"
+        case .tomorrowRing:           return "clock"
+        case .bagRequired:            return "backpack"
+        case .monthlyScoreCalendar:   return "calendar.badge.clock"
+        case .moodThermometer:        return "heart.text.square"
         }
     }
 }
