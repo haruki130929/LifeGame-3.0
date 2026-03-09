@@ -67,6 +67,9 @@ struct LifeGameApp: App {
                     .environment(coordinator)
                     .environment(storageConfig)
                     .environment(keyValueStore)
+                    // 主題套用（必須在 .environmentObject(theme) 之前，
+                    // 這樣 ThemeApplier 才在 ThemeStore 的 environment 範圍內）
+                    .applyTheme()
                     // 既有的 Store
                     .environmentObject(theme)
                     .environmentObject(calendarStore)
@@ -75,8 +78,6 @@ struct LifeGameApp: App {
                     .environmentObject(wishStore)
                     .environmentObject(ledgerStore)
                     .environmentObject(moodHistory)
-                    // 主題套用（tint、深淺模式、字體倍率）
-                    .applyTheme()
                     // SwiftData 容器（只在 coordinator 可用時掛載）
                     .modelContainer(coordinator.modelContainer)
                     .id(storageConfig.currentMode)
