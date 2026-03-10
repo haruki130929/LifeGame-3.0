@@ -117,7 +117,19 @@ final class ThemeStore: ObservableObject {
     }
     
     // MARK: - Computed
-    
+
+    /// 所有自訂 UI 都用這個判斷深淺模式，不依賴 @Environment(\.colorScheme)。
+    /// 當 appearance 是 @Published，ThemeStore 的 objectWillChange 會讓所有
+    /// 觀察者（@EnvironmentObject / @ObservedObject）即時重新繪製。
+    var isDark: Bool {
+        switch appearance {
+        case .light:  return false
+        case .dark:   return true
+        case .system:
+            return UITraitCollection.current.userInterfaceStyle == .dark
+        }
+    }
+
     var accentColor: Color {
         if useCustomAccent, let c = Color(hex: customAccentHex) {
             return c

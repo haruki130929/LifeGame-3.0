@@ -20,10 +20,15 @@ struct HomeContentView: View {
     @State private var isContentOpen = false
     @State private var showMoodScreen = false
     private var isOverlayPresented: Bool { isDrawerOpen || isContentOpen }
-    
+
+    /// 主背景色：直接從 ThemeStore 讀取，不靠 @Environment(\.colorScheme)
+    private var screenBackground: Color {
+        theme.isDark ? .black : Color(.systemBackground)
+    }
+
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            screenBackground.ignoresSafeArea()
             
             GeometryReader { proxy in
                 let w = proxy.size.width

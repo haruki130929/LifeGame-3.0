@@ -23,21 +23,29 @@ struct FolderTabs<T: Hashable>: View {
 
 // MARK: - Tab Button
 struct FolderTabButton: View {
-    
+
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+    @EnvironmentObject private var theme: ThemeStore
+
     var body: some View {
         Button(action: action) {
             Text(title)
                 .font(.system(size: 14, weight: .medium))
                 .padding(.horizontal, 18)
                 .padding(.vertical, 8)
-                .foregroundStyle(isSelected ? .black : .white.opacity(0.6))
+                .foregroundStyle(
+                    isSelected
+                        ? (theme.isDark ? Color.black : Color.white)
+                        : (theme.isDark ? Color.white.opacity(0.6) : Color(.secondaryLabel))
+                )
                 .background(
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(isSelected ? .white : Color.white.opacity(0.08))
+                        .fill(isSelected
+                            ? (theme.isDark ? Color.white : Color(.label))
+                            : (theme.isDark ? Color.white.opacity(0.08) : Color(.tertiarySystemFill))
+                        )
                 )
                 .offset(y: isSelected ? 2 : 0)
         }

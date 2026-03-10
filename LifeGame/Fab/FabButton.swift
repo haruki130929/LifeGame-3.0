@@ -2,6 +2,7 @@ import SwiftUI
 
 struct FabButton: View {
     @EnvironmentObject var fab: FabStore
+    @EnvironmentObject private var theme: ThemeStore
 
     @State private var btnScale: CGFloat = 1.0
     @State private var btnRotation: Double = 0
@@ -10,11 +11,27 @@ struct FabButton: View {
     @State private var showSubItems: Bool = false
 
     private let fabCircleSize: CGFloat = 60
-    private let fabCircleBg = Color.white.opacity(0.14)
-    private let pillBg = Color.white.opacity(0.12)
-    private let pillStroke = Color.white.opacity(0.10)
-    private let subPillBg = Color.white.opacity(0.18)
     private let itemDelay: Double = 0.04
+
+    // MARK: - Adaptive Colors（從 theme.isDark 決定）
+    private var fabCircleBg: Color {
+        theme.isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.08)
+    }
+    private var pillBg: Color {
+        theme.isDark ? Color.white.opacity(0.12) : Color.black.opacity(0.06)
+    }
+    private var pillStroke: Color {
+        theme.isDark ? Color.white.opacity(0.10) : Color.black.opacity(0.08)
+    }
+    private var subPillBg: Color {
+        theme.isDark ? Color.white.opacity(0.18) : Color.black.opacity(0.10)
+    }
+    private var fabForeground: Color {
+        theme.isDark ? .white.opacity(0.95) : Color(.label)
+    }
+    private var menuForeground: Color {
+        theme.isDark ? .white.opacity(0.92) : Color(.label)
+    }
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 10) {
@@ -59,14 +76,18 @@ struct FabButton: View {
                 Image(systemName: item.systemImage)
                     .font(.callout.weight(.semibold))
             }
-            .foregroundStyle(.white.opacity(0.92))
+            .foregroundStyle(menuForeground)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
-            .background(isSelected ? Color.white.opacity(0.28) : pillBg)
+            .background(isSelected
+                ? (theme.isDark ? Color.white.opacity(0.28) : Color.black.opacity(0.14))
+                : pillBg)
             .clipShape(Capsule())
             .overlay(
                 Capsule().stroke(
-                    isSelected ? Color.white.opacity(0.4) : pillStroke,
+                    isSelected
+                        ? (theme.isDark ? Color.white.opacity(0.4) : Color.black.opacity(0.18))
+                        : pillStroke,
                     lineWidth: isSelected ? 1.5 : 1
                 )
             )
@@ -107,12 +128,14 @@ struct FabButton: View {
                 Image(systemName: item.systemImage)
                     .font(.callout.weight(.semibold))
             }
-            .foregroundStyle(.white.opacity(0.92))
+            .foregroundStyle(menuForeground)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(subPillBg)
             .clipShape(Capsule())
-            .overlay(Capsule().stroke(Color.white.opacity(0.20), lineWidth: 1))
+            .overlay(Capsule().stroke(
+                theme.isDark ? Color.white.opacity(0.20) : Color.black.opacity(0.10),
+                lineWidth: 1))
         }
         .buttonStyle(.plain)
         .opacity(showSubItems ? 1 : 0)
@@ -138,12 +161,14 @@ struct FabButton: View {
         } label: {
             Image(systemName: "plus")
                 .font(.system(size: 30, weight: .bold))
-                .foregroundStyle(.white.opacity(0.95))
+                .foregroundStyle(fabForeground)
                 .frame(width: fabCircleSize, height: fabCircleSize)
                 .background(fabCircleBg)
                 .clipShape(Circle())
-                .overlay(Circle().stroke(Color.white.opacity(0.10), lineWidth: 1))
-                .shadow(color: .black.opacity(0.25), radius: 12, x: 0, y: 8)
+                .overlay(Circle().stroke(
+                    theme.isDark ? Color.white.opacity(0.10) : Color.black.opacity(0.08),
+                    lineWidth: 1))
+                .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.12), radius: 12, x: 0, y: 8)
                 .scaleEffect(btnScale)
                 .rotationEffect(.degrees(btnRotation))
         }

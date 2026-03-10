@@ -67,8 +67,7 @@ struct LifeGameApp: App {
                     .environment(coordinator)
                     .environment(storageConfig)
                     .environment(keyValueStore)
-                    // 主題套用（必須在 .environmentObject(theme) 之前，
-                    // 這樣 ThemeApplier 才在 ThemeStore 的 environment 範圍內）
+                    // 主題套用（tint / colorScheme / dynamicType）
                     .applyTheme()
                     // 既有的 Store
                     .environmentObject(theme)
@@ -81,6 +80,8 @@ struct LifeGameApp: App {
                     // SwiftData 容器（只在 coordinator 可用時掛載）
                     .modelContainer(coordinator.modelContainer)
                     .id(storageConfig.currentMode)
+                    // ✅ Window 層級再套一次，確保整個視窗（狀態列等）都切換深淺模式
+                    .preferredColorScheme(theme.appearance.preferredColorScheme)
             } else {
                 StorageErrorView(
                     errorMessage: startupError ?? "未知錯誤",

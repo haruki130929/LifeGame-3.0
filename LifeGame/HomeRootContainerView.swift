@@ -2,15 +2,19 @@ import SwiftUI
 
 /// ✅ 集中「建立 & 注入」所有功能 Store 的地方
 /// HomeRootView 只管排版，不管依賴建立
+///
+/// ⚠️ theme / wishStore / ledgerStore / fab / calendarStore
+///   已由 MyApp 建立並注入 → 這裡只用 @EnvironmentObject 讀取，
+///   不重新 @StateObject，避免產生第二份實例導致主題等設定失效。
 struct HomeRootContainerView: View {
-    
-    // MARK: - Global / Feature Stores (EnvironmentObject)
-    @StateObject private var theme = ThemeStore()
-    @StateObject private var wishStore = WishStore()
-    @StateObject private var ledgerStore = LedgerStore()
-    @StateObject private var fab = FabStore()
-    @StateObject private var calendarStore = CalendarStore()
-    
+
+    // MARK: - 由 MyApp 注入的全域 Store（不要重複建立！）
+    @EnvironmentObject private var theme: ThemeStore
+    @EnvironmentObject private var wishStore: WishStore
+    @EnvironmentObject private var ledgerStore: LedgerStore
+    @EnvironmentObject private var fab: FabStore
+    @EnvironmentObject private var calendarStore: CalendarStore
+
     // MARK: - Local Feature Stores (原本在 HomeContentView 裡 @StateObject 的)
     @StateObject private var game = LifeGame()
     @StateObject private var moodStore = MoodStore()
@@ -19,7 +23,7 @@ struct HomeRootContainerView: View {
 
     // MARK: - Non-observable (不需要 UI 更新就維持 let)
     private let dailyLogStore = DailyLogStore()
-    
+
     var body: some View {
         HomeRootView(
             game: game,
@@ -27,11 +31,7 @@ struct HomeRootContainerView: View {
             slotCardStore: slotCardStore,
             dailyLogStore: dailyLogStore
         )
-        .environmentObject(theme)
-        .environmentObject(wishStore)
-        .environmentObject(ledgerStore)
-        .environmentObject(fab)
-        .environmentObject(calendarStore)
+        // 只注入此處獨有的 Store；其餘自動繼承自 MyApp
         .environmentObject(monthlyScoreStore)
     }
 }

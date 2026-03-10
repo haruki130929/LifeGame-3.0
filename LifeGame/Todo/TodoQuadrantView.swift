@@ -50,18 +50,39 @@ struct TodoQuadrantCardLarge: View {
             }
         }
         .padding(14)
-        .background(.thinMaterial)
+        .background {
+            if theme.isDark {
+                RoundedRectangle(cornerRadius: 18).fill(.thinMaterial)
+            } else {
+                RoundedRectangle(cornerRadius: 18).fill(Color.white)
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 18))
+        .overlay(
+            RoundedRectangle(cornerRadius: 18)
+                .strokeBorder(
+                    theme.isDark
+                        ? Color.white.opacity(0.06)
+                        : Color.black.opacity(0.10),
+                    lineWidth: 1
+                )
+        )
+        .shadow(
+            color: theme.isDark ? .black.opacity(0.3) : .black.opacity(0.08),
+            radius: theme.isDark ? 10 : 8,
+            x: 0,
+            y: theme.isDark ? 6 : 3
+        )
     }
-    
+
     private func quadrantPreviewCell(_ q: TodoQuadrant) -> some View {
         let list = store.previewItems(in: q, limit: 2)
-        
+
         return VStack(alignment: .leading, spacing: 6) {
             Text(q.title)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-            
+
             if list.isEmpty {
                 Text("--")
                     .font(.footnote)
@@ -71,12 +92,18 @@ struct TodoQuadrantCardLarge: View {
                     previewRow(item)
                 }
             }
-            
+
             Spacer(minLength: 0)
         }
         .padding(10)
         .frame(maxWidth: .infinity, minHeight: 92, alignment: .topLeading)
-        .background(.ultraThinMaterial)
+        .background {
+            if theme.isDark {
+                RoundedRectangle(cornerRadius: 14).fill(.ultraThinMaterial)
+            } else {
+                RoundedRectangle(cornerRadius: 14).fill(Color(.systemGray6))
+            }
+        }
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
     

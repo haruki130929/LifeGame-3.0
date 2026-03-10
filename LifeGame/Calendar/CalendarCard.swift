@@ -7,7 +7,8 @@ struct CalendarCard: View {
     let onPrevMonth: () -> Void
     let onNextMonth: () -> Void
     let urgentImportantTasks: [UrgentImportantTask]
-    
+
+    @EnvironmentObject private var theme: ThemeStore
     @State private var selected: Date = Date()
     
     private let cal = Calendar.current
@@ -29,8 +30,19 @@ struct CalendarCard: View {
             }
         }
         .padding(14)
-        .background(.thinMaterial, in: shape)
-        .overlay(shape.strokeBorder(Color.white.opacity(0.06), lineWidth: 1))
+        .background {
+            if theme.isDark {
+                shape.fill(.thinMaterial)
+            } else {
+                shape.fill(Color.white)
+            }
+        }
+        .overlay(shape.strokeBorder(
+            theme.isDark ? Color.white.opacity(0.06) : Color.black.opacity(0.10),
+            lineWidth: 1))
+        .shadow(
+            color: theme.isDark ? .clear : .black.opacity(0.08),
+            radius: 8, x: 0, y: 3)
         .contentShape(shape)
         .clipShape(shape)
     }
@@ -156,7 +168,9 @@ struct CalendarCard: View {
                         // selected 淡圈（非今天）
                         if isSelected && !isToday {
                             Circle()
-                                .fill(Color.white.opacity(0.14))
+                                .fill(theme.isDark
+                                    ? Color.white.opacity(0.14)
+                                    : Color.black.opacity(0.08))
                                 .frame(width: dayCircleSize, height: dayCircleSize)
                                 .zIndex(1)
                         }

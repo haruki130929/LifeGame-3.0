@@ -1,18 +1,30 @@
 import SwiftUI
 
 struct HomeMainPanelView: View {
-    
+
     @Binding var selectedTab: HomeTab
-    
+
     let containerWidth: CGFloat
     let leftTopButtonWidth: CGFloat
-    
-    // Colors（放這裡，HomeContentView 就不用管）
-    private var panelColor: Color { Color(white: 0.14) }
-    private var panelStroke: Color { Color.white.opacity(0.06) }
-    private var unselectedTabColor: Color { Color.white }
-    private var unselectedTextColor: Color { Color.gray.opacity(0.75) }
-    private var selectedTextColor: Color { Color.white.opacity(0.9) }
+
+    @EnvironmentObject private var theme: ThemeStore
+
+    // MARK: - Adaptive Colors（從 ThemeStore.isDark 決定）
+    private var panelColor: Color {
+        theme.isDark ? Color(white: 0.14) : Color(.secondarySystemBackground)
+    }
+    private var panelStroke: Color {
+        theme.isDark ? Color.white.opacity(0.06) : Color.black.opacity(0.08)
+    }
+    private var unselectedTabColor: Color {
+        theme.isDark ? Color.white : Color(.tertiarySystemBackground)
+    }
+    private var unselectedTextColor: Color {
+        theme.isDark ? Color.gray.opacity(0.75) : Color(.secondaryLabel)
+    }
+    private var selectedTextColor: Color {
+        theme.isDark ? Color.white.opacity(0.9) : Color(.label)
+    }
     
     var body: some View {
         let tabW = Layout.clamp(containerWidth * 0.19, LayoutTokens.tabWidthMin, LayoutTokens.tabWidthMax)
@@ -47,7 +59,7 @@ struct HomeMainPanelView: View {
                 )
                 .stroke(panelStroke, lineWidth: 1)
             )
-            .shadow(color: .black.opacity(0.25), radius: 18, x: 0, y: 8)
+            .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.10), radius: 18, x: 0, y: 8)
             
             HomeDashboardContentView(
                 selectedTab: selectedTab,
@@ -66,7 +78,9 @@ struct HomeMainPanelView: View {
                             FolderTabShape(cornerRadius: LayoutTokens.tabCorner, slant: LayoutTokens.tabSlant)
                                 .fill(isSelected ? panelColor : unselectedTabColor)
                                 .shadow(
-                                    color: .black.opacity(isSelected ? 0.28 : 0.18),
+                                    color: .black.opacity(theme.isDark
+                                        ? (isSelected ? 0.28 : 0.18)
+                                        : (isSelected ? 0.10 : 0.06)),
                                     radius: isSelected ? 10 : 6,
                                     x: 0, y: isSelected ? 4 : 2
                                 )
