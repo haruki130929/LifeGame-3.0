@@ -56,7 +56,6 @@ struct AddRingItemSheet: View {
                     colorRow("藍", "4DA3FF")
                     colorRow("綠", "3AD29F")
                     colorRow("黃", "F6C445")
-                    colorRow("紅", "FF4D6D")
                     colorRow("紫", "9B7BFF")
                 }
                 

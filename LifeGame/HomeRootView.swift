@@ -65,8 +65,9 @@ struct HomeRootView: View {
                 navigationPath.append(feature)
                 fab.route = nil
 
-            // 時間圓環專用 route，由 TomorrowRingDetailView 自己處理
-            case .addRingItem, .quickAppendRing:
+            // 功能頁面專用 route，由各自的 View 處理
+            case .addRingItem, .quickAppendRing, .jumpToToday,
+                 .addTodoToQuadrant, .todoEditMode:
                 break
             }
         }

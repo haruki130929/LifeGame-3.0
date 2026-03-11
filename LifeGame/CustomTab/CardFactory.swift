@@ -42,7 +42,9 @@ struct CardFactory: View {
                 ranges: rangeProvider.ranges(from: calendarStore.events, in: monthDate),
                 onPrevMonth: { monthOffset -= 1 },
                 onNextMonth: { monthOffset += 1 },
-                urgentImportantTasks: []
+                urgentImportantTasks: todoStore.items(in: .importantUrgent)
+                    .filter { !$0.isDone }
+                    .map { UrgentImportantTask(title: $0.title) }
             )
             .onTapGesture { showCalendarScreen = true }
             .navigationDestination(isPresented: $showCalendarScreen) {

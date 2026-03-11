@@ -10,7 +10,7 @@ enum Weather: String, CaseIterable, Codable, Identifiable {
 
 // MARK: - 可忘記紀錄的時間（起床時間用）
 
-enum OptionalLogTime: Codable, Equatable {
+nonisolated enum OptionalLogTime: Codable, Equatable, Sendable {
     case unknown
     case time(Date)
     
@@ -182,7 +182,7 @@ enum BodyLateReason: String, CaseIterable, Codable, Identifiable {
 
 // MARK: - 備註照片
 
-struct DailyLogPhoto: Identifiable, Codable, Equatable {
+nonisolated struct DailyLogPhoto: Identifiable, Codable, Equatable, Sendable {
     var id: UUID = UUID()
     var imageData: Data
     var caption: String = ""
@@ -190,7 +190,7 @@ struct DailyLogPhoto: Identifiable, Codable, Equatable {
 
 // MARK: - 主 Model
 
-struct DailyLogEntry: Identifiable, Codable, Equatable {
+nonisolated struct DailyLogEntry: Identifiable, Codable, Equatable, Sendable {
     var id: UUID = UUID()
     
     // 基本
@@ -262,7 +262,7 @@ struct DailyLogEntry: Identifiable, Codable, Equatable {
     var photos: [DailyLogPhoto] = []
 }
 
-enum OptionalLogDouble: Codable, Equatable {
+nonisolated enum OptionalLogDouble: Codable, Equatable, Sendable {
     case unknown
     case value(Double)
     

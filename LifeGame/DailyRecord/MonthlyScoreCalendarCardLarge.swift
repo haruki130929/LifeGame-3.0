@@ -171,9 +171,7 @@ private extension MonthlyScoreCalendarCardLarge {
     }
     
     var weekdaySymbols: [String] {
-        let symbols = cal.shortStandaloneWeekdaySymbols
-        let shift = cal.firstWeekday - 1
-        return Array(symbols[shift...]) + Array(symbols[..<shift])
+        cal.chineseWeekdaySymbols
     }
     
     var cells: [MSDayCell] {

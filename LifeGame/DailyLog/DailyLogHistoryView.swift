@@ -315,7 +315,7 @@ private extension DailyLogHistoryView {
                 createNewOrEditToday()
             },
             FabAction(title: "搜尋日記", systemImage: "magnifyingglass") {
-                // TODO: 未來加入搜尋 sheet
+                // 預留：搜尋功能
             }
         ]
     }

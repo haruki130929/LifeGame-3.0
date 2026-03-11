@@ -16,6 +16,15 @@ enum TodoQuadrant: Int, CaseIterable, Identifiable, Codable {
         case .urgentNotImportant: return "緊急不重要"
         }
     }
+
+    var fabIcon: String {
+        switch self {
+        case .importantNotUrgent:    return "star.circle"
+        case .importantUrgent:       return "exclamationmark.circle"
+        case .notImportantNotUrgent: return "minus.circle"
+        case .urgentNotImportant:    return "bolt.circle"
+        }
+    }
 }
 
 struct TodoItem: Identifiable, Codable, Equatable {

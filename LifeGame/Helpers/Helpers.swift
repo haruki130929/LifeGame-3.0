@@ -4,7 +4,7 @@ import Foundation
 func calendarTW() -> Calendar {
     var cal = Calendar(identifier: .gregorian)
     cal.locale = Locale(identifier: "zh_Hant_TW")
-    cal.timeZone = TimeZone(identifier: "Asia/Taipei")!
+    cal.timeZone = TimeZone(identifier: "Asia/Taipei") ?? .current
     cal.firstWeekday = 1 // Sunday
     return cal
 }

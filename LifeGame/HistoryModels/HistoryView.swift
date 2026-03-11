@@ -45,7 +45,7 @@ struct HistoryView: View {
         let days = makeCalendarDays(for: month, calendar: cal)
         
         return VStack(alignment: .leading, spacing: 10) {
-            let weekSymbols = cal.shortWeekdaySymbols
+            let weekSymbols = cal.chineseWeekdaySymbols
             HStack {
                 ForEach(weekSymbols, id: \.self) { s in
                     Text(s)

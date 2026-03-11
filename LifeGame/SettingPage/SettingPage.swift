@@ -42,12 +42,6 @@ struct SettingsPage: View {
                 }
             }
             Section("提醒") {
-                Button("測試：10 秒後跳通知") {
-                    NotificationManager.scheduleTestIn10Seconds()
-                    NotificationManager.debugPrintAuthStatus()
-                    NotificationManager.debugPrintPending()
-                }
-                
                 Toggle("每小時提醒記錄心情", isOn: $hourlyMoodEnabled)
                     .onChange(of: hourlyMoodEnabled) { _, newValue in
                         // ✅ 先存設定（SwiftData）
@@ -87,7 +81,7 @@ struct SettingsPage: View {
                         }
                     }
                 
-                Text("開啟後每天 22:00 提醒一次。")
+                Text("開啟後每天 \(String(format: "%02d:%02d", settleReminderHour, settleReminderMinute)) 提醒一次。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                 

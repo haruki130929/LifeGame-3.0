@@ -9,9 +9,10 @@ struct CalendarCard: View {
     let urgentImportantTasks: [UrgentImportantTask]
 
     @EnvironmentObject private var theme: ThemeStore
+    @EnvironmentObject private var calendarSettings: CalendarSettingsStore
     @State private var selected: Date = Date()
-    
-    private let cal = Calendar.current
+
+    private var cal: Calendar { calendarSettings.calendar }
     private let rowGap: CGFloat = 6
     private let barInsetX: CGFloat = 2
     
@@ -85,7 +86,7 @@ struct CalendarCard: View {
     
     // MARK: - Weekday row
     private var weekdayRow: some View {
-        let symbols = weekdaySymbolsMonFirst
+        let symbols = weekdaySymbols
         return HStack(spacing: 0) {
             ForEach(symbols, id: \.self) { s in
                 Text(s)
@@ -337,13 +338,9 @@ struct CalendarCard: View {
     
     private var selectedDayNumber: Int { cal.component(.day, from: selected) }
     
-    /// Monday-first: Mo Tu We Th Fr Sa Su
-    private var weekdaySymbolsMonFirst: [String] {
-        let formatter = DateFormatter()
-        let raw = formatter.shortStandaloneWeekdaySymbols ?? ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-        let base = (raw.count == 7) ? raw : ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
-        let shifted = Array(base[1...6]) + [base[0]]
-        return shifted.map { String($0.prefix(2)) }
+    /// 中文星期符號，依 firstWeekday 設定排列
+    private var weekdaySymbols: [String] {
+        cal.chineseWeekdaySymbols
     }
     
     /// Month cells（補齊到滿週數）
@@ -352,7 +349,7 @@ struct CalendarCard: View {
         let dayRange = cal.range(of: .day, in: .month, for: startOfMonth) ?? 1..<31
         
         let weekday = cal.component(.weekday, from: startOfMonth) // Sun=1 ... Sat=7
-        let leading = (weekday + 5) % 7 // Mon=0 ... Sun=6
+        let leading = (weekday - cal.firstWeekday + 7) % 7
         
         var cells: [CalendarDayCell] = []
         cells.reserveCapacity(42)

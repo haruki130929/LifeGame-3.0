@@ -59,29 +59,37 @@ struct LifeGameApp: App {
         _startupError = State(initialValue: errorMessage)
     }
 
+    @AppStorage("onboarding_completed_v1") private var onboardingCompleted = false
+
     var body: some Scene {
         WindowGroup {
             if let coordinator, let keyValueStore, startupError == nil {
-                HomeRootContainerView()
-                    // 新的儲存層
-                    .environment(coordinator)
-                    .environment(storageConfig)
-                    .environment(keyValueStore)
-                    // 主題套用（tint / colorScheme / dynamicType）
-                    .applyTheme()
-                    // 既有的 Store
-                    .environmentObject(theme)
-                    .environmentObject(calendarStore)
-                    .environmentObject(calendarSettings)
-                    .environmentObject(fab)
-                    .environmentObject(wishStore)
-                    .environmentObject(ledgerStore)
-                    .environmentObject(moodHistory)
-                    // SwiftData 容器（只在 coordinator 可用時掛載）
-                    .modelContainer(coordinator.modelContainer)
-                    .id(storageConfig.currentMode)
-                    // ✅ Window 層級再套一次，確保整個視窗（狀態列等）都切換深淺模式
-                    .preferredColorScheme(theme.appearance.preferredColorScheme)
+                if onboardingCompleted {
+                    HomeRootContainerView()
+                        // 新的儲存層
+                        .environment(coordinator)
+                        .environment(storageConfig)
+                        .environment(keyValueStore)
+                        // 主題套用（tint / colorScheme / dynamicType）
+                        .applyTheme()
+                        // 既有的 Store
+                        .environmentObject(theme)
+                        .environmentObject(calendarStore)
+                        .environmentObject(calendarSettings)
+                        .environmentObject(fab)
+                        .environmentObject(wishStore)
+                        .environmentObject(ledgerStore)
+                        .environmentObject(moodHistory)
+                        // SwiftData 容器（只在 coordinator 可用時掛載）
+                        .modelContainer(coordinator.modelContainer)
+                        .id(storageConfig.currentMode)
+                        // ✅ Window 層級再套一次，確保整個視窗（狀態列等）都切換深淺模式
+                        .preferredColorScheme(theme.appearance.preferredColorScheme)
+                } else {
+                    OnboardingView()
+                        .environmentObject(theme)
+                        .preferredColorScheme(theme.appearance.preferredColorScheme)
+                }
             } else {
                 StorageErrorView(
                     errorMessage: startupError ?? "未知錯誤",

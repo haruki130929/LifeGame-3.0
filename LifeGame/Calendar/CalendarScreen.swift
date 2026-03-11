@@ -2,11 +2,13 @@ import SwiftUI
 
 struct CalendarScreen: View {
     @EnvironmentObject private var calendarStore: CalendarStore
-    
+    @EnvironmentObject private var fab: FabStore
+    @StateObject private var todoStore = TodoQuadrantStore()
+
     // MARK: - State
     @State private var monthOffset: Int = 0
     @State private var selected: Date = Date()
-    
+
     @State private var showNewEvent: Bool = false
     @State private var showEditor: Bool = false
     @State private var editingEvent: CalendarEvent? = nil
@@ -27,10 +29,9 @@ struct CalendarScreen: View {
                     ranges: rangesForMonth,
                     onPrevMonth: { monthOffset -= 1 },
                     onNextMonth: { monthOffset += 1 },
-                    urgentImportantTasks: [
-                        UrgentImportantTask(title: "明天要交的作業"),
-                        UrgentImportantTask(title: "回覆訊息")
-                    ]
+                    urgentImportantTasks: todoStore.items(in: .importantUrgent)
+                        .filter { !$0.isDone }
+                        .map { UrgentImportantTask(title: $0.title) }
                 )
                 .padding(.horizontal, 12)
                 
@@ -52,7 +53,30 @@ struct CalendarScreen: View {
             }
         }
         
-        // ✅ 編輯行程（先用同一張表單做「編輯」；如果善甯還沒要編輯功能，可以先註解掉這段）
+        // ── FAB 選單接入 ──
+        .onAppear {
+            fab.apply(context: .feature(.calendar))
+        }
+        .onDisappear {
+            fab.popActions()
+        }
+        .onChange(of: fab.route) { _, newRoute in
+            switch newRoute {
+            case .addCalendarEvent:
+                fab.route = nil
+                showNewEvent = true
+            case .jumpToToday:
+                fab.route = nil
+                withAnimation {
+                    monthOffset = 0
+                    selected = Date()
+                }
+            default:
+                break
+            }
+        }
+
+        // ✅ 編輯行程
         .sheet(isPresented: $showEditor) {
             if let e = editingEvent {
                 EditEventSheet(event: e) { newTitle, newStart, newEnd in

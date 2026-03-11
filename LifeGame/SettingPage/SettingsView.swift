@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     
     @EnvironmentObject private var theme: ThemeStore
+    @EnvironmentObject private var calendarSettings: CalendarSettingsStore
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - Draft (草稿)
@@ -23,6 +24,7 @@ struct SettingsView: View {
     
     var body: some View {
         Form {
+            calendarSection
             storageSection
             notificationSection
             previewSection
@@ -58,6 +60,29 @@ struct SettingsView: View {
 
 // MARK: - Sections
 private extension SettingsView {
+
+    var calendarSection: some View {
+        Section("功能設定") {
+            NavigationLink {
+                CalendarSettingsView(settings: calendarSettings)
+            } label: {
+                HStack {
+                    Image(systemName: "calendar")
+                        .foregroundStyle(.red)
+                    Text("行事曆")
+                }
+            }
+            NavigationLink {
+                TodoQuadrantSettingsView()
+            } label: {
+                HStack {
+                    Image(systemName: "list.bullet.clipboard")
+                        .foregroundStyle(.orange)
+                    Text("待辦四象限")
+                }
+            }
+        }
+    }
 
     var storageSection: some View {
         Section("資料") {

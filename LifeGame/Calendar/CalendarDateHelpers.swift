@@ -16,12 +16,22 @@ extension Calendar {
         return df.string(from: date)
     }
     
+    // MARK: - 中文星期符號
+
+    /// 中文單字星期符號，依 firstWeekday 排列
+    /// firstWeekday=1 → ["日","一","二","三","四","五","六"]
+    /// firstWeekday=2 → ["一","二","三","四","五","六","日"]
+    var chineseWeekdaySymbols: [String] {
+        let base = ["日", "一", "二", "三", "四", "五", "六"]
+        let shift = firstWeekday - 1
+        return Array(base[shift...]) + Array(base[..<shift])
+    }
+
+    /// 取得某日的中文單字星期符號（日、一、二…六）
     func shortWeekdaySymbol(for date: Date) -> String {
-        // weekday: 1..7
-        let w = component(.weekday, from: date)
-        let symbols = shortWeekdaySymbols // ["週日","週一"...]（依 locale）
-        let idx = max(0, min(symbols.count - 1, w - 1))
-        return symbols[idx]
+        let w = component(.weekday, from: date) // 1=Sun...7=Sat
+        let base = ["日", "一", "二", "三", "四", "五", "六"]
+        return base[w - 1]
     }
     
     func weekStart(for anchor: Date) -> Date {

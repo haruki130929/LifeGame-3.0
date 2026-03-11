@@ -10,17 +10,23 @@ struct TomorrowRingView: View {
     @Binding var isInteracting: Bool
     @Binding var selectedItemID: UUID?
     var mode: Mode = .card
+    var gameHP: Stat?
+    var gameFP: Stat?
 
     init(
         plan: Binding<TomorrowRingPlan>,
         isInteracting: Binding<Bool> = .constant(false),
         selectedItemID: Binding<UUID?> = .constant(nil),
-        mode: Mode = .card
+        mode: Mode = .card,
+        gameHP: Stat? = nil,
+        gameFP: Stat? = nil
     ) {
         self._plan = plan
         self._isInteracting = isInteracting
         self._selectedItemID = selectedItemID
         self.mode = mode
+        self.gameHP = gameHP
+        self.gameFP = gameFP
     }
 
     // MARK: - Constants
@@ -41,7 +47,6 @@ struct TomorrowRingView: View {
     var body: some View {
         VStack(spacing: 8) {
             ringCanvas
-                .frame(height: 220 * Layout.heightScale)
 
             infoLine
         }
@@ -84,8 +89,8 @@ private extension TomorrowRingView {
                 .allowsHitTesting(false)
 
                 RingHourLabels(
-                    labelRadiusRatio: 0.70,
-                    font: .caption2
+                    labelRadiusRatio: 0.68,
+                    font: .caption
                 )
                 .allowsHitTesting(false)
 
@@ -104,6 +109,8 @@ private extension TomorrowRingView {
                 }
 
                 segments(center: ringCenter, items: currentItems)
+                currentTimeNeedle
+                    .allowsHitTesting(false)
                 centerInfo
             }
             // ✅ 這個讓拖曳手勢固定吃到（ScrollView 不會搶）
@@ -157,12 +164,61 @@ private extension TomorrowRingView {
     
     var centerInfo: some View {
         VStack(spacing: 6) {
-            Text("TomorrowRing")
-                .font(.caption)
-                .foregroundStyle(.secondary)
-            
-            Text("HP \(plan.remainingHP)  FP \(plan.remainingFP)")
-                .font(.headline)
+            if let hp = gameHP, let fp = gameFP {
+                statRow(label: "HP", current: hp.current, max: hp.max, color: .red)
+                statRow(label: "FP", current: fp.current, max: fp.max, color: .blue)
+            } else {
+                Text("HP \(plan.remainingHP)  FP \(plan.remainingFP)")
+                    .font(.headline)
+            }
+        }
+    }
+
+    func statRow(label: String, current: Int, max: Int, color: Color) -> some View {
+        VStack(spacing: 3) {
+            Text("\(label) \(current)/\(max)")
+                .font(.footnote.bold())
+                .monospacedDigit()
+
+            GeometryReader { geo in
+                let ratio = max > 0 ? CGFloat(current) / CGFloat(max) : 0
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(color.opacity(0.18))
+                    Capsule()
+                        .fill(color)
+                        .frame(width: geo.size.width * ratio)
+                }
+            }
+            .frame(width: 72, height: 6)
+            .clipShape(Capsule())
+        }
+    }
+
+    // MARK: - 現在時間紅線
+    var currentTimeNeedle: some View {
+        GeometryReader { geo in
+            let size = min(geo.size.width, geo.size.height)
+            let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+            let r = size / 2
+
+            let cal = Calendar.current
+            let now = Date()
+            let minute = cal.component(.hour, from: now) * 60 + cal.component(.minute, from: now)
+            let angle = CGFloat(minute) / CGFloat(TOTAL_MINUTES) * 2 * .pi - .pi / 2
+
+            let innerR = r * 0.72
+            let outerR = r + 9   // ringLineWidth / 2，延伸到弧段最外緣
+            let p1 = CGPoint(x: center.x + cos(angle) * innerR,
+                             y: center.y + sin(angle) * innerR)
+            let p2 = CGPoint(x: center.x + cos(angle) * outerR,
+                             y: center.y + sin(angle) * outerR)
+
+            Path { path in
+                path.move(to: p1)
+                path.addLine(to: p2)
+            }
+            .stroke(.red, style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
         }
     }
 }

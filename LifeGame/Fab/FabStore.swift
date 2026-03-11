@@ -12,17 +12,24 @@ struct FabAction: Identifiable {
 final class FabStore: ObservableObject {
     enum Route: Identifiable, Equatable {
         case addCalendarEvent
+        case jumpToToday
         case navigate(FeatureID)
         // ── 時間圓環專用 ──
         case addRingItem
         case quickAppendRing
+        // ── 待辦四象限專用 ──
+        case addTodoToQuadrant(TodoQuadrant)
+        case todoEditMode
 
         var id: String {
             switch self {
-            case .addCalendarEvent:    return "addCalendarEvent"
-            case .navigate(let f):     return "navigate-\(f)"
-            case .addRingItem:         return "addRingItem"
-            case .quickAppendRing:     return "quickAppendRing"
+            case .addCalendarEvent:         return "addCalendarEvent"
+            case .jumpToToday:              return "jumpToToday"
+            case .navigate(let f):          return "navigate-\(f)"
+            case .addRingItem:              return "addRingItem"
+            case .quickAppendRing:          return "quickAppendRing"
+            case .addTodoToQuadrant(let q): return "addTodo-\(q.rawValue)"
+            case .todoEditMode:             return "todoEditMode"
             }
         }
     }
@@ -235,17 +242,16 @@ final class FabStore: ObservableObject {
     // MARK: - Detail Actions（進入功能頁面後的 FAB）
 
     private func makeDetailActions(for feature: FeatureID) -> [FabAction] {
-        var result: [FabAction] = [
-            FabAction(title: "返回", systemImage: "chevron.backward") { [weak self] in
-                self?.popActions()
-            }
-        ]
+        var result: [FabAction] = []
 
         switch feature {
         case .calendar:
             result += [
                 FabAction(title: "新增行程", systemImage: "calendar.badge.plus") { [weak self] in
                     self?.route = .addCalendarEvent; self?.collapse()
+                },
+                FabAction(title: "跳到今天", systemImage: "sun.max") { [weak self] in
+                    self?.route = .jumpToToday; self?.collapse()
                 }
             ]
         case .diary:
@@ -283,8 +289,19 @@ final class FabStore: ObservableObject {
             ]
         case .todoQuadrant:
             result += [
-                FabAction(title: "新增待辦", systemImage: "plus.circle") { [weak self] in
-                    self?.route = .navigate(.todoQuadrant); self?.collapse()
+                FabAction(title: "新增待辦事項", systemImage: "plus.circle") { [weak self] in
+                    guard let self else { return }
+                    self.subActions = TodoQuadrant.allCases.map { q in
+                        FabAction(title: q.title, systemImage: q.fabIcon) { [weak self] in
+                            self?.route = .addTodoToQuadrant(q); self?.collapse()
+                        }
+                    }
+                    withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
+                        self.showSubMenu = true
+                    }
+                },
+                FabAction(title: "編輯", systemImage: "pencil") { [weak self] in
+                    self?.route = .todoEditMode; self?.collapse()
                 }
             ]
         case .tomorrowRing:
@@ -314,6 +331,15 @@ final class FabStore: ObservableObject {
                     self?.route = .navigate(.moodThermometer); self?.collapse()
                 }
             ]
+        }
+
+        // ── 所有功能頁最後都加「設定」（設定頁本身除外）──
+        if feature != .settings {
+            result.append(
+                FabAction(title: "設定", systemImage: "gearshape") { [weak self] in
+                    self?.route = .navigate(.settings); self?.collapse()
+                }
+            )
         }
 
         return result

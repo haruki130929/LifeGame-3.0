@@ -4,21 +4,25 @@ struct TomorrowRingDetailView: View {
     @Binding var plan: TomorrowRingPlan
 
     @EnvironmentObject private var fab: FabStore
+    @EnvironmentObject private var game: LifeGame
 
     @State private var isPresentingAdd = false
     @State private var editingItem: RingItem? = nil
     @State private var ringSelectedID: UUID? = nil
 
     var body: some View {
-        VStack(spacing: 0) {
-            // 時間圓環（固定在上方，不跟著捲動 → 拖曳不會被 ScrollView 搶手勢）
-            TomorrowRingView(plan: $plan, selectedItemID: $ringSelectedID, mode: .detail)
-                .frame(height: 260 * Layout.heightScale)
-                .frame(maxWidth: .infinity)
+        HStack(alignment: .top, spacing: 0) {
+            // ── 左半：圓環 ──
+            TomorrowRingView(
+                plan: $plan,
+                selectedItemID: $ringSelectedID,
+                mode: .detail,
+                gameHP: game.hp,
+                gameFP: game.fp
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
-            Divider().opacity(0.35).padding(.top, 8)
-
-            // 時段列表（只有列表捲動）
+            // ── 右半：時段列表 ──
             ScrollView {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("時段")
@@ -35,12 +39,13 @@ struct TomorrowRingDetailView: View {
                         }
                     }
                 }
-                .padding(.horizontal, 18)
+                .padding(.horizontal, 14)
                 .padding(.top, 10)
                 .padding(.bottom, 80) // 留空間給 FAB
             }
+            .frame(maxWidth: .infinity)
         }
-        // ✅ 點擊畫面任何地方取消選取（simultaneousGesture 不會干擾長按拖曳和捲動）
+        // ✅ 點擊畫面任何地方取消選取
         .simultaneousGesture(
             TapGesture().onEnded {
                 if ringSelectedID != nil {
@@ -50,16 +55,6 @@ struct TomorrowRingDetailView: View {
         )
         .navigationTitle("時間圓環")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                if !plan.items.isEmpty {
-                    Button("清空") {
-                        withAnimation { plan.items.removeAll() }
-                    }
-                    .foregroundStyle(.red)
-                }
-            }
-        }
 
         // ── 進入/離開時切換 FAB 選單 ──
         .onAppear {
@@ -199,7 +194,6 @@ private struct EditRingItemSheet: View {
                     colorRow("藍", "4DA3FF")
                     colorRow("綠", "3AD29F")
                     colorRow("黃", "F6C445")
-                    colorRow("紅", "FF4D6D")
                     colorRow("紫", "9B7BFF")
                 }
 

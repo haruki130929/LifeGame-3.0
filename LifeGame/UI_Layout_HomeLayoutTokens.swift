@@ -58,7 +58,7 @@ enum DrawerPanel {
 
     static func drawerWidth(for screenWidth: CGFloat) -> CGFloat {
         if Layout.isIPad {
-            return Layout.clamp(screenWidth * 0.38, 340, 480)
+            return Layout.clamp(screenWidth * 0.25, 260, 320)
         }
         return Layout.clamp(screenWidth * 0.42, 260, 340)
     }
