@@ -13,7 +13,7 @@ struct TomorrowRingDetailView: View {
         VStack(spacing: 0) {
             // 時間圓環（固定在上方，不跟著捲動 → 拖曳不會被 ScrollView 搶手勢）
             TomorrowRingView(plan: $plan, selectedItemID: $ringSelectedID, mode: .detail)
-                .frame(height: 260)
+                .frame(height: 260 * Layout.heightScale)
                 .frame(maxWidth: .infinity)
 
             Divider().opacity(0.35).padding(.top, 8)

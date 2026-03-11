@@ -41,7 +41,7 @@ struct TomorrowRingView: View {
     var body: some View {
         VStack(spacing: 8) {
             ringCanvas
-                .frame(height: 220)
+                .frame(height: 220 * Layout.heightScale)
 
             infoLine
         }
@@ -78,8 +78,8 @@ private extension TomorrowRingView {
                     tickEvery: 30,
                     majorTickEvery: 60,
                     tickRadiusRatio: 0.92,
-                    minorTickLen: 7,
-                    majorTickLen: 11
+                    minorTickLen: Layout.isIPad ? 9 : 7,
+                    majorTickLen: Layout.isIPad ? 15 : 11
                 )
                 .allowsHitTesting(false)
 

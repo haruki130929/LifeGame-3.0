@@ -26,21 +26,27 @@ struct RingTimeTicks: View {
             let rOuter = size * tickRadiusRatio / 2
             
             Canvas { ctx, _ in
+                let iPad = Layout.isIPad
                 for minute in stride(from: 0, to: totalMinutes, by: tickEvery) {
                     let isMajor = (minute % majorTickEvery == 0)
                     let len = isMajor ? majorTickLen : minorTickLen
-                    let w: CGFloat = isMajor ? 3 : 2.2
-                    
+                    let w: CGFloat = isMajor
+                        ? (iPad ? 3.5 : 3)
+                        : (iPad ? 2.8 : 2.2)
+                    let opacity: Double = isMajor
+                        ? (iPad ? 0.55 : 0.40)
+                        : (iPad ? 0.35 : 0.22)
+
                     let angle = angleForMinute(minute)
                     let p1 = point(center: center, radius: rOuter, angle: angle)
                     let p2 = point(center: center, radius: rOuter - len, angle: angle)
-                    
+
                     var path = Path()
                     path.move(to: p1)
                     path.addLine(to: p2)
-                    
+
                     ctx.stroke(path,
-                               with: .color(.white.opacity(isMajor ? 0.40 : 0.22)),
+                               with: .color(.white.opacity(opacity)),
                                lineWidth: w)
                 }
             }

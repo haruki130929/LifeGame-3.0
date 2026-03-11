@@ -25,7 +25,7 @@ struct TomorrowRingCard: View {
 
                 if size == .large {
                     TomorrowRingView(plan: $plan, selectedItemID: $selectedSegmentID)
-                        .frame(height: 220)
+                        .frame(height: 220 * Layout.heightScale)
                         .frame(maxWidth: .infinity)
                 } else {
                     Text("HP \(plan.remainingHP) / FP \(plan.remainingFP)")

@@ -40,7 +40,10 @@ struct HomeContentView: View {
                 let safeLeading = proxy.safeAreaInsets.leading
                 let safeTrailing = proxy.safeAreaInsets.trailing
                 
-                let sideInset = Layout.clamp(w * 0.03, LayoutTokens.panelSideInsetMin, LayoutTokens.panelSideInsetMax)
+                // iPad：面板兩端對齊浮動按鈕位置
+                let sideInset = Layout.isIPad
+                    ? max(safeLeading, safeTrailing) + LayoutTokens.floatSideGap
+                    : Layout.clamp(w * 0.03, LayoutTokens.panelSideInsetMin, LayoutTokens.panelSideInsetMax)
                 let topButtonsY = safeTop + LayoutTokens.floatTopGap
                 let leftTopButtonWidth = LayoutTokens.leftTopButtonReservedWidth
                 

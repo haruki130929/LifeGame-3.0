@@ -24,11 +24,12 @@ enum CardSize: String, Codable, CaseIterable {
     }
     
     var height: CGFloat {
-        switch self {
-        case .small: return 110
-        case .medium: return 160
-        case .large: return 270
+        let base: CGFloat = switch self {
+        case .small: 110
+        case .medium: 160
+        case .large: 270
         }
+        return base * Layout.heightScale
     }
 }
 

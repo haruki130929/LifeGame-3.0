@@ -16,6 +16,9 @@ struct HomeDashboardContentView: View {
     // 圓環時段選取狀態（傳給 CardFactory → TomorrowRingCard → TomorrowRingView）
     @State private var ringSelectedID: UUID?
 
+    // iPhone 手風琴：目前展開的卡片（一次一張）
+    @State private var expandedCardType: CardType?
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -27,13 +30,27 @@ struct HomeDashboardContentView: View {
                 if let tab = currentTab {
                     if tab.cardTypes.isEmpty {
                         emptyTabPlaceholder(name: tab.name)
-                    } else {
+                    } else if Layout.isIPad {
+                        // iPad：卡片 Grid 佈局
                         LazyVGrid(
-                            columns: [GridItem(.adaptive(minimum: 240), spacing: 12)],
-                            spacing: 12
+                            columns: [GridItem(.adaptive(minimum: 300), spacing: 16)],
+                            spacing: 16
                         ) {
                             ForEach(tab.cardTypes, id: \.self) { cardType in
                                 CardFactory(cardType: cardType, ringSelectedID: $ringSelectedID)
+                            }
+                        }
+                    } else {
+                        // iPhone：手風琴文字列
+                        VStack(spacing: 12) {
+                            ForEach(tab.cardTypes, id: \.self) { cardType in
+                                if cardType != .editCards {
+                                    ExpandableCardRow(
+                                        cardType: cardType,
+                                        expandedCardType: $expandedCardType,
+                                        ringSelectedID: $ringSelectedID
+                                    )
+                                }
                             }
                         }
                     }
@@ -43,7 +60,7 @@ struct HomeDashboardContentView: View {
 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, 18)
+            .padding(.horizontal, Layout.isIPad ? 20 : 18)
             .padding(.bottom, 16)
         }
         .contentShape(Rectangle())
@@ -54,6 +71,10 @@ struct HomeDashboardContentView: View {
                 }
             }
         )
+        // 切換 Tab 時收起展開的卡片
+        .onChange(of: selectedTab) { _, _ in
+            expandedCardType = nil
+        }
     }
 
     // MARK: - 時段標籤

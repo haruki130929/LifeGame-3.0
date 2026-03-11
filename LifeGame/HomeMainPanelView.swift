@@ -71,7 +71,7 @@ struct HomeMainPanelView: View {
     var body: some View {
         let allTabs = displayTabs
         let tabCount = allTabs.count
-        let tabW = Layout.clamp(containerWidth * 0.19, LayoutTokens.tabWidthMin, LayoutTokens.tabWidthMax)
+        let tabW = Layout.clamp(containerWidth * (Layout.isIPad ? 0.14 : 0.19), LayoutTokens.tabWidthMin, LayoutTokens.tabWidthMax)
         let tabH = Layout.clamp(containerWidth * 0.075, LayoutTokens.tabHeightMin, LayoutTokens.tabHeightMax)
         let overlap = Layout.clamp(tabW * 0.12, LayoutTokens.tabOverlapMin, LayoutTokens.tabOverlapMax)
 
