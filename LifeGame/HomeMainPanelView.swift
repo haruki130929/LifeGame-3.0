@@ -2,14 +2,19 @@ import SwiftUI
 
 struct HomeMainPanelView: View {
 
-    @Binding var selectedTab: HomeTab
+    @Binding var selectedTab: TabSelection
+    let currentSlot: TimeSlot
 
     let containerWidth: CGFloat
     let leftTopButtonWidth: CGFloat
 
     @EnvironmentObject private var theme: ThemeStore
+    @EnvironmentObject private var customTabStore: CustomTabStore
 
-    // MARK: - Adaptive Colors（從 ThemeStore.isDark 決定）
+    @State private var showAddTabSheet = false
+    @State private var editingTab: CustomTab? = nil
+
+    // MARK: - Adaptive Colors
     private var panelColor: Color {
         theme.isDark ? Color(white: 0.14) : Color(.secondarySystemBackground)
     }
@@ -25,20 +30,59 @@ struct HomeMainPanelView: View {
     private var selectedTextColor: Color {
         theme.isDark ? Color.white.opacity(0.9) : Color(.label)
     }
-    
+
+    // MARK: - Tab Display Models
+
+    private struct TabDisplay: Identifiable, Equatable {
+        let id: String
+        let selection: TabSelection?   // nil = "+" 按鈕
+        let label: String
+        let icon: String
+        let isAddButton: Bool
+        let customTab: CustomTab?
+
+        static func tab(_ ct: CustomTab) -> TabDisplay {
+            TabDisplay(
+                id: ct.id.uuidString,
+                selection: .tab(ct.id),
+                label: ct.name,
+                icon: ct.icon,
+                isAddButton: false,
+                customTab: ct
+            )
+        }
+
+        static let addButton = TabDisplay(
+            id: "__add__",
+            selection: nil,
+            label: "+",
+            icon: "plus",
+            isAddButton: true,
+            customTab: nil
+        )
+    }
+
+    private var displayTabs: [TabDisplay] {
+        var result = customTabStore.tabs.map { TabDisplay.tab($0) }
+        result.append(.addButton)
+        return result
+    }
+
     var body: some View {
+        let allTabs = displayTabs
+        let tabCount = allTabs.count
         let tabW = Layout.clamp(containerWidth * 0.19, LayoutTokens.tabWidthMin, LayoutTokens.tabWidthMax)
         let tabH = Layout.clamp(containerWidth * 0.075, LayoutTokens.tabHeightMin, LayoutTokens.tabHeightMax)
         let overlap = Layout.clamp(tabW * 0.12, LayoutTokens.tabOverlapMin, LayoutTokens.tabOverlapMax)
-        
-        let tabs = HomeTab.allCases
-        let selectedIndex = tabs.firstIndex(of: selectedTab) ?? 0
-        
+
+        // 找到當前選中 tab 的 index（"+" 按鈕不算）
+        let selectedIndex = allTabs.firstIndex(where: { $0.selection == selectedTab }) ?? 0
+
         let leadingX = leftTopButtonWidth + LayoutTokens.tabsLeadingGap
         let bumpX = leadingX + CGFloat(selectedIndex) * (tabW - overlap)
-        
+
         return ZStack(alignment: .topLeading) {
-            
+
             FolderPanelShape(
                 panelCorner: LayoutTokens.panelCorner,
                 bumpX: bumpX,
@@ -60,71 +104,105 @@ struct HomeMainPanelView: View {
                 .stroke(panelStroke, lineWidth: 1)
             )
             .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.10), radius: 18, x: 0, y: 8)
-            
+
             HomeDashboardContentView(
                 selectedTab: selectedTab,
+                currentSlot: currentSlot,
                 tabHeight: tabH
             )
-            
-            HStack(spacing: -overlap) {
-                ForEach(Array(tabs.enumerated()), id: \.element.id) { index, tab in
-                    let isSelected = (tab == selectedTab)
-                    let baseZ = Double(tabs.count - index)
-                    
-                    Button {
-                        withAnimation(DrawerPanel.panelSpring) { selectedTab = tab }
-                    } label: {
-                        ZStack {
-                            FolderTabShape(cornerRadius: LayoutTokens.tabCorner, slant: LayoutTokens.tabSlant)
-                                .fill(isSelected ? panelColor : unselectedTabColor)
-                                .shadow(
-                                    color: .black.opacity(theme.isDark
-                                        ? (isSelected ? 0.28 : 0.18)
-                                        : (isSelected ? 0.10 : 0.06)),
-                                    radius: isSelected ? 10 : 6,
-                                    x: 0, y: isSelected ? 4 : 2
-                                )
-                            
-                            HStack(spacing: 8) {
-                                if isSelected {
-                                    Image(systemName: iconName(for: tab))
-                                        .font(.system(size: 13, weight: .bold))
-                                        .foregroundStyle(selectedTextColor)
-                                }
-                                
-                                Text(tab.rawValue)
-                                    .font(.system(size: 13, weight: .bold))
-                                    .foregroundStyle(isSelected ? selectedTextColor : unselectedTextColor)
+
+            // MARK: - Tab Bar
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: -overlap) {
+                    ForEach(Array(allTabs.enumerated()), id: \.element.id) { index, displayTab in
+                        let isSelected = (displayTab.selection == selectedTab) && !displayTab.isAddButton
+                        let baseZ = Double(tabCount - index)
+
+                        Button {
+                            if displayTab.isAddButton {
+                                showAddTabSheet = true
+                            } else if let sel = displayTab.selection {
+                                withAnimation(DrawerPanel.panelSpring) { selectedTab = sel }
                             }
-                            .padding(.horizontal, 14)
+                        } label: {
+                            ZStack {
+                                FolderTabShape(cornerRadius: LayoutTokens.tabCorner, slant: LayoutTokens.tabSlant)
+                                    .fill(isSelected ? panelColor : unselectedTabColor)
+                                    .shadow(
+                                        color: .black.opacity(theme.isDark
+                                            ? (isSelected ? 0.28 : 0.18)
+                                            : (isSelected ? 0.10 : 0.06)),
+                                        radius: isSelected ? 10 : 6,
+                                        x: 0, y: isSelected ? 4 : 2
+                                    )
+
+                                if displayTab.isAddButton {
+                                    Image(systemName: "plus")
+                                        .font(.system(size: 16, weight: .bold))
+                                        .foregroundStyle(unselectedTextColor)
+                                } else {
+                                    HStack(spacing: 8) {
+                                        if isSelected {
+                                            Image(systemName: displayTab.icon)
+                                                .font(.system(size: 13, weight: .bold))
+                                                .foregroundStyle(selectedTextColor)
+                                        }
+
+                                        Text(displayTab.label)
+                                            .font(.system(size: 13, weight: .bold))
+                                            .foregroundStyle(isSelected ? selectedTextColor : unselectedTextColor)
+                                    }
+                                    .padding(.horizontal, 14)
+                                }
+                            }
+                            .frame(width: tabW, height: tabH)
                         }
-                        .frame(width: tabW, height: tabH)
-                    }
-                    .buttonStyle(.plain)
-                    .mask(
-                        TabOverlapMask(
-                            overlap: overlap,
-                            cutHeight: tabH * 0.62,
-                            slant: LayoutTokens.tabSlant,
-                            shouldCut: (!isSelected && index != 0)
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            if !displayTab.isAddButton, let ct = displayTab.customTab {
+                                Button {
+                                    editingTab = ct
+                                } label: {
+                                    Label("編輯", systemImage: "pencil")
+                                }
+
+                                Button(role: .destructive) {
+                                    let tabID = ct.id
+                                    customTabStore.remove(id: tabID)
+                                    // 如果刪掉的是正在選的，切回第一個
+                                    if selectedTab == .tab(tabID) {
+                                        if let first = customTabStore.tabs.first {
+                                            selectedTab = .tab(first.id)
+                                        }
+                                    }
+                                } label: {
+                                    Label("刪除", systemImage: "trash")
+                                }
+                            }
+                        }
+                        .mask(
+                            TabOverlapMask(
+                                overlap: overlap,
+                                cutHeight: tabH * 0.62,
+                                slant: LayoutTokens.tabSlant,
+                                shouldCut: (!isSelected && index != 0 && !displayTab.isAddButton)
+                            )
                         )
-                    )
-                    .zIndex(isSelected ? 10_000 : baseZ)
+                        .zIndex(isSelected ? 10_000 : baseZ)
+                    }
                 }
+                .padding(.leading, leadingX)
             }
-            .padding(.leading, leadingX)
             .offset(y: -tabH)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
-    private func iconName(for tab: HomeTab) -> String {
-        switch tab {
-        case .tools:  return "wrench.and.screwdriver.fill"
-        case .role:   return "person.fill"
-        case .growth: return "chart.line.uptrend.xyaxis"
-        case .help:   return "questionmark.circle.fill"
-        case .diary:  return "book.fill"
+
+        // MARK: - Sheets
+        .sheet(isPresented: $showAddTabSheet) {
+            CustomTabEditorSheet(editingTab: nil)
+        }
+        .sheet(item: $editingTab) { tab in
+            CustomTabEditorSheet(editingTab: tab)
         }
     }
 }

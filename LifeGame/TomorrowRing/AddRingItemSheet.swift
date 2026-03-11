@@ -110,8 +110,8 @@ struct AddRingItemSheet: View {
                         .foregroundStyle(.secondary)
                 }
             }
+            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
     }
     
     private func timePickerRow(title: String, minute: Binding<Int>) -> some View {

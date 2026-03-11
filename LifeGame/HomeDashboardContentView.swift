@@ -1,97 +1,107 @@
 import SwiftUI
 
-/// 主頁面板內的「內容區」：卡片都放這裡（避免 HomeRootView 變胖）
+/// 主頁面板內的「內容區」：根據選中的切頁渲染對應卡片
 struct HomeDashboardContentView: View {
-    
-    // ✅ 現在外面會告訴你目前在哪個分頁
-    let selectedTab: HomeTab
-    
-    // Calendar data（目前只有工具頁先用到）
-    @EnvironmentObject private var calendarStore: CalendarStore
-    
-    // Calendar UI State（給 CalendarCard 用）
-    @State private var monthOffset = 0
-    private let cal = Calendar.current
-    private let rangeProvider = CalendarRangeProvider()
-    private var monthDate: Date {
-        cal.date(byAdding: .month, value: monthOffset, to: Date()) ?? Date()
-    }
-    @State private var showCalendarScreen = false
-    
-    @StateObject private var todoStore = TodoQuadrantStore()
-    
+
+    let selectedTab: TabSelection
+    let currentSlot: TimeSlot
+
+    @EnvironmentObject private var customTabStore: CustomTabStore
+    @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
+    @EnvironmentObject private var theme: ThemeStore
+
     /// 外框 tabs 的高度（因為內容要往下避開 tab）
     let tabHeight: CGFloat
-    
+
+    // 圓環時段選取狀態（傳給 CardFactory → TomorrowRingCard → TomorrowRingView）
+    @State private var ringSelectedID: UUID?
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 12) {
-                Spacer().frame(height: tabHeight + 10)
-                
-                // ✅ 每個 tab 顯示自己的卡片
-                switch selectedTab {
-                case .tools:
-                    toolsCards
-                    
-                case .role:
-                    comingSoonPlaceholder(title: "角色", icon: "person.crop.circle")
+            VStack(alignment: .leading, spacing: 0) {
+                // 時段標籤（上下間距相等）
+                slotLabel
+                    .padding(.vertical, 8)
+                    .padding(.top, 4)
 
-                case .growth:
-                    comingSoonPlaceholder(title: "成長", icon: "chart.line.uptrend.xyaxis")
-
-                case .help:
-                    comingSoonPlaceholder(title: "幫助", icon: "lifepreserver")
-
-                case .diary:
-                    comingSoonPlaceholder(title: "日記", icon: "book")
+                if let tab = currentTab {
+                    if tab.cardTypes.isEmpty {
+                        emptyTabPlaceholder(name: tab.name)
+                    } else {
+                        LazyVGrid(
+                            columns: [GridItem(.adaptive(minimum: 240), spacing: 12)],
+                            spacing: 12
+                        ) {
+                            ForEach(tab.cardTypes, id: \.self) { cardType in
+                                CardFactory(cardType: cardType, ringSelectedID: $ringSelectedID)
+                            }
+                        }
+                    }
+                } else {
+                    noTabPlaceholder
                 }
-                
+
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 18)
             .padding(.bottom, 16)
         }
-        .navigationDestination(isPresented: $showCalendarScreen) {
-            CalendarScreen()
-        }
-    }
-    
-    // MARK: - Tools cards (先把行事曆放工具頁，且用小卡片 grid)
-    private var toolsCards: some View {
-        LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 240), spacing: 12)],
-            spacing: 12
-        ) {
-            CalendarCard(
-                size: .medium, // ⭐ 小張卡片（如果你專案沒有 .medium，改成 .small）
-                monthDate: monthDate,
-                ranges: rangeProvider.ranges(
-                    from: calendarStore.events,
-                    in: monthDate
-                ),
-                onPrevMonth: { monthOffset -= 1 },
-                onNextMonth: { monthOffset += 1 },
-                urgentImportantTasks: [
-                    UrgentImportantTask(title: "明天要交的作業"),
-                    UrgentImportantTask(title: "回覆訊息")
-                ]
-            )
-            .onTapGesture {
-                showCalendarScreen = true
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                if ringSelectedID != nil {
+                    ringSelectedID = nil
+                }
             }
-            
-            TodoQuadrantCardLarge(store: todoStore)
+        )
+    }
+
+    // MARK: - 時段標籤
+
+    private var slotLabel: some View {
+        HStack(spacing: 7) {
+            Image(systemName: currentSlot.systemImage)
+                .font(.system(size: 16, weight: .bold))
+            Text(timeSlotNameStore.displayName(for: currentSlot))
+                .font(.system(size: 17, weight: .bold))
+        }
+        .foregroundStyle(theme.isDark ? .white.opacity(0.7) : .primary.opacity(0.6))
+        .padding(.leading, 2)
+    }
+
+    // MARK: - Helpers
+
+    private var currentTab: CustomTab? {
+        switch selectedTab {
+        case .tab(let id):
+            return customTabStore.tabs.first { $0.id == id }
         }
     }
-    
-    // MARK: - Coming Soon
-    private func comingSoonPlaceholder(title: String, icon: String) -> some View {
+
+    private func emptyTabPlaceholder(name: String) -> some View {
         VStack(spacing: 16) {
             Spacer().frame(height: 40)
-            Image(systemName: icon)
+            Image(systemName: "square.dashed")
                 .font(.system(size: 40))
                 .foregroundStyle(.tertiary)
-            Text("\(title)功能即將推出")
+            Text("「\(name)」還沒有卡片")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            Text("長按切頁可以編輯內容")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+            Spacer()
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    private var noTabPlaceholder: some View {
+        VStack(spacing: 16) {
+            Spacer().frame(height: 40)
+            Image(systemName: "plus.square.dashed")
+                .font(.system(size: 40))
+                .foregroundStyle(.tertiary)
+            Text("點「＋」新增你的第一個切頁")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
             Spacer()

@@ -5,41 +5,52 @@ fileprivate let SNAP_STEP = 10   // ✅ 拖曳 10 分鐘一格
 
 struct TomorrowRingView: View {
     enum Mode { case card, detail }
-    
+
     @Binding var plan: TomorrowRingPlan
     @Binding var isInteracting: Bool
+    @Binding var selectedItemID: UUID?
     var mode: Mode = .card
-    
+
     init(
         plan: Binding<TomorrowRingPlan>,
         isInteracting: Binding<Bool> = .constant(false),
+        selectedItemID: Binding<UUID?> = .constant(nil),
         mode: Mode = .card
     ) {
         self._plan = plan
         self._isInteracting = isInteracting
+        self._selectedItemID = selectedItemID
         self.mode = mode
     }
-    
+
     // MARK: - Constants
     private let ringLineWidth: CGFloat = 18
     private var hitWidth: CGFloat { ringLineWidth + 30 }
-    
+
     // MARK: - Interaction State
+    // ✅ 內部用 @State，手勢邏輯不受 .constant binding 影響
     @State private var selectedID: UUID?
     @State private var dragStartMinute: Int?
     @State private var originalStartMinute: Int?
     @State private var hoveringItem: RingItem?
-    
+
     // ✅ 拖曳中只改這份，不卡
     @State private var workingItems: [RingItem] = []
     @State private var isDraggingRing = false
-    
+
     var body: some View {
         VStack(spacing: 8) {
             ringCanvas
                 .frame(height: 220)
-            
+
             infoLine
+        }
+        // ✅ 雙向同步：內部 selectedID ↔ 外部 selectedItemID
+        .onChange(of: selectedID) { _, newVal in
+            if selectedItemID != newVal { selectedItemID = newVal }
+        }
+        .onChange(of: selectedItemID) { _, newVal in
+            if selectedID != newVal { selectedID = newVal }
         }
     }
 }
@@ -50,17 +61,19 @@ private extension TomorrowRingView {
     var ringCanvas: some View {
         GeometryReader { geo in
             let size = min(geo.size.width, geo.size.height)
-            let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-            
+            let geoCenter = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
+            // ✅ 手勢座標是相對於 ZStack（size × size），圓心在正中央
+            let ringCenter = CGPoint(x: size / 2, y: size / 2)
+
             ZStack {
-                // ✅ 取消點選：detail 一律可點；card 只有選中時才攔截（避免擋住 NavigationLink）
+                // ✅ 取消點選：選中時點空白處取消；未選中時不攔截（避免擋住 NavigationLink）
                 Color.clear
                     .contentShape(Rectangle())
-                    .allowsHitTesting(mode == .detail ? true : (selectedID != nil))
+                    .allowsHitTesting(selectedID != nil)
                     .onTapGesture { clearSelection() }
-                
+
                 baseRing
-                
+
                 RingTimeTicks(
                     tickEvery: 30,
                     majorTickEvery: 60,
@@ -69,13 +82,13 @@ private extension TomorrowRingView {
                     majorTickLen: 11
                 )
                 .allowsHitTesting(false)
-                
+
                 RingHourLabels(
                     labelRadiusRatio: 0.70,
                     font: .caption2
                 )
                 .allowsHitTesting(false)
-                
+
                 if let id = selectedID,
                    let item = currentItems.first(where: { $0.id == id }) {
                     RingSelectionMarkers(
@@ -89,14 +102,14 @@ private extension TomorrowRingView {
                     )
                     .allowsHitTesting(false)
                 }
-                
-                segments(center: center, items: currentItems)
+
+                segments(center: ringCenter, items: currentItems)
                 centerInfo
             }
             // ✅ 這個讓拖曳手勢固定吃到（ScrollView 不會搶）
             .contentShape(Rectangle())
             .frame(width: size, height: size)
-            .position(center)
+            .position(geoCenter)
         }
     }
     
@@ -252,7 +265,7 @@ private extension TomorrowRingView {
         isDraggingRing = false
     }
     func segmentInteractionGesture(item: RingItem, center: CGPoint) -> some Gesture {
-        LongPressGesture(minimumDuration: 0.35)
+        LongPressGesture(minimumDuration: 0.15)
             .sequenced(before: DragGesture(minimumDistance: 0))
             .onChanged { phase in
                 switch phase {

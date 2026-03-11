@@ -3,14 +3,19 @@ import Charts
 
 struct MoodThermometerChartView: View {
     let points: [MoodPoint]
-    let startAt8: Date            // 今天 8:00
-    let endAt8NextDay: Date       // 隔天 8:00
-    
+    let rangeStart: Date          // 永遠是今天 8:00
+    let rangeEnd: Date            // 永遠是隔天 8:00
+    var period: MoodTimePeriod = .day
+
+    @EnvironmentObject private var theme: ThemeStore
+
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 16)
+
         VStack(alignment: .leading, spacing: 8) {
-            Text("今天心情折線圖（8:00 起算）")
+            Text(period.chartTitle)
                 .font(.headline)
-            
+
             Chart {
                 ForEach(points) { p in
                     LineMark(
@@ -18,7 +23,7 @@ struct MoodThermometerChartView: View {
                         y: .value("分數", p.score)
                     )
                     .interpolationMethod(.catmullRom)
-                    
+
                     PointMark(
                         x: .value("時間", p.timestamp),
                         y: .value("分數", p.score)
@@ -26,13 +31,13 @@ struct MoodThermometerChartView: View {
                 }
             }
             .chartYScale(domain: 0...10)
-            .chartXScale(domain: startAt8...endAt8NextDay)
+            .chartXScale(domain: rangeStart...rangeEnd)
             .chartYAxis {
                 AxisMarks(position: .leading, values: [0, 2, 4, 6, 8, 10])
             }
             .chartXAxis {
-                // 每 4 小時一個刻度：8,12,16,20,0,4,8
-                AxisMarks(values: .stride(by: .hour, count: 4)) { value in
+                // 橫軸永遠是一天中的時間，每 4 小時一刻度
+                AxisMarks(values: .stride(by: .hour, count: 4)) { _ in
                     AxisGridLine()
                     AxisTick()
                     AxisValueLabel(format: .dateTime.hour(.twoDigits(amPM: .abbreviated)))
@@ -42,7 +47,27 @@ struct MoodThermometerChartView: View {
             .padding(.vertical, 8)
         }
         .padding()
-        .background(.thinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .background {
+            if theme.isDark {
+                shape.fill(.thinMaterial)
+            } else {
+                shape.fill(Color.white)
+            }
+        }
+        .overlay(
+            shape.strokeBorder(
+                theme.isDark
+                    ? Color.white.opacity(0.06)
+                    : Color.black.opacity(0.10),
+                lineWidth: 1
+            )
+        )
+        .shadow(
+            color: theme.isDark ? .black.opacity(0.3) : .black.opacity(0.08),
+            radius: theme.isDark ? 10 : 8,
+            x: 0,
+            y: theme.isDark ? 6 : 3
+        )
+        .clipShape(shape)
     }
 }

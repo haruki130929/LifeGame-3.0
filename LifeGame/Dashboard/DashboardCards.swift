@@ -17,12 +17,14 @@ struct DailyLogCard: View {
 struct EditCardsCard: View {
     let slot: TimeSlot
     let size: CardSize
-    
+
+    @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
+
     var body: some View {
         DashboardCardContainer {
             VStack(alignment: .leading, spacing: 10) {
                 CardHeader(title: "編輯卡片", icon: "square.grid.2x2")
-                Text("時段：\(slot.rawValue)")
+                Text("時段：\(timeSlotNameStore.displayName(for: slot))")
                     .foregroundStyle(.secondary)
             }
         }

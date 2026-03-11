@@ -13,11 +13,16 @@ final class FabStore: ObservableObject {
     enum Route: Identifiable, Equatable {
         case addCalendarEvent
         case navigate(FeatureID)
+        // ── 時間圓環專用 ──
+        case addRingItem
+        case quickAppendRing
 
         var id: String {
             switch self {
             case .addCalendarEvent:    return "addCalendarEvent"
             case .navigate(let f):     return "navigate-\(f)"
+            case .addRingItem:         return "addRingItem"
+            case .quickAppendRing:     return "quickAppendRing"
             }
         }
     }
@@ -284,8 +289,11 @@ final class FabStore: ObservableObject {
             ]
         case .tomorrowRing:
             result += [
-                FabAction(title: "編輯排程", systemImage: "pencil.circle") { [weak self] in
-                    self?.route = .navigate(.tomorrowRing); self?.collapse()
+                FabAction(title: "新增時段", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .addRingItem; self?.collapse()
+                },
+                FabAction(title: "快速接續", systemImage: "arrow.right.circle") { [weak self] in
+                    self?.route = .quickAppendRing; self?.collapse()
                 }
             ]
         case .bagRequired:

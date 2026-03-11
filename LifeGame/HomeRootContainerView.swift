@@ -20,6 +20,8 @@ struct HomeRootContainerView: View {
     @StateObject private var moodStore = MoodStore()
     @StateObject private var slotCardStore = SlotCardConfigStore()
     @StateObject private var monthlyScoreStore = MonthlyScoreStore()
+    @StateObject private var customTabStore = CustomTabStore()
+    @StateObject private var timeSlotNameStore = TimeSlotNameStore()
 
     // MARK: - Non-observable (不需要 UI 更新就維持 let)
     private let dailyLogStore = DailyLogStore()
@@ -33,5 +35,8 @@ struct HomeRootContainerView: View {
         )
         // 只注入此處獨有的 Store；其餘自動繼承自 MyApp
         .environmentObject(monthlyScoreStore)
+        .environmentObject(customTabStore)
+        .environmentObject(timeSlotNameStore)
+        .environmentObject(game)
     }
 }

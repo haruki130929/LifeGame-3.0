@@ -1,0 +1,92 @@
+import SwiftUI
+
+/// 將 CardType 映射到實際的卡片 View
+/// 所有依賴透過 @EnvironmentObject 取得
+struct CardFactory: View {
+    let cardType: CardType
+    @Binding var ringSelectedID: UUID?
+
+    init(cardType: CardType, ringSelectedID: Binding<UUID?> = .constant(nil)) {
+        self.cardType = cardType
+        self._ringSelectedID = ringSelectedID
+    }
+
+    @EnvironmentObject private var calendarStore: CalendarStore
+    @EnvironmentObject private var game: LifeGame
+
+    // 各卡片需要的本地 State
+    @StateObject private var todoStore = TodoQuadrantStore()
+    @State private var monthOffset = 0
+    @State private var tomorrowPlan: TomorrowRingPlan = {
+        if let saved: TomorrowRingPlan = StorageManager.load(TomorrowRingPlan.self, forKey: "tomorrow_ring_plan") {
+            return saved
+        }
+        return .sample
+    }()
+    @State private var showCalendarScreen = false
+    @State private var showTomorrowRingDetail = false
+
+    private let cal = Calendar.current
+    private let rangeProvider = CalendarRangeProvider()
+
+    private var monthDate: Date {
+        cal.date(byAdding: .month, value: monthOffset, to: Date()) ?? Date()
+    }
+
+    var body: some View {
+        switch cardType {
+        case .calendar:
+            CalendarCard(
+                size: .medium,
+                monthDate: monthDate,
+                ranges: rangeProvider.ranges(from: calendarStore.events, in: monthDate),
+                onPrevMonth: { monthOffset -= 1 },
+                onNextMonth: { monthOffset += 1 },
+                urgentImportantTasks: []
+            )
+            .onTapGesture { showCalendarScreen = true }
+            .navigationDestination(isPresented: $showCalendarScreen) {
+                CalendarScreen()
+            }
+
+        case .todoQuadrant:
+            TodoQuadrantCardLarge(store: todoStore)
+
+        case .todayStatus:
+            TodayStatusContentCard(game: game)
+
+        case .dailyLog:
+            DailyLogCard(size: .large)
+
+        case .tomorrowRing:
+            TomorrowRingCard(size: .large, plan: $tomorrowPlan,
+                             selectedSegmentID: $ringSelectedID,
+                             onTap: { showTomorrowRingDetail = true })
+                .navigationDestination(isPresented: $showTomorrowRingDetail) {
+                    TomorrowRingDetailView(plan: $tomorrowPlan)
+                }
+                .onChange(of: tomorrowPlan) { _, newPlan in
+                    StorageManager.save(newPlan, forKey: "tomorrow_ring_plan")
+                }
+
+        case .bagRequired:
+            BagRequiredCardLarge(size: .medium)
+
+        case .monthlyScoreCalendar:
+            MonthlyScoreCalendarCardLarge()
+
+        case .quickStart:
+            DashboardCardContainer {
+                VStack(alignment: .leading, spacing: 10) {
+                    CardHeader(title: "快速開始", icon: "bolt")
+                    Text("開始你的一天")
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+        case .editCards:
+            // editCards 在自訂切頁中不顯示
+            EmptyView()
+        }
+    }
+}

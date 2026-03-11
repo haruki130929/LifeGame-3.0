@@ -11,9 +11,10 @@ struct HomeContentView: View {
     @EnvironmentObject private var wishStore: WishStore
     @EnvironmentObject private var ledgerStore: LedgerStore
     @EnvironmentObject private var fab: FabStore
-    
-    @State private var selectedTab: HomeTab = .tools
-    @State private var currentSlot: TimeSlot = .morning
+    @EnvironmentObject private var customTabStore: CustomTabStore
+
+    @State private var selectedTab: TabSelection = .tab(UUID())
+    @State private var currentSlot: TimeSlot = .beforeLeave
     @State private var showSlotCardEditor = false
     
     @State private var isDrawerOpen = false
@@ -61,6 +62,7 @@ struct HomeContentView: View {
                         
                         HomeMainPanelView(
                             selectedTab: $selectedTab,
+                            currentSlot: currentSlot,
                             containerWidth: w - sideInset * 2,
                             leftTopButtonWidth: leftTopButtonWidth
                         )
@@ -99,6 +101,10 @@ struct HomeContentView: View {
         .toolbar(.hidden, for: .navigationBar)
         
         .onAppear {
+            // 初始化選中第一個切頁
+            if let first = customTabStore.tabs.first {
+                selectedTab = .tab(first.id)
+            }
             refreshFabMenu()
         }
         .onChange(of: currentSlot) { _, _ in

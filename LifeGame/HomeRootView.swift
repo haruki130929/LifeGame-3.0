@@ -64,6 +64,10 @@ struct HomeRootView: View {
             case .navigate(let feature):
                 navigationPath.append(feature)
                 fab.route = nil
+
+            // 時間圓環專用 route，由 TomorrowRingDetailView 自己處理
+            case .addRingItem, .quickAppendRing:
+                break
             }
         }
         .sheet(isPresented: $showAddCalendarEvent) {

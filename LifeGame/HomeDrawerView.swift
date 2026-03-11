@@ -9,24 +9,26 @@ struct HomeDrawerView: View {
     let ledgerStore: LedgerStore
     
     @EnvironmentObject private var theme: ThemeStore
-    
+    @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            
+
             Text("一天")
                 .font(.headline)
                 .padding(.top, 12)
-            
+
             ForEach(TimeSlot.allCases) { slot in
                 Button {
                     onSelectSlot(slot)
                 } label: {
                     HStack {
                         Image(systemName: slot.systemImage)
-                        Text(slot.rawValue)
+                        Text(timeSlotNameStore.displayName(for: slot))
                         Spacer()
                     }
                     .padding(10)
+                    .contentShape(Rectangle())
                     .background(currentSlot == slot ? AnyShapeStyle(.thinMaterial) : AnyShapeStyle(Color.clear))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }

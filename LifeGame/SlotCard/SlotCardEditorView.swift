@@ -2,14 +2,15 @@ import SwiftUI
 
 struct SlotCardEditorView: View {
     @ObservedObject var store: SlotCardConfigStore
-    @State private var slot: TimeSlot = .morning
-    
+    @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
+    @State private var slot: TimeSlot = .beforeLeave
+
     var body: some View {
         List {
             Section {
                 Picker("時段", selection: $slot) {
                     ForEach(TimeSlot.allCases) { s in
-                        Text(s.displayName).tag(s)
+                        Text(timeSlotNameStore.displayName(for: s)).tag(s)
                     }
                 }
                 .pickerStyle(.segmented)

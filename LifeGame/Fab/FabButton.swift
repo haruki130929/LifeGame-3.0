@@ -47,6 +47,18 @@ struct FabButton: View {
 
             mainButton
         }
+        // ✅ 偵測外部收合（FabStore.collapse / pushActions / popActions）
+        //    → 重置按鈕動畫狀態，確保「＋」恢復原樣
+        .onChange(of: fab.isExpanded) { _, isExpanded in
+            if !isExpanded && !isAnimating {
+                withAnimation(.spring(response: 0.22, dampingFraction: 0.80)) {
+                    btnRotation = 0
+                    btnScale = 1.0
+                }
+                showMenuItems = false
+                showSubItems = false
+            }
+        }
     }
 
     @ViewBuilder private var mainMenuView: some View {
