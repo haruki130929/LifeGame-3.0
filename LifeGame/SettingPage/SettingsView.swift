@@ -5,6 +5,7 @@ struct SettingsView: View {
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
     @EnvironmentObject private var ringSettings: TomorrowRingSettingsStore
+    @EnvironmentObject private var phoneModeStore: PhoneModeStore
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - Draft (草稿)
@@ -25,6 +26,9 @@ struct SettingsView: View {
     
     var body: some View {
         Form {
+            if !Layout.isIPad {
+                phoneModeSection
+            }
             calendarSection
             storageSection
             notificationSection
@@ -61,6 +65,34 @@ struct SettingsView: View {
 
 // MARK: - Sections
 private extension SettingsView {
+
+    var phoneModeSection: some View {
+        Section {
+            Picker("顯示模式", selection: $phoneModeStore.mode) {
+                Text("一般模式").tag(PhoneMode.full)
+                Text("簡略模式").tag(PhoneMode.quick)
+            }
+            .pickerStyle(.segmented)
+
+            if phoneModeStore.mode == .quick {
+                NavigationLink {
+                    QuickPageConfigView()
+                } label: {
+                    HStack {
+                        Image(systemName: "rectangle.stack")
+                            .foregroundStyle(.purple)
+                        Text("編輯快速頁面")
+                    }
+                }
+            }
+        } header: {
+            Text("iPhone 模式")
+        } footer: {
+            Text(phoneModeStore.mode == .quick
+                 ? "簡略模式：左右滑動切換功能頁面"
+                 : "一般模式：與 iPad 相同的完整功能")
+        }
+    }
 
     var calendarSection: some View {
         Section("功能設定") {

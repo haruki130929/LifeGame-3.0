@@ -41,6 +41,14 @@ struct HomeDrawerHost: View {
                 .animation(.easeInOut(duration: DrawerPanel.drawerAnimDuration), value: isOpen)
                 .allowsHitTesting(isOpen)
                 .zIndex(50)
+                .gesture(
+                    DragGesture(minimumDistance: 30)
+                        .onEnded { value in
+                            if value.translation.width < -60 {
+                                withAnimation(.easeInOut) { isOpen = false }
+                            }
+                        }
+                )
             }
             .ignoresSafeArea()
         }

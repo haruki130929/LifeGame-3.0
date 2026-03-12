@@ -100,6 +100,29 @@ struct HomeContentView: View {
                 }
             }
             .allowsHitTesting(!isOverlayPresented)
+            // iPhone 邊緣滑動手勢：右滑開 drawer、左滑開右面板
+            .gesture(
+                Layout.isIPad ? nil : DragGesture(minimumDistance: 30)
+                    .onEnded { value in
+                        guard !isOverlayPresented else { return }
+                        let horizontal = value.translation.width
+                        let startX = value.startLocation.x
+
+                        if horizontal > 80 && startX < 50 {
+                            // 從左邊緣右滑 → 開 drawer
+                            withAnimation(DrawerPanel.panelSpring) {
+                                isDrawerOpen = true
+                                isContentOpen = false
+                            }
+                        } else if horizontal < -80 && startX > UIScreen.main.bounds.width - 50 {
+                            // 從右邊緣左滑 → 開右面板
+                            withAnimation(DrawerPanel.panelSpring) {
+                                isContentOpen = true
+                                isDrawerOpen = false
+                            }
+                        }
+                    }
+            )
         }
         .toolbar(.hidden, for: .navigationBar)
         

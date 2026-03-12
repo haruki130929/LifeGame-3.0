@@ -18,6 +18,7 @@ struct LifeGameApp: App {
     @StateObject private var ledgerStore = LedgerStore()
     @StateObject private var moodHistory = MoodHistoryStore()
     @StateObject private var ringSettings = TomorrowRingSettingsStore()
+    @StateObject private var phoneModeStore = PhoneModeStore()
 
     init() {
         // 1. 註冊所有 @Model 類型
@@ -82,6 +83,7 @@ struct LifeGameApp: App {
                         .environmentObject(ledgerStore)
                         .environmentObject(moodHistory)
                         .environmentObject(ringSettings)
+                        .environmentObject(phoneModeStore)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
                         .modelContainer(coordinator.modelContainer)
                         .id(storageConfig.currentMode)
@@ -90,6 +92,7 @@ struct LifeGameApp: App {
                 } else {
                     OnboardingView()
                         .environmentObject(theme)
+                        .environmentObject(phoneModeStore)
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
                 }
             } else {

@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// ✅ 集中「建立 & 注入」所有功能 Store 的地方
+/// 集中「建立 & 注入」所有功能 Store 的地方
 /// HomeRootView 只管排版，不管依賴建立
 ///
 /// ⚠️ theme / wishStore / ledgerStore / fab / calendarStore
@@ -14,6 +14,7 @@ struct HomeRootContainerView: View {
     @EnvironmentObject private var ledgerStore: LedgerStore
     @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var calendarStore: CalendarStore
+    @EnvironmentObject private var phoneModeStore: PhoneModeStore
 
     // MARK: - Local Feature Stores (原本在 HomeContentView 裡 @StateObject 的)
     @StateObject private var game = LifeGame()
@@ -27,6 +28,31 @@ struct HomeRootContainerView: View {
     private let dailyLogStore = DailyLogStore()
 
     var body: some View {
+        Group {
+            if Layout.isIPad {
+                // iPad：原有流程不動
+                fullModeView
+            } else {
+                // iPhone：依模式分支
+                switch phoneModeStore.mode {
+                case .full:
+                    fullModeView
+                case .quick:
+                    QuickModeShellView(
+                        game: game,
+                        moodStore: moodStore,
+                        dailyLogStore: dailyLogStore
+                    )
+                    .environmentObject(monthlyScoreStore)
+                    .environmentObject(customTabStore)
+                    .environmentObject(timeSlotNameStore)
+                    .environmentObject(game)
+                }
+            }
+        }
+    }
+
+    private var fullModeView: some View {
         HomeRootView(
             game: game,
             moodStore: moodStore,

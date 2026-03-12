@@ -29,6 +29,14 @@ struct HomeRightPanelHost: View {
                     .transition(.move(edge: .trailing))
                     .zIndex(51)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .trailing)
+                    .gesture(
+                        DragGesture(minimumDistance: 30)
+                            .onEnded { value in
+                                if value.translation.width > 60 {
+                                    withAnimation(DrawerPanel.panelSpring) { isOpen = false }
+                                }
+                            }
+                    )
                 }
                 .ignoresSafeArea()
             }

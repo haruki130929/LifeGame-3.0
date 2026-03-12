@@ -60,6 +60,23 @@ struct ExpandableCardRow: View {
                 }
             }
         }
+        // 上下滑動：下拉展開、上推收起
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 30)
+                .onEnded { value in
+                    let vertical = value.translation.height
+                    // 水平移動過大時忽略（避免與 ScrollView 衝突）
+                    guard abs(value.translation.width) < abs(vertical) else { return }
+
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+                        if vertical > 40 && !isExpanded {
+                            expandedCardType = cardType
+                        } else if vertical < -40 && isExpanded {
+                            expandedCardType = nil
+                        }
+                    }
+                }
+        )
     }
 
     // MARK: - Header Row（沿用 CardHeader 樣式 + chevron 旋轉）
