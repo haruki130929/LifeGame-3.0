@@ -13,6 +13,8 @@ struct TomorrowRingView: View {
     var gameHP: Stat?
     var gameFP: Stat?
 
+    @EnvironmentObject private var ringSettings: TomorrowRingSettingsStore
+
     init(
         plan: Binding<TomorrowRingPlan>,
         isInteracting: Binding<Bool> = .constant(false),
@@ -30,7 +32,7 @@ struct TomorrowRingView: View {
     }
 
     // MARK: - Constants
-    private let ringLineWidth: CGFloat = 18
+    private var ringLineWidth: CGFloat { mode == .detail ? 32 : 18 }
     private var hitWidth: CGFloat { ringLineWidth + 30 }
 
     // MARK: - Interaction State
@@ -65,7 +67,8 @@ private extension TomorrowRingView {
     
     var ringCanvas: some View {
         GeometryReader { geo in
-            let size = min(geo.size.width, geo.size.height)
+            let rawSize = min(geo.size.width, geo.size.height)
+            let size = mode == .detail ? rawSize * 0.70 : rawSize
             let geoCenter = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
             // ✅ 手勢座標是相對於 ZStack（size × size），圓心在正中央
             let ringCenter = CGPoint(x: size / 2, y: size / 2)
@@ -89,7 +92,7 @@ private extension TomorrowRingView {
                 .allowsHitTesting(false)
 
                 RingHourLabels(
-                    labelRadiusRatio: 0.68,
+                    labelRadiusRatio: mode == .detail ? 0.76 : 0.68,
                     font: .caption
                 )
                 .allowsHitTesting(false)
@@ -109,6 +112,12 @@ private extension TomorrowRingView {
                 }
 
                 segments(center: ringCenter, items: currentItems)
+
+                if mode == .detail, ringSettings.showSegmentIcons {
+                    segmentIcons(center: ringCenter, size: size, items: currentItems)
+                        .allowsHitTesting(false)
+                }
+
                 currentTimeNeedle
                     .allowsHitTesting(false)
                 centerInfo
@@ -134,6 +143,29 @@ private extension TomorrowRingView {
             segment(for: item, center: center)
                 .zIndex(selectedID == item.id ? 10 : 0)
         }
+    }
+
+    func segmentIcons(center: CGPoint, size: CGFloat, items: [RingItem]) -> some View {
+        let r = size / 2
+        return ZStack {
+            ForEach(items) { item in
+                Image(systemName: item.icon)
+                    .font(.system(size: 14, weight: .bold))
+                    .foregroundStyle(.white.opacity(0.9))
+                    .position(iconPosition(for: item, center: center, radius: r))
+            }
+        }
+    }
+
+    func iconPosition(for item: RingItem, center: CGPoint, radius: CGFloat) -> CGPoint {
+        // 靠近時段起始端（左側 20%）
+        let dur = positiveDuration(from: item.startMinute, to: item.endMinute)
+        let offsetMinute = (item.startMinute + dur / 16) % TOTAL_MINUTES
+        let angle = CGFloat(offsetMinute) / CGFloat(TOTAL_MINUTES) * 2 * .pi - .pi / 2
+        return CGPoint(
+            x: center.x + cos(angle) * radius,
+            y: center.y + sin(angle) * radius
+        )
     }
     
     func segment(for item: RingItem, center: CGPoint) -> some View {
@@ -164,6 +196,12 @@ private extension TomorrowRingView {
     
     var centerInfo: some View {
         VStack(spacing: 6) {
+            if mode == .detail {
+                Text(currentTimeString)
+                    .font(.title.bold())
+                    .monospacedDigit()
+            }
+
             if let hp = gameHP, let fp = gameFP {
                 statRow(label: "HP", current: hp.current, max: hp.max, color: .red)
                 statRow(label: "FP", current: fp.current, max: fp.max, color: .blue)
@@ -177,7 +215,7 @@ private extension TomorrowRingView {
     func statRow(label: String, current: Int, max: Int, color: Color) -> some View {
         VStack(spacing: 3) {
             Text("\(label) \(current)/\(max)")
-                .font(.footnote.bold())
+                .font(.caption.bold())
                 .monospacedDigit()
 
             GeometryReader { geo in
@@ -190,9 +228,17 @@ private extension TomorrowRingView {
                         .frame(width: geo.size.width * ratio)
                 }
             }
-            .frame(width: 72, height: 6)
+            .frame(width: 60, height: 5)
             .clipShape(Capsule())
         }
+    }
+
+    var currentTimeString: String {
+        let cal = Calendar.current
+        let now = Date()
+        let h = cal.component(.hour, from: now)
+        let m = cal.component(.minute, from: now)
+        return String(format: "%02d:%02d", h, m)
     }
 
     // MARK: - 現在時間紅線
@@ -208,7 +254,7 @@ private extension TomorrowRingView {
             let angle = CGFloat(minute) / CGFloat(TOTAL_MINUTES) * 2 * .pi - .pi / 2
 
             let innerR = r * 0.72
-            let outerR = r + 9   // ringLineWidth / 2，延伸到弧段最外緣
+            let outerR = r + ringLineWidth / 2
             let p1 = CGPoint(x: center.x + cos(angle) * innerR,
                              y: center.y + sin(angle) * innerR)
             let p2 = CGPoint(x: center.x + cos(angle) * outerR,
@@ -234,7 +280,7 @@ private extension TomorrowRingView {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
                 .lineLimit(1)
-        } else {
+        } else if mode == .card {
             Text("長按一段再沿圓形拖曳")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
@@ -388,6 +434,11 @@ private extension TomorrowRingView {
         return r >= 0 ? r : (r + m)
     }
     
+    func midpointMinute(start: Int, end: Int) -> Int {
+        let dur = positiveDuration(from: start, to: end)
+        return (start + dur / 2) % TOTAL_MINUTES
+    }
+
     func minuteText(_ m: Int) -> String {
         let mm = (m % TOTAL_MINUTES + TOTAL_MINUTES) % TOTAL_MINUTES
         let h = mm / 60

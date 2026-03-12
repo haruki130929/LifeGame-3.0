@@ -17,6 +17,7 @@ struct LifeGameApp: App {
     @StateObject private var wishStore = WishStore()
     @StateObject private var ledgerStore = LedgerStore()
     @StateObject private var moodHistory = MoodHistoryStore()
+    @StateObject private var ringSettings = TomorrowRingSettingsStore()
 
     init() {
         // 1. 註冊所有 @Model 類型
@@ -80,6 +81,7 @@ struct LifeGameApp: App {
                         .environmentObject(wishStore)
                         .environmentObject(ledgerStore)
                         .environmentObject(moodHistory)
+                        .environmentObject(ringSettings)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
                         .modelContainer(coordinator.modelContainer)
                         .id(storageConfig.currentMode)

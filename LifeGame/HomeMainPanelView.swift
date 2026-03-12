@@ -37,7 +37,6 @@ struct HomeMainPanelView: View {
         let id: String
         let selection: TabSelection?   // nil = "+" 按鈕
         let label: String
-        let icon: String
         let isAddButton: Bool
         let customTab: CustomTab?
 
@@ -46,7 +45,6 @@ struct HomeMainPanelView: View {
                 id: ct.id.uuidString,
                 selection: .tab(ct.id),
                 label: ct.name,
-                icon: ct.icon,
                 isAddButton: false,
                 customTab: ct
             )
@@ -56,7 +54,6 @@ struct HomeMainPanelView: View {
             id: "__add__",
             selection: nil,
             label: "+",
-            icon: "plus",
             isAddButton: true,
             customTab: nil
         )
@@ -141,18 +138,10 @@ struct HomeMainPanelView: View {
                                         .font(.system(size: 16, weight: .bold))
                                         .foregroundStyle(unselectedTextColor)
                                 } else {
-                                    HStack(spacing: 8) {
-                                        if isSelected {
-                                            Image(systemName: displayTab.icon)
-                                                .font(.system(size: 13, weight: .bold))
-                                                .foregroundStyle(selectedTextColor)
-                                        }
-
-                                        Text(displayTab.label)
-                                            .font(.system(size: 13, weight: .bold))
-                                            .foregroundStyle(isSelected ? selectedTextColor : unselectedTextColor)
-                                    }
-                                    .padding(.horizontal, 14)
+                                    Text(displayTab.label)
+                                        .font(.system(size: 13, weight: .bold))
+                                        .foregroundStyle(isSelected ? selectedTextColor : unselectedTextColor)
+                                        .padding(.horizontal, 14)
                                 }
                             }
                             .frame(width: tabW, height: tabH)

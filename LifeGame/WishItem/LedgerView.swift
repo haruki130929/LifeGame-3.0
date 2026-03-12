@@ -1,39 +1,10 @@
 import SwiftUI
 
 struct LedgerView: View {
-    @ObservedObject var store: LedgerStore   // ✅ 還原回 @ObservedObject
-    
-    @State private var kind: LedgerEntry.Kind = .expense
-    @State private var title: String = ""
-    @State private var amountText: String = ""
-    
+    @ObservedObject var store: LedgerStore
+
     var body: some View {
         List {
-            Section("新增") {
-                Picker("類型", selection: $kind) {
-                    ForEach(LedgerEntry.Kind.allCases, id: \.self) { k in
-                        Text(k.title).tag(k)
-                    }
-                }
-                
-                TextField("項目", text: $title)
-                TextField("金額", text: $amountText)
-                    .keyboardType(.numberPad)
-                
-                Button("加入") {
-                    let amt = Int(amountText) ?? 0
-                    guard !title.isEmpty, amt > 0 else { return }
-                    if kind == .expense {
-                        store.addExpense(title: title, amount: amt)
-                    } else {
-                        store.addIncome(title: title, amount: amt)
-                    }
-                    title = ""
-                    amountText = ""
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            
             Section("總計") {
                 HStack {
                     Text("收入")

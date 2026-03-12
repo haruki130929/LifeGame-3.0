@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import SwiftUI
 
 @MainActor
 final class WishStore: ObservableObject {
@@ -21,6 +22,14 @@ final class WishStore: ObservableObject {
         }
     }
     
+    func add(_ item: WishItem) {
+        items.insert(item, at: 0)
+    }
+
+    func remove(at offsets: IndexSet) {
+        items.remove(atOffsets: offsets)
+    }
+
     func markPurchased(id: UUID) -> Bool {
         guard let idx = items.firstIndex(where: { $0.id == id }) else { return false }
         guard items[idx].status != .purchased else { return false } // 一次性

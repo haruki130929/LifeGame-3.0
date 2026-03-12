@@ -9,7 +9,6 @@ struct CustomTabEditorSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var tabName: String = ""
-    @State private var selectedIcon: String = "square.grid.2x2"
     @State private var selectedCardTypes: [CardType] = []
 
     // 可選的卡片類型（排除 editCards）
@@ -18,21 +17,10 @@ struct CustomTabEditorSheet: View {
         .tomorrowRing, .bagRequired, .monthlyScoreCalendar, .quickStart
     ]
 
-    // 常用 SF Symbol 圖示
-    private let iconOptions: [String] = [
-        "wrench.and.screwdriver.fill", "square.grid.2x2", "star.fill",
-        "heart.fill", "book.fill", "person.fill",
-        "chart.line.uptrend.xyaxis", "gamecontroller.fill",
-        "leaf.fill", "flame.fill", "bolt.fill", "moon.fill",
-        "sun.max.fill", "graduationcap.fill", "briefcase.fill",
-        "music.note", "paintbrush.fill", "camera.fill"
-    ]
-
     var body: some View {
         NavigationStack {
             Form {
                 nameSection
-                iconSection
                 cardSelectionSection
                 cardOrderSection
             }
@@ -53,7 +41,6 @@ struct CustomTabEditorSheet: View {
             .onAppear {
                 if let tab = editingTab {
                     tabName = tab.name
-                    selectedIcon = tab.icon
                     selectedCardTypes = tab.cardTypes
                 }
             }
@@ -66,43 +53,6 @@ struct CustomTabEditorSheet: View {
         Section("切頁名稱") {
             TextField("例如：學習、生活、工作", text: $tabName)
         }
-    }
-
-    // MARK: - 圖示
-
-    private var iconSection: some View {
-        Section("圖示") {
-            iconGrid
-        }
-    }
-
-    private var iconGrid: some View {
-        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
-            ForEach(iconOptions, id: \.self) { icon in
-                iconButton(icon)
-            }
-        }
-        .padding(.vertical, 4)
-    }
-
-    private func iconButton(_ icon: String) -> some View {
-        let isSelected = (selectedIcon == icon)
-        return Button {
-            selectedIcon = icon
-        } label: {
-            Image(systemName: icon)
-                .font(.title3)
-                .frame(width: 40, height: 40)
-                .background(
-                    RoundedRectangle(cornerRadius: 10)
-                        .fill(isSelected ? Color.accentColor.opacity(0.2) : Color(.tertiarySystemFill))
-                )
-                .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .strokeBorder(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
-                )
-        }
-        .buttonStyle(.plain)
     }
 
     // MARK: - 卡片選擇
@@ -163,13 +113,12 @@ struct CustomTabEditorSheet: View {
 
         if var tab = editingTab {
             tab.name = trimmedName
-            tab.icon = selectedIcon
             tab.cardTypes = selectedCardTypes
             customTabStore.update(tab)
         } else {
             let newTab = CustomTab(
                 name: trimmedName,
-                icon: selectedIcon,
+                icon: "square.grid.2x2",
                 cardTypes: selectedCardTypes
             )
             customTabStore.add(newTab)

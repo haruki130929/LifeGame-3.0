@@ -9,7 +9,7 @@ struct WishListView: View {
             ForEach(store.items) { item in
                 WishItemRow(item: item) { item in
                     guard let amount = item.price else { return }
-                    
+
                     if store.markPurchased(id: item.id) {
                         ledgerStore.addExpense(
                             title: item.title,
@@ -20,8 +20,13 @@ struct WishListView: View {
                     }
                 }
             }
+            .onDelete { offsets in
+                store.remove(at: offsets)
+            }
+            .onMove { from, to in
+                store.items.move(fromOffsets: from, toOffset: to)
+            }
         }
-        .navigationTitle("慾望清單")
     }
 }
 

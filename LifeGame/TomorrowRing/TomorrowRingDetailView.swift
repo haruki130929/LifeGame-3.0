@@ -32,10 +32,9 @@ struct TomorrowRingDetailView: View {
                         emptyPlaceholder
                     } else {
                         ForEach(plan.items) { item in
-                            RingRow(item: item)
-                                .onTapGesture {
-                                    editingItem = item
-                                }
+                            RingRow(item: item) {
+                                editingItem = item
+                            }
                         }
                     }
                 }
@@ -156,7 +155,7 @@ struct TomorrowRingDetailView: View {
 
 // MARK: - 編輯時段 Sheet
 
-private struct EditRingItemSheet: View {
+struct EditRingItemSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var item: RingItem
@@ -269,6 +268,7 @@ private struct EditRingItemSheet: View {
 
 private struct RingRow: View {
     let item: RingItem
+    let onEdit: () -> Void
 
     var body: some View {
         HStack(spacing: 10) {
@@ -295,9 +295,14 @@ private struct RingRow: View {
                 .foregroundStyle(.secondary)
                 .monospacedDigit()
 
-            Image(systemName: "chevron.right")
-                .font(.caption2)
-                .foregroundStyle(.tertiary)
+            Button {
+                onEdit()
+            } label: {
+                Image(systemName: "pencil.circle.fill")
+                    .font(.body)
+                    .foregroundStyle(.white.opacity(0.6))
+            }
+            .buttonStyle(.plain)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 10)
@@ -306,7 +311,6 @@ private struct RingRow: View {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .stroke(.white.opacity(0.06), lineWidth: 1)
         )
-        .contentShape(Rectangle())
     }
 
     private func durationText(start: Int, end: Int) -> String {

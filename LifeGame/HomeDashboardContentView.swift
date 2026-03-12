@@ -19,6 +19,9 @@ struct HomeDashboardContentView: View {
     // iPhone 手風琴：目前展開的卡片（一次一張）
     @State private var expandedCardType: CardType?
 
+    // 編輯切頁卡片
+    @State private var showTabEditor = false
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 0) {
@@ -85,9 +88,23 @@ struct HomeDashboardContentView: View {
                 .font(.system(size: 16, weight: .bold))
             Text(timeSlotNameStore.displayName(for: currentSlot))
                 .font(.system(size: 17, weight: .bold))
+
+            Button {
+                showTabEditor = true
+            } label: {
+                Image(systemName: "pencil.circle.fill")
+                    .font(.system(size: 18))
+                    .foregroundStyle(theme.isDark ? .white.opacity(0.35) : .primary.opacity(0.3))
+            }
+            .buttonStyle(.plain)
         }
         .foregroundStyle(theme.isDark ? .white.opacity(0.7) : .primary.opacity(0.6))
         .padding(.leading, 2)
+        .sheet(isPresented: $showTabEditor) {
+            if let tab = currentTab {
+                CustomTabEditorSheet(editingTab: tab)
+            }
+        }
     }
 
     // MARK: - Helpers

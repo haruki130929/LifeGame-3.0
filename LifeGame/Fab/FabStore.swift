@@ -20,6 +20,11 @@ final class FabStore: ObservableObject {
         // ── 待辦四象限專用 ──
         case addTodoToQuadrant(TodoQuadrant)
         case todoEditMode
+        // ── 財務專用 ──
+        case addWish
+        case editWishList
+        case addLedgerEntry
+        case viewLedgerChart
 
         var id: String {
             switch self {
@@ -30,6 +35,10 @@ final class FabStore: ObservableObject {
             case .quickAppendRing:          return "quickAppendRing"
             case .addTodoToQuadrant(let q): return "addTodo-\(q.rawValue)"
             case .todoEditMode:             return "todoEditMode"
+            case .addWish:                  return "addWish"
+            case .editWishList:             return "editWishList"
+            case .addLedgerEntry:           return "addLedgerEntry"
+            case .viewLedgerChart:          return "viewLedgerChart"
             }
         }
     }
@@ -262,17 +271,20 @@ final class FabStore: ObservableObject {
             ]
         case .ledger:
             result += [
-                FabAction(title: "新增支出", systemImage: "minus.circle") { [weak self] in
-                    self?.route = .navigate(.ledger); self?.collapse()
+                FabAction(title: "新增收支", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .addLedgerEntry; self?.collapse()
                 },
-                FabAction(title: "新增收入", systemImage: "plus.circle") { [weak self] in
-                    self?.route = .navigate(.ledger); self?.collapse()
+                FabAction(title: "檢視圖表", systemImage: "chart.pie") { [weak self] in
+                    self?.route = .viewLedgerChart; self?.collapse()
                 }
             ]
         case .wish:
             result += [
-                FabAction(title: "新增願望", systemImage: "sparkles") { [weak self] in
-                    self?.route = .navigate(.wish); self?.collapse()
+                FabAction(title: "新增慾望", systemImage: "sparkles") { [weak self] in
+                    self?.route = .addWish; self?.collapse()
+                },
+                FabAction(title: "編輯", systemImage: "pencil") { [weak self] in
+                    self?.route = .editWishList; self?.collapse()
                 }
             ]
         case .settings:

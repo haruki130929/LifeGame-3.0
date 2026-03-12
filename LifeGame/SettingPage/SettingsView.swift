@@ -4,6 +4,7 @@ struct SettingsView: View {
     
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
+    @EnvironmentObject private var ringSettings: TomorrowRingSettingsStore
     @Environment(\.dismiss) private var dismiss
     
     // MARK: - Draft (草稿)
@@ -79,6 +80,15 @@ private extension SettingsView {
                     Image(systemName: "list.bullet.clipboard")
                         .foregroundStyle(.orange)
                     Text("待辦四象限")
+                }
+            }
+            NavigationLink {
+                TomorrowRingSettingsView(settings: ringSettings)
+            } label: {
+                HStack {
+                    Image(systemName: "clock")
+                        .foregroundStyle(.cyan)
+                    Text("時間圓環")
                 }
             }
         }

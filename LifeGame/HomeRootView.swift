@@ -67,7 +67,8 @@ struct HomeRootView: View {
 
             // 功能頁面專用 route，由各自的 View 處理
             case .addRingItem, .quickAppendRing, .jumpToToday,
-                 .addTodoToQuadrant, .todoEditMode:
+                 .addTodoToQuadrant, .todoEditMode,
+                 .addWish, .editWishList, .addLedgerEntry, .viewLedgerChart:
                 break
             }
         }
