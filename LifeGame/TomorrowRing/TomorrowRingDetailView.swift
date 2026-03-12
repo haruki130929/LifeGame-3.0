@@ -174,12 +174,6 @@ struct EditRingItemSheet: View {
                 Section("基本") {
                     TextField("名稱", text: $item.title)
 
-                    Picker("時段", selection: $item.slot) {
-                        ForEach(DaySlot.allCases) { slot in
-                            Text(slot.title).tag(slot)
-                        }
-                    }
-
                     Picker("圖示", selection: $item.icon) {
                         Label("clock", systemImage: "clock").tag("clock")
                         Label("book", systemImage: "book").tag("book")
@@ -202,8 +196,8 @@ struct EditRingItemSheet: View {
                 }
 
                 Section("消耗") {
-                    Stepper("HP 消耗：\(item.hpCost)", value: $item.hpCost, in: 0...999)
-                    Stepper("FP 消耗：\(item.fpCost)", value: $item.fpCost, in: 0...999)
+                    Stepper("HP 消耗：\(item.hpCost)P", value: $item.hpCost, in: 0...100, step: 5)
+                    Stepper("FP 消耗：\(item.fpCost)P", value: $item.fpCost, in: 0...100, step: 5)
                 }
 
                 Section {

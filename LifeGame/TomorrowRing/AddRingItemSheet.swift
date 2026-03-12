@@ -35,13 +35,7 @@ struct AddRingItemSheet: View {
             Form {
                 Section("基本") {
                     TextField("名稱", text: $draft.title)
-                    
-                    Picker("時段", selection: $draft.slot) {
-                        ForEach(DaySlot.allCases) { slot in
-                            Text(slot.rawValue).tag(slot)
-                        }
-                    }
-                    
+
                     Picker("圖示", selection: $draft.icon) {
                         Label("clock", systemImage: "clock").tag("clock")
                         Label("book", systemImage: "book").tag("book")
@@ -69,8 +63,8 @@ struct AddRingItemSheet: View {
                 }
                 
                 Section("消耗") {
-                    Stepper("HP 消耗：\(draft.hpCost)", value: $draft.hpCost, in: 0...999)
-                    Stepper("FP 消耗：\(draft.fpCost)", value: $draft.fpCost, in: 0...999)
+                    Stepper("HP 消耗：\(draft.hpCost)P", value: $draft.hpCost, in: 0...100, step: 5)
+                    Stepper("FP 消耗：\(draft.fpCost)P", value: $draft.fpCost, in: 0...100, step: 5)
                 }
             }
             .navigationTitle("新增時段")

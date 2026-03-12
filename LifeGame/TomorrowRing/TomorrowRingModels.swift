@@ -67,8 +67,8 @@ extension TomorrowRingPlan {
                     title: "上課／通勤",
                     icon: DaySlot.morning.icon,
                     colorHex: "4BB3FD",
-                    hpCost: 12,
-                    fpCost: 8
+                    hpCost: 10,
+                    fpCost: 10
                 ),
                 RingItem(
                     slot: .afternoon,
@@ -77,8 +77,8 @@ extension TomorrowRingPlan {
                     title: "作業／讀書",
                     icon: DaySlot.afternoon.icon,
                     colorHex: "FFD166",
-                    hpCost: 18,
-                    fpCost: 12
+                    hpCost: 20,
+                    fpCost: 10
                 ),
                 RingItem(
                     slot: .evening,
@@ -97,8 +97,8 @@ extension TomorrowRingPlan {
                     title: "洗澡／放鬆",
                     icon: DaySlot.night.icon,
                     colorHex: "EF476F",
-                    hpCost: 6,
-                    fpCost: 4
+                    hpCost: 5,
+                    fpCost: 5
                 )
             ]
         )

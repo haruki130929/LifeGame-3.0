@@ -16,7 +16,7 @@ struct HomeDrawerView: View {
 
             Text("一天")
                 .font(.headline)
-                .padding(.top, 12)
+                .padding(.top, 48)
 
             ForEach(TimeSlot.allCases) { slot in
                 Button {
@@ -80,7 +80,14 @@ struct HomeDrawerView: View {
                 closeDrawer: { } // Drawer 關閉由 Host 控制
             )
         } label: {
-            Label(label, systemImage: systemImage)
+            HStack {
+                Image(systemName: systemImage)
+                Text(label)
+                Spacer()
+            }
+            .padding(10)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 }

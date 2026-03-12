@@ -31,13 +31,6 @@ struct LGCategoryHubView: View {
 
     var body: some View {
         List {
-            Section {
-                Label(category.rawValue, systemImage: category.systemImage)
-                    .font(.headline)
-                Text("在這裡選擇細部功能")
-                    .foregroundStyle(.secondary)
-            }
-
             Section("功能") {
                 contentLinks
             }

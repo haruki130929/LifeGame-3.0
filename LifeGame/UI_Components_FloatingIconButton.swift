@@ -2,17 +2,31 @@ import SwiftUI
 
 struct FloatingIconButton: View {
     let systemName: String
-    var size: CGFloat = 44
+    var size: CGFloat = 52
     let action: () -> Void
-    
+
+    @EnvironmentObject private var theme: ThemeStore
+
+    private var bg: Color {
+        theme.isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.08)
+    }
+    private var strokeColor: Color {
+        theme.isDark ? Color.white.opacity(0.10) : Color.black.opacity(0.08)
+    }
+    private var fg: Color {
+        theme.isDark ? .white.opacity(0.95) : Color(.label)
+    }
+
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.headline)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundStyle(fg)
                 .frame(width: size, height: size)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(color: .black.opacity(0.12), radius: 10, x: 0, y: 6)
+                .background(bg)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(strokeColor, lineWidth: 1))
+                .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.12), radius: 10, x: 0, y: 6)
         }
         .buttonStyle(.plain)
     }

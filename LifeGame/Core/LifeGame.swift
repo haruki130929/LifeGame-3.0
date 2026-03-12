@@ -70,17 +70,79 @@ final class LifeGame: ObservableObject {
 }
 
 extension LifeGame {
-    
+
     /// 一堂課：HP -10、FP -10（不動 MP）
     func applyClassCost() {
         hp.current = max(0, hp.current - 10)
         fp.current = max(0, fp.current - 10)
     }
-    
+
     /// 今日結算：先做最小可用版本（之後要接 HistoryStore 再擴充）
     func settleToday() {
         // 先留著：之後可以在這裡寫「把今日狀態寫進回顧 / 歷史」
         // 例如：history.add(...)
         debugLog("✅ settleToday")
+    }
+
+    // MARK: - 時間圓環自動扣除
+
+    private static let deductedKey = "ring_deducted_segments"
+
+    /// 載入今日已扣除的時段 ID
+    private func loadDeductedIDs() -> Set<String> {
+        guard let saved: [String: [String]] = StorageManager.load([String: [String]].self, forKey: Self.deductedKey) else {
+            return []
+        }
+        let todayKey = Self.todayKey()
+        return Set(saved[todayKey] ?? [])
+    }
+
+    /// 儲存今日已扣除的時段 ID（只保留今天的紀錄）
+    private func saveDeductedIDs(_ ids: Set<String>) {
+        let todayKey = Self.todayKey()
+        StorageManager.save([todayKey: Array(ids)], forKey: Self.deductedKey)
+    }
+
+    private static func todayKey() -> String {
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd"
+        return fmt.string(from: Date())
+    }
+
+    /// 檢查時間圓環的時段，若時段已結束則自動扣除 HP/FP
+    func applyRingDeductions(plan: TomorrowRingPlan) {
+        let cal = Calendar.current
+        let now = Date()
+        let currentMinute = cal.component(.hour, from: now) * 60 + cal.component(.minute, from: now)
+
+        var deducted = loadDeductedIDs()
+        var changed = false
+
+        for item in plan.items {
+            let idStr = item.id.uuidString
+            guard !deducted.contains(idStr) else { continue }
+
+            // 判斷時段是否已結束
+            let ended: Bool
+            if item.endMinute > item.startMinute {
+                // 正常時段（例如 9:00~12:00）
+                ended = currentMinute >= item.endMinute
+            } else {
+                // 跨午夜時段（例如 22:00~02:00），只有到了隔天結束時間之後才算結束
+                ended = currentMinute >= item.endMinute && currentMinute < item.startMinute
+            }
+
+            if ended {
+                hp.add(-item.hpCost)
+                fp.add(-item.fpCost)
+                deducted.insert(idStr)
+                changed = true
+                debugLog("⏰ 時段「\(item.title)」結束，HP -\(item.hpCost), FP -\(item.fpCost)")
+            }
+        }
+
+        if changed {
+            saveDeductedIDs(deducted)
+        }
     }
 }

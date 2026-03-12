@@ -1,4 +1,5 @@
 import SwiftUI
+import Combine
 
 struct HomeContentView: View {
     
@@ -132,9 +133,19 @@ struct HomeContentView: View {
                 selectedTab = .tab(first.id)
             }
             refreshFabMenu()
+            checkRingDeductions()
         }
         .onChange(of: currentSlot) { _, _ in
             refreshFabMenu()
+        }
+        .onChange(of: isContentOpen) { _, open in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                fab.isHidden = open
+            }
+            if open { fab.collapse() }
+        }
+        .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
+            checkRingDeductions()
         }
         
         .overlay(alignment: .leading) {
@@ -184,5 +195,13 @@ private extension HomeContentView {
 
     func refreshFabMenu() {
         fab.apply(context: .home(timeSlot: currentSlot, features: currentFabFeatures))
+    }
+
+    /// 載入時間圓環計畫，檢查已結束的時段並扣除 HP/FP
+    func checkRingDeductions() {
+        guard let plan: TomorrowRingPlan = StorageManager.load(
+            TomorrowRingPlan.self, forKey: "tomorrow_ring_plan"
+        ) else { return }
+        game.applyRingDeductions(plan: plan)
     }
 }

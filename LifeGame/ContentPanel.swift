@@ -6,21 +6,19 @@ struct ContentPanel: View {
     @ObservedObject var mood: MoodStore
     var onNavigateToMood: (() -> Void)? = nil
 
-    private let cornerRadius: CGFloat = 18
-
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("Content").font(.title2).bold()
                 Spacer()
                 Button {
-                    withAnimation(.spring()) { isOpen = false }
+                    withAnimation(.easeInOut) { isOpen = false }
                 } label: {
                     Image(systemName: "xmark")
-                        .font(.headline)
-                        .frame(width: 36, height: 36)
+                        .font(.system(size: 16, weight: .bold))
+                        .frame(width: 40, height: 40)
                         .background(.thinMaterial)
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
+                        .clipShape(Circle())
                 }
                 .buttonStyle(.plain)
             }
@@ -53,10 +51,9 @@ struct ContentPanel: View {
             Spacer()
         }
         .padding(16)
+        .padding(.top, 36)
+        .frame(maxHeight: .infinity, alignment: .top)
         .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: cornerRadius))
-        .padding(.trailing, 12)
-        .padding(.vertical, 12)
-        .shadow(radius: 12)
+        .ignoresSafeArea()
     }
 }

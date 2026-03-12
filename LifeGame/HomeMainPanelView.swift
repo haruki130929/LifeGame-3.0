@@ -12,7 +12,6 @@ struct HomeMainPanelView: View {
     @EnvironmentObject private var customTabStore: CustomTabStore
 
     @State private var showAddTabSheet = false
-    @State private var editingTab: CustomTab? = nil
 
     // MARK: - Adaptive Colors
     private var panelColor: Color {
@@ -147,28 +146,6 @@ struct HomeMainPanelView: View {
                             .frame(width: tabW, height: tabH)
                         }
                         .buttonStyle(.plain)
-                        .contextMenu {
-                            if !displayTab.isAddButton, let ct = displayTab.customTab {
-                                Button {
-                                    editingTab = ct
-                                } label: {
-                                    Label("編輯", systemImage: "pencil")
-                                }
-
-                                Button(role: .destructive) {
-                                    let tabID = ct.id
-                                    customTabStore.remove(id: tabID)
-                                    // 如果刪掉的是正在選的，切回第一個
-                                    if selectedTab == .tab(tabID) {
-                                        if let first = customTabStore.tabs.first {
-                                            selectedTab = .tab(first.id)
-                                        }
-                                    }
-                                } label: {
-                                    Label("刪除", systemImage: "trash")
-                                }
-                            }
-                        }
                         .mask(
                             TabOverlapMask(
                                 overlap: overlap,
@@ -189,9 +166,6 @@ struct HomeMainPanelView: View {
         // MARK: - Sheets
         .sheet(isPresented: $showAddTabSheet) {
             CustomTabEditorSheet(editingTab: nil)
-        }
-        .sheet(item: $editingTab) { tab in
-            CustomTabEditorSheet(editingTab: tab)
         }
     }
 }

@@ -43,6 +43,7 @@ final class FabStore: ObservableObject {
         }
     }
 
+    @Published var isHidden: Bool = false
     @Published var isExpanded: Bool = false
     @Published private(set) var actions: [FabAction] = []
     @Published private(set) var subActions: [FabAction] = []

@@ -24,7 +24,7 @@ enum LayoutTokens {
     static let panelCorner: CGFloat = 26
 
     // Floating buttons
-    static let floatButtonSize: CGFloat = 44
+    static let floatButtonSize: CGFloat = 52
     static let floatTopGap: CGFloat = 8
     static let floatSideGap: CGFloat = 12
 
