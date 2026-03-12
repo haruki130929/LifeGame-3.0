@@ -29,10 +29,10 @@ struct RingSelectionMarkers: View {
                 // 可選：先畫一層淡白線當描邊（更清楚）
                 if strokeOpacity > 0 {
                     markerLine(minute: startMinute, center: center, radius: r)
-                        .stroke(.white.opacity(strokeOpacity), style: StrokeStyle(lineWidth: lineWidth + 1, lineCap: .round))
+                        .stroke(.primary.opacity(strokeOpacity), style: StrokeStyle(lineWidth: lineWidth + 1, lineCap: .round))
                     
                     markerLine(minute: endMinute, center: center, radius: r)
-                        .stroke(.white.opacity(strokeOpacity), style: StrokeStyle(lineWidth: lineWidth + 1, lineCap: .round))
+                        .stroke(.primary.opacity(strokeOpacity), style: StrokeStyle(lineWidth: lineWidth + 1, lineCap: .round))
                 }
                 
                 // 主線（用時段顏色）

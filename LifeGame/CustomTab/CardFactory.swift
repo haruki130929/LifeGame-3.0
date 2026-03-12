@@ -25,6 +25,7 @@ struct CardFactory: View {
     }()
     @State private var showCalendarScreen = false
     @State private var showTomorrowRingDetail = false
+    @State private var showBagScreen = false
 
     private let cal = Calendar.current
     private let rangeProvider = CalendarRangeProvider()
@@ -73,6 +74,10 @@ struct CardFactory: View {
 
         case .bagRequired:
             BagRequiredCardLarge(size: .medium)
+                .onTapGesture { showBagScreen = true }
+                .navigationDestination(isPresented: $showBagScreen) {
+                    Bag_BackpackChecklistView()
+                }
 
         case .monthlyScoreCalendar:
             MonthlyScoreCalendarCardLarge()

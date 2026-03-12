@@ -23,7 +23,7 @@ struct RingHourLabels: View {
                     
                     Text(String(format: "%02d", hour))
                         .font(font)
-                        .foregroundStyle(.white.opacity(0.35))
+                        .foregroundStyle(.primary.opacity(0.42))
                         .monospacedDigit()
                         .position(p)
                 }

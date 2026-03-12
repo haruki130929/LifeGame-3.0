@@ -85,9 +85,9 @@ private extension TomorrowRingView {
                 RingTimeTicks(
                     tickEvery: 30,
                     majorTickEvery: 60,
-                    tickRadiusRatio: 0.92,
-                    minorTickLen: Layout.isIPad ? 9 : 7,
-                    majorTickLen: Layout.isIPad ? 15 : 11
+                    ringLineWidth: ringLineWidth,
+                    minorTickLen: Layout.isIPad ? 22 : 17,
+                    majorTickLen: Layout.isIPad ? 25 : 20
                 )
                 .allowsHitTesting(false)
 
@@ -135,7 +135,7 @@ private extension TomorrowRingView {
     
     var baseRing: some View {
         Circle()
-            .stroke(.white.opacity(0.08), lineWidth: ringLineWidth)
+            .stroke(.primary.opacity(0.13), lineWidth: ringLineWidth)
     }
     
     func segments(center: CGPoint, items: [RingItem]) -> some View {
@@ -151,7 +151,7 @@ private extension TomorrowRingView {
             ForEach(items) { item in
                 Image(systemName: item.icon)
                     .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.white.opacity(0.9))
+                    .foregroundStyle(.primary.opacity(0.9))
                     .position(iconPosition(for: item, center: center, radius: r))
             }
         }
@@ -180,10 +180,10 @@ private extension TomorrowRingView {
                 Color(hex: item.colorHex),
                 style: StrokeStyle(lineWidth: ringLineWidth, lineCap: .round)
             )
-            
+
             if selectedID == item.id {
                 arc.stroke(
-                    .white.opacity(0.35),
+                    .primary.opacity(0.35),
                     style: StrokeStyle(lineWidth: ringLineWidth + 5, lineCap: .round)
                 )
             }
