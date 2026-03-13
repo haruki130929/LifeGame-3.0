@@ -17,6 +17,7 @@ struct SettingsView: View {
                 phoneModeSection
             }
             notificationSection
+            dailyLogSection
             featureSection
             appearanceSection
             storageSection
@@ -45,11 +46,7 @@ private extension SettingsView {
                 NavigationLink {
                     QuickPageConfigView()
                 } label: {
-                    HStack {
-                        Image(systemName: "rectangle.stack")
-                            .foregroundStyle(.purple)
-                        Text("編輯快速頁面")
-                    }
+                    Label("編輯快速頁面", systemImage: "rectangle.stack")
                 }
             }
         } header: {
@@ -75,35 +72,44 @@ private extension SettingsView {
         }
     }
 
+    // MARK: 每日紀錄
+    var dailyLogSection: some View {
+        Section("每日紀錄") {
+            NavigationLink {
+                QuestionModuleSettingsView()
+            } label: {
+                Label("問題模組管理", systemImage: "list.bullet.rectangle")
+            }
+        }
+    }
+
     // MARK: 功能設定
     var featureSection: some View {
         Section("功能設定") {
             NavigationLink {
                 CalendarSettingsView(settings: calendarSettings)
             } label: {
-                HStack {
-                    Image(systemName: "calendar")
-                        .foregroundStyle(.red)
-                    Text("行事曆")
-                }
+                Label("行事曆", systemImage: "calendar")
             }
             NavigationLink {
                 TodoQuadrantSettingsView()
             } label: {
-                HStack {
-                    Image(systemName: "list.bullet.clipboard")
-                        .foregroundStyle(.orange)
-                    Text("待辦四象限")
-                }
+                Label("待辦四象限", systemImage: "list.bullet.clipboard")
             }
             NavigationLink {
                 TomorrowRingSettingsView(settings: ringSettings)
             } label: {
-                HStack {
-                    Image(systemName: "clock")
-                        .foregroundStyle(.cyan)
-                    Text("時間圓環")
-                }
+                Label("時間圓環", systemImage: "clock")
+            }
+            NavigationLink {
+                MonthlyScoreSettingsView()
+            } label: {
+                Label("本月結算", systemImage: "calendar.badge.clock")
+            }
+            NavigationLink {
+                BagSettingsView()
+            } label: {
+                Label("收拾書包", systemImage: "backpack")
             }
         }
     }
@@ -114,11 +120,7 @@ private extension SettingsView {
             NavigationLink {
                 AppearanceSettingsView()
             } label: {
-                HStack {
-                    Image(systemName: "paintbrush")
-                        .foregroundStyle(.purple)
-                    Text("主題與配色")
-                }
+                Label("主題與配色", systemImage: "paintbrush")
             }
         }
     }
@@ -129,11 +131,7 @@ private extension SettingsView {
             NavigationLink {
                 StorageSettingsView()
             } label: {
-                HStack {
-                    Image(systemName: "externaldrive.fill.badge.icloud")
-                        .foregroundStyle(.blue)
-                    Text("儲存方式")
-                }
+                Label("儲存方式", systemImage: "externaldrive.fill.badge.icloud")
             }
         }
     }

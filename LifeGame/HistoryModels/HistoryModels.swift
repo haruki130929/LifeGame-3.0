@@ -10,8 +10,8 @@ enum DayDifficulty: String, Codable {
     var score: Int {
         switch self {
         case .easy: return 70
-        case .medium: return 50
-        case .hard: return 30
+        case .medium: return 30
+        case .hard: return 10
         }
     }
     
@@ -46,7 +46,7 @@ struct DayRecord: Identifiable, Codable, Hashable {
         let m = medianOf3(hp, fp, mp)
         let diff: DayDifficulty
         if m >= 70 { diff = .easy }
-        else if m >= 50 { diff = .medium }
+        else if m >= 30 { diff = .medium }
         else { diff = .hard }
         
         return DayRecord(

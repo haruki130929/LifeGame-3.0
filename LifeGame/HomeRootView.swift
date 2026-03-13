@@ -13,6 +13,8 @@ struct HomeRootView: View {
     @EnvironmentObject private var ledgerStore: LedgerStore
 
     @State private var showAddCalendarEvent = false
+    @State private var showAddDailyLog = false
+    @State private var featureSettingsTarget: FeatureID?
     @State private var navigationPath = NavigationPath()
 
     var body: some View {
@@ -61,14 +63,23 @@ struct HomeRootView: View {
                 showAddCalendarEvent = true
                 fab.route = nil
 
+            case .addDailyLog:
+                showAddDailyLog = true
+                fab.route = nil
+
             case .navigate(let feature):
                 navigationPath.append(feature)
+                fab.route = nil
+
+            case .featureSettings(let feature):
+                featureSettingsTarget = feature
                 fab.route = nil
 
             // 功能頁面專用 route，由各自的 View 處理
             case .addRingItem, .quickAppendRing, .jumpToToday,
                  .addTodoToQuadrant, .todoEditMode,
-                 .addWish, .editWishList, .addLedgerEntry, .viewLedgerChart:
+                 .addWish, .editWishList, .addLedgerEntry, .viewLedgerChart,
+                 .monthlyScoreStats:
                 break
             }
         }
@@ -77,6 +88,16 @@ struct HomeRootView: View {
                 store: calendarStore,
                 calendar: Calendar.current
             )
+        }
+        .sheet(isPresented: $showAddDailyLog) {
+            NavigationStack {
+                DailyLogEditorView(mode: .add, store: dailyLogStore)
+            }
+        }
+        .sheet(item: $featureSettingsTarget) { feature in
+            NavigationStack {
+                FeatureSettingsRouter(feature: feature)
+            }
         }
     }
 }

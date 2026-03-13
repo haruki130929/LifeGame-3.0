@@ -22,11 +22,29 @@ struct TodayStatusContentCard: View {
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                
+
                 Button {
                     game.settleToday()
                 } label: {
                     Text("今日結算")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+            }
+
+            HStack(spacing: 10) {
+                Button {
+                    game.mp.add(5)
+                } label: {
+                    Text("MP＋5")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+
+                Button {
+                    game.mp.add(-5)
+                } label: {
+                    Text("MP－5")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)

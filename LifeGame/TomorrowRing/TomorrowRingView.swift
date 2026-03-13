@@ -85,9 +85,9 @@ private extension TomorrowRingView {
                 RingTimeTicks(
                     tickEvery: 30,
                     majorTickEvery: 60,
-                    ringLineWidth: ringLineWidth,
-                    minorTickLen: Layout.isIPad ? 22 : 17,
-                    majorTickLen: Layout.isIPad ? 25 : 20
+                    tickRadiusRatio: 0.92,
+                    minorTickLen: Layout.isIPad ? 9 : 7,
+                    majorTickLen: Layout.isIPad ? 15 : 11
                 )
                 .allowsHitTesting(false)
 

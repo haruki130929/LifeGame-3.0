@@ -1,21 +1,53 @@
 import SwiftUI
 
 struct DiaryView: View {
-    
-    @State private var diaryText: String = ""
-    
+    @StateObject private var store = DiaryStore()
+    @State private var showingAdd = false
+
     var body: some View {
-        NavigationView {
-            VStack {
-                Text("我的日記")
-                    .font(.title)
-                
-                TextEditor(text: $diaryText)
-                    .padding()
-                    .border(Color.gray)
+        List {
+            if store.entries.isEmpty {
+                ContentUnavailableView("還沒有日記",
+                                       systemImage: "book",
+                                       description: Text("按右下角 ＋ 新增第一篇日記"))
+            } else {
+                ForEach(store.entries) { entry in
+                    NavigationLink {
+                        DiaryEditorView(mode: .edit(entry), store: store)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text(entry.date, format: .dateTime.year().month().day())
+                                .font(.headline)
+
+                            if !entry.content.isEmpty {
+                                Text(entry.content)
+                                    .font(.subheadline)
+                                    .foregroundStyle(.secondary)
+                                    .lineLimit(2)
+                            }
+
+                            if !entry.answers.isEmpty {
+                                Text("已填 \(entry.answers.count) 項")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
+                        }
+                        .padding(.vertical, 4)
+                    }
+                }
+                .onDelete(perform: store.delete)
             }
-            .padding()
-            .navigationTitle("日記")
+        }
+        .navigationTitle("日記")
+        .fabMenu([
+            FabAction(title: "新增日記", systemImage: "plus") {
+                showingAdd = true
+            }
+        ])
+        .sheet(isPresented: $showingAdd) {
+            NavigationStack {
+                DiaryEditorView(mode: .add, store: store)
+            }
         }
     }
 }

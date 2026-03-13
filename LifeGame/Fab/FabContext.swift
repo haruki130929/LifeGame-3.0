@@ -1,6 +1,8 @@
 import Foundation
 
-enum FeatureID: Hashable {
+enum FeatureID: String, Hashable, Identifiable {
+    var id: String { rawValue }
+
     case diary
     case calendar
     case wish

@@ -16,6 +16,8 @@ struct QuickModeShellView: View {
     @State private var navigationPath = NavigationPath()
     @State private var showSettings = false
     @State private var showAddCalendarEvent = false
+    @State private var showAddDailyLog = false
+    @State private var featureSettingsTarget: FeatureID?
 
     var body: some View {
         NavigationStack(path: $navigationPath) {
@@ -76,12 +78,19 @@ struct QuickModeShellView: View {
             case .addCalendarEvent:
                 showAddCalendarEvent = true
                 fab.route = nil
+            case .addDailyLog:
+                showAddDailyLog = true
+                fab.route = nil
             case .navigate(let feature):
                 navigationPath.append(feature)
                 fab.route = nil
+            case .featureSettings(let feature):
+                featureSettingsTarget = feature
+                fab.route = nil
             case .addRingItem, .quickAppendRing, .jumpToToday,
                  .addTodoToQuadrant, .todoEditMode,
-                 .addWish, .editWishList, .addLedgerEntry, .viewLedgerChart:
+                 .addWish, .editWishList, .addLedgerEntry, .viewLedgerChart,
+                 .monthlyScoreStats:
                 break
             }
         }
@@ -96,6 +105,16 @@ struct QuickModeShellView: View {
                 store: calendarStore,
                 calendar: Calendar.current
             )
+        }
+        .sheet(isPresented: $showAddDailyLog) {
+            NavigationStack {
+                DailyLogEditorView(mode: .add, store: dailyLogStore)
+            }
+        }
+        .sheet(item: $featureSettingsTarget) { feature in
+            NavigationStack {
+                FeatureSettingsRouter(feature: feature)
+            }
         }
         .onAppear {
             updateFabContext(for: currentPageIndex)

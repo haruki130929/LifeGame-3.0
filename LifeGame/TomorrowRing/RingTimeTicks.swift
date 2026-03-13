@@ -9,8 +9,9 @@ struct RingTimeTicks: View {
     /// 整點刻度加長（60）
     let majorTickEvery: Int
 
-    /// 圓環線寬，用來算刻度最外點 = size/2 + ringLineWidth/2
-    let ringLineWidth: CGFloat
+    /// 刻度要貼哪個半徑（用比例，會跟著 size 變）
+    /// 1.0 = 外圓邊界；0.5 = 中間；建議 0.62~0.68 貼內圈
+    let tickRadiusRatio: CGFloat
 
     /// 小刻度長度
     let minorTickLen: CGFloat
@@ -22,38 +23,32 @@ struct RingTimeTicks: View {
         GeometryReader { geo in
             let size = min(geo.size.width, geo.size.height)
             let center = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
-            let rOuter = size / 2 + ringLineWidth / 2
+            let rOuter = size * tickRadiusRatio / 2
 
-            let iPad = Layout.isIPad
+            Canvas { ctx, _ in
+                let iPad = Layout.isIPad
+                for minute in stride(from: 0, to: totalMinutes, by: tickEvery) {
+                    let isMajor = (minute % majorTickEvery == 0)
+                    let len = isMajor ? majorTickLen : minorTickLen
+                    let w: CGFloat = isMajor
+                        ? (iPad ? 3.5 : 3)
+                        : (iPad ? 2.8 : 2.2)
+                    let opacity: Double = isMajor
+                        ? (iPad ? 0.55 : 0.40)
+                        : (iPad ? 0.35 : 0.22)
 
-            // ✅ 用 Path 而非 Canvas，避免邊界裁切
-            ZStack {
-                // 小刻度
-                Path { path in
-                    for minute in stride(from: 0, to: totalMinutes, by: tickEvery) {
-                        guard minute % majorTickEvery != 0 else { continue }
-                        let angle = angleForMinute(minute)
-                        path.move(to: point(center: center, radius: rOuter, angle: angle))
-                        path.addLine(to: point(center: center, radius: rOuter - minorTickLen, angle: angle))
-                    }
+                    let angle = angleForMinute(minute)
+                    let p1 = point(center: center, radius: rOuter, angle: angle)
+                    let p2 = point(center: center, radius: rOuter - len, angle: angle)
+
+                    var path = Path()
+                    path.move(to: p1)
+                    path.addLine(to: p2)
+
+                    ctx.stroke(path,
+                               with: .color(.primary.opacity(opacity)),
+                               lineWidth: w)
                 }
-                .stroke(
-                    .primary.opacity(iPad ? 0.40 : 0.28),
-                    lineWidth: iPad ? 2.8 : 2.2
-                )
-
-                // 大刻度（整點）
-                Path { path in
-                    for minute in stride(from: 0, to: totalMinutes, by: majorTickEvery) {
-                        let angle = angleForMinute(minute)
-                        path.move(to: point(center: center, radius: rOuter, angle: angle))
-                        path.addLine(to: point(center: center, radius: rOuter - majorTickLen, angle: angle))
-                    }
-                }
-                .stroke(
-                    .primary.opacity(iPad ? 0.60 : 0.48),
-                    lineWidth: iPad ? 3.5 : 3
-                )
             }
         }
     }

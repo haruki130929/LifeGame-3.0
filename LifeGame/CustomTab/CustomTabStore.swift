@@ -28,15 +28,16 @@ final class CustomTabStore: ObservableObject {
 
     init() {
         if var saved: [CustomTab] = StorageManager.load([CustomTab].self, forKey: key) {
-            // 遷移：確保第一個切頁包含 tomorrowRing
+            // 遷移：確保第一個切頁包含必要卡片
             if !saved.isEmpty {
-                let first = saved[0]
+                var first = saved[0]
                 if !first.cardTypes.contains(.tomorrowRing) {
-                    var updated = first
-                    // 插在最前面
-                    updated.cardTypes.insert(.tomorrowRing, at: 0)
-                    saved[0] = updated
+                    first.cardTypes.insert(.tomorrowRing, at: 0)
                 }
+                if !first.cardTypes.contains(.monthlyScoreCalendar) {
+                    first.cardTypes.append(.monthlyScoreCalendar)
+                }
+                saved[0] = first
             }
             self.tabs = saved
         } else {
@@ -45,7 +46,7 @@ final class CustomTabStore: ObservableObject {
                 CustomTab(
                     name: "工具",
                     icon: "wrench.and.screwdriver.fill",
-                    cardTypes: [.tomorrowRing, .calendar, .todoQuadrant]
+                    cardTypes: [.tomorrowRing, .calendar, .todoQuadrant, .monthlyScoreCalendar]
                 )
             ]
         }

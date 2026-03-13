@@ -26,6 +26,7 @@ struct CardFactory: View {
     @State private var showCalendarScreen = false
     @State private var showTomorrowRingDetail = false
     @State private var showBagScreen = false
+    @State private var showMonthlyScoreScreen = false
 
     private let cal = Calendar.current
     private let rangeProvider = CalendarRangeProvider()
@@ -81,6 +82,10 @@ struct CardFactory: View {
 
         case .monthlyScoreCalendar:
             MonthlyScoreCalendarCardLarge()
+                .onTapGesture { showMonthlyScoreScreen = true }
+                .navigationDestination(isPresented: $showMonthlyScoreScreen) {
+                    MonthlyScorePageWrapper()
+                }
 
         case .quickStart:
             DashboardCardContainer {

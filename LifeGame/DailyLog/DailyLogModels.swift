@@ -260,6 +260,9 @@ nonisolated struct DailyLogEntry: Identifiable, Codable, Equatable, Sendable {
     // 特別觀察（文字 + 多張照片）
     var specialObservation: String = ""
     var photos: [DailyLogPhoto] = []
+
+    // 自訂模組的回答
+    var customAnswers: [CustomAnswer] = []
 }
 
 nonisolated enum OptionalLogDouble: Codable, Equatable, Sendable {

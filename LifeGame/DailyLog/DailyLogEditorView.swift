@@ -1,31 +1,49 @@
 import SwiftUI
 
 struct DailyLogEditorView: View {
-    let entry: DailyLogEntry
-    let onSave: (DailyLogEntry) -> Void
-    
-    @Environment(\.dismiss) private var dismiss
-    @State private var draft: DailyLogEntry
-    
-    init(entry: DailyLogEntry, onSave: @escaping (DailyLogEntry) -> Void) {
-        self.entry = entry
-        self.onSave = onSave
-        _draft = State(initialValue: entry)
+    enum Mode {
+        case add
+        case edit(DailyLogEntry)
     }
-    
+
+    let mode: Mode
+    @ObservedObject var store: DailyLogStore
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var draft = DailyLogEntry()
+
+    private var title: String {
+        switch mode {
+        case .add:  return "新增每日紀錄"
+        case .edit: return "編輯每日紀錄"
+        }
+    }
+
     var body: some View {
         DailyLogFormView(entry: $draft)
-            .navigationTitle("每日紀錄")
+            .navigationTitle(title)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("取消") { dismiss() }
                 }
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("儲存") {
-                        onSave(draft)
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存") {
+                        save()
                         dismiss()
                     }
                 }
             }
+            .onAppear {
+                switch mode {
+                case .add:
+                    draft = DailyLogEntry()
+                case .edit(let existing):
+                    draft = existing
+                }
+            }
+    }
+
+    private func save() {
+        store.upsert(draft)
     }
 }
