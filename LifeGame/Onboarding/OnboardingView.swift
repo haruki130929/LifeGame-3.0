@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// 第一次打開 App 時顯示的新手引導
-/// iPad: 3 頁（歡迎 → 功能 → 準備）
-/// iPhone: 4 頁（歡迎 → 功能 → 裝置選擇 → 準備）
+/// iPad: 2 頁（歡迎 → 準備）
+/// iPhone: 3 頁（歡迎 → 裝置選擇 → 準備）
 struct OnboardingView: View {
 
     @EnvironmentObject private var theme: ThemeStore
@@ -11,35 +11,30 @@ struct OnboardingView: View {
 
     @State private var currentPage = 0
 
-    private let iPad = Layout.isIPad
-    /// iPhone 多一頁「裝置選擇」
-    private var totalPages: Int { iPad ? 3 : 4 }
+    private let iPad = AppLayout.isIPad
+    private var totalPages: Int { iPad ? 2 : 3 }
 
     var body: some View {
         ZStack {
-            // 背景
             background
 
             VStack(spacing: 0) {
                 Spacer()
 
-                // 內容頁
                 TabView(selection: $currentPage) {
                     welcomePage.tag(0)
-                    featuresPage.tag(1)
 
                     if !iPad {
-                        deviceChoicePage.tag(2)
+                        deviceChoicePage.tag(1)
                     }
 
-                    readyPage.tag(iPad ? 2 : 3)
+                    readyPage.tag(iPad ? 1 : 2)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.3), value: currentPage)
 
                 Spacer()
 
-                // 底部：頁面指示器 + 按鈕
                 bottomBar
                     .padding(.bottom, iPad ? 60 : 50)
             }
@@ -70,7 +65,6 @@ struct OnboardingView: View {
             Image(systemName: "gamecontroller.fill")
                 .font(.system(size: iPad ? 96 : 72))
                 .foregroundStyle(theme.accentColor)
-                .symbolEffect(.pulse, options: .repeating)
 
             Text("歡迎來到 LifeGame")
                 .font(.system(size: iPad ? 38 : 30, weight: .bold))
@@ -86,43 +80,7 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Page 2: 功能導覽
-
-    private var featuresPage: some View {
-        VStack(spacing: iPad ? 36 : 28) {
-            Spacer()
-
-            Text("你的隨身工具箱")
-                .font(.system(size: iPad ? 34 : 26, weight: .bold))
-
-            if iPad {
-                // iPad: 2×2 Grid
-                LazyVGrid(
-                    columns: [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)],
-                    spacing: 20
-                ) {
-                    featureCard(icon: "calendar", color: .red, title: "行事曆", desc: "管理你的行程\n與重要日期")
-                    featureCard(icon: "list.bullet.clipboard", color: .orange, title: "待辦四象限", desc: "用重要 × 緊急\n分類任務")
-                    featureCard(icon: "clock", color: .blue, title: "時間圓環", desc: "視覺化規劃\n你的一天")
-                    featureCard(icon: "face.smiling", color: .green, title: "心情追蹤", desc: "記錄每天的\n心情變化")
-                }
-                .padding(.horizontal, 24)
-            } else {
-                // iPhone: 垂直列表
-                VStack(alignment: .leading, spacing: 20) {
-                    featureRow(icon: "calendar", color: .red, title: "行事曆", desc: "管理你的行程與重要日期")
-                    featureRow(icon: "list.bullet.clipboard", color: .orange, title: "待辦四象限", desc: "用重要 × 緊急分類任務")
-                    featureRow(icon: "clock", color: .blue, title: "時間圓環", desc: "視覺化規劃你的一天")
-                    featureRow(icon: "face.smiling", color: .green, title: "心情追蹤", desc: "記錄每天的心情變化")
-                }
-                .padding(.horizontal, 36)
-            }
-
-            Spacer()
-        }
-    }
-
-    // MARK: - Page 3 (iPhone only): 裝置選擇
+    // MARK: - Page 2 (iPhone only): 裝置選擇
 
     private var deviceChoicePage: some View {
         VStack(spacing: 28) {
@@ -131,7 +89,6 @@ struct OnboardingView: View {
             Image(systemName: "ipad.and.iphone")
                 .font(.system(size: 68))
                 .foregroundStyle(theme.accentColor)
-                .symbolEffect(.pulse, options: .repeating)
 
             Text("你的使用方式")
                 .font(.system(size: 26, weight: .bold))
@@ -143,7 +100,6 @@ struct OnboardingView: View {
                 .padding(.horizontal, 40)
 
             VStack(spacing: 14) {
-                // 有 iPad → 簡略模式
                 deviceChoiceButton(
                     icon: "ipad",
                     title: "我也有 iPad",
@@ -155,7 +111,6 @@ struct OnboardingView: View {
                     }
                 }
 
-                // 只有 iPhone → 一般模式
                 deviceChoiceButton(
                     icon: "iphone",
                     title: "只有 iPhone",
@@ -182,13 +137,12 @@ struct OnboardingView: View {
             Image(systemName: "sparkles")
                 .font(.system(size: iPad ? 88 : 68))
                 .foregroundStyle(theme.accentColor)
-                .symbolEffect(.variableColor.iterative, options: .repeating)
 
             Text("準備好了！")
                 .font(.system(size: iPad ? 38 : 30, weight: .bold))
 
             if iPad {
-                Text("左上角開啟選單\n右下角「＋」新增功能\n長按切頁可以自訂內容")
+                Text("左上角開啟選單\n右下角「＋」新增功能")
                     .font(.system(size: 20))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -196,7 +150,7 @@ struct OnboardingView: View {
             } else {
                 Text(phoneModeStore.mode == .quick
                      ? "左右滑動切換功能頁\n右下角「＋」快速操作\n可以在設定中自訂頁面"
-                     : "左上角開啟選單\n右下角「＋」新增功能\n長按切頁可以自訂內容")
+                     : "左上角開啟選單\n右下角「＋」新增功能")
                     .font(.system(size: 17))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -316,53 +270,5 @@ struct OnboardingView: View {
             }
         }
         .buttonStyle(.plain)
-    }
-
-    // MARK: - iPhone: 功能列
-
-    private func featureRow(icon: String, color: Color, title: String, desc: String) -> some View {
-        HStack(spacing: 16) {
-            Image(systemName: icon)
-                .font(.system(size: 22, weight: .semibold))
-                .foregroundStyle(color)
-                .frame(width: 44, height: 44)
-                .background(color.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-
-            VStack(alignment: .leading, spacing: 3) {
-                Text(title)
-                    .font(.system(size: 16, weight: .semibold))
-                Text(desc)
-                    .font(.system(size: 14))
-                    .foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    // MARK: - iPad: 功能卡片（Grid 用）
-
-    private func featureCard(icon: String, color: Color, title: String, desc: String) -> some View {
-        VStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.system(size: 30, weight: .semibold))
-                .foregroundStyle(color)
-                .frame(width: 60, height: 60)
-                .background(color.opacity(0.12))
-                .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
-
-            Text(title)
-                .font(.system(size: 18, weight: .semibold))
-
-            Text(desc)
-                .font(.system(size: 14))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 20)
-        .background {
-            RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .fill(.ultraThinMaterial)
-        }
     }
 }

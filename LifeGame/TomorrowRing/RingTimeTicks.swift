@@ -26,7 +26,7 @@ struct RingTimeTicks: View {
             let rOuter = size * tickRadiusRatio / 2
 
             Canvas { ctx, _ in
-                let iPad = Layout.isIPad
+                let iPad = AppLayout.isIPad
                 for minute in stride(from: 0, to: totalMinutes, by: tickEvery) {
                     let isMajor = (minute % majorTickEvery == 0)
                     let len = isMajor ? majorTickLen : minorTickLen

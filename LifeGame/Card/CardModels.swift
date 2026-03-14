@@ -29,7 +29,7 @@ enum CardSize: String, Codable, CaseIterable {
         case .medium: 160
         case .large: 270
         }
-        return base * Layout.heightScale
+        return base * AppLayout.heightScale
     }
 }
 

@@ -15,25 +15,48 @@ struct DashboardCardShell<Content: View>: View {
         self.content = content()
     }
     
+    @EnvironmentObject private var theme: ThemeStore
+
     var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
+
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 Image(systemName: icon)
-                    .frame(width: 32, height: 32)
-                    .background(.thinMaterial)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+
                 Text(title)
                     .font(.headline)
-                
+
                 Spacer()
             }
-            
+
             content
         }
         .padding(14)
-        .background(.ultraThinMaterial)
-        .clipShape(RoundedRectangle(cornerRadius: 18))
-        .shadow(radius: 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            if theme.isDark {
+                shape.fill(.thinMaterial)
+            } else {
+                shape.fill(Color.white)
+            }
+        }
+        .clipShape(shape)
+        .overlay(
+            shape.strokeBorder(
+                theme.isDark
+                    ? Color.white.opacity(0.06)
+                    : Color.black.opacity(0.10),
+                lineWidth: 1
+            )
+        )
+        .shadow(
+            color: theme.isDark ? .black.opacity(0.3) : .black.opacity(0.08),
+            radius: theme.isDark ? 10 : 8,
+            x: 0,
+            y: theme.isDark ? 6 : 3
+        )
     }
 }

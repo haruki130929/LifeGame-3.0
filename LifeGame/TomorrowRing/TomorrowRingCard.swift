@@ -32,7 +32,7 @@ struct TomorrowRingCard: View {
                         gameHP: game.hp,
                         gameFP: game.fp
                     )
-                    .frame(height: 200 * Layout.heightScale)
+                    .frame(height: 200 * AppLayout.heightScale)
                     .frame(maxWidth: .infinity)
                 } else {
                     Text("HP \(game.hp.current)/\(game.hp.max)  FP \(game.fp.current)/\(game.fp.max)")

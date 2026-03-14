@@ -9,6 +9,7 @@ struct HomeDashboardContentView: View {
     @EnvironmentObject private var customTabStore: CustomTabStore
     @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
     @EnvironmentObject private var theme: ThemeStore
+    @EnvironmentObject private var coachMarkStore: CoachMarkStore
 
     /// 外框 tabs 的高度（因為內容要往下避開 tab）
     let tabHeight: CGFloat
@@ -33,7 +34,7 @@ struct HomeDashboardContentView: View {
                 if let tab = currentTab {
                     if tab.cardTypes.isEmpty {
                         emptyTabPlaceholder(name: tab.name)
-                    } else if Layout.isIPad {
+                    } else if AppLayout.isIPad {
                         // iPad：卡片 Grid 佈局
                         LazyVGrid(
                             columns: [GridItem(.adaptive(minimum: 300), spacing: 16)],
@@ -63,7 +64,7 @@ struct HomeDashboardContentView: View {
 
                 Spacer(minLength: 0)
             }
-            .padding(.horizontal, Layout.isIPad ? 20 : 18)
+            .padding(.horizontal, AppLayout.isIPad ? 20 : 18)
             .padding(.bottom, 16)
         }
         .contentShape(Rectangle())
@@ -97,6 +98,19 @@ struct HomeDashboardContentView: View {
                     .foregroundStyle(theme.isDark ? .white.opacity(0.35) : .primary.opacity(0.3))
             }
             .buttonStyle(.plain)
+            .background(
+                GeometryReader { geo in
+                    Color.clear.onAppear {
+                        DispatchQueue.main.async {
+                            let frame = geo.frame(in: .global)
+                            coachMarkStore.reportCenter(
+                                CGPoint(x: frame.midX, y: frame.midY),
+                                for: .tabEdit
+                            )
+                        }
+                    }
+                }
+            )
         }
         .foregroundStyle(theme.isDark ? .white.opacity(0.7) : .primary.opacity(0.6))
         .padding(.leading, 2)

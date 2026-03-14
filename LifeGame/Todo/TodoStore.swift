@@ -51,15 +51,7 @@ final class TodoQuadrantStore: ObservableObject {
             items = []
         }
         
-        // ✅ 若完全沒有資料，才塞 sample（避免污染正式使用者）
-        if items.isEmpty {
-            items = [
-                TodoItem(title: "複習日文課文", quadrant: .importantNotUrgent),
-                TodoItem(title: "明天要交的作業", quadrant: .importantUrgent),
-                TodoItem(title: "整理桌面", quadrant: .notImportantNotUrgent),
-                TodoItem(title: "回覆訊息", quadrant: .urgentNotImportant)
-            ]
-        }
+        // 不再塞預設資料，讓使用者自行新增
     }
     
     private func save() {

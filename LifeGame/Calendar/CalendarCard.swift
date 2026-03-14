@@ -70,14 +70,14 @@ struct CalendarCard: View {
                 Button(action: onPrevMonth) {
                     Image(systemName: "chevron.left")
                         .font(.headline)
-                        .foregroundStyle(.cyan)
+                        .foregroundStyle(.primary)
                 }
                 .buttonStyle(.plain)
                 
                 Button(action: onNextMonth) {
                     Image(systemName: "chevron.right")
                         .font(.headline)
-                        .foregroundStyle(.cyan)
+                        .foregroundStyle(.primary)
                 }
                 .buttonStyle(.plain)
             }

@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 // MARK: - Small helpers + iPad 判斷
-enum Layout {
+enum AppLayout {
     static func clamp(_ v: CGFloat, _ lo: CGFloat, _ hi: CGFloat) -> CGFloat {
         min(max(v, lo), hi)
     }
@@ -30,15 +30,15 @@ enum LayoutTokens {
 
     // Tabs leading reserved width
     static var leftTopButtonReservedWidth: CGFloat {
-        Layout.clamp(floatButtonSize + floatSideGap * 2, 52, 72)
+        AppLayout.clamp(floatButtonSize + floatSideGap * 2, 52, 72)
     }
     static let tabsLeadingGap: CGFloat = 6
 
     // Tabs
-    static let tabWidthMin: CGFloat = Layout.isIPad ? 110 : 84
-    static let tabWidthMax: CGFloat = Layout.isIPad ? 160 : 112
-    static let tabHeightMin: CGFloat = Layout.isIPad ? 38 : 32
-    static let tabHeightMax: CGFloat = Layout.isIPad ? 50 : 40
+    static let tabWidthMin: CGFloat = AppLayout.isIPad ? 110 : 84
+    static let tabWidthMax: CGFloat = AppLayout.isIPad ? 160 : 112
+    static let tabHeightMin: CGFloat = AppLayout.isIPad ? 38 : 32
+    static let tabHeightMax: CGFloat = AppLayout.isIPad ? 50 : 40
     static let tabOverlapMin: CGFloat = 8
     static let tabOverlapMax: CGFloat = 14
     static let tabSlant: CGFloat = 15
@@ -57,16 +57,16 @@ enum DrawerPanel {
     static let panelSpring = Animation.spring(response: 0.28, dampingFraction: 0.9)
 
     static func drawerWidth(for screenWidth: CGFloat) -> CGFloat {
-        if Layout.isIPad {
-            return Layout.clamp(screenWidth * 0.25, 260, 320)
+        if AppLayout.isIPad {
+            return AppLayout.clamp(screenWidth * 0.25, 260, 320)
         }
-        return Layout.clamp(screenWidth * 0.42, 260, 340)
+        return AppLayout.clamp(screenWidth * 0.42, 260, 340)
     }
 
     static func rightPanelWidth(for screenWidth: CGFloat) -> CGFloat {
-        if Layout.isIPad {
-            return Layout.clamp(screenWidth * 0.50, 400, 560)
+        if AppLayout.isIPad {
+            return AppLayout.clamp(screenWidth * 0.50, 400, 560)
         }
-        return Layout.clamp(screenWidth * 0.55, 360, 520)
+        return AppLayout.clamp(screenWidth * 0.55, 360, 520)
     }
 }

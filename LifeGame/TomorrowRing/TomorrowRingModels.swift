@@ -57,50 +57,6 @@ struct TomorrowRingPlan: Identifiable, Codable, Hashable {
 // MARK: - Sample (for preview / development)
 extension TomorrowRingPlan {
     static var sample: TomorrowRingPlan {
-        TomorrowRingPlan(
-            date: Date(),
-            items: [
-                RingItem(
-                    slot: .morning,
-                    startMinute: 7 * 60,
-                    endMinute: 12 * 60,
-                    title: "上課／通勤",
-                    icon: DaySlot.morning.icon,
-                    colorHex: "4BB3FD",
-                    hpCost: 10,
-                    fpCost: 10
-                ),
-                RingItem(
-                    slot: .afternoon,
-                    startMinute: 13 * 60,
-                    endMinute: 17 * 60,
-                    title: "作業／讀書",
-                    icon: DaySlot.afternoon.icon,
-                    colorHex: "FFD166",
-                    hpCost: 20,
-                    fpCost: 10
-                ),
-                RingItem(
-                    slot: .evening,
-                    startMinute: 18 * 60,
-                    endMinute: 22 * 60,
-                    title: "社團／晚餐",
-                    icon: DaySlot.evening.icon,
-                    colorHex: "06D6A0",
-                    hpCost: 10,
-                    fpCost: 10
-                ),
-                RingItem(
-                    slot: .night,
-                    startMinute: 22 * 60,
-                    endMinute: 24 * 60,
-                    title: "洗澡／放鬆",
-                    icon: DaySlot.night.icon,
-                    colorHex: "EF476F",
-                    hpCost: 5,
-                    fpCost: 5
-                )
-            ]
-        )
+        TomorrowRingPlan(date: Date(), items: [])
     }
 }

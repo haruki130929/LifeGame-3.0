@@ -5,26 +5,34 @@ struct WishListView: View {
     @ObservedObject var ledgerStore: LedgerStore
     
     var body: some View {
-        List {
-            ForEach(store.items) { item in
-                WishItemRow(item: item) { item in
-                    guard let amount = item.price else { return }
+        if store.items.isEmpty {
+            ContentUnavailableView {
+                Label("尚無慾望清單", systemImage: "sparkles")
+            } description: {
+                Text("點擊右下角「＋」按鈕，選擇「新增慾望」來加入你想買的東西吧！")
+            }
+        } else {
+            List {
+                ForEach(store.items) { item in
+                    WishItemRow(item: item) { item in
+                        guard let amount = item.price else { return }
 
-                    if store.markPurchased(id: item.id) {
-                        ledgerStore.addExpense(
-                            title: item.title,
-                            amount: amount,
-                            note: "來自慾望清單",
-                            wishID: item.id
-                        )
+                        if store.markPurchased(id: item.id) {
+                            ledgerStore.addExpense(
+                                title: item.title,
+                                amount: amount,
+                                note: "來自慾望清單",
+                                wishID: item.id
+                            )
+                        }
                     }
                 }
-            }
-            .onDelete { offsets in
-                store.remove(at: offsets)
-            }
-            .onMove { from, to in
-                store.items.move(fromOffsets: from, toOffset: to)
+                .onDelete { offsets in
+                    store.remove(at: offsets)
+                }
+                .onMove { from, to in
+                    store.items.move(fromOffsets: from, toOffset: to)
+                }
             }
         }
     }

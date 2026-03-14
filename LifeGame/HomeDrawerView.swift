@@ -57,9 +57,6 @@ struct HomeDrawerView: View {
                     Spacer()
                 }
                 .foregroundStyle(theme.accentColor)
-                .padding(10)
-                .background(.thinMaterial)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
             }
             .buttonStyle(.plain)
             .padding(.bottom, 12)

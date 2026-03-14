@@ -86,8 +86,8 @@ private extension TomorrowRingView {
                     tickEvery: 30,
                     majorTickEvery: 60,
                     tickRadiusRatio: 0.92,
-                    minorTickLen: Layout.isIPad ? 9 : 7,
-                    majorTickLen: Layout.isIPad ? 15 : 11
+                    minorTickLen: AppLayout.isIPad ? 9 : 7,
+                    majorTickLen: AppLayout.isIPad ? 15 : 11
                 )
                 .allowsHitTesting(false)
 

@@ -13,7 +13,7 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
-            if !Layout.isIPad {
+            if !AppLayout.isIPad {
                 phoneModeSection
             }
             notificationSection

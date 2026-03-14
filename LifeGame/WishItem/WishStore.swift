@@ -12,14 +12,7 @@ final class WishStore: ObservableObject {
     
     init() {
         load()
-        if items.isEmpty {
-            // 第一次使用才塞預設資料
-            items = [
-                WishItem(title: "Sony 耳機", price: 12000),
-                WishItem(title: "新鍵盤", price: 3500),
-                WishItem(title: "筆電支架")
-            ]
-        }
+        // 不再塞預設資料，讓使用者自行新增
     }
     
     func add(_ item: WishItem) {

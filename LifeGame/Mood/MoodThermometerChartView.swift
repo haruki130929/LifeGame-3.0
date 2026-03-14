@@ -43,7 +43,7 @@ struct MoodThermometerChartView: View {
                     AxisValueLabel(format: .dateTime.hour(.twoDigits(amPM: .abbreviated)))
                 }
             }
-            .frame(height: 220 * Layout.heightScale)
+            .frame(height: 220 * AppLayout.heightScale)
             .padding(.vertical, 8)
         }
         .padding()

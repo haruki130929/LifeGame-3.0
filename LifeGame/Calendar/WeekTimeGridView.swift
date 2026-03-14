@@ -6,7 +6,7 @@ struct WeekTimeGridView: View {
     @Binding var anchorDate: Date
     
     private let hourHeight: CGFloat = 56
-    private let dayColumnWidth: CGFloat = Layout.isIPad ? 220 : 160
+    private let dayColumnWidth: CGFloat = AppLayout.isIPad ? 220 : 160
     private let headerHeight: CGFloat = 44
     private let timeColumnWidth: CGFloat = 72
     

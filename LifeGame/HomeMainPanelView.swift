@@ -67,9 +67,9 @@ struct HomeMainPanelView: View {
     var body: some View {
         let allTabs = displayTabs
         let tabCount = allTabs.count
-        let tabW = Layout.clamp(containerWidth * (Layout.isIPad ? 0.14 : 0.19), LayoutTokens.tabWidthMin, LayoutTokens.tabWidthMax)
-        let tabH = Layout.clamp(containerWidth * 0.075, LayoutTokens.tabHeightMin, LayoutTokens.tabHeightMax)
-        let overlap = Layout.clamp(tabW * 0.12, LayoutTokens.tabOverlapMin, LayoutTokens.tabOverlapMax)
+        let tabW = AppLayout.clamp(containerWidth * (AppLayout.isIPad ? 0.14 : 0.19), LayoutTokens.tabWidthMin, LayoutTokens.tabWidthMax)
+        let tabH = AppLayout.clamp(containerWidth * 0.075, LayoutTokens.tabHeightMin, LayoutTokens.tabHeightMax)
+        let overlap = AppLayout.clamp(tabW * 0.12, LayoutTokens.tabOverlapMin, LayoutTokens.tabOverlapMax)
 
         // 找到當前選中 tab 的 index（"+" 按鈕不算）
         let selectedIndex = allTabs.firstIndex(where: { $0.selection == selectedTab }) ?? 0

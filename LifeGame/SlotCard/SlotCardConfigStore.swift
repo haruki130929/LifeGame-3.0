@@ -47,8 +47,8 @@ final class SlotCardConfigStore: ObservableObject {
             }
 
             let base = Config(
-                beforeLeave:    defaults([.quickStart, .tomorrowRing, .bagRequired, .editCards]),
-                morning:        defaults([.quickStart, .todayStatus, .calendar, .dailyLog, .editCards]),
+                beforeLeave:    defaults([.tomorrowRing, .bagRequired, .editCards]),
+                morning:        defaults([.todayStatus, .calendar, .dailyLog, .editCards]),
                 earlyAfternoon: defaults([.todayStatus, .calendar, .dailyLog, .editCards]),
                 beforeEnd:      defaults([.todayStatus, .dailyLog, .editCards]),
                 bedtime:        defaults([.todayStatus, .dailyLog, .editCards])
@@ -120,7 +120,7 @@ final class SlotCardConfigStore: ObservableObject {
         }
 
         return Config(
-            beforeLeave:    defaults([.quickStart, .tomorrowRing, .bagRequired, .editCards]),
+            beforeLeave:    defaults([.tomorrowRing, .bagRequired, .editCards]),
             morning:        legacy.morning,
             earlyAfternoon: legacy.afternoon,
             beforeEnd:      legacy.evening,

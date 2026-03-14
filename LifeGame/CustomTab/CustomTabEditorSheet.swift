@@ -14,7 +14,7 @@ struct CustomTabEditorSheet: View {
     // 可選的卡片類型（排除 editCards）
     private let availableCardTypes: [CardType] = [
         .calendar, .todoQuadrant, .dailyLog, .todayStatus,
-        .tomorrowRing, .bagRequired, .monthlyScoreCalendar, .quickStart
+        .tomorrowRing, .bagRequired, .monthlyScoreCalendar
     ]
 
     var body: some View {

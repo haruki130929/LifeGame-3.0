@@ -13,6 +13,7 @@ struct HomeContentView: View {
     @EnvironmentObject private var ledgerStore: LedgerStore
     @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var customTabStore: CustomTabStore
+    @EnvironmentObject private var coachMarkStore: CoachMarkStore
 
     @State private var selectedTab: TabSelection = .tab(UUID())
     @State private var currentSlot: TimeSlot = .beforeLeave
@@ -42,9 +43,9 @@ struct HomeContentView: View {
                 let safeTrailing = proxy.safeAreaInsets.trailing
                 
                 // iPad：面板兩端對齊浮動按鈕位置
-                let sideInset = Layout.isIPad
+                let sideInset = AppLayout.isIPad
                     ? max(safeLeading, safeTrailing) + LayoutTokens.floatSideGap
-                    : Layout.clamp(w * 0.03, LayoutTokens.panelSideInsetMin, LayoutTokens.panelSideInsetMax)
+                    : AppLayout.clamp(w * 0.03, LayoutTokens.panelSideInsetMin, LayoutTokens.panelSideInsetMax)
                 let topButtonsY = safeTop + LayoutTokens.floatTopGap
                 let leftTopButtonWidth = LayoutTokens.leftTopButtonReservedWidth
                 
@@ -54,7 +55,7 @@ struct HomeContentView: View {
                 + LayoutTokens.floatButtonSize
                 + LayoutTokens.panelTopClearance
                 
-                let extraBottom = Layout.clamp(h * 0.008, 0, 8)
+                let extraBottom = AppLayout.clamp(h * 0.008, 0, 8)
                 let panelBottomReserved = safeBottom + extraBottom
                 
                 let computedPanelHeight = h - panelTopReserved - panelBottomReserved
@@ -83,10 +84,11 @@ struct HomeContentView: View {
                     }
                     .opacity(isContentOpen ? 0.5 : 1)
                     .disabled(isContentOpen)
+                    .background(coachButtonReporter(.drawerButton))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(.top, topButtonsY)
                     .padding(.leading, safeLeading + (leftTopButtonWidth - LayoutTokens.floatButtonSize) / 2)
-                    
+
                     FloatingIconButton(systemName: "arrow.right", size: LayoutTokens.floatButtonSize) {
                         withAnimation(DrawerPanel.panelSpring) {
                             isContentOpen.toggle()
@@ -95,6 +97,7 @@ struct HomeContentView: View {
                     }
                     .opacity((isDrawerOpen || isContentOpen) ? 0.5 : 1)
                     .disabled(isDrawerOpen || isContentOpen)
+                    .background(coachButtonReporter(.rightPanel))
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .padding(.top, topButtonsY)
                     .padding(.trailing, safeTrailing + LayoutTokens.floatSideGap)
@@ -103,7 +106,7 @@ struct HomeContentView: View {
             .allowsHitTesting(!isOverlayPresented)
             // iPhone 邊緣滑動手勢：右滑開 drawer、左滑開右面板
             .gesture(
-                Layout.isIPad ? nil : DragGesture(minimumDistance: 30)
+                AppLayout.isIPad ? nil : DragGesture(minimumDistance: 30)
                     .onEnded { value in
                         guard !isOverlayPresented else { return }
                         let horizontal = value.translation.width
@@ -203,5 +206,21 @@ private extension HomeContentView {
             TomorrowRingPlan.self, forKey: "tomorrow_ring_plan"
         ) else { return }
         game.applyRingDeductions(plan: plan)
+    }
+
+    // MARK: - Coach Mark 按鈕位置回報
+
+    /// 用 .background() 附加在按鈕上，回報按鈕中心的螢幕座標
+    /// 使用 DispatchQueue.main.async 確保 layout 完成後再讀取
+    private func coachButtonReporter(_ mark: CoachMarkStore.Mark) -> some View {
+        GeometryReader { geo in
+            Color.clear
+                .onAppear {
+                    DispatchQueue.main.async {
+                        let f = geo.frame(in: .global)
+                        coachMarkStore.reportCenter(CGPoint(x: f.midX, y: f.midY), for: mark)
+                    }
+                }
+        }
     }
 }
