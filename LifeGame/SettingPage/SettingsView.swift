@@ -68,7 +68,7 @@ private extension SettingsView {
         } header: {
             Text("通知")
         } footer: {
-            Text("開啟後每小時會提醒你記錄心情溫度（0～10）")
+            Text("開啟後每小時會提醒你記錄心情溫度")
         }
     }
 
@@ -110,6 +110,11 @@ private extension SettingsView {
                 BagSettingsView()
             } label: {
                 Label("收拾書包", systemImage: "backpack")
+            }
+            NavigationLink {
+                MoodSettingsView()
+            } label: {
+                Label("心情溫度計", systemImage: "heart.text.square")
             }
         }
     }

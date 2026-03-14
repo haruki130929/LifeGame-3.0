@@ -31,6 +31,8 @@ struct FeatureSettingsRouter: View {
             BagSettingsView()
         case .dailyLog:
             QuestionModuleSettingsView()
+        case .moodThermometer:
+            MoodSettingsView()
         default:
             SettingsView()
         }

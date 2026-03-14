@@ -260,7 +260,7 @@ struct EditRingItemSheet: View {
 
 // MARK: - RingRow
 
-private struct RingRow: View {
+struct RingRow: View {
     let item: RingItem
     let onEdit: () -> Void
 

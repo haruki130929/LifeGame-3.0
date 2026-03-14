@@ -8,6 +8,7 @@ struct MoodThermometerChartView: View {
     var period: MoodTimePeriod = .day
 
     @EnvironmentObject private var theme: ThemeStore
+    @EnvironmentObject private var moodSettings: MoodSettingsStore
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 16)
@@ -30,10 +31,10 @@ struct MoodThermometerChartView: View {
                     )
                 }
             }
-            .chartYScale(domain: 0...10)
+            .chartYScale(domain: moodSettings.scoreRange)
             .chartXScale(domain: rangeStart...rangeEnd)
             .chartYAxis {
-                AxisMarks(position: .leading, values: [0, 2, 4, 6, 8, 10])
+                AxisMarks(position: .leading)
             }
             .chartXAxis {
                 // 橫軸永遠是一天中的時間，每 4 小時一刻度

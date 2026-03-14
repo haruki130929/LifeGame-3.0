@@ -57,8 +57,8 @@ struct HomeDrawerView: View {
                     Spacer()
                 }
                 .foregroundStyle(theme.accentColor)
+                .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
             .padding(.bottom, 12)
         }
         .padding(12)

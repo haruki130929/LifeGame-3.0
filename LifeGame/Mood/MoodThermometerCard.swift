@@ -2,7 +2,8 @@ import SwiftUI
 
 struct MoodThermometerCard: View {
     @ObservedObject var mood: MoodStore
-    @EnvironmentObject private var history: MoodHistoryStore   // ✅ (A) 加這行
+    @EnvironmentObject private var history: MoodHistoryStore
+    @EnvironmentObject private var moodSettings: MoodSettingsStore
     
     @State private var showHourlyLimitAlert = false
     
@@ -26,7 +27,7 @@ struct MoodThermometerCard: View {
             }
             
             // 你原本的 Slider（示意）
-            Slider(value: $mood.score, in: 0...10, step: 1)
+            Slider(value: $mood.score, in: moodSettings.scoreRange, step: 1)
             
             // ✅ (C) 把「儲存」改成「紀錄」，並寫入 history
             Button {

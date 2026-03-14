@@ -3,6 +3,7 @@ import SwiftUI
 struct MoodThermometerScreen: View {
     @StateObject private var mood = MoodStore()
     @EnvironmentObject private var history: MoodHistoryStore
+    @EnvironmentObject private var fab: FabStore
 
     @State private var selectedPeriod: MoodTimePeriod = .day
     @State private var showHourlyLimitAlert = false
@@ -53,6 +54,12 @@ struct MoodThermometerScreen: View {
         }
         .navigationTitle("心情溫度計")
         .animation(.easeInOut(duration: 0.2), value: selectedPeriod)
+        .onAppear {
+            fab.apply(context: .feature(.moodThermometer))
+        }
+        .onDisappear {
+            fab.popActions()
+        }
     }
 
     // MARK: - 建立圖表資料點

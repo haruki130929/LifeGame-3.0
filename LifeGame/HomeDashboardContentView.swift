@@ -47,14 +47,12 @@ struct HomeDashboardContentView: View {
                     } else {
                         // iPhone：手風琴文字列
                         VStack(spacing: 12) {
-                            ForEach(tab.cardTypes, id: \.self) { cardType in
-                                if cardType != .editCards {
-                                    ExpandableCardRow(
-                                        cardType: cardType,
-                                        expandedCardType: $expandedCardType,
-                                        ringSelectedID: $ringSelectedID
-                                    )
-                                }
+                            ForEach(tab.cardTypes.filter { $0.featureID != nil }, id: \.self) { cardType in
+                                ExpandableCardRow(
+                                    cardType: cardType,
+                                    expandedCardType: $expandedCardType,
+                                    ringSelectedID: $ringSelectedID
+                                )
                             }
                         }
                     }

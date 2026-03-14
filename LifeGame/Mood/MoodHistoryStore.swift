@@ -51,6 +51,51 @@ final class MoodHistoryStore: ObservableObject {
         points.filter { range.contains($0.timestamp) }
     }
 
+    /// 更新已有記錄的分數
+    func update(id: UUID, score: Double) {
+        guard let idx = points.firstIndex(where: { $0.id == id }) else { return }
+        let old = points[idx]
+        points[idx] = MoodPoint(id: old.id, timestamp: old.timestamp, score: min(10, max(0, score)))
+        save()
+    }
+
+    /// 同一小時有記錄就更新，沒有就新增
+    @discardableResult
+    func addOrUpdate(score: Double, forHour date: Date) -> Bool {
+        let calendar = Calendar.current
+        guard let hourStart = calendar.dateInterval(of: .hour, for: date)?.start else { return false }
+        let clamped = min(10, max(0, score))
+
+        if let idx = points.firstIndex(where: {
+            calendar.dateInterval(of: .hour, for: $0.timestamp)?.start == hourStart
+        }) {
+            let old = points[idx]
+            points[idx] = MoodPoint(id: old.id, timestamp: old.timestamp, score: clamped)
+        } else {
+            points.append(MoodPoint(timestamp: date, score: clamped))
+            points.sort { $0.timestamp < $1.timestamp }
+        }
+        save()
+        return true
+    }
+
+    /// 回傳顯示範圍內每個小時的記錄狀態
+    func hourlyEntries(in range: ClosedRange<Date>) -> [(hour: Date, point: MoodPoint?)] {
+        let calendar = Calendar.current
+        var result: [(hour: Date, point: MoodPoint?)] = []
+        var current = range.lowerBound
+
+        while current <= range.upperBound {
+            let hourStart = calendar.dateInterval(of: .hour, for: current)?.start ?? current
+            let match = points.first {
+                calendar.dateInterval(of: .hour, for: $0.timestamp)?.start == hourStart
+            }
+            result.append((hour: hourStart, point: match))
+            current = calendar.date(byAdding: .hour, value: 1, to: hourStart) ?? current.addingTimeInterval(3600)
+        }
+        return result
+    }
+
     // MARK: - Persistence (StorageManager → SwiftData)
 
     private func save() {

@@ -29,6 +29,8 @@ final class FabStore: ObservableObject {
         case viewLedgerChart
         // ── 本月結算專用 ──
         case monthlyScoreStats
+        // ── 心情溫度計專用 ──
+        case moodEdit
         // ── 功能設定 ──
         case featureSettings(FeatureID)
 
@@ -47,6 +49,7 @@ final class FabStore: ObservableObject {
             case .addLedgerEntry:           return "addLedgerEntry"
             case .viewLedgerChart:          return "viewLedgerChart"
             case .monthlyScoreStats:        return "monthlyScoreStats"
+            case .moodEdit:                 return "moodEdit"
             case .featureSettings(let f):   return "featureSettings-\(f)"
             }
         }
@@ -254,8 +257,8 @@ final class FabStore: ObservableObject {
             ]
         case .moodThermometer:
             result += [
-                FabAction(title: "記錄心情", systemImage: "plus.circle") { [weak self] in
-                    self?.route = .navigate(.moodThermometer); self?.collapse()
+                FabAction(title: "編輯", systemImage: "pencil.circle") { [weak self] in
+                    self?.route = .moodEdit; self?.collapse()
                 }
             ]
         }

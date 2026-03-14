@@ -11,18 +11,22 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
     case calendar
     case tomorrowRing
     case monthlyScore
+    case diary
+    case finance
 
     var id: String { rawValue }
 
     var title: String {
         switch self {
-        case .bag:            return "出門準備"
+        case .bag:            return "收拾書包"
         case .mood:           return "心情溫度計"
         case .todo:           return "待辦四象限"
         case .dailyLog:       return "每日紀錄"
         case .calendar:       return "行事曆"
         case .tomorrowRing:   return "時間圓環"
         case .monthlyScore:   return "本月結算"
+        case .diary:          return "日記"
+        case .finance:        return "財務"
         }
     }
 
@@ -35,6 +39,8 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
         case .calendar:       return "calendar"
         case .tomorrowRing:   return "clock"
         case .monthlyScore:   return "calendar.badge.clock"
+        case .diary:          return "book"
+        case .finance:        return "yensign.circle"
         }
     }
 
@@ -48,6 +54,8 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
         case .calendar:       return .calendar
         case .tomorrowRing:   return .tomorrowRing
         case .monthlyScore:   return .monthlyScoreCalendar
+        case .diary:          return .diary
+        case .finance:        return .wish
         }
     }
 }

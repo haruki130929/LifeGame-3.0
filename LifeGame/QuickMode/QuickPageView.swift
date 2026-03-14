@@ -5,6 +5,9 @@ struct QuickPageView: View {
     let page: QuickPage
     let dailyLogStore: DailyLogStore
 
+    @EnvironmentObject private var wishStore: WishStore
+    @EnvironmentObject private var ledgerStore: LedgerStore
+
     var body: some View {
         switch page.featureType {
         case .tomorrowRing:
@@ -21,6 +24,10 @@ struct QuickPageView: View {
             CalendarScreen()
         case .monthlyScore:
             MonthlyScorePageWrapper()
+        case .diary:
+            DiaryView()
+        case .finance:
+            FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore)
         }
     }
 }

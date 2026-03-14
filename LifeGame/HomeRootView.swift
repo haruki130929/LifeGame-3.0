@@ -14,6 +14,7 @@ struct HomeRootView: View {
 
     @State private var showAddCalendarEvent = false
     @State private var showAddDailyLog = false
+    @State private var showMoodEdit = false
     @State private var featureSettingsTarget: FeatureID?
     @State private var navigationPath = NavigationPath()
 
@@ -67,6 +68,10 @@ struct HomeRootView: View {
                 showAddDailyLog = true
                 fab.route = nil
 
+            case .moodEdit:
+                showMoodEdit = true
+                fab.route = nil
+
             case .navigate(let feature):
                 navigationPath.append(feature)
                 fab.route = nil
@@ -98,6 +103,9 @@ struct HomeRootView: View {
             NavigationStack {
                 FeatureSettingsRouter(feature: feature)
             }
+        }
+        .sheet(isPresented: $showMoodEdit) {
+            MoodEditView()
         }
     }
 }
