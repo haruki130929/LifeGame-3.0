@@ -14,8 +14,8 @@ struct CardFactory: View {
     @EnvironmentObject private var calendarStore: CalendarStore
     @EnvironmentObject private var game: LifeGame
 
-    // 各卡片需要的本地 State
-    @StateObject private var todoStore = TodoQuadrantStore()
+    // 各卡片需要的 Store
+    @EnvironmentObject private var todoStore: TodoQuadrantStore
     @State private var monthOffset = 0
     @State private var tomorrowPlan: TomorrowRingPlan = {
         if let saved: TomorrowRingPlan = StorageManager.load(TomorrowRingPlan.self, forKey: "tomorrow_ring_plan") {

@@ -3,7 +3,7 @@ import SwiftUI
 struct CalendarScreen: View {
     @EnvironmentObject private var calendarStore: CalendarStore
     @EnvironmentObject private var fab: FabStore
-    @StateObject private var todoStore = TodoQuadrantStore()
+    @EnvironmentObject private var todoStore: TodoQuadrantStore
 
     // MARK: - State
     @State private var monthOffset: Int = 0

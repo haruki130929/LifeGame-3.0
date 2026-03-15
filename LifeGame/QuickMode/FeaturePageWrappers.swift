@@ -4,7 +4,7 @@ import SwiftUI
 
 /// 待辦四象限 — 包裝 TodoQuadrantBoardView，自帶 store
 struct TodoQuadrantPageWrapper: View {
-    @StateObject private var store = TodoQuadrantStore()
+    @EnvironmentObject private var store: TodoQuadrantStore
 
     var body: some View {
         TodoQuadrantBoardView(store: store)

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct TodoQuadrantSettingsView: View {
-    @StateObject private var store = TodoQuadrantStore()
+    @EnvironmentObject private var store: TodoQuadrantStore
 
     var body: some View {
         Form {

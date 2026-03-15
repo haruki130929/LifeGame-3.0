@@ -20,7 +20,7 @@ struct ExpandableCardRow: View {
     }()
 
     // 待辦四象限
-    @StateObject private var todoStore = TodoQuadrantStore()
+    @EnvironmentObject private var todoStore: TodoQuadrantStore
 
     // 行事曆
     @State private var monthOffset = 0
