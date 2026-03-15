@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct MoodThermometerScreen: View {
-    @StateObject private var mood = MoodStore()
+    @EnvironmentObject private var mood: MoodStore
     @EnvironmentObject private var history: MoodHistoryStore
     @EnvironmentObject private var fab: FabStore
 

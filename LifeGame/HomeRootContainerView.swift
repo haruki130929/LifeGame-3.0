@@ -47,6 +47,7 @@ struct HomeRootContainerView: View {
                         .environmentObject(customTabStore)
                         .environmentObject(timeSlotNameStore)
                         .environmentObject(game)
+                        .environmentObject(moodStore)
                     }
                 }
             }
@@ -71,5 +72,6 @@ struct HomeRootContainerView: View {
         .environmentObject(customTabStore)
         .environmentObject(timeSlotNameStore)
         .environmentObject(game)
+        .environmentObject(moodStore)
     }
 }
