@@ -28,6 +28,8 @@ final class MandalaStore: ObservableObject {
     }
 
     @Published var currentIndex: Int = 0
+    /// 每次顏色變更時更新，讓 SwiftUI 偵測到變化並重新渲染
+    @Published private(set) var colorRevision = UUID()
 
     var doc: Document {
         get {
@@ -102,12 +104,22 @@ final class MandalaStore: ObservableObject {
     // MARK: - 格子顏色
 
     func setCellColor(row: Int, col: Int, hex: String?) {
-        let key = "\(row)-\(col)"
-        if let hex {
-            doc.cellColors[key] = hex
-        } else {
-            doc.cellColors.removeValue(forKey: key)
+        updateCellColors(["\(row)-\(col)": hex])
+    }
+
+    /// 批次更新多個格子的顏色，只觸發一次 @Published
+    func updateCellColors(_ changes: [String: String?]) {
+        guard documents.indices.contains(currentIndex) else { return }
+        var updated = documents[currentIndex]
+        for (key, hex) in changes {
+            if let hex {
+                updated.cellColors[key] = hex
+            } else {
+                updated.cellColors.removeValue(forKey: key)
+            }
         }
+        documents[currentIndex] = updated
+        colorRevision = UUID()
     }
 
     func cellColor(row: Int, col: Int) -> String? {

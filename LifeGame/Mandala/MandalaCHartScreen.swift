@@ -9,6 +9,7 @@ struct MandalaChartScreen: View {
     var body: some View {
         VStack(spacing: 0) {
             MandalaChartView(store: store, isEditMode: $isEditMode)
+                .id(store.colorRevision)
 
             // 多頁切換：只在有多個圖表時顯示
             if store.documents.count > 1 {

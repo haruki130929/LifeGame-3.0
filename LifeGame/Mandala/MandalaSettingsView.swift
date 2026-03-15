@@ -139,25 +139,28 @@ struct MandalaSettingsView: View {
 
     private func applyColorToGoal(_ color: Color) {
         guard let hex = color.toHex() else { return }
-        store.setCellColor(row: 4, col: 4, hex: hex)
+        store.updateCellColors(["4-4": hex])
     }
 
     private func applyColorToThemes(_ color: Color) {
         guard let hex = color.toHex() else { return }
+        var changes: [String: String?] = [:]
         for pos in themePositions {
-            store.setCellColor(row: pos.0, col: pos.1, hex: hex)
+            changes["\(pos.0)-\(pos.1)"] = hex
         }
         // 外圍區塊中心也套用
         for blockRow in 0..<3 {
             for blockCol in 0..<3 {
                 if blockRow == 1 && blockCol == 1 { continue }
-                store.setCellColor(row: blockRow * 3 + 1, col: blockCol * 3 + 1, hex: hex)
+                changes["\(blockRow * 3 + 1)-\(blockCol * 3 + 1)"] = hex
             }
         }
+        store.updateCellColors(changes)
     }
 
     private func applyColorToActions(_ color: Color) {
         guard let hex = color.toHex() else { return }
+        var changes: [String: String?] = [:]
         let offsets: [(Int, Int)] = [
             (0, 0), (0, 1), (0, 2),
             (1, 0),         (1, 2),
@@ -167,10 +170,11 @@ struct MandalaSettingsView: View {
             for blockCol in 0..<3 {
                 if blockRow == 1 && blockCol == 1 { continue }
                 for off in offsets {
-                    store.setCellColor(row: blockRow * 3 + off.0, col: blockCol * 3 + off.1, hex: hex)
+                    changes["\(blockRow * 3 + off.0)-\(blockCol * 3 + off.1)"] = hex
                 }
             }
         }
+        store.updateCellColors(changes)
     }
 
     // MARK: - 匯出圖片
