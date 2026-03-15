@@ -142,15 +142,15 @@ struct OnboardingView: View {
                 .font(.system(size: iPad ? 38 : 30, weight: .bold))
 
             if iPad {
-                Text("左上角開啟選單\n右下角「＋」新增功能")
+                Text("左上角開啟選單\n右上角開啟工具欄\n右下角「＋」新增功能")
                     .font(.system(size: 20))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             } else {
                 Text(phoneModeStore.mode == .quick
-                     ? "左右滑動切換功能頁\n右下角「＋」快速操作\n可以在設定中自訂頁面"
-                     : "左上角開啟選單\n右下角「＋」新增功能")
+                     ? "左右滑動切換功能頁\n右上角開啟工具欄\n右下角「＋」快速操作\n可以在設定中自訂頁面"
+                     : "左上角開啟選單\n右上角開啟工具欄\n右下角「＋」新增功能")
                     .font(.system(size: 17))
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
