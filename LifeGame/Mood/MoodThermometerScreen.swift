@@ -36,17 +36,18 @@ struct MoodThermometerScreen: View {
                 MoodThermometerCard(mood: mood)
 
                 Button {
-                    let ok = history.add(score: mood.score, at: Date())
+                    let previousHour = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
+                    let ok = history.add(score: mood.score, at: previousHour)
                     if !ok { showHourlyLimitAlert = true }
                 } label: {
-                    Label("記錄一次（存到折線圖）", systemImage: "plus.circle.fill")
+                    Label("記錄上一小時心情", systemImage: "plus.circle.fill")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
-                .alert("這一小時已經記錄過了", isPresented: $showHourlyLimitAlert) {
+                .alert("上一個小時已經記錄過了", isPresented: $showHourlyLimitAlert) {
                     Button("OK", role: .cancel) { }
                 } message: {
-                    Text("每小時只能記錄一次，下一個整點後再記錄。")
+                    Text("每小時只能記錄一次，等這個小時結束後再記錄。")
                 }
 
             }

@@ -63,9 +63,10 @@ struct MoodEditView: View {
             ? calendar.date(byAdding: .day, value: -1, to: today8)!
             : today8
 
-        // 到目前小時為止
+        // 到上一個小時為止（因為要過完一個小時才能紀錄）
         let currentHour = calendar.dateInterval(of: .hour, for: now)?.start ?? now
-        return (start, currentHour)
+        let previousHour = calendar.date(byAdding: .hour, value: -1, to: currentHour) ?? currentHour
+        return (start, max(start, previousHour))
     }
 
     private func loadDrafts() {
