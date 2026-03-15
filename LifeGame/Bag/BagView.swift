@@ -27,13 +27,13 @@ enum BagSeeder {
         }
 
         guard existing.isEmpty else {
-            try? context.save()
+            context.safeSave()
             return
         }
         for d in defaults {
             context.insert(BagItemModel(name: d.name, icon: d.icon, isRequired: d.isRequired, isChecked: false))
         }
-        try? context.save()
+        context.safeSave()
     }
 }
 
@@ -196,17 +196,17 @@ struct Bag_BackpackChecklistView: View {
     
     private func toggle(_ item: BagItemModel) {
         item.isChecked.toggle()
-        try? context.save()
+        context.safeSave()
     }
     
     private func toggleRequired(_ item: BagItemModel) {
         item.isRequired.toggle()
-        try? context.save()
+        context.safeSave()
     }
     
     private func deleteItem(_ item: BagItemModel) {
         context.delete(item)
-        try? context.save()
+        context.safeSave()
     }
     
 }

@@ -29,7 +29,7 @@ struct QuickBagView: View {
 
     private func toggle(_ item: BagItemModel) {
         item.isChecked.toggle()
-        try? context.save()
+        context.safeSave()
     }
 
     private func seedIfNeeded() {
@@ -48,6 +48,6 @@ struct QuickBagView: View {
         for (name, icon, req) in defaults {
             context.insert(BagItemModel(name: name, icon: icon, isRequired: req, isChecked: false))
         }
-        try? context.save()
+        context.safeSave()
     }
 }

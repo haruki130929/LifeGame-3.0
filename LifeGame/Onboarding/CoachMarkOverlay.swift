@@ -155,7 +155,7 @@ struct CoachMarkOverlay: View {
     @ViewBuilder
     private func tipCard(for mark: CoachMarkStore.Mark) -> some View {
         let info = tipInfo(for: mark)
-        let stepIndex = CoachMarkStore.Mark.allCases.firstIndex(of: mark)! + 1
+        let stepIndex = (CoachMarkStore.Mark.allCases.firstIndex(of: mark) ?? 0) + 1
         let total = CoachMarkStore.Mark.allCases.count
 
         VStack(spacing: 14) {

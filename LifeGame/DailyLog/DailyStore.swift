@@ -19,11 +19,15 @@ final class DailyLogStore: ObservableObject {
         } else {
             // coordinator 尚未初始化 → 用臨時 in-memory 容器，避免 crash
             debugLog("⚠️ DailyLogStore: StorageCoordinator 尚未初始化，使用 in-memory 容器")
-            let fallback = try! ModelContainer(
-                for: DailyLogRecord.self,
-                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-            )
-            self.context = ModelContext(fallback)
+            do {
+                let fallback = try ModelContainer(
+                    for: DailyLogRecord.self,
+                    configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+                )
+                self.context = ModelContext(fallback)
+            } catch {
+                fatalError("DailyLogStore: 無法建立 in-memory ModelContainer: \(error)")
+            }
         }
         load()
     }

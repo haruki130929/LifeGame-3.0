@@ -78,7 +78,7 @@ struct BagRequiredCardLarge: View {
 
     private func toggle(_ item: BagItemModel) {
         item.isChecked.toggle()
-        try? context.save()
+        context.safeSave()
     }
 }
 

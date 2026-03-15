@@ -41,7 +41,7 @@ final class BagMigrator {
             upsert(item: it, isChecked: oldChecked.contains(it.id))
         }
         
-        try? context.save()
+        context.safeSave()
         
         // 4) 打旗標：避免下次重複匯入
         defaults.set(true, forKey: BagMigrationFlags.didMigrateBagV2ToSwiftData)

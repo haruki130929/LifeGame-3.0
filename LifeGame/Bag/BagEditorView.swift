@@ -110,7 +110,7 @@ struct BagItemEditorView: View {
             context.insert(model)
         }
         
-        try? context.save()
+        context.safeSave()
     }
 }
 
