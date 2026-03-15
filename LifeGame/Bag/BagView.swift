@@ -10,7 +10,7 @@ enum BagSeeder {
         ("耳機", "airpods.pro", true),
         ("充電線", "cable.connector", false),
         ("行動電源", "bolt.batteryblock", false),
-        ("水壺", "bag.fill", true),
+        ("水壺", "waterbottle.fill", true),
         ("筆袋", "applepencil", true),
         ("手帳本", "book", false),
         ("課本／講義", "books.vertical.fill", false)
@@ -19,8 +19,17 @@ enum BagSeeder {
     @MainActor
     static func seedIfNeeded(context: ModelContext) {
         let desc = FetchDescriptor<BagItemModel>()
-        let count = (try? context.fetchCount(desc)) ?? 0
-        guard count == 0 else { return }
+        let existing = (try? context.fetch(desc)) ?? []
+
+        // 修正舊 icon（bag.fill → waterbottle.fill）
+        for item in existing where item.name == "水壺" && item.icon == "bag.fill" {
+            item.icon = "waterbottle.fill"
+        }
+
+        guard existing.isEmpty else {
+            try? context.save()
+            return
+        }
         for d in defaults {
             context.insert(BagItemModel(name: d.name, icon: d.icon, isRequired: d.isRequired, isChecked: false))
         }
