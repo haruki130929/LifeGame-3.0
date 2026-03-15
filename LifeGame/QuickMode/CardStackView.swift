@@ -111,6 +111,7 @@ struct CardStackView: View {
                     .background(theme.accentColor.opacity(0.12))
                     .foregroundStyle(theme.accentColor)
                     .clipShape(Capsule())
+                    .accessibilityLabel("重新開始")
             }
             .padding(.top, 8)
 

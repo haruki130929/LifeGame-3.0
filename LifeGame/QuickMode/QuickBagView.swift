@@ -33,21 +33,6 @@ struct QuickBagView: View {
     }
 
     private func seedIfNeeded() {
-        guard items.isEmpty else { return }
-        let defaults: [(String, String, Bool)] = [
-            ("錢包", "wallet.pass", true),
-            ("鑰匙", "key", true),
-            ("耳機", "headphones", true),
-            ("充電線", "cable.connector", false),
-            ("行動電源", "battery.100.bolt", false),
-            ("水壺", "waterbottle", true),
-            ("筆袋", "pencil", true),
-            ("手帳本", "book", false),
-            ("課本／講義", "books.vertical", false)
-        ]
-        for (name, icon, req) in defaults {
-            context.insert(BagItemModel(name: name, icon: icon, isRequired: req, isChecked: false))
-        }
-        context.safeSave()
+        BagSeeder.seedIfNeeded(context: context)
     }
 }
