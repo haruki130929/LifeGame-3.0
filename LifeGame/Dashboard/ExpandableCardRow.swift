@@ -230,13 +230,13 @@ struct ExpandableCardRow: View {
         .clipShape(RoundedRectangle(cornerRadius: 10))
     }
 
-    // MARK: - 收拾書包原始內容
+    // MARK: - 整理書包原始內容
     private var bagContent: some View {
         BagRequiredInlineContent()
     }
 }
 
-// MARK: - 收拾書包 inline（不含 DashboardCardContainer）
+// MARK: - 整理書包 inline（不含 DashboardCardContainer）
 
 private struct BagRequiredInlineContent: View {
     @Query(

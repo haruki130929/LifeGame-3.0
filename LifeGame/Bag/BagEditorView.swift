@@ -23,18 +23,15 @@ struct BagItemEditorView: View {
                     .focused($nameFocused)
             }
             
-            Section("Icon") {
+            Section("圖示") {
                 Button { showIconPicker = true } label: {
                     HStack(spacing: 12) {
                         Image(systemName: icon)
                             .font(.title2)
                             .frame(width: 32)
-                        
-                        Text(icon)
-                            .foregroundStyle(.secondary)
-                        
+
                         Spacer()
-                        
+
                         Text("選擇")
                             .foregroundStyle(.secondary)
                     }
@@ -46,7 +43,7 @@ struct BagItemEditorView: View {
             }
             
             Section {
-                Text("icon 直接在分類裡挑，必要時再用搜尋。")
+                Text("圖示直接在分類裡挑，必要時再用搜尋。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -161,12 +158,6 @@ struct IconPickerView: View {
                                     Image(systemName: icon)
                                         .font(.system(size: 26, weight: .semibold))
                                         .frame(height: 30)
-                                    
-                                    Text(icon)
-                                        .font(.caption2)
-                                        .foregroundStyle(.secondary)
-                                        .lineLimit(1)
-                                        .minimumScaleFactor(0.7)
                                 }
                                 .frame(maxWidth: .infinity, minHeight: 72)
                                 .padding(10)
@@ -186,7 +177,7 @@ struct IconPickerView: View {
                 .padding()
             }
         }
-        .navigationTitle("選擇 Icon")
+        .navigationTitle("選擇圖示")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {

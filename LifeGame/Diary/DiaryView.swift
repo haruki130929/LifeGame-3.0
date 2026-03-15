@@ -26,6 +26,12 @@ struct DiaryView: View {
                                     .lineLimit(2)
                             }
 
+                            if !entry.photos.isEmpty {
+                                Label("\(entry.photos.count) 張照片", systemImage: "photo")
+                                    .font(.caption)
+                                    .foregroundStyle(.tertiary)
+                            }
+
                             if !entry.answers.isEmpty {
                                 Text("已填 \(entry.answers.count) 項")
                                     .font(.caption)

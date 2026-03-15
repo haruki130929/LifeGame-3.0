@@ -89,6 +89,8 @@ struct QuickModeShellView: View {
                     MonthlyScorePageWrapper()
                 case .moodThermometer:
                     MoodThermometerScreen()
+                case .mandala:
+                    MandalaChartScreen()
                 }
             }
         }

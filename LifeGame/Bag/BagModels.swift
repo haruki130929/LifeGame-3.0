@@ -22,35 +22,29 @@ enum BagItemEditorMode {
 }
 
 enum IconCategory: String, CaseIterable, Identifiable {
+    case medical = "醫療"
+    case money = "證件金錢"
     case stationery = "文具"
     case tech = "3C"
     case daily = "生活"
-    case medical = "醫療"
-    case rain = "雨具"
-    case money = "證件金錢"
-    case other = "其他"
-    
+
     var id: String { rawValue }
-    
+
     var icons: [String] {
         switch self {
-        case .stationery:
-            return ["pencil","pencil.and.outline","pencil.tip","book","books.vertical","notebook",
-                    "doc.text","folder","paperclip","scissors","highlighter","bookmark"]
-        case .tech:
-            return ["headphones","earbuds","phone","iphone","cable.connector",
-                    "battery.100.bolt","bolt","powerplug","wifi","flashlight.on.fill"]
-        case .daily:
-            return ["backpack","bag","waterbottle","cup.and.saucer","eyeglasses",
-                    "clock","watch.analog","tshirt","hanger"]
         case .medical:
-            return ["bandage","cross.case","pills","heart.text.square","stethoscope"]
-        case .rain:
-            return ["umbrella","cloud.rain","drop"]
+            return ["bandage", "pill.fill", "facemask.fill"]
         case .money:
-            return ["wallet.pass","creditcard","idcard","person.text.rectangle"]
-        case .other:
-            return ["key","airtag","carabiner","star","sparkles"]
+            return ["creditcard", "wallet.bifold"]
+        case .stationery:
+            return ["applepencil", "eraser.fill", "pencil.and.ruler",
+                    "book", "books.vertical.fill", "text.book.closed.fill", "magazine"]
+        case .tech:
+            return ["iphone", "ipad", "applewatch", "airpods.max", "airpods.pro",
+                    "cable.connector", "macbook", "bolt.batteryblock"]
+        case .daily:
+            return ["key", "backpack", "umbrella", "bag.fill", "watch.analog",
+                    "comb.fill", "eyeglasses", "fork.knife"]
         }
     }
 }

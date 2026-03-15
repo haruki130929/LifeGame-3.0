@@ -15,6 +15,7 @@ enum FeatureID: String, Hashable, Identifiable {
     case bagRequired
     case monthlyScoreCalendar
     case moodThermometer
+    case mandala
 }
 
 enum FabContext {

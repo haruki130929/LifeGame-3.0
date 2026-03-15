@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct DiaryEditorView: View {
     enum Mode {
@@ -33,9 +34,14 @@ struct DiaryEditorView: View {
                     .frame(minHeight: 200)
             }
 
+            // 3. 照片
+            Section("3. 照片") {
+                DailyLogPhotosSection(photos: $entry.photos)
+            }
+
             // 動態渲染啟用的自訂模組
             ForEach(Array(moduleStore.enabledCustomModules.enumerated()), id: \.element.id) { index, module in
-                let header = "\(index + 3). \(module.displayTitle)"
+                let header = "\(index + 4). \(module.displayTitle)"
                 CustomModuleSectionView(module: module, answers: $entry.answers, header: header)
             }
         }

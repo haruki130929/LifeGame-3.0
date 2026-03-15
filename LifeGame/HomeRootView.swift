@@ -52,6 +52,8 @@ struct HomeRootView: View {
                     MonthlyScorePageWrapper()
                 case .moodThermometer:
                     MoodThermometerScreen()
+                case .mandala:
+                    MandalaChartScreen()
                 }
             }
         }
@@ -84,7 +86,9 @@ struct HomeRootView: View {
             case .addRingItem, .quickAppendRing, .jumpToToday,
                  .addTodoToQuadrant, .todoEditMode,
                  .addWish, .editWishList, .addLedgerEntry, .viewLedgerChart,
-                 .monthlyScoreStats:
+                 .monthlyScoreStats,
+                 .addBagItem, .bagEditMode,
+                 .addMandalaChart, .mandalaEditMode:
                 break
             }
         }

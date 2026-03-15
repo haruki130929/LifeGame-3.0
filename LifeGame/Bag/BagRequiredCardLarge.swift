@@ -32,7 +32,7 @@ struct BagRequiredCardLarge: View {
                     Image(systemName: "backpack")
                         .font(.headline)
 
-                    Text("收拾書包")
+                    Text("整理書包")
                         .font(.headline)
 
                     Spacer()

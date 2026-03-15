@@ -157,7 +157,7 @@ final class SlotCardConfigStore: ObservableObject {
                 items.insert(CardItem(type: .tomorrowRing, size: .large), at: 0)
             }
 
-            // 補 bagRequired（收拾書包：只顯示必帶）
+            // 補 bagRequired（整理書包：只顯示必帶）
             if !items.contains(where: { $0.type == .bagRequired }) {
                 let insertIndex = min(1, items.count)
                 items.insert(CardItem(type: .bagRequired, size: .medium), at: insertIndex)

@@ -11,4 +11,7 @@ struct DiaryEntry: Identifiable, Codable, Equatable {
 
     /// 使用者填寫的自訂模組回答
     var answers: [CustomAnswer] = []
+
+    /// 照片
+    var photos: [DailyLogPhoto] = []
 }

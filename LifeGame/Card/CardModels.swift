@@ -57,7 +57,7 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
         case .editCards: return "編輯卡片"
         case .todoQuadrant: return "待辦四象限"
         case .tomorrowRing: return "時間圓環"
-        case .bagRequired: return "收拾書包"
+        case .bagRequired: return "整理書包"
         case .monthlyScoreCalendar: return "本月結算"
         }
     }

@@ -18,7 +18,7 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .bag:            return "收拾書包"
+        case .bag:            return "整理書包"
         case .mood:           return "心情溫度計"
         case .todo:           return "待辦四象限"
         case .dailyLog:       return "每日紀錄"

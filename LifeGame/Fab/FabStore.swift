@@ -31,6 +31,12 @@ final class FabStore: ObservableObject {
         case monthlyScoreStats
         // ── 心情溫度計專用 ──
         case moodEdit
+        // ── 整理書包專用 ──
+        case addBagItem
+        case bagEditMode
+        // ── 曼陀羅圖表專用 ──
+        case addMandalaChart
+        case mandalaEditMode
         // ── 功能設定 ──
         case featureSettings(FeatureID)
 
@@ -50,6 +56,10 @@ final class FabStore: ObservableObject {
             case .viewLedgerChart:          return "viewLedgerChart"
             case .monthlyScoreStats:        return "monthlyScoreStats"
             case .moodEdit:                 return "moodEdit"
+            case .addBagItem:               return "addBagItem"
+            case .bagEditMode:              return "bagEditMode"
+            case .addMandalaChart:          return "addMandalaChart"
+            case .mandalaEditMode:          return "mandalaEditMode"
             case .featureSettings(let f):   return "featureSettings-\(f)"
             }
         }
@@ -245,8 +255,11 @@ final class FabStore: ObservableObject {
             ]
         case .bagRequired:
             result += [
-                FabAction(title: "編輯清單", systemImage: "checklist") { [weak self] in
-                    self?.route = .navigate(.bagRequired); self?.collapse()
+                FabAction(title: "新增物品", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .addBagItem; self?.collapse()
+                },
+                FabAction(title: "編輯", systemImage: "pencil") { [weak self] in
+                    self?.route = .bagEditMode; self?.collapse()
                 }
             ]
         case .monthlyScoreCalendar:
@@ -259,6 +272,15 @@ final class FabStore: ObservableObject {
             result += [
                 FabAction(title: "編輯", systemImage: "pencil.circle") { [weak self] in
                     self?.route = .moodEdit; self?.collapse()
+                }
+            ]
+        case .mandala:
+            result += [
+                FabAction(title: "新增圖表", systemImage: "plus.circle") { [weak self] in
+                    self?.route = .addMandalaChart; self?.collapse()
+                },
+                FabAction(title: "編輯", systemImage: "pencil") { [weak self] in
+                    self?.route = .mandalaEditMode; self?.collapse()
                 }
             ]
         }
@@ -278,9 +300,10 @@ final class FabStore: ObservableObject {
         case .dailyLog:               return "每日紀錄"
         case .todoQuadrant:           return "待辦四象限"
         case .tomorrowRing:           return "時間圓環"
-        case .bagRequired:            return "收拾書包"
+        case .bagRequired:            return "整理書包"
         case .monthlyScoreCalendar:   return "本月結算"
         case .moodThermometer:        return "心情溫度計"
+        case .mandala:                return "曼陀羅圖表"
         }
     }
 
@@ -297,6 +320,7 @@ final class FabStore: ObservableObject {
         case .bagRequired:            return "backpack"
         case .monthlyScoreCalendar:   return "calendar.badge.clock"
         case .moodThermometer:        return "heart.text.square"
+        case .mandala:                return "square.grid.3x3"
         }
     }
 }

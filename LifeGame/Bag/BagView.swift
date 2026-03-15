@@ -51,23 +51,24 @@ struct BagItemCard: View {
 struct Bag_BackpackChecklistView: View {
     
     @Environment(\.modelContext) private var context
+    @EnvironmentObject private var fab: FabStore
     @Query(sort: \BagItemModel.name) private var items: [BagItemModel]
-    
+
     @State private var showAdd = false
     @State private var editingItem: BagItemModel? = nil
-    @State private var showResetConfirm = false
+    @State private var isEditMode = false
     
     // ✅ 預設物品：第一次資料庫是空的時候會自動灌進去
     private let defaultItems: [(name: String, icon: String, isRequired: Bool)] = [
-        ("錢包", "wallet.pass", true),
+        ("錢包", "wallet.bifold", true),
         ("鑰匙", "key", true),
-        ("耳機", "headphones", true),
+        ("耳機", "airpods.pro", true),
         ("充電線", "cable.connector", false),
-        ("行動電源", "battery.100.bolt", false),
-        ("水壺", "waterbottle", true),
-        ("筆袋", "pencil", true),
+        ("行動電源", "bolt.batteryblock", false),
+        ("水壺", "bag.fill", true),
+        ("筆袋", "applepencil", true),
         ("手帳本", "book", false),
-        ("課本／講義", "books.vertical", false)
+        ("課本／講義", "books.vertical.fill", false)
     ]
     
     private let columns: [GridItem] = [
@@ -79,17 +80,31 @@ struct Bag_BackpackChecklistView: View {
             LazyVGrid(columns: columns, spacing: 16) {
                 ForEach(items) { item in
                     BagItemCard(item: item) {
-                        toggle(item)
+                        if isEditMode {
+                            editingItem = item
+                        } else {
+                            toggle(item)
+                        }
+                    }
+                    .overlay(alignment: .topLeading) {
+                        if isEditMode {
+                            Button { deleteItem(item) } label: {
+                                Image(systemName: "minus.circle.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(.red)
+                            }
+                            .offset(x: -6, y: -6)
+                        }
                     }
                     .contextMenu {
                         Button { editingItem = item } label: {
                             Label("編輯", systemImage: "pencil")
                         }
-                        
+
                         Button { toggleRequired(item) } label: {
                             Label(item.isRequired ? "取消必帶" : "設為必帶", systemImage: "pin.circle")
                         }
-                        
+
                         Button(role: .destructive) { deleteItem(item) } label: {
                             Label("刪除", systemImage: "trash")
                         }
@@ -104,37 +119,6 @@ struct Bag_BackpackChecklistView: View {
         // ✅ 重要：右上角 + 不要放，交給 FAB
         .toolbar { }
         
-        // 左下角「重設」＋右下角「完成(清空勾選)」
-        .safeAreaInset(edge: .bottom) {
-            HStack {
-                Button {
-                    showResetConfirm = true
-                } label: {
-                    Label("重設", systemImage: "arrow.counterclockwise")
-                }
-                .buttonStyle(.bordered)
-                
-                Spacer()
-                
-                Button {
-                    clearAllChecked()
-                } label: {
-                    Image(systemName: "checkmark.circle.fill")
-                        .font(.title2)
-                }
-                .buttonStyle(.borderedProminent)
-            }
-            .padding()
-            .background(.ultraThinMaterial)
-        }
-        .confirmationDialog(
-            "要重設書包物品嗎？",
-            isPresented: $showResetConfirm,
-            titleVisibility: .visible
-        ) {
-            Button("重設", role: .destructive) { resetToDefault() }
-            Button("取消", role: .cancel) { }
-        }
         
         // 新增
         .sheet(isPresented: $showAdd) {
@@ -162,6 +146,20 @@ struct Bag_BackpackChecklistView: View {
         // ✅ 第一次進來資料庫是空的，就灌預設物品（只動儲存，不動 UI）
         .onAppear {
             seedIfNeeded()
+            fab.apply(context: .feature(.bagRequired))
+        }
+        .onChange(of: fab.route) {
+            guard let route = fab.route else { return }
+            switch route {
+            case .addBagItem:
+                showAdd = true
+                fab.route = nil
+            case .bagEditMode:
+                isEditMode.toggle()
+                fab.route = nil
+            default:
+                break
+            }
         }
     }
     
@@ -169,31 +167,11 @@ struct Bag_BackpackChecklistView: View {
     
     private func seedIfNeeded() {
         guard items.isEmpty else { return }
-        for d in defaultItems {
+        let existingNames = Set(items.map(\.name))
+        for d in defaultItems where !existingNames.contains(d.name) {
             context.insert(BagItemModel(name: d.name, icon: d.icon, isRequired: d.isRequired, isChecked: false))
         }
         try? context.save()
-    }
-    
-    private func clearAllChecked() {
-        for item in items {
-            item.isChecked = false
-        }
-        try? context.save()
-    }
-    
-    private func resetToDefault() {
-        // 刪光 → 灌預設 → 全取消勾選
-        for item in items {
-            context.delete(item)
-        }
-        for d in defaultItems {
-            context.insert(BagItemModel(name: d.name, icon: d.icon, isRequired: d.isRequired, isChecked: false))
-        }
-        try? context.save()
-        
-        editingItem = nil
-        showAdd = false
     }
     
     private func toggle(_ item: BagItemModel) {
@@ -211,11 +189,4 @@ struct Bag_BackpackChecklistView: View {
         try? context.save()
     }
     
-    // 先留著，之後如果要做「全勾」再用
-    private func markAllChecked() {
-        for item in items {
-            item.isChecked = true
-        }
-        try? context.save()
-    }
 }

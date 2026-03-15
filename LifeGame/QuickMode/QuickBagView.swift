@@ -1,7 +1,7 @@
 import SwiftUI
 import SwiftData
 
-/// Quick Mode 專用：收拾書包（不含底部重設/打勾按鈕）
+/// Quick Mode 專用：整理書包（不含底部重設/打勾按鈕）
 struct QuickBagView: View {
     @Environment(\.modelContext) private var context
     @Query(sort: \BagItemModel.name) private var items: [BagItemModel]

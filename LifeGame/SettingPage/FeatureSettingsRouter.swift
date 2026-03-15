@@ -33,6 +33,8 @@ struct FeatureSettingsRouter: View {
             QuestionModuleSettingsView()
         case .moodThermometer:
             MoodSettingsView()
+        case .mandala:
+            MandalaSettingsView()
         default:
             SettingsView()
         }

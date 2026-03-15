@@ -109,12 +109,17 @@ private extension SettingsView {
             NavigationLink {
                 BagSettingsView()
             } label: {
-                Label("收拾書包", systemImage: "backpack")
+                Label("整理書包", systemImage: "backpack")
             }
             NavigationLink {
                 MoodSettingsView()
             } label: {
                 Label("心情溫度計", systemImage: "heart.text.square")
+            }
+            NavigationLink {
+                MandalaSettingsView()
+            } label: {
+                Label("曼陀羅圖表", systemImage: "square.grid.3x3")
             }
         }
     }
