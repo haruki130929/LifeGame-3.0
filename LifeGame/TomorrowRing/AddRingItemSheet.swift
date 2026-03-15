@@ -37,11 +37,11 @@ struct AddRingItemSheet: View {
                     TextField("名稱", text: $draft.title)
 
                     Picker("圖示", selection: $draft.icon) {
-                        Label("clock", systemImage: "clock").tag("clock")
-                        Label("book", systemImage: "book").tag("book")
-                        Label("figure.walk", systemImage: "figure.walk").tag("figure.walk")
-                        Label("fork.knife", systemImage: "fork.knife").tag("fork.knife")
-                        Label("moon", systemImage: "moon").tag("moon")
+                        Label("時鐘", systemImage: "clock").tag("clock")
+                        Label("書本", systemImage: "book").tag("book")
+                        Label("走路", systemImage: "figure.walk").tag("figure.walk")
+                        Label("用餐", systemImage: "fork.knife").tag("fork.knife")
+                        Label("睡眠", systemImage: "moon").tag("moon")
                     }
                 }
                 

@@ -270,6 +270,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LifeGame/Info.plist;
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "LifeGame 需要存取你的行事曆，以便新增和管理事件";
+				INFOPLIST_KEY_NSMotionUsageDescription = "LifeGame 使用動態感應器來產生卡片視差效果";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "LifeGame 需要存取你的相簿，讓你為日誌加入照片";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -306,6 +307,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LifeGame/Info.plist;
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "LifeGame 需要存取你的行事曆，以便新增和管理事件";
+				INFOPLIST_KEY_NSMotionUsageDescription = "LifeGame 使用動態感應器來產生卡片視差效果";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "LifeGame 需要存取你的相簿，讓你為日誌加入照片";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

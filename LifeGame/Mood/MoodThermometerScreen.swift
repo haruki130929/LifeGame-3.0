@@ -45,7 +45,7 @@ struct MoodThermometerScreen: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .alert("上一個小時已經記錄過了", isPresented: $showHourlyLimitAlert) {
-                    Button("OK", role: .cancel) { }
+                    Button("好", role: .cancel) { }
                 } message: {
                     Text("每小時只能記錄一次，等這個小時結束後再記錄。")
                 }

@@ -9,7 +9,7 @@ struct ContentPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("Content").font(.title2).bold()
+                Text("工具欄").font(.title2).bold()
                 Spacer()
                 Button {
                     withAnimation(.easeInOut) { isOpen = false }
