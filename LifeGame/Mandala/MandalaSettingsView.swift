@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MandalaSettingsView: View {
 
-    @StateObject private var store = MandalaStore()
+    @EnvironmentObject private var store: MandalaStore
 
     // 顏色設定
     @State private var goalColor: Color = .clear

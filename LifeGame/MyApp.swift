@@ -23,6 +23,7 @@ struct LifeGameApp: App {
     @StateObject private var historyStore = HistoryStore()
     @StateObject private var coachMarkStore = CoachMarkStore()
     @StateObject private var moodSettings = MoodSettingsStore()
+    @StateObject private var mandalaStore = MandalaStore()
 
     init() {
         // 1. 註冊所有 @Model 類型
@@ -92,6 +93,7 @@ struct LifeGameApp: App {
                         .environmentObject(historyStore)
                         .environmentObject(coachMarkStore)
                         .environmentObject(moodSettings)
+                        .environmentObject(mandalaStore)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
                         .modelContainer(coordinator.modelContainer)
                         .id(storageConfig.currentMode)

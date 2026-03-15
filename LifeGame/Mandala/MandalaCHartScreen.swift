@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MandalaChartScreen: View {
 
-    @StateObject private var store = MandalaStore()
+    @EnvironmentObject private var store: MandalaStore
     @EnvironmentObject private var fab: FabStore
     @State private var isEditMode = false
 
