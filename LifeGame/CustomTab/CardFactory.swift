@@ -60,7 +60,7 @@ struct CardFactory: View {
             EmptyView()  // 已移除，保留 case 避免已存儲資料解碼失敗
 
         case .dailyLog:
-            DailyLogCard(size: .large)
+            EmptyView()  // 已移除卡片，保留 case 避免已存儲資料解碼失敗
 
         case .tomorrowRing:
             TomorrowRingCard(size: .large, plan: $tomorrowPlan,

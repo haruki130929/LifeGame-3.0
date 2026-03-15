@@ -36,7 +36,7 @@ struct HomeDashboardContentView: View {
                 // 根據選中的切頁取出該切頁的卡片類型
                 let tabCardTypes = currentTab?.cardTypes ?? []
                 let slotCards = tabCardTypes
-                    .filter { $0 != .editCards && $0 != .todayStatus && $0 != .quickStart }
+                    .filter { $0 != .editCards && $0 != .todayStatus && $0 != .quickStart && $0 != .dailyLog }
 
                 if slotCards.isEmpty {
                     emptySlotPlaceholder
