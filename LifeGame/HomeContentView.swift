@@ -68,6 +68,7 @@ struct HomeContentView: View {
                         HomeMainPanelView(
                             selectedTab: $selectedTab,
                             currentSlot: currentSlot,
+                            slotCardStore: slotCardStore,
                             containerWidth: w - sideInset * 2,
                             leftTopButtonWidth: leftTopButtonWidth
                         )
@@ -196,13 +197,10 @@ struct HomeContentView: View {
 
 // MARK: - FAB helpers
 private extension HomeContentView {
-    /// 從目前選中的切頁卡片動態產生可導航的 FeatureID 清單
+    /// 從目前時段的卡片動態產生可導航的 FeatureID 清單
     var currentFabFeatures: [FeatureID] {
-        guard case .tab(let id) = selectedTab,
-              let tab = customTabStore.tabs.first(where: { $0.id == id }) else {
-            return []
-        }
-        return tab.cardTypes.compactMap { $0.featureID }
+        slotCardStore.items(for: currentSlot)
+            .compactMap { $0.type.featureID }
     }
 
     func refreshFabMenu() {

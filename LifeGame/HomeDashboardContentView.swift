@@ -11,6 +11,8 @@ struct HomeDashboardContentView: View {
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var coachMarkStore: CoachMarkStore
 
+    @ObservedObject var slotCardStore: SlotCardConfigStore
+
     /// 外框 tabs 的高度（因為內容要往下避開 tab）
     let tabHeight: CGFloat
 
@@ -31,33 +33,32 @@ struct HomeDashboardContentView: View {
                     .padding(.vertical, 8)
                     .padding(.top, 4)
 
-                if let tab = currentTab {
-                    if tab.cardTypes.isEmpty {
-                        emptyTabPlaceholder(name: tab.name)
-                    } else if AppLayout.isIPad {
-                        // iPad：卡片 Grid 佈局
-                        LazyVGrid(
-                            columns: [GridItem(.adaptive(minimum: 300), spacing: 16)],
-                            spacing: 16
-                        ) {
-                            ForEach(tab.cardTypes, id: \.self) { cardType in
-                                CardFactory(cardType: cardType, ringSelectedID: $ringSelectedID)
-                            }
-                        }
-                    } else {
-                        // iPhone：手風琴文字列
-                        VStack(spacing: 12) {
-                            ForEach(tab.cardTypes.filter { $0.featureID != nil }, id: \.self) { cardType in
-                                ExpandableCardRow(
-                                    cardType: cardType,
-                                    expandedCardType: $expandedCardType,
-                                    ringSelectedID: $ringSelectedID
-                                )
-                            }
+                let slotCards = slotCardStore.items(for: currentSlot).map(\.type)
+                    .filter { $0 != .editCards && $0 != .todayStatus && $0 != .quickStart }
+
+                if slotCards.isEmpty {
+                    emptySlotPlaceholder
+                } else if AppLayout.isIPad {
+                    // iPad：卡片 Grid 佈局
+                    LazyVGrid(
+                        columns: [GridItem(.adaptive(minimum: 300), spacing: 16)],
+                        spacing: 16
+                    ) {
+                        ForEach(slotCards, id: \.self) { cardType in
+                            CardFactory(cardType: cardType, ringSelectedID: $ringSelectedID)
                         }
                     }
                 } else {
-                    noTabPlaceholder
+                    // iPhone：手風琴文字列
+                    VStack(spacing: 12) {
+                        ForEach(slotCards.filter { $0.featureID != nil }, id: \.self) { cardType in
+                            ExpandableCardRow(
+                                cardType: cardType,
+                                expandedCardType: $expandedCardType,
+                                ringSelectedID: $ringSelectedID
+                            )
+                        }
+                    }
                 }
 
                 Spacer(minLength: 0)
@@ -73,8 +74,11 @@ struct HomeDashboardContentView: View {
                 }
             }
         )
-        // 切換 Tab 時收起展開的卡片
+        // 切換 Tab 或時段時收起展開的卡片
         .onChange(of: selectedTab) { _, _ in
+            expandedCardType = nil
+        }
+        .onChange(of: currentSlot) { _, _ in
             expandedCardType = nil
         }
     }
@@ -128,32 +132,18 @@ struct HomeDashboardContentView: View {
         }
     }
 
-    private func emptyTabPlaceholder(name: String) -> some View {
+    private var emptySlotPlaceholder: some View {
         VStack(spacing: 16) {
             Spacer().frame(height: 40)
             Image(systemName: "square.dashed")
                 .font(.system(size: 40))
                 .foregroundStyle(.tertiary)
-            Text("「\(name)」還沒有卡片")
+            Text("此時段還沒有卡片")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Text("長按切頁可以編輯內容")
+            Text("點編輯按鈕設定卡片")
                 .font(.caption)
                 .foregroundStyle(.tertiary)
-            Spacer()
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var noTabPlaceholder: some View {
-        VStack(spacing: 16) {
-            Spacer().frame(height: 40)
-            Image(systemName: "plus.square.dashed")
-                .font(.system(size: 40))
-                .foregroundStyle(.tertiary)
-            Text("點「＋」新增你的第一個切頁")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
             Spacer()
         }
         .frame(maxWidth: .infinity)

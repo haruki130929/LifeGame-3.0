@@ -4,6 +4,7 @@ struct HomeMainPanelView: View {
 
     @Binding var selectedTab: TabSelection
     let currentSlot: TimeSlot
+    @ObservedObject var slotCardStore: SlotCardConfigStore
 
     let containerWidth: CGFloat
     let leftTopButtonWidth: CGFloat
@@ -104,6 +105,7 @@ struct HomeMainPanelView: View {
             HomeDashboardContentView(
                 selectedTab: selectedTab,
                 currentSlot: currentSlot,
+                slotCardStore: slotCardStore,
                 tabHeight: tabH
             )
 
