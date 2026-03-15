@@ -19,6 +19,7 @@ struct CustomTab: Identifiable, Codable, Equatable {
 
 // MARK: - CustomTabStore
 
+@MainActor
 final class CustomTabStore: ObservableObject {
     @Published private(set) var tabs: [CustomTab] {
         didSet { save() }

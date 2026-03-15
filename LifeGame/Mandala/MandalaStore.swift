@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 final class MandalaStore: ObservableObject {
 
     struct Document: Identifiable, Codable, Equatable {

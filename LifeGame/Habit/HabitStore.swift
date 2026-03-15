@@ -3,6 +3,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 final class HabitStore: ObservableObject {
     // MARK: - Storage keys
     private let habitsKey = "habits_v1"

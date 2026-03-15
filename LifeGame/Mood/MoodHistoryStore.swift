@@ -13,6 +13,7 @@ struct MoodPoint: Identifiable, Codable {
     }
 }
 
+@MainActor
 final class MoodHistoryStore: ObservableObject {
     @Published private(set) var points: [MoodPoint] = []
 

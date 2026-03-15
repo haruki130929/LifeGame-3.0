@@ -170,7 +170,7 @@ struct NestedGroup: Identifiable, Codable, Equatable {
 
 // MARK: - 自訂問題的答案
 
-struct CustomAnswer: Codable, Equatable, Identifiable {
+struct CustomAnswer: Codable, Equatable, Identifiable, Sendable {
     var id: UUID { questionId }
     var questionId: UUID
 

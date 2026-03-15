@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 final class WeekReviewStore: ObservableObject {
     
     private let storageKey = "weekReview.data"

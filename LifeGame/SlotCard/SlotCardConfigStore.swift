@@ -2,6 +2,7 @@ import SwiftUI
 import Combine
 import Foundation
 
+@MainActor
 final class SlotCardConfigStore: ObservableObject {
 
     // MARK: - Config（5 個時段）

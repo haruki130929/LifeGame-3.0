@@ -3,6 +3,7 @@ import SwiftUI
 import Combine
 import Foundation
 
+@MainActor
 final class HistoryStore: ObservableObject {
     @Published var records: [String: DayRecord] = [:]
     private let key = "history_records_v1"

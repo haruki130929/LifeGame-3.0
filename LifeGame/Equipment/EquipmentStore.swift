@@ -3,6 +3,7 @@ import SwiftUI
 import Combine
 import Foundation
 
+@MainActor
 final class EquipmentStore: ObservableObject {
     @Published var items: [EquipItem] = []
     private let key = "equipments_v1"

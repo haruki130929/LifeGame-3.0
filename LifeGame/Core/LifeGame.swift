@@ -3,6 +3,7 @@ import Foundation
 import Combine
 import SwiftUI
 
+@MainActor
 final class LifeGame: ObservableObject {
     @Published var hp = Stat(current: 100, max: 100)
     @Published var fp = Stat(current: 100, max: 100)

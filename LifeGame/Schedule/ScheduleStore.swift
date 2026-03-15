@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 
+@MainActor
 final class ScheduleStore: ObservableObject {
     
     private let storageKey = "schedule_hourly_titles_v1"
