@@ -49,10 +49,10 @@ final class SlotCardConfigStore: ObservableObject {
 
             let base = Config(
                 beforeLeave:    defaults([.tomorrowRing, .bagRequired, .editCards]),
-                morning:        defaults([.todayStatus, .calendar, .dailyLog, .editCards]),
-                earlyAfternoon: defaults([.todayStatus, .calendar, .dailyLog, .editCards]),
-                beforeEnd:      defaults([.todayStatus, .dailyLog, .editCards]),
-                bedtime:        defaults([.todayStatus, .dailyLog, .editCards])
+                morning:        defaults([.calendar, .dailyLog, .editCards]),
+                earlyAfternoon: defaults([.calendar, .dailyLog, .editCards]),
+                beforeEnd:      defaults([.dailyLog, .editCards]),
+                bedtime:        defaults([.dailyLog, .editCards])
             )
             initialConfig = Self.migrateIfNeeded(base)
         }

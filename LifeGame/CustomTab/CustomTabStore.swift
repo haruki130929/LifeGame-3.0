@@ -40,6 +40,12 @@ final class CustomTabStore: ObservableObject {
                 }
                 saved[0] = first
             }
+            // 遷移：移除已廢棄的 todayStatus 卡片
+            saved = saved.map { tab in
+                var t = tab
+                t.cardTypes.removeAll { $0 == .todayStatus }
+                return t
+            }
             self.tabs = saved
         } else {
             // 初次安裝：預設一個「工具」切頁

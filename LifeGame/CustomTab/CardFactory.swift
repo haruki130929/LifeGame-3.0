@@ -57,7 +57,7 @@ struct CardFactory: View {
             TodoQuadrantCardLarge(store: todoStore)
 
         case .todayStatus:
-            TodayStatusContentCard(game: game)
+            EmptyView()  // 已移除，保留 case 避免已存儲資料解碼失敗
 
         case .dailyLog:
             DailyLogCard(size: .large)
