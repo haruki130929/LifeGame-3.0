@@ -48,11 +48,13 @@ private extension MonthlyScoreCalendarCardLarge {
                 Image(systemName: "chevron.left")
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("上一個月")
 
             Button { monthOffset += 1 } label: {
                 Image(systemName: "chevron.right")
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("下一個月")
         }
     }
 

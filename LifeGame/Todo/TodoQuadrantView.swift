@@ -119,6 +119,7 @@ struct TodoQuadrantCardLarge: View {
                     .foregroundStyle(item.isDone ? AnyShapeStyle(.secondary) : AnyShapeStyle(theme.accentColor))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(item.isDone ? "標為未完成" : "標為完成")
 
             Text(item.title)
                 .font(.footnote)
@@ -289,6 +290,7 @@ struct TodoQuadrantBoardView: View {
                         .foregroundStyle(theme.accentColor)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("新增待辦")
             }
 
             VStack(spacing: 8) {
@@ -323,6 +325,7 @@ struct TodoQuadrantBoardView: View {
                     .foregroundStyle(item.isDone ? AnyShapeStyle(.secondary) : AnyShapeStyle(theme.accentColor))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel(item.isDone ? "標為未完成" : "標為完成")
 
             Text(item.title)
                 .font(.body)

@@ -214,14 +214,14 @@ struct EquipmentSettingsView: View {
                             store.items.remove(at: idx)
                             store.save()
                         }
-                    } label: { Image(systemName: "trash") }
+                    } label: { Image(systemName: "trash").accessibilityLabel("刪除") }
                 }
             }
         }
         .navigationTitle("裝備設定")
         .toolbar {
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button { showAdd = true } label: { Image(systemName: "plus") }
+                Button { showAdd = true } label: { Image(systemName: "plus").accessibilityLabel("新增裝備") }
             }
         }
         .sheet(isPresented: $showAdd) {

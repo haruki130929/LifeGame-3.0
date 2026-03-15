@@ -59,6 +59,7 @@ struct QuickModeShellView: View {
                                 .background(Color(.tertiaryLabel))
                                 .clipShape(Circle())
                                 .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 3)
+                                .accessibilityLabel("設定")
                         }
                         .padding(.trailing, 20)
                         .padding(.bottom, 20)

@@ -33,6 +33,7 @@ struct PhotoFullscreenPreview: View {
                             .foregroundStyle(.white)
                             .shadow(radius: 4)
                             .padding()
+                            .accessibilityLabel("關閉")
                     }
                 }
                 Spacer()

@@ -297,6 +297,7 @@ struct RingRow: View {
                     .foregroundStyle(.white.opacity(0.6))
             }
             .buttonStyle(.plain)
+            .accessibilityLabel("編輯")
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 10)

@@ -118,6 +118,7 @@ struct Bag_BackpackChecklistView: View {
                                     .font(.title3)
                                     .foregroundStyle(.red)
                             }
+                            .accessibilityLabel("刪除\(item.name)")
                             .offset(x: -6, y: -6)
                         }
                     }

@@ -98,6 +98,7 @@ struct HomeDashboardContentView: View {
                 Image(systemName: "pencil.circle.fill")
                     .font(.system(size: 18))
                     .foregroundStyle(theme.isDark ? .white.opacity(0.35) : .primary.opacity(0.3))
+                    .accessibilityLabel("編輯卡片")
             }
             .buttonStyle(.plain)
             .background(

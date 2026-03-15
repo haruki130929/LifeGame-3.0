@@ -52,5 +52,6 @@ private struct PlusFloatingButton: View {
             )
             .shadow(radius: 10, y: 6)
             .contentShape(Circle())
+            .accessibilityLabel("新增時段")
     }
 }

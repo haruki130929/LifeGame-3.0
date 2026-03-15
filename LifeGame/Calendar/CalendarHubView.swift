@@ -21,19 +21,21 @@ struct CalendarHubView: View {
                     } label: {
                         Image(systemName: "chevron.left")
                     }
-                    
+                    .accessibilityLabel("上一個月")
+
                     Spacer()
-                    
+
                     Text(titleText(calendar: cal))
                         .font(.title2).bold()
-                    
+
                     Spacer()
-                    
+
                     Button {
                         stepAnchor(1, calendar: cal)
                     } label: {
                         Image(systemName: "chevron.right")
                     }
+                    .accessibilityLabel("下一個月")
                 }
                 .padding(.horizontal, 16)
                 .padding(.top, 10)
@@ -70,6 +72,7 @@ struct CalendarHubView: View {
                     .frame(width: 56, height: 56)
                     .background(.thinMaterial)
                     .clipShape(Circle())
+                    .accessibilityLabel("新增事件")
             }
             .padding(.trailing, 18)
             .padding(.bottom, 18)
@@ -85,6 +88,7 @@ struct CalendarHubView: View {
                     CalendarSettingsView(settings: settings)
                 } label: {
                     Image(systemName: "gearshape")
+                        .accessibilityLabel("行事曆設定")
                 }
             }
         }

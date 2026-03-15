@@ -25,18 +25,20 @@ struct HistoryView: View {
                 Image(systemName: "chevron.left")
             }
             .buttonStyle(.bordered)
-            
+            .accessibilityLabel("上一個月")
+
             Spacer()
-            
+
             Text(monthTitle(month))
                 .font(.title3).fontWeight(.semibold)
-            
+
             Spacer()
-            
+
             Button { month = shiftMonth(month, by: 1) } label: {
                 Image(systemName: "chevron.right")
             }
             .buttonStyle(.bordered)
+            .accessibilityLabel("下一個月")
         }
     }
     

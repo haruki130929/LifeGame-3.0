@@ -183,6 +183,7 @@ struct FabButton: View {
                 .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.12), radius: 12, x: 0, y: 8)
                 .scaleEffect(btnScale)
                 .rotationEffect(.degrees(btnRotation))
+                .accessibilityLabel(fab.isExpanded ? "收合選單" : "展開選單")
         }
         .buttonStyle(.plain)
         .disabled(isAnimating)

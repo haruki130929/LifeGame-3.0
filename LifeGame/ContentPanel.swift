@@ -19,6 +19,7 @@ struct ContentPanel: View {
                         .frame(width: 40, height: 40)
                         .background(.thinMaterial)
                         .clipShape(Circle())
+                        .accessibilityLabel("關閉")
                 }
                 .buttonStyle(.plain)
             }

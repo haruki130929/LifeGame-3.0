@@ -73,13 +73,15 @@ struct CalendarCard: View {
                         .foregroundStyle(.primary)
                 }
                 .buttonStyle(.plain)
-                
+                .accessibilityLabel("上一個月")
+
                 Button(action: onNextMonth) {
                     Image(systemName: "chevron.right")
                         .font(.headline)
                         .foregroundStyle(.primary)
                 }
                 .buttonStyle(.plain)
+                .accessibilityLabel("下一個月")
             }
         }
     }
