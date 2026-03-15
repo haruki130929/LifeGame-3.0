@@ -5,15 +5,22 @@ struct TodoQuadrantCardLarge: View {
     @EnvironmentObject private var theme: ThemeStore
     @ObservedObject var store: TodoQuadrantStore
 
-    // ── 點象限 → 進到功能頁並聚焦該象限 ──
+    // ── 點象限 → 用 sheet 打開該象限編輯 ──
     @State private var selectedQuadrant: TodoQuadrant? = nil
 
     var body: some View {
         cardBody
-            // 導航到完整功能頁（點象限觸發）
-            .navigationDestination(item: $selectedQuadrant) { quadrant in
-                TodoQuadrantBoardView(store: store, focusedQuadrant: quadrant)
-                    .navigationTitle("待辦四象限")
+            .sheet(item: $selectedQuadrant) { quadrant in
+                NavigationStack {
+                    TodoQuadrantBoardView(store: store, focusedQuadrant: quadrant)
+                        .navigationTitle(quadrant.title)
+                        .navigationBarTitleDisplayMode(.inline)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarTrailing) {
+                                Button("完成") { selectedQuadrant = nil }
+                            }
+                        }
+                }
             }
     }
 
