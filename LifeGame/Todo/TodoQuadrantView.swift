@@ -5,23 +5,14 @@ struct TodoQuadrantCardLarge: View {
     @EnvironmentObject private var theme: ThemeStore
     @ObservedObject var store: TodoQuadrantStore
 
-    // ── 點象限 → 新增該象限的待辦 ──
-    @State private var addQuadrant: TodoQuadrant? = nil
-
-    // ── 點卡片其他地方 → 進到功能頁 ──
-    @State private var showPage = false
+    // ── 點象限 → 進到功能頁並聚焦該象限 ──
+    @State private var selectedQuadrant: TodoQuadrant? = nil
 
     var body: some View {
         cardBody
-            .contentShape(Rectangle())
-            .onTapGesture { showPage = true }
-            // 新增待辦 sheet（點象限觸發）
-            .sheet(item: $addQuadrant) { quadrant in
-                AddTodoToQuadrantSheet(store: store, quadrant: quadrant)
-            }
-            // 導航到完整功能頁（點卡片其他區域觸發）
-            .navigationDestination(isPresented: $showPage) {
-                TodoQuadrantBoardView(store: store)
+            // 導航到完整功能頁（點象限觸發）
+            .navigationDestination(item: $selectedQuadrant) { quadrant in
+                TodoQuadrantBoardView(store: store, focusedQuadrant: quadrant)
                     .navigationTitle("待辦四象限")
             }
     }
@@ -79,7 +70,7 @@ struct TodoQuadrantCardLarge: View {
         let list = store.previewItems(in: q, limit: 2)
 
         return Button {
-            addQuadrant = q
+            selectedQuadrant = q
         } label: {
             VStack(alignment: .leading, spacing: 6) {
                 Text(q.title)
@@ -87,7 +78,7 @@ struct TodoQuadrantCardLarge: View {
                     .foregroundStyle(.secondary)
 
                 if list.isEmpty {
-                    Text("點擊新增")
+                    Text("尚無待辦")
                         .font(.footnote)
                         .foregroundStyle(.tertiary)
                 } else {
@@ -114,8 +105,13 @@ struct TodoQuadrantCardLarge: View {
 
     private func previewRow(_ item: TodoItem) -> some View {
         HStack(spacing: 8) {
-            Image(systemName: item.isDone ? "checkmark.circle.fill" : "circle")
-                .foregroundStyle(item.isDone ? AnyShapeStyle(.secondary) : AnyShapeStyle(theme.accentColor))
+            Button {
+                store.toggleDone(item)
+            } label: {
+                Image(systemName: item.isDone ? "checkmark.circle.fill" : "circle")
+                    .foregroundStyle(item.isDone ? AnyShapeStyle(.secondary) : AnyShapeStyle(theme.accentColor))
+            }
+            .buttonStyle(.plain)
 
             Text(item.title)
                 .font(.footnote)
@@ -174,32 +170,67 @@ struct TodoQuadrantBoardView: View {
     @EnvironmentObject private var fab: FabStore
     @ObservedObject var store: TodoQuadrantStore
 
+    /// 從卡片點進來時，自動展開的象限
+    var focusedQuadrant: TodoQuadrant? = nil
+
     @State private var addQuadrant: TodoQuadrant? = nil
     @State private var isEditMode = false
+    @State private var expandedQuadrant: TodoQuadrant? = nil
 
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
 
-                axisHint
+                // 展開模式的返回按鈕
+                if expandedQuadrant != nil {
+                    HStack {
+                        Button {
+                            withAnimation(.easeInOut(duration: 0.25)) {
+                                expandedQuadrant = nil
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                Image(systemName: "chevron.left")
+                                Text("全部象限")
+                            }
+                            .font(.subheadline)
+                        }
+                        Spacer()
+                    }
+                } else {
+                    axisHint
+                }
 
-                // 2x2 Grid
-                VStack(spacing: 12) {
-                    HStack(spacing: 12) {
-                        quadrantCell(.importantNotUrgent)
-                        quadrantCell(.importantUrgent)
+                // 展開模式：只顯示被選中的象限
+                if let expanded = expandedQuadrant {
+                    quadrantCell(expanded)
+                        .transition(.opacity)
+                } else {
+                    // 2x2 Grid（點擊可展開單一象限）
+                    VStack(spacing: 12) {
+                        HStack(spacing: 12) {
+                            quadrantCell(.importantNotUrgent)
+                                .onTapGesture { withAnimation(.easeInOut(duration: 0.25)) { expandedQuadrant = .importantNotUrgent } }
+                            quadrantCell(.importantUrgent)
+                                .onTapGesture { withAnimation(.easeInOut(duration: 0.25)) { expandedQuadrant = .importantUrgent } }
+                        }
+                        HStack(spacing: 12) {
+                            quadrantCell(.notImportantNotUrgent)
+                                .onTapGesture { withAnimation(.easeInOut(duration: 0.25)) { expandedQuadrant = .notImportantNotUrgent } }
+                            quadrantCell(.urgentNotImportant)
+                                .onTapGesture { withAnimation(.easeInOut(duration: 0.25)) { expandedQuadrant = .urgentNotImportant } }
+                        }
                     }
-                    HStack(spacing: 12) {
-                        quadrantCell(.notImportantNotUrgent)
-                        quadrantCell(.urgentNotImportant)
-                    }
+                    .transition(.opacity)
                 }
             }
             .padding(14)
         }
-        // ── FAB 選單接入 ──
         .onAppear {
             fab.apply(context: .feature(.todoQuadrant))
+            if let focusedQuadrant {
+                expandedQuadrant = focusedQuadrant
+            }
         }
         .onDisappear {
             fab.popActions()
@@ -239,8 +270,19 @@ struct TodoQuadrantBoardView: View {
 
     private func quadrantCell(_ q: TodoQuadrant) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text(q.title)
-                .font(.headline)
+            HStack {
+                Text(q.title)
+                    .font(.headline)
+                Spacer()
+                Button {
+                    addQuadrant = q
+                } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(theme.accentColor)
+                }
+                .buttonStyle(.plain)
+            }
 
             VStack(spacing: 8) {
                 let list = store.items(in: q)
@@ -259,7 +301,7 @@ struct TodoQuadrantBoardView: View {
             Spacer(minLength: 0)
         }
         .padding(12)
-        .frame(maxWidth: .infinity, minHeight: 220, alignment: .topLeading)
+        .frame(maxWidth: .infinity, minHeight: expandedQuadrant != nil ? 300 : 220, alignment: .topLeading)
         .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
