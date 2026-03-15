@@ -71,6 +71,9 @@ struct BagRequiredCardLarge: View {
                 }
             }
         }
+        .onAppear {
+            BagSeeder.seedIfNeeded(context: context)
+        }
     }
 
     private func toggle(_ item: BagItemModel) {

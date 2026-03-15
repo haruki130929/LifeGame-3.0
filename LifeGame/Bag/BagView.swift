@@ -1,6 +1,33 @@
 import SwiftUI
 import SwiftData
 
+// MARK: - Seed 預設書包物品
+
+enum BagSeeder {
+    static let defaults: [(name: String, icon: String, isRequired: Bool)] = [
+        ("錢包", "wallet.bifold", true),
+        ("鑰匙", "key", true),
+        ("耳機", "airpods.pro", true),
+        ("充電線", "cable.connector", false),
+        ("行動電源", "bolt.batteryblock", false),
+        ("水壺", "bag.fill", true),
+        ("筆袋", "applepencil", true),
+        ("手帳本", "book", false),
+        ("課本／講義", "books.vertical.fill", false)
+    ]
+
+    @MainActor
+    static func seedIfNeeded(context: ModelContext) {
+        let desc = FetchDescriptor<BagItemModel>()
+        let count = (try? context.fetchCount(desc)) ?? 0
+        guard count == 0 else { return }
+        for d in defaults {
+            context.insert(BagItemModel(name: d.name, icon: d.icon, isRequired: d.isRequired, isChecked: false))
+        }
+        try? context.save()
+    }
+}
+
 // MARK: - Card
 
 struct BagItemCard: View {
@@ -58,18 +85,7 @@ struct Bag_BackpackChecklistView: View {
     @State private var editingItem: BagItemModel? = nil
     @State private var isEditMode = false
     
-    // ✅ 預設物品：第一次資料庫是空的時候會自動灌進去
-    private let defaultItems: [(name: String, icon: String, isRequired: Bool)] = [
-        ("錢包", "wallet.bifold", true),
-        ("鑰匙", "key", true),
-        ("耳機", "airpods.pro", true),
-        ("充電線", "cable.connector", false),
-        ("行動電源", "bolt.batteryblock", false),
-        ("水壺", "bag.fill", true),
-        ("筆袋", "applepencil", true),
-        ("手帳本", "book", false),
-        ("課本／講義", "books.vertical.fill", false)
-    ]
+    // 預設物品改由 BagSeeder 統一管理
     
     private let columns: [GridItem] = [
         GridItem(.adaptive(minimum: 120), spacing: 16)
@@ -166,12 +182,7 @@ struct Bag_BackpackChecklistView: View {
     // MARK: - Actions (SwiftData)
     
     private func seedIfNeeded() {
-        guard items.isEmpty else { return }
-        let existingNames = Set(items.map(\.name))
-        for d in defaultItems where !existingNames.contains(d.name) {
-            context.insert(BagItemModel(name: d.name, icon: d.icon, isRequired: d.isRequired, isChecked: false))
-        }
-        try? context.save()
+        BagSeeder.seedIfNeeded(context: context)
     }
     
     private func toggle(_ item: BagItemModel) {
