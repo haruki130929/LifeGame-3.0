@@ -82,14 +82,23 @@ struct HomeRootView: View {
                 featureSettingsTarget = feature
                 fab.route = nil
 
-            // 功能頁面專用 route，由各自的 View 處理
-            case .addRingItem, .quickAppendRing, .jumpToToday,
-                 .addTodoToQuadrant, .todoEditMode,
-                 .addWish, .editWishList, .addLedgerEntry, .viewLedgerChart,
-                 .monthlyScoreStats,
-                 .addBagItem, .bagEditMode,
-                 .addMandalaChart, .mandalaEditMode:
-                break
+            // 功能頁面專用 route：先導航到對應功能頁，保留 route 讓功能頁接手
+            case .addRingItem, .quickAppendRing:
+                navigationPath.append(FeatureID.tomorrowRing)
+            case .jumpToToday:
+                navigationPath.append(FeatureID.calendar)
+            case .addTodoToQuadrant, .todoEditMode:
+                navigationPath.append(FeatureID.todoQuadrant)
+            case .addWish, .editWishList:
+                navigationPath.append(FeatureID.wish)
+            case .addLedgerEntry, .viewLedgerChart:
+                navigationPath.append(FeatureID.ledger)
+            case .monthlyScoreStats:
+                navigationPath.append(FeatureID.monthlyScoreCalendar)
+            case .addBagItem, .bagEditMode:
+                navigationPath.append(FeatureID.bagRequired)
+            case .addMandalaChart, .mandalaEditMode:
+                navigationPath.append(FeatureID.mandala)
             }
         }
         .sheet(isPresented: $showAddCalendarEvent) {
