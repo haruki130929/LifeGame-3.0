@@ -324,13 +324,13 @@ private struct DailyLogFullReviewCard: View {
             SectionTitle("身體狀況")
             
             if entry.painAreas.isEmpty {
-                Text("疼痛：無")
+                Text("不適：無")
             } else {
                 let list = entry.painAreas.map { area -> String in
                     let score = entry.painScoreByArea[area] ?? 1
                     return "\(area.rawValue)（\(score)/10）"
                 }
-                Text("疼痛：\(list.joined(separator: "、"))")
+                Text("不適：\(list.joined(separator: "、"))")
             }
             
             Text("注意到身體狀況：\(entry.bodyNoticeTiming.rawValue)")

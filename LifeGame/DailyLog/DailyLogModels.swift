@@ -35,17 +35,15 @@ enum MoodChangeType: String, CaseIterable, Codable, Identifiable {
 
 enum MoodChangeReason: String, CaseIterable, Codable, Identifiable {
     case anxiety = "焦慮"
-    case chat = "聊天"
-    case favorite = "做喜歡的事"
+    case unexpected = "突發狀況"
     case other = "其他"
     var id: String { rawValue }
 }
 
 enum StabilizeMethod: String, CaseIterable, Codable, Identifiable {
-    case selfHarm = "手受傷"
-    case weightedBlanket = "壓力毯"
-    case plushBracelet = "毛絨手環"
-    case hairPulling = "拔頭髮"
+    case breathing = "深呼吸"
+    case music = "聽音樂"
+    case exercise = "活動身體"
     case other = "其他"
     var id: String { rawValue }
 }
@@ -59,18 +57,17 @@ enum AnxietyLevel: String, CaseIterable, Codable, Identifiable {
 }
 
 enum AnxietyReason: String, CaseIterable, Codable, Identifiable {
-    case sound = "聲音"
-    case crowd = "人多"
-    case spotlight = "成為焦點"
+    case environment = "環境"
+    case study = "課業"
+    case unexpected = "突發狀況"
     case other = "其他"
     var id: String { rawValue }
 }
 
 enum AnxietySymptom: String, CaseIterable, Codable, Identifiable {
-    case cannotSpeak = "無法開口"
-    case stiff = "肢體僵硬"
     case fastHeartbeat = "心跳快"
     case tremble = "顫抖"
+    case sweat = "冒汗"
     case other = "其他"
     var id: String { rawValue }
 }
@@ -87,8 +84,8 @@ enum ImpulseLevel: String, CaseIterable, Codable, Identifiable {
 }
 
 enum ImpulseType: String, CaseIterable, Codable, Identifiable {
-    case selfHarm = "手受傷"
-    case hairPulling = "拔頭髮"
+    case browsing = "上網"
+    case favorite = "做喜歡的事"
     case impulseShopping = "衝動購物"
     case stayingUp = "熬夜"
     case other = "其他"
@@ -157,9 +154,10 @@ enum DifficultyReason: String, CaseIterable, Codable, Identifiable {
 
 enum PainArea: String, CaseIterable, Codable, Identifiable {
     case headache = "頭痛"
-    case rightShoulderBlade = "右肩胛骨內側"
-    case rightElbow = "右手肘"
-    case rightWrist = "右手腕"
+    case stomachache = "肚子痛"
+    case muscleTension = "肌肉緊繃"
+    case menstrualPain = "經痛"
+    case dryEyes = "眼睛乾澀"
     var id: String { rawValue }
 }
 

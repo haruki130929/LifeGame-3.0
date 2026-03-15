@@ -9,9 +9,9 @@ struct BodySectionView: View {
             // 疲勞（Slider）
             ScoreSliderRow(title: "今日疲勞程度", value: $entry.fatigueScore)
 
-            // 疼痛的地方（多選）
+            // 不舒服的地方（多選）
             VStack(alignment: .leading, spacing: 8) {
-                Text("疼痛的地方（可複選）")
+                Text("不舒服的地方（可複選）")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
 
@@ -22,7 +22,7 @@ struct BodySectionView: View {
                     )
 
                     if entry.painAreas.contains(area) {
-                        Picker("疼痛程度（1～10）", selection: bindingForPainScore(area)) {
+                        Picker("不適程度（1～10）", selection: bindingForPainScore(area)) {
                             ForEach(1...10, id: \.self) { v in
                                 Text("\(v)").tag(v)
                             }
