@@ -141,6 +141,9 @@ struct HomeContentView: View {
         .onChange(of: currentSlot) { _, _ in
             refreshFabMenu()
         }
+        .onChange(of: selectedTab) { _, _ in
+            refreshFabMenu()
+        }
         .onChange(of: isContentOpen) { _, open in
             withAnimation(.easeInOut(duration: 0.2)) {
                 fab.isHidden = open
@@ -190,10 +193,13 @@ struct HomeContentView: View {
 
 // MARK: - FAB helpers
 private extension HomeContentView {
-    /// 從 SlotCard 設定動態產生可導航的 FeatureID 清單
+    /// 從目前選中的切頁卡片動態產生可導航的 FeatureID 清單
     var currentFabFeatures: [FeatureID] {
-        slotCardStore.items(for: currentSlot)
-            .compactMap { $0.type.featureID }   // 過濾掉 quickStart / todayStatus / editCards
+        guard case .tab(let id) = selectedTab,
+              let tab = customTabStore.tabs.first(where: { $0.id == id }) else {
+            return []
+        }
+        return tab.cardTypes.compactMap { $0.featureID }
     }
 
     func refreshFabMenu() {
