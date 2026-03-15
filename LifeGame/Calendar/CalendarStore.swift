@@ -1,7 +1,6 @@
 import Foundation
 import Combine
 import EventKit
-import Combine
 import SwiftUI
 
 @MainActor

@@ -2,7 +2,6 @@
 import SwiftUI
 import Combine
 import Foundation
-import Combine
 
 final class HistoryStore: ObservableObject {
     @Published var records: [String: DayRecord] = [:]

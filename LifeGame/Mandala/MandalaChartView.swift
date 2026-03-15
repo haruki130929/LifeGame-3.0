@@ -81,7 +81,7 @@ struct MandalaChartView: View {
                 RoundedRectangle(cornerRadius: 8)
                     .stroke(style.border, lineWidth: style.borderWidth)
             )
-            .cornerRadius(8)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
         } else if let text = textForReadOnlyCell(row: row, col: col) {
             // 唯讀格子（外圍中心，顯示主題副本）
             Text(text)
@@ -95,7 +95,7 @@ struct MandalaChartView: View {
                     RoundedRectangle(cornerRadius: 8)
                         .stroke(style.border, lineWidth: style.borderWidth)
                 )
-                .cornerRadius(8)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
         } else {
             Color.clear
                 .frame(minHeight: cellMinHeight)
@@ -131,7 +131,7 @@ struct MandalaChartView: View {
                     .stroke(dragSource == cellId ? Color.blue : style.border,
                             lineWidth: dragSource == cellId ? 2 : style.borderWidth)
             )
-            .cornerRadius(8)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
             .opacity(dragSource == cellId ? 0.5 : 1.0)
             .if(isEditable) { view in
                 view
@@ -140,7 +140,7 @@ struct MandalaChartView: View {
                             .font(.system(size: 13))
                             .padding(8)
                             .background(Color.blue.opacity(0.15))
-                            .cornerRadius(8)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
                             .onAppear { dragSource = cellId }
                     }
                     .dropDestination(for: String.self) { items, _ in
@@ -151,7 +151,7 @@ struct MandalaChartView: View {
                         store.swapCells(from: (srcParts[0], srcParts[1]), to: (dstParts[0], dstParts[1]))
                         dragSource = nil
                         return true
-                    } isTargeted: { targeted in
+                    } isTargeted: { _ in
                         // 可以加入 hover 效果
                     }
             }

@@ -2,7 +2,6 @@
 import SwiftUI
 import Combine
 import Foundation
-import Combine
 
 final class EquipmentStore: ObservableObject {
     @Published var items: [EquipItem] = []
