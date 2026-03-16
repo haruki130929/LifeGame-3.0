@@ -19,7 +19,7 @@ final class SlotCardConfigStore: ObservableObject {
         didSet { save() }
     }
 
-    private let key = "slot_card_config_v4"  // v4：重新設定預設卡片
+    private let key = "slot_card_config_v5"  // v5：睡前加入本月結算
 
     // MARK: - Init
 
@@ -60,7 +60,7 @@ final class SlotCardConfigStore: ObservableObject {
             morning:        d([.todoQuadrant, .tomorrowRing, .calendar]),
             earlyAfternoon: d([.todoQuadrant, .tomorrowRing, .calendar]),
             beforeEnd:      d([.todoQuadrant, .tomorrowRing, .calendar]),
-            bedtime:        d([.todoQuadrant, .tomorrowRing, .calendar, .bagRequired])
+            bedtime:        d([.todoQuadrant, .tomorrowRing, .calendar, .bagRequired, .monthlyScoreCalendar])
         )
     }
 
