@@ -33,9 +33,10 @@ struct HomeDashboardContentView: View {
                     .padding(.vertical, 8)
                     .padding(.top, 4)
 
-                // 根據選中的切頁取出該切頁的卡片類型
-                let tabCardTypes = currentTab?.cardTypes ?? []
-                let slotCards = tabCardTypes
+                // 根據目前時段取出該時段的卡片類型
+                let slotItems = slotCardStore.items(for: currentSlot)
+                let slotCards = slotItems
+                    .map { $0.type }
                     .filter { $0 != .editCards && $0 != .todayStatus && $0 != .quickStart && $0 != .dailyLog }
 
                 if slotCards.isEmpty {
@@ -120,9 +121,10 @@ struct HomeDashboardContentView: View {
         .foregroundStyle(theme.isDark ? .white.opacity(0.7) : .primary.opacity(0.6))
         .padding(.leading, 2)
         .sheet(isPresented: $showTabEditor) {
-            if let tab = currentTab {
-                CustomTabEditorSheet(editingTab: tab)
-            }
+            SlotCardEditorSheet(
+                slot: currentSlot,
+                slotCardStore: slotCardStore
+            )
         }
     }
 
