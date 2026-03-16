@@ -48,11 +48,11 @@ final class SlotCardConfigStore: ObservableObject {
             }
 
             let base = Config(
-                beforeLeave:    defaults([.tomorrowRing, .bagRequired, .editCards]),
-                morning:        defaults([.calendar, .dailyLog, .editCards]),
-                earlyAfternoon: defaults([.calendar, .dailyLog, .editCards]),
-                beforeEnd:      defaults([.dailyLog, .editCards]),
-                bedtime:        defaults([.dailyLog, .editCards])
+                beforeLeave:    defaults([.bagRequired, .todoQuadrant, .tomorrowRing, .calendar]),
+                morning:        defaults([.todoQuadrant, .tomorrowRing, .calendar]),
+                earlyAfternoon: defaults([.todoQuadrant, .tomorrowRing, .calendar]),
+                beforeEnd:      defaults([.todoQuadrant, .tomorrowRing, .calendar]),
+                bedtime:        defaults([.todoQuadrant, .tomorrowRing, .calendar, .bagRequired])
             )
             initialConfig = Self.migrateIfNeeded(base)
         }
@@ -121,7 +121,7 @@ final class SlotCardConfigStore: ObservableObject {
         }
 
         return Config(
-            beforeLeave:    defaults([.tomorrowRing, .bagRequired, .editCards]),
+            beforeLeave:    defaults([.bagRequired, .todoQuadrant, .tomorrowRing, .calendar]),
             morning:        legacy.morning,
             earlyAfternoon: legacy.afternoon,
             beforeEnd:      legacy.evening,
