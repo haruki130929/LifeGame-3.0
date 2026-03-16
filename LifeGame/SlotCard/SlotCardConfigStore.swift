@@ -19,8 +19,7 @@ final class SlotCardConfigStore: ObservableObject {
         didSet { save() }
     }
 
-    private let key = "slot_card_config_v3"         // v3：5 時段
-    private let legacyKey = "slot_card_config_v2"    // v2：舊 4 時段
+    private let key = "slot_card_config_v4"  // v4：重新設定預設卡片
 
     // MARK: - Init
 
@@ -28,7 +27,7 @@ final class SlotCardConfigStore: ObservableObject {
         let initialConfig: Config
 
         if let decoded: Config = StorageManager.load(Config.self, forKey: key) {
-            // 已有 v3 資料 → 直接用（保留使用者自訂的卡片配置）
+            // 已有 v4 資料 → 直接用（保留使用者自訂的卡片配置）
             var fixed = decoded
             fixed.beforeLeave    = Self.forceCalendarLarge(fixed.beforeLeave)
             fixed.morning        = Self.forceCalendarLarge(fixed.morning)
@@ -37,30 +36,32 @@ final class SlotCardConfigStore: ObservableObject {
             fixed.bedtime        = Self.forceCalendarLarge(fixed.bedtime)
             initialConfig = fixed
 
-        } else if let legacy = Self.loadLegacy(forKey: "slot_card_config_v2") {
-            // 有舊 v2 資料 → 遷移到 5 時段
-            initialConfig = Self.migrateFromV2(legacy)
-
         } else {
-            // 全新安裝 → 使用預設值（不再跑 migration 補卡片）
-            func defaults(_ types: [CardType]) -> [CardItem] {
-                types.map { CardItem(type: $0, size: $0.defaultSize) }
-            }
-
-            initialConfig = Config(
-                beforeLeave:    defaults([.bagRequired, .todoQuadrant, .tomorrowRing, .calendar]),
-                morning:        defaults([.todoQuadrant, .tomorrowRing, .calendar]),
-                earlyAfternoon: defaults([.todoQuadrant, .tomorrowRing, .calendar]),
-                beforeEnd:      defaults([.todoQuadrant, .tomorrowRing, .calendar]),
-                bedtime:        defaults([.todoQuadrant, .tomorrowRing, .calendar, .bagRequired])
-            )
+            // v3、v2 或全新安裝 → 一律使用新預設值
+            initialConfig = Self.makeDefaults()
         }
 
         self.config = initialConfig
 
-        debugLog("✅ SlotCardConfigStore init (v3 – 5 slots)")
+        debugLog("✅ SlotCardConfigStore init (v4 – 5 slots)")
         debugLog("beforeLeave types:", config.beforeLeave.map { $0.type.rawValue })
         debugLog("morning types:", config.morning.map { $0.type.rawValue })
+    }
+
+    // MARK: - 預設卡片配置
+
+    private static func makeDefaults() -> Config {
+        func d(_ types: [CardType]) -> [CardItem] {
+            types.map { CardItem(type: $0, size: $0.defaultSize) }
+        }
+
+        return Config(
+            beforeLeave:    d([.bagRequired, .todoQuadrant, .tomorrowRing, .calendar]),
+            morning:        d([.todoQuadrant, .tomorrowRing, .calendar]),
+            earlyAfternoon: d([.todoQuadrant, .tomorrowRing, .calendar]),
+            beforeEnd:      d([.todoQuadrant, .tomorrowRing, .calendar]),
+            bedtime:        d([.todoQuadrant, .tomorrowRing, .calendar, .bagRequired])
+        )
     }
 
     // MARK: - Public API
@@ -85,7 +86,7 @@ final class SlotCardConfigStore: ObservableObject {
         }
     }
 
-    // MARK: - Helpers (全部 static，避免 init 早期用到 self)
+    // MARK: - Helpers
 
     private static func forceCalendarLarge(_ items: [CardItem]) -> [CardItem] {
         items.map { item in
@@ -93,39 +94,6 @@ final class SlotCardConfigStore: ObservableObject {
             if copy.type == .calendar { copy.size = .large }
             return copy
         }
-    }
-
-    // MARK: - Legacy V2 (4 時段) 讀取
-
-    private struct LegacyConfig: Codable {
-        var morning: [CardItem]
-        var afternoon: [CardItem]
-        var evening: [CardItem]
-        var night: [CardItem]
-    }
-
-    private static func loadLegacy(forKey key: String) -> LegacyConfig? {
-        StorageManager.load(LegacyConfig.self, forKey: key)
-    }
-
-    /// 將舊 4 時段對應到新 5 時段
-    /// morning   → morning
-    /// afternoon → earlyAfternoon
-    /// evening   → beforeEnd
-    /// night     → bedtime
-    /// beforeLeave 給預設值
-    private static func migrateFromV2(_ legacy: LegacyConfig) -> Config {
-        func defaults(_ types: [CardType]) -> [CardItem] {
-            types.map { CardItem(type: $0, size: $0.defaultSize) }
-        }
-
-        return Config(
-            beforeLeave:    defaults([.bagRequired, .todoQuadrant, .tomorrowRing, .calendar]),
-            morning:        legacy.morning,
-            earlyAfternoon: legacy.afternoon,
-            beforeEnd:      legacy.evening,
-            bedtime:        legacy.night
-        )
     }
 
     // MARK: - Save
