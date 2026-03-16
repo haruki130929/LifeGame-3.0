@@ -81,9 +81,6 @@ struct CoachMarkOverlay: View {
     }
 
     // MARK: - 聚光燈圓心（螢幕座標）
-    //
-    // 所有按鈕都由各自的 View 用 .frame(in: .global) 回報螢幕座標，
-    // 不再用公式計算，避免不同 GR 座標系統不一致。
 
     private func spotlightCenter(
         for mark: CoachMarkStore.Mark,
@@ -96,6 +93,7 @@ struct CoachMarkOverlay: View {
         // fallback（按鈕尚未回報時的大致位置）
         let insets = windowInsets
         switch mark {
+        // Full Mode
         case .drawerButton:
             return CGPoint(x: 36, y: insets.top + 40)
         case .rightPanel:
@@ -104,6 +102,11 @@ struct CoachMarkOverlay: View {
             return CGPoint(x: screenSize.width - 46, y: screenSize.height - 46)
         case .tabEdit:
             return CGPoint(x: 150, y: insets.top + 120)
+        // Quick Mode
+        case .quickSwipe:
+            return CGPoint(x: screenSize.width / 2, y: screenSize.height / 2)
+        case .quickSettings:
+            return CGPoint(x: screenSize.width - 46, y: screenSize.height - 46)
         }
     }
 
@@ -117,6 +120,10 @@ struct CoachMarkOverlay: View {
             return 40
         case .tabEdit:
             return 22
+        case .quickSwipe:
+            return 80   // 較大圓圈框住卡片中央區域
+        case .quickSettings:
+            return 36
         }
     }
 
@@ -147,6 +154,14 @@ struct CoachMarkOverlay: View {
             // tab 區域 → 卡片在下方
             let x = min(spot.x + 80, screenSize.width / 2)
             return CGPoint(x: x, y: spot.y + radius + gap + 80)
+
+        case .quickSwipe:
+            // 卡片中央 → 提示卡在下方
+            return CGPoint(x: screenSize.width / 2, y: spot.y + radius + gap + 80)
+
+        case .quickSettings:
+            // 右下角 → 卡片在左上方
+            return CGPoint(x: spot.x - radius - gap - 120, y: spot.y - radius - gap - 60)
         }
     }
 
@@ -155,8 +170,9 @@ struct CoachMarkOverlay: View {
     @ViewBuilder
     private func tipCard(for mark: CoachMarkStore.Mark) -> some View {
         let info = tipInfo(for: mark)
-        let stepIndex = (CoachMarkStore.Mark.allCases.firstIndex(of: mark) ?? 0) + 1
-        let total = CoachMarkStore.Mark.allCases.count
+        let sequence = coachStore.activeSequenceForDisplay
+        let stepIndex = (sequence.firstIndex(of: mark) ?? 0) + 1
+        let total = sequence.count
 
         VStack(spacing: 14) {
             HStack(spacing: 6) {
@@ -220,6 +236,7 @@ struct CoachMarkOverlay: View {
 
     private func tipInfo(for mark: CoachMarkStore.Mark) -> TipInfo {
         switch mark {
+        // Full Mode
         case .drawerButton:
             return TipInfo(
                 icon: "line.3.horizontal",
@@ -243,6 +260,19 @@ struct CoachMarkOverlay: View {
                 icon: "pencil.circle.fill",
                 title: "編輯卡片",
                 desc: "點這裡自訂時段顯示的卡片"
+            )
+        // Quick Mode
+        case .quickSwipe:
+            return TipInfo(
+                icon: "hand.draw",
+                title: "滑動卡片",
+                desc: "左右滑動完成每張任務卡片"
+            )
+        case .quickSettings:
+            return TipInfo(
+                icon: "gearshape.fill",
+                title: "設定",
+                desc: "點這裡開啟設定"
             )
         }
     }

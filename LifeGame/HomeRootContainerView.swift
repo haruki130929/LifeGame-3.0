@@ -56,7 +56,8 @@ struct HomeRootContainerView: View {
         }
         .coordinateSpace(name: "coachRoot")
         .onAppear {
-            coachMarkStore.startIfNeeded()
+            let isQuick = !AppLayout.isIPad && phoneModeStore.mode == .quick
+            coachMarkStore.startIfNeeded(isQuickMode: isQuick)
         }
     }
 
