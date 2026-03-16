@@ -148,6 +148,9 @@ struct HomeContentView: View {
         .onReceive(customTabStore.$tabs) { _ in
             refreshFabMenu()
         }
+        .onReceive(slotCardStore.$config) { _ in
+            refreshFabMenu()
+        }
         .onChange(of: isContentOpen) { _, open in
             withAnimation(.easeInOut(duration: 0.2)) {
                 fab.isHidden = open

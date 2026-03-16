@@ -28,33 +28,32 @@ final class SlotCardConfigStore: ObservableObject {
         let initialConfig: Config
 
         if let decoded: Config = StorageManager.load(Config.self, forKey: key) {
-            // 已有 v3 資料 → 直接用
+            // 已有 v3 資料 → 直接用（保留使用者自訂的卡片配置）
             var fixed = decoded
             fixed.beforeLeave    = Self.forceCalendarLarge(fixed.beforeLeave)
             fixed.morning        = Self.forceCalendarLarge(fixed.morning)
             fixed.earlyAfternoon = Self.forceCalendarLarge(fixed.earlyAfternoon)
             fixed.beforeEnd      = Self.forceCalendarLarge(fixed.beforeEnd)
             fixed.bedtime        = Self.forceCalendarLarge(fixed.bedtime)
-            initialConfig = Self.migrateIfNeeded(fixed)
+            initialConfig = fixed
 
         } else if let legacy = Self.loadLegacy(forKey: "slot_card_config_v2") {
             // 有舊 v2 資料 → 遷移到 5 時段
-            initialConfig = Self.migrateIfNeeded(Self.migrateFromV2(legacy))
+            initialConfig = Self.migrateFromV2(legacy)
 
         } else {
-            // 全新安裝
+            // 全新安裝 → 使用預設值（不再跑 migration 補卡片）
             func defaults(_ types: [CardType]) -> [CardItem] {
                 types.map { CardItem(type: $0, size: $0.defaultSize) }
             }
 
-            let base = Config(
+            initialConfig = Config(
                 beforeLeave:    defaults([.bagRequired, .todoQuadrant, .tomorrowRing, .calendar]),
                 morning:        defaults([.todoQuadrant, .tomorrowRing, .calendar]),
                 earlyAfternoon: defaults([.todoQuadrant, .tomorrowRing, .calendar]),
                 beforeEnd:      defaults([.todoQuadrant, .tomorrowRing, .calendar]),
                 bedtime:        defaults([.todoQuadrant, .tomorrowRing, .calendar, .bagRequired])
             )
-            initialConfig = Self.migrateIfNeeded(base)
         }
 
         self.config = initialConfig
@@ -127,67 +126,6 @@ final class SlotCardConfigStore: ObservableObject {
             beforeEnd:      legacy.evening,
             bedtime:        legacy.night
         )
-    }
-
-    // MARK: - Migration（補 todoQuadrant + tomorrowPlan 等必要卡片）
-
-    private static func migrateIfNeeded(_ cfg: Config) -> Config {
-        var c = cfg
-        let targetSlots: [TimeSlot] = TimeSlot.allCases
-
-        for slot in targetSlots {
-            var items = Self.items(in: c, slot: slot)
-
-            // 補 todoQuadrant
-            if !items.contains(where: { $0.type == .todoQuadrant }) {
-                items.append(CardItem(type: .todoQuadrant, size: .large))
-            }
-
-            // 補 monthlyScoreCalendar（本月結算）
-            if !items.contains(where: { $0.type == .monthlyScoreCalendar }) {
-                if let calendarIndex = items.firstIndex(where: { $0.type == .calendar }) {
-                    let insertIndex = min(calendarIndex + 1, items.count)
-                    items.insert(CardItem(type: .monthlyScoreCalendar, size: .large), at: insertIndex)
-                } else {
-                    items.append(CardItem(type: .monthlyScoreCalendar, size: .large))
-                }
-            }
-
-            // 補 tomorrowPlan
-            if !items.contains(where: { $0.type == .tomorrowRing }) {
-                items.insert(CardItem(type: .tomorrowRing, size: .large), at: 0)
-            }
-
-            // 補 bagRequired（整理書包：只顯示必帶）
-            if !items.contains(where: { $0.type == .bagRequired }) {
-                let insertIndex = min(1, items.count)
-                items.insert(CardItem(type: .bagRequired, size: .medium), at: insertIndex)
-            }
-
-            Self.setItems(in: &c, slot: slot, items: items)
-        }
-
-        return c
-    }
-
-    private static func items(in c: Config, slot: TimeSlot) -> [CardItem] {
-        switch slot {
-        case .beforeLeave:    return c.beforeLeave
-        case .morning:        return c.morning
-        case .earlyAfternoon: return c.earlyAfternoon
-        case .beforeEnd:      return c.beforeEnd
-        case .bedtime:        return c.bedtime
-        }
-    }
-
-    private static func setItems(in c: inout Config, slot: TimeSlot, items: [CardItem]) {
-        switch slot {
-        case .beforeLeave:    c.beforeLeave = items
-        case .morning:        c.morning = items
-        case .earlyAfternoon: c.earlyAfternoon = items
-        case .beforeEnd:      c.beforeEnd = items
-        case .bedtime:        c.bedtime = items
-        }
     }
 
     // MARK: - Save
