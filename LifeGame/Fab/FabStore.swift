@@ -72,6 +72,7 @@ final class FabStore: ObservableObject {
     @Published var showSubMenu: Bool = false
     @Published var selectedFeature: FeatureID? = nil
     @Published var route: Route? = nil
+    @Published private(set) var currentFeatures: [FeatureID] = []
 
     private var featureStack: [[FabAction]] = []
 
@@ -129,8 +130,10 @@ final class FabStore: ObservableObject {
     func apply(context: FabContext) {
         switch context {
         case let .home(_, features):
+            currentFeatures = features
             setRootActions(makeHomeActions(features: features))
         case let .feature(feature):
+            currentFeatures = [feature]
             pushActions(makeDetailActions(for: feature))
         }
     }

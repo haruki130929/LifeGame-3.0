@@ -75,7 +75,10 @@ struct HomeRootView: View {
                 fab.route = nil
 
             case .navigate(let feature):
-                navigationPath.append(feature)
+                // 防止重複導航：只在根頁面時才 push
+                if navigationPath.isEmpty {
+                    navigationPath.append(feature)
+                }
                 fab.route = nil
 
             case .featureSettings(let feature):
