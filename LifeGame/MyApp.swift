@@ -69,6 +69,7 @@ struct LifeGameApp: App {
     }
 
     @AppStorage("onboarding_completed_v1") private var onboardingCompleted = false
+    @State private var showWhatsNew = false
 
     var body: some Scene {
         WindowGroup {
@@ -102,6 +103,19 @@ struct LifeGameApp: App {
                         .id(storageConfig.currentMode)
                         // ✅ Window 層級再套一次，確保整個視窗（狀態列等）都切換深淺模式
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
+                        // 版本更新內容
+                        .onAppear {
+                            if VersionTracker.shouldShowWhatsNew {
+                                showWhatsNew = true
+                            }
+                        }
+                        .sheet(isPresented: $showWhatsNew) {
+                            WhatsNewView(version: VersionTracker.currentVersion) {
+                                VersionTracker.markAsShown()
+                                showWhatsNew = false
+                            }
+                            .interactiveDismissDisabled()
+                        }
                 } else {
                     OnboardingView()
                         .environmentObject(theme)

@@ -13,6 +13,7 @@ struct FabFloatingOverlay: ViewModifier {
                         let safeTrailing = proxy.safeAreaInsets.trailing
 
                         FabButton()
+                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
                             .padding(.trailing, safeTrailing + LayoutTokens.fabSideGap)
                             .padding(.bottom, safeBottom + LayoutTokens.fabBottomGap)
                             .background(

@@ -1,6 +1,18 @@
 import SwiftUI
 
 struct FabButton: View {
+    var body: some View {
+        if AppLayout.isIPad {
+            FabButtoniPad()
+        } else {
+            FabButtoniPhone()
+        }
+    }
+}
+
+// MARK: - iPhone 版（長按手勢圓環）
+
+private struct FabButtoniPhone: View {
     @EnvironmentObject var fab: FabStore
     @EnvironmentObject private var theme: ThemeStore
 
@@ -38,17 +50,13 @@ struct FabButton: View {
 
     var body: some View {
         ZStack {
-            // 圓環開啟時的全螢幕背景（點擊關閉）
             if isRingActive {
                 Color.black.opacity(0.3)
                     .ignoresSafeArea()
-                    .onTapGesture {
-                        dismissRing()
-                    }
+                    .onTapGesture { dismissRing() }
                     .transition(.opacity)
             }
 
-            // FAB 按鈕 + 圓環
             fabButton
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
         }
@@ -70,10 +78,7 @@ struct FabButton: View {
             .scaleEffect(isRingActive ? 0.85 : 1.0)
             .rotationEffect(.degrees(isRingActive ? 45 : 0))
             .onTapGesture {
-                // 圓環開啟時，點「×」關閉
-                if isRingActive {
-                    dismissRing()
-                }
+                if isRingActive { dismissRing() }
             }
             .background(
                 GeometryReader { geo in
@@ -119,7 +124,7 @@ struct FabButton: View {
             .accessibilityLabel("選單")
     }
 
-    // MARK: - Ring Activation
+    // MARK: - Ring
 
     private func activateRing() {
         withAnimation(.spring(response: 0.3, dampingFraction: 0.72)) {
@@ -141,7 +146,7 @@ struct FabButton: View {
         ringRotation = 0
     }
 
-    // MARK: - Drag Handling
+    // MARK: - Drag
 
     private func handleDrag(at location: CGPoint) {
         let dx = location.x - fabGlobalCenter.x
@@ -193,7 +198,7 @@ struct FabButton: View {
         }
     }
 
-    // MARK: - 邊緣滾動
+    // MARK: - Edge Scroll
 
     private func checkEdgeScroll(fingerAngle: CGFloat) {
         let arcMid = (FabRingView.visibleStart + FabRingView.visibleEnd) / 2
@@ -261,17 +266,240 @@ struct FabButton: View {
         guard idx < items.count else { return }
 
         if fab.currentFeatures.count > 1 {
-            // 從反轉後的 ringItems 找回原始 feature
             let featureID = items[idx].id
             if let feature = fab.currentFeatures.first(where: { $0.rawValue == featureID }) {
                 fab.route = .navigate(feature)
             }
         } else {
-            // 從反轉後的 index 對應回原始 actions
             let actionID = items[idx].id
             if let action = fab.actions.first(where: { $0.id.uuidString == actionID }) {
                 action.action()
             }
+        }
+    }
+}
+
+// MARK: - iPad 版（原本的膠囊選單）
+
+private struct FabButtoniPad: View {
+    @EnvironmentObject var fab: FabStore
+    @EnvironmentObject private var theme: ThemeStore
+
+    @State private var btnScale: CGFloat = 1.0
+    @State private var btnRotation: Double = 0
+    @State private var isAnimating = false
+    @State private var showMenuItems: Bool = false
+    @State private var showSubItems: Bool = false
+
+    private let fabCircleSize: CGFloat = 60
+    private let itemDelay: Double = 0.04
+
+    private var fabCircleBg: Color {
+        theme.isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.08)
+    }
+    private var pillBg: Color {
+        theme.isDark ? Color.white.opacity(0.12) : Color.black.opacity(0.06)
+    }
+    private var pillStroke: Color {
+        theme.isDark ? Color.white.opacity(0.10) : Color.black.opacity(0.08)
+    }
+    private var subPillBg: Color {
+        theme.isDark ? Color.white.opacity(0.18) : Color.black.opacity(0.10)
+    }
+    private var fabForeground: Color {
+        theme.isDark ? .white.opacity(0.95) : Color(.label)
+    }
+    private var menuForeground: Color {
+        theme.isDark ? .white.opacity(0.92) : Color(.label)
+    }
+
+    var body: some View {
+        VStack(alignment: .trailing, spacing: 10) {
+            HStack(alignment: .bottom, spacing: 12) {
+                if fab.showSubMenu && fab.isExpanded {
+                    subMenuView
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                }
+                mainMenuView
+            }
+            mainButton
+        }
+        .onChange(of: fab.isExpanded) { _, isExpanded in
+            if !isExpanded && !isAnimating {
+                withAnimation(.spring(response: 0.22, dampingFraction: 0.80)) {
+                    btnRotation = 0
+                    btnScale = 1.0
+                }
+                showMenuItems = false
+                showSubItems = false
+            }
+        }
+    }
+
+    @ViewBuilder private var mainMenuView: some View {
+        if fab.isExpanded {
+            VStack(alignment: .trailing, spacing: 8) {
+                ForEach(fab.actions.indices, id: \.self) { index in
+                    mainMenuItem(index: index, item: fab.actions[index])
+                }
+            }
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+    }
+
+    private func mainMenuItem(index: Int, item: FabAction) -> some View {
+        let isSelected: Bool = {
+            guard let selected = fab.selectedFeature else { return false }
+            return fab.title(for: selected) == item.title
+        }()
+
+        return Button {
+            item.action()
+        } label: {
+            HStack(spacing: 8) {
+                Text(item.title)
+                    .font(.callout.weight(.semibold))
+                Image(systemName: item.systemImage)
+                    .font(.callout.weight(.semibold))
+            }
+            .foregroundStyle(menuForeground)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isSelected
+                ? (theme.isDark ? Color.white.opacity(0.28) : Color.black.opacity(0.14))
+                : pillBg)
+            .clipShape(Capsule())
+            .overlay(
+                Capsule().stroke(
+                    isSelected
+                        ? (theme.isDark ? Color.white.opacity(0.4) : Color.black.opacity(0.18))
+                        : pillStroke,
+                    lineWidth: isSelected ? 1.5 : 1
+                )
+            )
+        }
+        .buttonStyle(.plain)
+        .opacity(showMenuItems ? 1 : 0)
+        .offset(y: showMenuItems ? 0 : 14)
+        .scaleEffect(showMenuItems ? 1 : 0.92, anchor: .trailing)
+        .animation(
+            .spring(response: 0.28, dampingFraction: 0.72)
+            .delay(Double(index) * itemDelay),
+            value: showMenuItems
+        )
+    }
+
+    private var subMenuView: some View {
+        VStack(alignment: .trailing, spacing: 8) {
+            ForEach(fab.subActions.indices, id: \.self) { index in
+                subMenuItem(index: index, item: fab.subActions[index])
+            }
+        }
+        .onAppear {
+            withAnimation(.spring(response: 0.26, dampingFraction: 0.72)) {
+                showSubItems = true
+            }
+        }
+    }
+
+    private func subMenuItem(index: Int, item: FabAction) -> some View {
+        Button {
+            item.action()
+        } label: {
+            HStack(spacing: 8) {
+                Text(item.title)
+                    .font(.callout.weight(.semibold))
+                Image(systemName: item.systemImage)
+                    .font(.callout.weight(.semibold))
+            }
+            .foregroundStyle(menuForeground)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(subPillBg)
+            .clipShape(Capsule())
+            .overlay(Capsule().stroke(
+                theme.isDark ? Color.white.opacity(0.20) : Color.black.opacity(0.10),
+                lineWidth: 1))
+        }
+        .buttonStyle(.plain)
+        .opacity(showSubItems ? 1 : 0)
+        .offset(x: showSubItems ? 0 : 16)
+        .scaleEffect(showSubItems ? 1 : 0.92, anchor: .trailing)
+        .animation(
+            .spring(response: 0.26, dampingFraction: 0.72)
+            .delay(Double(index) * itemDelay),
+            value: showSubItems
+        )
+        .onChange(of: fab.showSubMenu) { _, isShowing in
+            showSubItems = isShowing
+        }
+    }
+
+    private var mainButton: some View {
+        Button {
+            if fab.isExpanded {
+                collapseSequence()
+            } else {
+                expandSequence()
+            }
+        } label: {
+            Image(systemName: "plus")
+                .font(.system(size: 30, weight: .bold))
+                .foregroundStyle(fabForeground)
+                .frame(width: fabCircleSize, height: fabCircleSize)
+                .background(fabCircleBg)
+                .clipShape(Circle())
+                .overlay(Circle().stroke(
+                    theme.isDark ? Color.white.opacity(0.10) : Color.black.opacity(0.08),
+                    lineWidth: 1))
+                .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.12), radius: 12, x: 0, y: 8)
+                .scaleEffect(btnScale)
+                .rotationEffect(.degrees(btnRotation))
+                .accessibilityLabel(fab.isExpanded ? "收合選單" : "展開選單")
+        }
+        .buttonStyle(.plain)
+        .disabled(isAnimating)
+    }
+
+    private func expandSequence() {
+        guard !isAnimating else { return }
+        isAnimating = true
+        Task { @MainActor in
+            withAnimation(.easeOut(duration: 0.05)) { btnScale = 0.72 }
+            try? await Task.sleep(nanoseconds: 80_000_000)
+            fab.isExpanded = true
+            showMenuItems = false
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.55)) {
+                btnRotation = 135; btnScale = 1.28
+            }
+            showMenuItems = true
+            try? await Task.sleep(nanoseconds: 70_000_000)
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.8)) { btnScale = 1.0 }
+            try? await Task.sleep(nanoseconds: 120_000_000)
+            isAnimating = false
+        }
+    }
+
+    private func collapseSequence() {
+        guard !isAnimating else { return }
+        isAnimating = true
+        Task { @MainActor in
+            showMenuItems = false
+            showSubItems = false
+            fab.hideSubMenu()
+            let totalDelay = Double(max(fab.actions.count - 1, 0)) * itemDelay
+            let waitForItems = UInt64((totalDelay + 0.04) * 1_000_000_000)
+            try? await Task.sleep(nanoseconds: waitForItems)
+            withAnimation(.easeOut(duration: 0.05)) { btnScale = 0.72 }
+            try? await Task.sleep(nanoseconds: 80_000_000)
+            fab.isExpanded = false
+            withAnimation(.spring(response: 0.22, dampingFraction: 0.80)) {
+                btnRotation = 0; btnScale = 1.18
+            }
+            try? await Task.sleep(nanoseconds: 70_000_000)
+            withAnimation(.spring(response: 0.25, dampingFraction: 0.6)) { btnScale = 1.0 }
+            try? await Task.sleep(nanoseconds: 120_000_000)
+            isAnimating = false
         }
     }
 }
