@@ -68,7 +68,8 @@ private extension TomorrowRingView {
     var ringCanvas: some View {
         GeometryReader { geo in
             let rawSize = min(geo.size.width, geo.size.height)
-            let size = mode == .detail ? rawSize * 0.70 : rawSize
+            let detailScale: CGFloat = AppLayout.isIPad ? 0.70 : 0.85
+            let size = mode == .detail ? rawSize * detailScale : rawSize
             let geoCenter = CGPoint(x: geo.size.width / 2, y: geo.size.height / 2)
             // ✅ 手勢座標是相對於 ZStack（size × size），圓心在正中央
             let ringCenter = CGPoint(x: size / 2, y: size / 2)
@@ -86,8 +87,8 @@ private extension TomorrowRingView {
                     tickEvery: 30,
                     majorTickEvery: 60,
                     tickRadiusRatio: 0.92,
-                    minorTickLen: AppLayout.isIPad ? 9 : 7,
-                    majorTickLen: AppLayout.isIPad ? 15 : 11
+                    minorTickLen: AppLayout.isIPad ? 9 : 9,
+                    majorTickLen: AppLayout.isIPad ? 15 : 14
                 )
                 .allowsHitTesting(false)
 

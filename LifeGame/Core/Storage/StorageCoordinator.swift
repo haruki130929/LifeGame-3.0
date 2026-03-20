@@ -6,6 +6,7 @@ import SwiftData
 final class StorageCoordinator {
     private(set) var modelContainer: ModelContainer
     private(set) var isMigrating = false
+    private(set) var switchError: String?
 
     private let configuration: StorageConfiguration
     private let migrationManager = MigrationManager()
@@ -39,11 +40,12 @@ final class StorageCoordinator {
             do {
                 self.modelContainer = try Self.createContainer(mode: pending, schema: schema)
                 configuration.confirmModeSwitch()
+                switchError = nil
                 debugLog("✅ 儲存模式已切換：\(currentMode) → \(pending)")
             } catch {
-                // 新模式失敗（例如 iCloud 不可用）→ 回退到當前模式
-                debugLog("⚠️ 切換模式失敗，回退到 \(currentMode)：\(error)")
-                configuration.clearPendingMode()
+                // 新模式失敗 → 用當前模式啟動，但保留 pending 讓下次再試
+                debugLog("⚠️ 切換模式失敗，保留 pending 下次再試：\(error)")
+                switchError = error.localizedDescription
                 self.modelContainer = try Self.createContainer(mode: currentMode, schema: schema)
             }
         } else {

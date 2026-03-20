@@ -1,4 +1,5 @@
 import SwiftUI
+import MessageUI
 
 struct SettingsView: View {
 
@@ -11,6 +12,10 @@ struct SettingsView: View {
     @State private var hourlyMoodEnabled: Bool = false
     private let hourlyMoodEnabledKey = "hourlyMoodReminderEnabled_v1"
 
+    // MARK: - 回饋
+    @State private var showFeedbackMail = false
+    @State private var showMailUnavailable = false
+
     var body: some View {
         Form {
             if !AppLayout.isIPad {
@@ -21,11 +26,23 @@ struct SettingsView: View {
             featureSection
             appearanceSection
             storageSection
+            feedbackSection
             aboutSection
         }
         .navigationTitle("設定")
         .onAppear {
             hourlyMoodEnabled = StorageManager.load(Bool.self, forKey: hourlyMoodEnabledKey) ?? false
+        }
+        .sheet(isPresented: $showFeedbackMail) {
+            FeedbackMailView()
+        }
+        .alert("無法傳送郵件", isPresented: $showMailUnavailable) {
+            Button("複製信箱地址") {
+                UIPasteboard.general.string = "harukiyang122@gmail.com"
+            }
+            Button("取消", role: .cancel) {}
+        } message: {
+            Text("你的裝置尚未設定郵件帳號。\n請手動寄信至 harukiyang122@gmail.com")
         }
     }
 }
@@ -143,6 +160,26 @@ private extension SettingsView {
             } label: {
                 Label("儲存方式", systemImage: "externaldrive.fill.badge.icloud")
             }
+        }
+    }
+
+    // MARK: 使用者回饋
+    var feedbackSection: some View {
+        Section {
+            Button {
+                if MFMailComposeViewController.canSendMail() {
+                    showFeedbackMail = true
+                } else {
+                    showMailUnavailable = true
+                }
+            } label: {
+                Label("分享使用體驗", systemImage: "envelope")
+                    .foregroundStyle(theme.isDark ? .white : Color(.label))
+            }
+        } header: {
+            Text("意見回饋")
+        } footer: {
+            Text("告訴我你的使用體驗、建議或遇到的問題")
         }
     }
 

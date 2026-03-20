@@ -7,14 +7,38 @@ struct StorageSettingsView: View {
     @State private var showRestartAlert = false
     @State private var showICloudError = false
 
+    private var isICloudAvailable: Bool {
+        FileManager.default.ubiquityIdentityToken != nil
+    }
+
     var body: some View {
         Form {
+            // MARK: - iCloud 帳號狀態
+            Section {
+                HStack {
+                    Image(systemName: isICloudAvailable ? "checkmark.icloud.fill" : "xmark.icloud")
+                        .foregroundStyle(isICloudAvailable ? .green : .red)
+                        .font(.title3)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(isICloudAvailable ? "已登入 iCloud" : "未登入 iCloud")
+                            .font(.body.weight(.medium))
+                        if !isICloudAvailable {
+                            Text("請到「設定」→ 最上方 → 登入 Apple ID")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            } header: {
+                Text("帳號狀態")
+            }
+
+            // MARK: - 同步開關
             Section {
                 Toggle(
                     "iCloud 同步",
                     isOn: Binding(
                         get: {
-                            // 如果有 pending 切換，顯示 pending 的狀態
                             if let pending = storageConfig.pendingMode {
                                 return pending == .iCloud
                             }
@@ -25,11 +49,16 @@ struct StorageSettingsView: View {
                         }
                     )
                 )
+                .disabled(!isICloudAvailable && storageConfig.currentMode == .local)
             } header: {
                 Text("儲存方式")
             } footer: {
-                if coordinator.hasPendingSwitch,
-                   let pending = coordinator.pendingMode {
+                if let error = coordinator.switchError {
+                    Label("上次切換失敗：\(error)", systemImage: "exclamationmark.triangle")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                } else if coordinator.hasPendingSwitch,
+                          let pending = coordinator.pendingMode {
                     Text("將在下次啟動 App 時切換為\(pending == .iCloud ? " iCloud 同步" : "本機儲存")")
                         .foregroundStyle(.orange)
                 } else {
@@ -50,6 +79,18 @@ struct StorageSettingsView: View {
                     .foregroundStyle(.red)
                 }
             }
+
+            // MARK: - 說明
+            Section {
+                VStack(alignment: .leading, spacing: 8) {
+                    Label("iCloud 同步使用你的 Apple ID", systemImage: "person.icloud")
+                    Text("開啟 iCloud 同步後，資料會自動在你登入同一個 Apple ID 的所有裝置間同步，不需要額外登入。")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            } header: {
+                Text("說明")
+            }
         }
         .navigationTitle("儲存設定")
         .alert("需要重新啟動", isPresented: $showRestartAlert) {
@@ -68,7 +109,7 @@ struct StorageSettingsView: View {
         let newMode: StorageMode = enableICloud ? .iCloud : .local
 
         if newMode == .iCloud {
-            guard FileManager.default.ubiquityIdentityToken != nil else {
+            guard isICloudAvailable else {
                 showICloudError = true
                 return
             }

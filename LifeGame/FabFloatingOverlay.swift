@@ -6,30 +6,35 @@ struct FabFloatingOverlay: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .overlay(alignment: .bottomTrailing) {
+            .overlay {
                 if !fab.isHidden {
                     GeometryReader { proxy in
                         let safeBottom = proxy.safeAreaInsets.bottom
                         let safeTrailing = proxy.safeAreaInsets.trailing
 
                         FabButton()
+                            .padding(.trailing, safeTrailing + LayoutTokens.fabSideGap)
+                            .padding(.bottom, safeBottom + LayoutTokens.fabBottomGap)
                             .background(
                                 GeometryReader { geo in
-                                    Color.clear.onAppear {
-                                        DispatchQueue.main.async {
-                                            let f = geo.frame(in: .global)
+                                    Color.clear
+                                        .onAppear {
+                                            DispatchQueue.main.async {
+                                                let f = geo.frame(in: .global)
+                                                coachMarkStore.reportCenter(
+                                                    CGPoint(x: f.midX, y: f.midY),
+                                                    for: .fabButton
+                                                )
+                                            }
+                                        }
+                                        .onChange(of: geo.frame(in: .global)) { _, newFrame in
                                             coachMarkStore.reportCenter(
-                                                CGPoint(x: f.midX, y: f.midY),
+                                                CGPoint(x: newFrame.midX, y: newFrame.midY),
                                                 for: .fabButton
                                             )
                                         }
-                                    }
                                 }
                             )
-                            .padding(.trailing, safeTrailing + LayoutTokens.fabSideGap)
-                            .padding(.bottom, safeBottom + LayoutTokens.fabBottomGap)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
-                            .allowsHitTesting(true)
                     }
                     .ignoresSafeArea()
                     .transition(.opacity)

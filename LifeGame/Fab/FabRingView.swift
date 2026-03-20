@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - 圓環項目模型
 
-struct RingItem: Identifiable {
+struct FabRingItem: Identifiable {
     let id: String
     let icon: String
     let title: String
@@ -11,7 +11,7 @@ struct RingItem: Identifiable {
 // MARK: - FabRingView
 
 struct FabRingView: View {
-    let items: [RingItem]
+    let items: [FabRingItem]
     let highlightedIndex: Int?
     let rotationOffset: CGFloat
     let isDark: Bool
@@ -48,7 +48,7 @@ struct FabRingView: View {
         }
     }
 
-    private func ringItem(index: Int, item: RingItem, angle: CGFloat, visibility: CGFloat) -> some View {
+    private func ringItem(index: Int, item: FabRingItem, angle: CGFloat, visibility: CGFloat) -> some View {
         let isHighlighted = highlightedIndex == index
         let x = cos(angle) * ringRadius
         let y = sin(angle) * ringRadius
@@ -99,11 +99,15 @@ struct FabRingView: View {
 
     // MARK: - 角度計算（循環排列）
 
+    /// 固定間距，功能少時不會太分散
+    private static let itemSpacing: CGFloat = .pi * 0.19  // ~34°
+
     static func itemAngle(index: Int, total: Int, offset: CGFloat) -> CGFloat {
         guard total > 0 else { return 0 }
-        let step = (2 * .pi) / CGFloat(total)
         let arcCenter = (visibleStart + visibleEnd) / 2
-        return arcCenter + step * CGFloat(index) + offset
+        let totalSpan = itemSpacing * CGFloat(total - 1)
+        let startAngle = arcCenter - totalSpan / 2
+        return startAngle + itemSpacing * CGFloat(index) + offset
     }
 
     static func normalizeAngle(_ a: CGFloat) -> CGFloat {

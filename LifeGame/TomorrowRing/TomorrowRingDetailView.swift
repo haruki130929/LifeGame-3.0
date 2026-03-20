@@ -11,38 +11,23 @@ struct TomorrowRingDetailView: View {
     @State private var ringSelectedID: UUID? = nil
 
     var body: some View {
-        HStack(alignment: .top, spacing: 0) {
-            // ── 左半：圓環 ──
-            TomorrowRingView(
-                plan: $plan,
-                selectedItemID: $ringSelectedID,
-                mode: .detail,
-                gameHP: game.hp,
-                gameFP: game.fp
-            )
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            // ── 右半：時段列表 ──
-            ScrollView {
-                VStack(alignment: .leading, spacing: 10) {
-                    Text("時段")
-                        .font(.headline)
-
-                    if plan.items.isEmpty {
-                        emptyPlaceholder
-                    } else {
-                        ForEach(plan.items) { item in
-                            RingRow(item: item) {
-                                editingItem = item
-                            }
-                        }
+        Group {
+            if AppLayout.isIPad {
+                // iPad：左右並排
+                HStack(alignment: .top, spacing: 0) {
+                    ringSection
+                    listSection
+                }
+            } else {
+                // iPhone：上下排列（圓環在上，時段列表在下）
+                ScrollView {
+                    VStack(spacing: 0) {
+                        ringSection
+                            .frame(height: 360)
+                        phoneListSection
                     }
                 }
-                .padding(.horizontal, 14)
-                .padding(.top, 10)
-                .padding(.bottom, 80) // 留空間給 FAB
             }
-            .frame(maxWidth: .infinity)
         }
         // ✅ 點擊畫面任何地方取消選取
         .simultaneousGesture(
@@ -105,6 +90,63 @@ struct TomorrowRingDetailView: View {
                 plan.items.removeAll { $0.id == item.id }
             }
         }
+    }
+
+    // MARK: - Sections
+
+    private var ringSection: some View {
+        TomorrowRingView(
+            plan: $plan,
+            selectedItemID: $ringSelectedID,
+            mode: .detail,
+            gameHP: game.hp,
+            gameFP: game.fp
+        )
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    private var listSection: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("時段")
+                    .font(.headline)
+
+                if plan.items.isEmpty {
+                    emptyPlaceholder
+                } else {
+                    ForEach(plan.items) { item in
+                        RingRow(item: item) {
+                            editingItem = item
+                        }
+                    }
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.top, 10)
+            .padding(.bottom, 80)
+        }
+        .frame(maxWidth: .infinity)
+    }
+
+    /// iPhone 用：不包 ScrollView（外層已有）
+    private var phoneListSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("時段")
+                .font(.headline)
+
+            if plan.items.isEmpty {
+                emptyPlaceholder
+            } else {
+                ForEach(plan.items) { item in
+                    RingRow(item: item) {
+                        editingItem = item
+                    }
+                }
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.top, 10)
+        .padding(.bottom, 80)
     }
 
     // MARK: - 快速接續

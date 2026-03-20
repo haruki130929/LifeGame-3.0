@@ -231,6 +231,12 @@ private extension HomeContentView {
                         coachMarkStore.reportCenter(CGPoint(x: f.midX, y: f.midY), for: mark)
                     }
                 }
+                .onChange(of: geo.frame(in: .global)) { _, newFrame in
+                    coachMarkStore.reportCenter(
+                        CGPoint(x: newFrame.midX, y: newFrame.midY),
+                        for: mark
+                    )
+                }
         }
     }
 }

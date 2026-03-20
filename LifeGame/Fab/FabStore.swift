@@ -130,7 +130,10 @@ final class FabStore: ObservableObject {
     func apply(context: FabContext) {
         switch context {
         case let .home(_, features):
-            currentFeatures = features
+            // 如果已經在功能頁（stack 有 push），不要覆蓋 currentFeatures
+            if featureStack.count <= 1 {
+                currentFeatures = features
+            }
             setRootActions(makeHomeActions(features: features))
         case let .feature(feature):
             currentFeatures = [feature]

@@ -23,24 +23,38 @@ struct FabButton: View {
         theme.isDark ? .white.opacity(0.95) : Color(.label)
     }
 
-    /// 將 FabStore 的資料轉成 RingItem
-    /// 首頁：顯示 currentFeatures（卡片功能）
-    /// 功能頁：顯示 actions（該功能的操作）
-    private var ringItems: [RingItem] {
+    /// 右邊優先：第一個 action 在右邊，設定（最後一個）在左邊
+    private var ringItems: [FabRingItem] {
         if fab.currentFeatures.count > 1 {
-            // 首頁模式：多個功能
-            return fab.currentFeatures.map { feature in
-                RingItem(id: feature.rawValue, icon: fab.icon(for: feature), title: fab.title(for: feature))
+            return fab.currentFeatures.reversed().map { feature in
+                FabRingItem(id: feature.rawValue, icon: fab.icon(for: feature), title: fab.title(for: feature))
             }
         } else {
-            // 功能頁模式：顯示該功能的操作
-            return fab.actions.map { action in
-                RingItem(id: action.id.uuidString, icon: action.systemImage, title: action.title)
+            return fab.actions.reversed().map { action in
+                FabRingItem(id: action.id.uuidString, icon: action.systemImage, title: action.title)
             }
         }
     }
 
     var body: some View {
+        ZStack {
+            // 圓環開啟時的全螢幕背景（點擊關閉）
+            if isRingActive {
+                Color.black.opacity(0.3)
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        dismissRing()
+                    }
+                    .transition(.opacity)
+            }
+
+            // FAB 按鈕 + 圓環
+            fabButton
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        }
+    }
+
+    private var fabButton: some View {
         Circle()
             .fill(fabCircleBg)
             .frame(width: fabCircleSize, height: fabCircleSize)
@@ -55,11 +69,20 @@ struct FabButton: View {
             .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.12), radius: 12, x: 0, y: 8)
             .scaleEffect(isRingActive ? 0.85 : 1.0)
             .rotationEffect(.degrees(isRingActive ? 45 : 0))
+            .onTapGesture {
+                // 圓環開啟時，點「×」關閉
+                if isRingActive {
+                    dismissRing()
+                }
+            }
             .background(
                 GeometryReader { geo in
                     Color.clear.onAppear {
                         let f = geo.frame(in: .global)
                         fabGlobalCenter = CGPoint(x: f.midX, y: f.midY)
+                    }
+                    .onChange(of: geo.frame(in: .global)) { _, newFrame in
+                        fabGlobalCenter = CGPoint(x: newFrame.midX, y: newFrame.midY)
                     }
                 }
             )
@@ -107,6 +130,15 @@ struct FabButton: View {
         stopScrollTimer()
         let g = UIImpactFeedbackGenerator(style: .medium)
         g.impactOccurred()
+    }
+
+    private func dismissRing() {
+        stopScrollTimer()
+        withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
+            isRingActive = false
+            highlightedIndex = nil
+        }
+        ringRotation = 0
     }
 
     // MARK: - Drag Handling
@@ -225,14 +257,21 @@ struct FabButton: View {
         let g = UIImpactFeedbackGenerator(style: .medium)
         g.impactOccurred()
 
+        let items = ringItems
+        guard idx < items.count else { return }
+
         if fab.currentFeatures.count > 1 {
-            // 首頁：導航到功能頁
-            guard idx < fab.currentFeatures.count else { return }
-            fab.route = .navigate(fab.currentFeatures[idx])
+            // 從反轉後的 ringItems 找回原始 feature
+            let featureID = items[idx].id
+            if let feature = fab.currentFeatures.first(where: { $0.rawValue == featureID }) {
+                fab.route = .navigate(feature)
+            }
         } else {
-            // 功能頁：執行對應的 action
-            guard idx < fab.actions.count else { return }
-            fab.actions[idx].action()
+            // 從反轉後的 index 對應回原始 actions
+            let actionID = items[idx].id
+            if let action = fab.actions.first(where: { $0.id.uuidString == actionID }) {
+                action.action()
+            }
         }
     }
 }

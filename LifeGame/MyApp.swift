@@ -41,7 +41,8 @@ struct LifeGameApp: App {
         do {
             coord = try StorageCoordinator(configuration: config)
         } catch {
-            debugLog("⚠️ 第一次初始化失敗，重置偏好後重試：\(error)")
+            debugLog("⚠️ 第一次初始化失敗，重置為本機模式重試：\(error)")
+            // 只清除 pending，不改 currentMode（讓 StorageCoordinator 內部處理回退）
             config.clearPendingMode()
             config.setMode(.local)
             do {

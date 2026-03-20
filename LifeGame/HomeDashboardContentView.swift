@@ -106,15 +106,22 @@ struct HomeDashboardContentView: View {
             .buttonStyle(.plain)
             .background(
                 GeometryReader { geo in
-                    Color.clear.onAppear {
-                        DispatchQueue.main.async {
-                            let frame = geo.frame(in: .global)
+                    Color.clear
+                        .onAppear {
+                            DispatchQueue.main.async {
+                                let frame = geo.frame(in: .global)
+                                coachMarkStore.reportCenter(
+                                    CGPoint(x: frame.midX, y: frame.midY),
+                                    for: .tabEdit
+                                )
+                            }
+                        }
+                        .onChange(of: geo.frame(in: .global)) { _, newFrame in
                             coachMarkStore.reportCenter(
-                                CGPoint(x: frame.midX, y: frame.midY),
+                                CGPoint(x: newFrame.midX, y: newFrame.midY),
                                 for: .tabEdit
                             )
                         }
-                    }
                 }
             )
         }
