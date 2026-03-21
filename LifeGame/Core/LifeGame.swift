@@ -62,11 +62,14 @@ final class LifeGame: ObservableObject {
     var mpProgress: Double {
         Double(mp.current) / Double(mp.max)
     }
-    
+
     func settleToday(into history: HistoryStore) {
         let record = DayRecord.make(date: Date(), hp: hp.current, fp: fp.current, mp: mp.current)
         history.upsert(record: record)
     }
+
+    /// 結算前的快照（用於取消結算）
+    var preSettleSnapshot: (hp: Int, fp: Int, mp: Int)?
 }
 
 extension LifeGame {
@@ -77,11 +80,27 @@ extension LifeGame {
         fp.current = max(0, fp.current - 10)
     }
 
-    /// 今日結算：先做最小可用版本（之後要接 HistoryStore 再擴充）
+    /// 取消上課：回復 HP +10、FP +10
+    func undoClassCost() {
+        hp.current = min(hp.max, hp.current + 10)
+        fp.current = min(fp.max, fp.current + 10)
+    }
+
+    /// 今日結算：記錄快照後重置
     func settleToday() {
-        // 先留著：之後可以在這裡寫「把今日狀態寫進回顧 / 歷史」
-        // 例如：history.add(...)
+        preSettleSnapshot = (hp: hp.current, fp: fp.current, mp: mp.current)
+        resetForNewDay()
         debugLog("✅ settleToday")
+    }
+
+    /// 取消結算：回復到結算前的狀態
+    func undoSettle() {
+        guard let snap = preSettleSnapshot else { return }
+        hp.current = snap.hp
+        fp.current = snap.fp
+        mp.current = snap.mp
+        preSettleSnapshot = nil
+        debugLog("↩️ undoSettle")
     }
 
     // MARK: - 時間圓環自動扣除
@@ -104,9 +123,7 @@ extension LifeGame {
     }
 
     private static func todayKey() -> String {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "yyyy-MM-dd"
-        return fmt.string(from: Date())
+        return dateKeyString(Date())
     }
 
     /// 檢查時間圓環的時段，若時段已結束則自動扣除 HP/FP

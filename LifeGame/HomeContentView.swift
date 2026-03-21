@@ -153,7 +153,13 @@ struct HomeContentView: View {
         }
         .onChange(of: isContentOpen) { _, open in
             withAnimation(.easeInOut(duration: 0.2)) {
-                fab.isHidden = open
+                fab.isHidden = open || isDrawerOpen
+            }
+            if open { fab.collapse() }
+        }
+        .onChange(of: isDrawerOpen) { _, open in
+            withAnimation(.easeInOut(duration: 0.2)) {
+                fab.isHidden = open || isContentOpen
             }
             if open { fab.collapse() }
         }

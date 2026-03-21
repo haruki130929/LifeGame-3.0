@@ -1,11 +1,15 @@
 import SwiftUI
 
 struct FabButton: View {
+    @AppStorage("fab_style_v1") private var fabStyleRaw: String = FabStyle.ring.rawValue
+
     var body: some View {
         if AppLayout.isIPad {
             FabButtoniPad()
+        } else if fabStyleRaw == FabStyle.menu.rawValue {
+            FabButtoniPad()  // 選單模式：跟 iPad 一樣
         } else {
-            FabButtoniPhone()
+            FabButtoniPhone() // 圓環模式（預設）
         }
     }
 }
@@ -17,7 +21,7 @@ private struct FabButtoniPhone: View {
     @EnvironmentObject private var theme: ThemeStore
 
     @State private var isRingActive = false
-    @State private var highlightedIndex: Int?
+    @State private var highlightedVI: Int?    // 虛擬索引（避免重複高亮）
     @State private var fabGlobalCenter: CGPoint = .zero
     @State private var ringRotation: CGFloat = 0
     @State private var scrollSpeed: CGFloat = 0
@@ -35,14 +39,14 @@ private struct FabButtoniPhone: View {
         theme.isDark ? .white.opacity(0.95) : Color(.label)
     }
 
-    /// 右邊優先：第一個 action 在右邊，設定（最後一個）在左邊
+    /// 第一個功能在最右邊，依序往左排列，可無限循環
     private var ringItems: [FabRingItem] {
         if fab.currentFeatures.count > 1 {
-            return fab.currentFeatures.reversed().map { feature in
+            return fab.currentFeatures.map { feature in
                 FabRingItem(id: feature.rawValue, icon: fab.icon(for: feature), title: fab.title(for: feature))
             }
         } else {
-            return fab.actions.reversed().map { action in
+            return fab.actions.map { action in
                 FabRingItem(id: action.id.uuidString, icon: action.systemImage, title: action.title)
             }
         }
@@ -95,7 +99,7 @@ private struct FabButtoniPhone: View {
                 if isRingActive {
                     FabRingView(
                         items: ringItems,
-                        highlightedIndex: highlightedIndex,
+                        highlightedVirtualIndex: highlightedVI,
                         rotationOffset: ringRotation,
                         isDark: theme.isDark
                     )
@@ -141,7 +145,7 @@ private struct FabButtoniPhone: View {
         stopScrollTimer()
         withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
             isRingActive = false
-            highlightedIndex = nil
+            highlightedVI = nil
         }
         ringRotation = 0
     }
@@ -154,9 +158,9 @@ private struct FabButtoniPhone: View {
         let distance = sqrt(dx * dx + dy * dy)
 
         guard distance > ringDeadZone else {
-            if highlightedIndex != nil {
+            if highlightedVI != nil {
                 withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
-                    highlightedIndex = nil
+                    highlightedVI = nil
                 }
             }
             stopScrollTimer()
@@ -172,26 +176,28 @@ private struct FabButtoniPhone: View {
         let items = ringItems
         guard !items.isEmpty else { return }
 
-        var bestIndex: Int?
+        var bestVI: Int?
         var bestDist: CGFloat = .infinity
 
-        for i in items.indices {
-            let itemAngle = FabRingView.itemAngle(index: i, total: items.count, offset: ringRotation)
-            let vis = FabRingView.visibility(angle: itemAngle)
+        let centerOffset = Int((FabRingView.arcStart - fingerAngle + ringRotation) / FabRingView.itemSpacing)
+
+        for vi in (centerOffset - 6)...(centerOffset + 6) {
+            let angle = FabRingView.angleFor(virtualIndex: vi, offset: ringRotation)
+            let vis = FabRingView.itemVisibility(angle: angle)
             guard vis > 0.3 else { continue }
 
-            let d = abs(FabRingView.normalizeAngle(fingerAngle - itemAngle))
+            let d = abs(FabRingView.normalizeAngle(fingerAngle - angle))
             if d < bestDist {
                 bestDist = d
-                bestIndex = i
+                bestVI = vi
             }
         }
 
-        if bestIndex != highlightedIndex {
+        if bestVI != highlightedVI {
             withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
-                highlightedIndex = bestIndex
+                highlightedVI = bestVI
             }
-            if bestIndex != nil {
+            if bestVI != nil {
                 let g = UIImpactFeedbackGenerator(style: .light)
                 g.impactOccurred()
             }
@@ -201,8 +207,8 @@ private struct FabButtoniPhone: View {
     // MARK: - Edge Scroll
 
     private func checkEdgeScroll(fingerAngle: CGFloat) {
-        let arcMid = (FabRingView.visibleStart + FabRingView.visibleEnd) / 2
-        let halfArc = abs(FabRingView.visibleEnd - FabRingView.visibleStart) / 2
+        let arcMid = (FabRingView.arcStart + FabRingView.arcEnd) / 2
+        let halfArc = FabRingView.arcSpan / 2
 
         let diff = FabRingView.normalizeAngle(fingerAngle - arcMid)
 
@@ -249,29 +255,31 @@ private struct FabButtoniPhone: View {
 
     private func completeSelection() {
         stopScrollTimer()
-        let idx = highlightedIndex
+        let idx = highlightedVI
 
         withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
             isRingActive = false
-            highlightedIndex = nil
+            highlightedVI = nil
         }
         ringRotation = 0
 
-        guard let idx else { return }
+        guard let vi = idx else { return }
 
         let g = UIImpactFeedbackGenerator(style: .medium)
         g.impactOccurred()
 
         let items = ringItems
-        guard idx < items.count else { return }
+        let count = items.count
+        guard count > 0 else { return }
+        let realIdx = ((vi % count) + count) % count
 
         if fab.currentFeatures.count > 1 {
-            let featureID = items[idx].id
+            let featureID = items[realIdx].id
             if let feature = fab.currentFeatures.first(where: { $0.rawValue == featureID }) {
                 fab.route = .navigate(feature)
             }
         } else {
-            let actionID = items[idx].id
+            let actionID = items[realIdx].id
             if let action = fab.actions.first(where: { $0.id.uuidString == actionID }) {
                 action.action()
             }

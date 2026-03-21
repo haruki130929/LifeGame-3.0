@@ -56,10 +56,12 @@ struct HomeDrawerView: View {
                     Text("設定")
                     Spacer()
                 }
+                .padding(10)
                 .foregroundStyle(theme.accentColor)
                 .contentShape(Rectangle())
             }
-            .padding(.bottom, 12)
+            .buttonStyle(.plain)
+            .padding(.bottom, 24)
         }
         .padding(12)
         .frame(maxHeight: .infinity, alignment: .top)

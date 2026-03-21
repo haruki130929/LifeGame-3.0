@@ -3,6 +3,7 @@ import MessageUI
 
 struct SettingsView: View {
 
+    @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
     @EnvironmentObject private var ringSettings: TomorrowRingSettingsStore
@@ -21,6 +22,9 @@ struct SettingsView: View {
             if !AppLayout.isIPad {
                 phoneModeSection
             }
+            if !AppLayout.isIPad {
+                interfaceSection
+            }
             notificationSection
             dailyLogSection
             featureSection
@@ -32,6 +36,10 @@ struct SettingsView: View {
         .navigationTitle("設定")
         .onAppear {
             hourlyMoodEnabled = StorageManager.load(Bool.self, forKey: hourlyMoodEnabledKey) ?? false
+            fab.isHidden = true
+        }
+        .onDisappear {
+            fab.isHidden = false
         }
         .sheet(isPresented: $showFeedbackMail) {
             FeedbackMailView()
@@ -72,6 +80,17 @@ private extension SettingsView {
             Text(phoneModeStore.mode == .quick
                  ? "簡略模式：左右滑動切換功能頁面"
                  : "一般模式：與 iPad 相同的完整功能")
+        }
+    }
+
+    // MARK: 介面操作
+    var interfaceSection: some View {
+        Section("介面操作") {
+            NavigationLink {
+                InterfaceSettingsView()
+            } label: {
+                Label("「＋」按鈕操作方式", systemImage: "hand.tap")
+            }
         }
     }
 

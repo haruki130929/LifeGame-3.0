@@ -46,13 +46,15 @@ func makeCalendarDays(for month: Date, calendar: Calendar) -> [Date] {
     }
 }
 
+/// 凌晨 4 點前算前一天（減 4 小時後取日期）
 func dateKeyString(_ date: Date) -> String {
+    let adjusted = date.addingTimeInterval(-4 * 3600) // 04:00 才算新的一天
     let f = DateFormatter()
     f.calendar = Calendar(identifier: .gregorian)
     f.locale = Locale(identifier: "zh_Hant_TW")
     f.timeZone = TimeZone(identifier: "Asia/Taipei")
     f.dateFormat = "yyyy-MM-dd"
-    return f.string(from: date)
+    return f.string(from: adjusted)
 }
 
 func medianOf3(_ a: Int, _ b: Int, _ c: Int) -> Int {

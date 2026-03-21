@@ -45,8 +45,8 @@ enum LayoutTokens {
     static let tabCorner: CGFloat = 5
 
     // FAB
-    static let fabSideGap: CGFloat = 16
-    static let fabBottomGap: CGFloat = 16
+    static let fabSideGap: CGFloat = AppLayout.isIPad ? 16 : 20
+    static let fabBottomGap: CGFloat = AppLayout.isIPad ? 16 : 20
 }
 
 // MARK: - Drawer Panel rules（寬度自適應）

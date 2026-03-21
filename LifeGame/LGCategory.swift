@@ -48,7 +48,9 @@ struct LGCategoryHubView: View {
             comingSoonRow("選緘溝通板", systemImage: "bubble.left.and.bubble.right")
 
         case .roles:
-            comingSoonRow("能力五角圖", systemImage: "pentagon")
+            NavigationLink { CharacterProfileView() } label: {
+                Label("角色設定", systemImage: "person.crop.circle")
+            }
             comingSoonRow("角色優勢 / 特性", systemImage: "bolt.heart")
             comingSoonRow("裝備系統", systemImage: "backpack")
 
