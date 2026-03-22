@@ -259,6 +259,10 @@ private struct FabButtoniPhone: View {
         stopScrollTimer()
         let idx = highlightedVI
 
+        // 先快照要執行的資料，再關閉圓環
+        let features = fab.currentFeatures
+        let actions = fab.actions
+
         withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
             isRingActive = false
             highlightedVI = nil
@@ -267,24 +271,21 @@ private struct FabButtoniPhone: View {
 
         guard let vi = idx else { return }
 
-        let g = UIImpactFeedbackGenerator(style: .medium)
-        g.impactOccurred()
-
-        let items = ringItems
-        let count = items.count
+        let count = features.count > 1 ? features.count : actions.count
         guard count > 0 else { return }
         let realIdx = ((vi % count) + count) % count
 
-        if fab.currentFeatures.count > 1 {
-            let featureID = items[realIdx].id
-            if let feature = fab.currentFeatures.first(where: { $0.rawValue == featureID }) {
-                fab.route = .navigate(feature)
-            }
+        let g = UIImpactFeedbackGenerator(style: .medium)
+        g.impactOccurred()
+
+        if features.count > 1 {
+            // 主頁面：導航到功能
+            let feature = features[realIdx]
+            fab.route = .navigate(feature)
         } else {
-            let actionID = items[realIdx].id
-            if let action = fab.actions.first(where: { $0.id.uuidString == actionID }) {
-                action.action()
-            }
+            // 功能頁：直接用索引執行 action（不靠 UUID 比對）
+            guard realIdx < actions.count else { return }
+            actions[realIdx].action()
         }
     }
 }
