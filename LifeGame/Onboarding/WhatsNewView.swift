@@ -73,7 +73,7 @@ struct WhatsNewView: View {
 
     static func items(for version: String) -> [WhatsNewItem] {
         switch version {
-        case "1.02":
+        case "1.03":
             return [
                 WhatsNewItem(
                     icon: "circle.dotted",
