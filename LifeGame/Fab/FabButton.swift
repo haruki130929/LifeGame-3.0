@@ -209,6 +209,13 @@ private struct FabButtoniPhone: View {
     // MARK: - Edge Scroll
 
     private func checkEdgeScroll(fingerAngle: CGFloat) {
+        // 項目少（≤5）時全部在弧形內，不需要邊緣滾動
+        let itemCount = ringItems.count
+        if itemCount <= 5 {
+            stopScrollTimer()
+            return
+        }
+
         let arcMid = (FabRingView.arcStart + FabRingView.arcEnd) / 2
         let halfArc = FabRingView.arcSpan / 2
 
