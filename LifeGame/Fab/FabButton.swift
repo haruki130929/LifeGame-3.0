@@ -279,13 +279,17 @@ private struct FabButtoniPhone: View {
         g.impactOccurred()
 
         if features.count > 1 {
-            // 主頁面：導航到功能
-            let feature = features[realIdx]
-            fab.route = .navigate(feature)
+            // 主頁面：導航到功能（透過 fab.route）
+            fab.route = .navigate(features[realIdx])
         } else {
-            // 功能頁：直接用索引執行 action（不靠 UUID 比對）
+            // 功能頁：透過 fab.route 觸發（跟主頁面走同一條路徑）
             guard realIdx < actions.count else { return }
-            actions[realIdx].action()
+            if let route = actions[realIdx].route {
+                fab.route = route
+            } else {
+                actions[realIdx].action()
+            }
+            fab.collapse()
         }
     }
 }
