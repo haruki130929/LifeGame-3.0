@@ -2,17 +2,14 @@ import SwiftUI
 
 struct FabButton: View {
     @AppStorage("fab_style_v1") private var fabStyleRaw: String = FabStyle.ring.rawValue
-    @EnvironmentObject private var fab: FabStore
 
     var body: some View {
         if AppLayout.isIPad {
             FabButtoniPad()
-        } else if fab.currentFeatures.count <= 1 {
-            FabButtoniPad()  // 功能頁：用膠囊選單（點擊式）
         } else if fabStyleRaw == FabStyle.menu.rawValue {
-            FabButtoniPad()  // 選單模式：跟 iPad 一樣
+            FabButtoniPad()  // 選單模式
         } else {
-            FabButtoniPhone() // 圓環模式（主頁面預設）
+            FabButtoniPhone() // 圓環模式
         }
     }
 }
