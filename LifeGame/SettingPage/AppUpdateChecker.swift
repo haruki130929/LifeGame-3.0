@@ -3,8 +3,9 @@ import Combine
 
 @MainActor
 final class AppUpdateChecker: ObservableObject {
-    @Published var hasUpdate: Bool = false
-    @Published var latestVersion: String?
+    // TODO: 測試完畢後改回 false
+    @Published var hasUpdate: Bool = true
+    @Published var latestVersion: String? = "9.99"
 
     private var appStoreID: String?
     private var cancellable: AnyCancellable?
