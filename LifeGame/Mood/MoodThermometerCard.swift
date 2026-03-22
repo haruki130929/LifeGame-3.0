@@ -6,7 +6,8 @@ struct MoodThermometerCard: View {
     @EnvironmentObject private var moodSettings: MoodSettingsStore
     
     @State private var showHourlyLimitAlert = false
-    
+    @State private var showRecordedToast = false
+
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("心情溫度計")
@@ -33,7 +34,14 @@ struct MoodThermometerCard: View {
             Button {
                 let previousHour = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
                 let ok = history.add(score: mood.score, at: previousHour)
-                if !ok { showHourlyLimitAlert = true }
+                if ok {
+                    showRecordedToast = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        showRecordedToast = false
+                    }
+                } else {
+                    showHourlyLimitAlert = true
+                }
             } label: {
                 Text("紀錄")
                     .frame(maxWidth: .infinity)
@@ -46,6 +54,19 @@ struct MoodThermometerCard: View {
             }
         }
         .padding()
+        .overlay {
+            if showRecordedToast {
+                Text("已紀錄 ✓")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 20)
+                    .padding(.vertical, 10)
+                    .background(.green.gradient, in: Capsule())
+                    .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+                    .transition(.scale.combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: showRecordedToast)
     }
     
     // ✅ 時間格式：顯示上一個小時 e.g. 13:00～14:00（當前 14:xx 時）

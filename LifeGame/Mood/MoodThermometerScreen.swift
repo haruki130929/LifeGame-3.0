@@ -7,6 +7,7 @@ struct MoodThermometerScreen: View {
 
     @State private var selectedPeriod: MoodTimePeriod = .day
     @State private var showHourlyLimitAlert = false
+    @State private var showRecordedToast = false
 
     var body: some View {
         ScrollView {
@@ -38,7 +39,14 @@ struct MoodThermometerScreen: View {
                 Button {
                     let previousHour = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
                     let ok = history.add(score: mood.score, at: previousHour)
-                    if !ok { showHourlyLimitAlert = true }
+                    if ok {
+                        showRecordedToast = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            showRecordedToast = false
+                        }
+                    } else {
+                        showHourlyLimitAlert = true
+                    }
                 } label: {
                     Label("記錄上一小時心情", systemImage: "plus.circle.fill")
                         .frame(maxWidth: .infinity)
@@ -53,6 +61,23 @@ struct MoodThermometerScreen: View {
             }
             .padding()
         }
+        .overlay {
+            if showRecordedToast {
+                VStack {
+                    Text("已紀錄 ✓")
+                        .font(.callout.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 20)
+                        .padding(.vertical, 10)
+                        .background(.green.gradient, in: Capsule())
+                        .shadow(color: .black.opacity(0.15), radius: 8, y: 4)
+                    Spacer()
+                }
+                .padding(.top, 60)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+        .animation(.spring(response: 0.3, dampingFraction: 0.75), value: showRecordedToast)
         .navigationTitle("心情溫度計")
         .animation(.easeInOut(duration: 0.2), value: selectedPeriod)
         .onAppear {
