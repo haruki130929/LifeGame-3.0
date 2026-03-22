@@ -12,7 +12,7 @@ struct FabRingItem: Identifiable {
 
 struct FabRingView: View {
     let items: [FabRingItem]
-    let highlightedVirtualIndex: Int?
+    let highlightedRealIndex: Int?
     let rotationOffset: CGFloat
     let isDark: Bool
 
@@ -108,7 +108,7 @@ struct FabRingView: View {
     // MARK: - 單一項目 View
 
     private func ringItemView(vi: VisibleItem) -> some View {
-        let isHighlighted = highlightedVirtualIndex == vi.virtualIndex
+        let isHighlighted = highlightedRealIndex == vi.realIndex
         let item = items[vi.realIndex]
         let x = cos(vi.angle) * Self.ringRadius
         let y = sin(vi.angle) * Self.ringRadius

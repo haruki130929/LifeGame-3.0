@@ -21,7 +21,8 @@ private struct FabButtoniPhone: View {
     @EnvironmentObject private var theme: ThemeStore
 
     @State private var isRingActive = false
-    @State private var highlightedVI: Int?    // 虛擬索引（避免重複高亮）
+    @State private var highlightedVI: Int?    // 虛擬索引（用於角度計算）
+    @State private var highlightedReal: Int?  // 實際索引（用於高亮顯示與選取）
     @State private var fabGlobalCenter: CGPoint = .zero
     @State private var ringRotation: CGFloat = 0
     @State private var scrollSpeed: CGFloat = 0
@@ -99,7 +100,7 @@ private struct FabButtoniPhone: View {
                 if isRingActive {
                     FabRingView(
                         items: ringItems,
-                        highlightedVirtualIndex: highlightedVI,
+                        highlightedRealIndex: highlightedReal,
                         rotationOffset: ringRotation,
                         isDark: theme.isDark
                     )
@@ -146,6 +147,7 @@ private struct FabButtoniPhone: View {
         withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
             isRingActive = false
             highlightedVI = nil
+            highlightedReal = nil
         }
         ringRotation = 0
     }
@@ -161,6 +163,7 @@ private struct FabButtoniPhone: View {
             if highlightedVI != nil {
                 withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
                     highlightedVI = nil
+                    highlightedReal = nil
                 }
             }
             stopScrollTimer()
@@ -195,9 +198,16 @@ private struct FabButtoniPhone: View {
             }
         }
 
+        // 計算 realIndex 用於高亮顯示
+        let bestReal: Int? = {
+            guard let vi = bestVI, count > 0 else { return nil }
+            return ((vi % count) + count) % count
+        }()
+
         if bestVI != highlightedVI {
             withAnimation(.spring(response: 0.2, dampingFraction: 0.8)) {
                 highlightedVI = bestVI
+                highlightedReal = bestReal
             }
             if bestVI != nil {
                 let g = UIImpactFeedbackGenerator(style: .light)
@@ -264,7 +274,7 @@ private struct FabButtoniPhone: View {
 
     private func completeSelection() {
         stopScrollTimer()
-        let idx = highlightedVI
+        let selectedReal = highlightedReal
 
         // 先快照要執行的資料，再關閉圓環
         let features = fab.currentFeatures
@@ -273,14 +283,11 @@ private struct FabButtoniPhone: View {
         withAnimation(.spring(response: 0.25, dampingFraction: 0.75)) {
             isRingActive = false
             highlightedVI = nil
+            highlightedReal = nil
         }
         ringRotation = 0
 
-        guard let vi = idx else { return }
-
-        let count = features.count > 1 ? features.count : actions.count
-        guard count > 0 else { return }
-        let realIdx = ((vi % count) + count) % count
+        guard let realIdx = selectedReal else { return }
 
         let g = UIImpactFeedbackGenerator(style: .medium)
         g.impactOccurred()
