@@ -72,15 +72,25 @@ final class FabStore: ObservableObject {
     @Published var showSubMenu: Bool = false
     @Published var selectedFeature: FeatureID? = nil
     @Published var route: Route? = nil
-    @Published private(set) var currentFeatures: [FeatureID] = []
+    @Published var currentFeatures: [FeatureID] = []
 
     private var featureStack: [[FabAction]] = []
 
+    /// 是否在功能頁（有 push 過 actions）
+    var isOnFeaturePage: Bool { featureStack.count > 1 }
+
     func setRootActions(_ actions: [FabAction]) {
-        featureStack = [actions]
-        self.actions = actions
-        hideSubMenu()
-        collapse()
+        if featureStack.isEmpty {
+            featureStack = [actions]
+        } else {
+            featureStack[0] = actions
+        }
+        // 只有在根層級時才更新顯示的 actions；功能頁 push 過 actions 時保留功能頁的
+        if featureStack.count <= 1 {
+            self.actions = actions
+            hideSubMenu()
+            collapse()
+        }
     }
 
     func pushActions(_ actions: [FabAction]) {
@@ -137,6 +147,7 @@ final class FabStore: ObservableObject {
             setRootActions(makeHomeActions(features: features))
         case let .feature(feature):
             currentFeatures = [feature]
+            isHidden = false
             pushActions(makeDetailActions(for: feature))
         }
     }

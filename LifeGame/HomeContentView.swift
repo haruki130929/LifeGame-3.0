@@ -136,6 +136,10 @@ struct HomeContentView: View {
             if let first = customTabStore.tabs.first {
                 selectedTab = .tab(first.id)
             }
+            // 回到首頁時，根據面板狀態同步 FAB 可見性（功能頁時不干預）
+            if !fab.isOnFeaturePage {
+                fab.isHidden = isContentOpen || isDrawerOpen
+            }
             refreshFabMenu()
             checkRingDeductions()
         }

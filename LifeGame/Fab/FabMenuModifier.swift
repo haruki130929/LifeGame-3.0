@@ -6,7 +6,11 @@ struct FabMenuModifier: ViewModifier {
     
     func body(content: Content) -> some View {
         content
-            .onAppear { fab.pushActions(actions) }
+            .onAppear {
+                fab.isHidden = false
+                fab.currentFeatures = []
+                fab.pushActions(actions)
+            }
             .onDisappear { fab.popActions() }
     }
 }
