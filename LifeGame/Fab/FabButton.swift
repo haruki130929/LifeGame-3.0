@@ -179,10 +179,12 @@ private struct FabButtoniPhone: View {
         var bestVI: Int?
         var bestDist: CGFloat = .infinity
 
-        let centerOffset = Int((FabRingView.arcStart - fingerAngle + ringRotation) / FabRingView.itemSpacing)
+        let count = items.count
+        let sp = FabRingView.itemSpacing(for: count)
+        let centerOffset = Int((FabRingView.arcStart - fingerAngle + ringRotation) / sp)
 
         for vi in (centerOffset - 6)...(centerOffset + 6) {
-            let angle = FabRingView.angleFor(virtualIndex: vi, offset: ringRotation)
+            let angle = FabRingView.angleFor(virtualIndex: vi, count: count, offset: ringRotation)
             let vis = FabRingView.itemVisibility(angle: angle)
             guard vis > 0.3 else { continue }
 

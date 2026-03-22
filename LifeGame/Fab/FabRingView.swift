@@ -29,8 +29,20 @@ struct FabRingView: View {
     /// 弧形角度範圍
     static let arcSpan: CGFloat = abs(arcEnd - arcStart)  // 0.5π ≈ 90°
 
-    /// 項目間距（固定）
-    static let itemSpacing: CGFloat = .pi * 0.14  // ≈ 25°
+    /// 項目間距：動態計算
+    /// - 功能少（≤5）：一組剛好填滿可見範圍，不會重複
+    /// - 功能多（>5）：用最小間距，超出的需要滾動才看到
+    static func itemSpacing(for count: Int) -> CGFloat {
+        guard count > 0 else { return 0.5 }
+        let halfArc = arcSpan / 2
+        let fadeMargin: CGFloat = 0.15
+        let visibleSpan = 2 * (halfArc + fadeMargin) + 0.2
+
+        // 最小間距：確保圖示不會物理重疊（iconSize / ringRadius）
+        let minSpacing: CGFloat = 0.4  // ≈ 23°，icon 46pt / radius 120pt
+
+        return max(minSpacing, visibleSpan / CGFloat(count))
+    }
 
     var body: some View {
         ZStack {
@@ -61,12 +73,13 @@ struct FabRingView: View {
         let count = items.count
         guard count > 0 else { return [] }
 
+        let sp = Self.itemSpacing(for: count)
         let arcMid = (Self.arcStart + Self.arcEnd) / 2
-        let estimatedCenter = Int((Self.arcStart - arcMid + rotationOffset) / Self.itemSpacing)
+        let estimatedCenter = Int((Self.arcStart - arcMid + rotationOffset) / sp)
 
         var candidates: [VisibleItem] = []
         for vi in (estimatedCenter - 10)...(estimatedCenter + 10) {
-            let angle = Self.angleFor(virtualIndex: vi, offset: rotationOffset)
+            let angle = Self.angleFor(virtualIndex: vi, count: count, offset: rotationOffset)
             let vis = Self.itemVisibility(angle: angle)
             if vis > 0.1 {
                 let realIndex = ((vi % count) + count) % count
@@ -140,8 +153,9 @@ struct FabRingView: View {
     // MARK: - 角度計算
 
     /// virtualIndex 0 = arcStart（最右邊/最上面），往 arcEnd（左邊）遞增
-    static func angleFor(virtualIndex: Int, offset: CGFloat) -> CGFloat {
-        return arcStart - itemSpacing * CGFloat(virtualIndex) + offset
+    static func angleFor(virtualIndex: Int, count: Int, offset: CGFloat) -> CGFloat {
+        let sp = itemSpacing(for: count)
+        return arcStart - sp * CGFloat(virtualIndex) + offset
     }
 
     /// 正規化角度到 [-π, π]
