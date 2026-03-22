@@ -42,7 +42,21 @@ final class CoachMarkStore: ObservableObject {
     }
 
     /// 是否已完成整套引導
-    @AppStorage("coach_marks_completed_v1") private var allCompleted = false
+    private var allCompleted: Bool {
+        get {
+            Self.migrateLegacyIfNeeded()
+            return StorageManager.load(Bool.self, forKey: "onboarding.coachMarksCompleted") ?? false
+        }
+        set { StorageManager.save(newValue, forKey: "onboarding.coachMarksCompleted") }
+    }
+
+    private static let legacyKey = "coach_marks_completed_v1"
+    private static func migrateLegacyIfNeeded() {
+        let ud = UserDefaults.standard
+        guard ud.bool(forKey: legacyKey) else { return }
+        StorageManager.save(true, forKey: "onboarding.coachMarksCompleted")
+        ud.removeObject(forKey: legacyKey)
+    }
 
     /// 進入主頁面時呼叫，根據模式啟動對應教學序列
     func startIfNeeded(isQuickMode: Bool = false) {

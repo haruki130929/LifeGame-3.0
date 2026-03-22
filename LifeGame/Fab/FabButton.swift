@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct FabButton: View {
-    @AppStorage("fab_style_v1") private var fabStyleRaw: String = FabStyle.ring.rawValue
+    @EnvironmentObject private var fab: FabStore
 
     var body: some View {
         if AppLayout.isIPad {
             FabButtoniPad()
-        } else if fabStyleRaw == FabStyle.menu.rawValue {
+        } else if FabStyle.current == .menu {
             FabButtoniPad()  // 選單模式
         } else {
             FabButtoniPhone() // 圓環模式

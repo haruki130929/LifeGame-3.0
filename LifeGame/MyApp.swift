@@ -70,7 +70,7 @@ struct LifeGameApp: App {
         _startupError = State(initialValue: errorMessage)
     }
 
-    @AppStorage("onboarding_completed_v1") private var onboardingCompleted = false
+    @State private var onboardingCompleted = OnboardingTracker.isCompleted
     @State private var showWhatsNew = false
 
     var body: some Scene {

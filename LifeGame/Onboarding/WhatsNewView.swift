@@ -115,7 +115,8 @@ struct WhatsNewItem {
 // MARK: - 版本追蹤
 
 enum VersionTracker {
-    private static let lastVersionKey = "whats_new_last_shown_version"
+    private static let storageKey = "onboarding.whatsNewLastVersion"
+    private static let legacyKey = "whats_new_last_shown_version"
 
     /// 目前 app 版本
     static var currentVersion: String {
@@ -124,7 +125,8 @@ enum VersionTracker {
 
     /// 上次顯示過更新內容的版本
     static var lastShownVersion: String? {
-        UserDefaults.standard.string(forKey: lastVersionKey)
+        migrateLegacyIfNeeded()
+        return StorageManager.load(String.self, forKey: storageKey)
     }
 
     /// 是否需要顯示更新內容
@@ -141,11 +143,18 @@ enum VersionTracker {
 
     /// 標記目前版本已顯示
     static func markAsShown() {
-        UserDefaults.standard.set(currentVersion, forKey: lastVersionKey)
+        StorageManager.save(currentVersion, forKey: storageKey)
     }
 
     /// 測試用：清除紀錄，讓 shouldShowWhatsNew 重新觸發
     static func resetForTesting() {
-        UserDefaults.standard.removeObject(forKey: lastVersionKey)
+        StorageManager.remove(forKey: storageKey)
+    }
+
+    private static func migrateLegacyIfNeeded() {
+        let ud = UserDefaults.standard
+        guard let old = ud.string(forKey: legacyKey) else { return }
+        StorageManager.save(old, forKey: storageKey)
+        ud.removeObject(forKey: legacyKey)
     }
 }

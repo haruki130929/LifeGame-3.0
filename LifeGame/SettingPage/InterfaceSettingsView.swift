@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - FAB 操作模式
 
-enum FabStyle: String, CaseIterable, Identifiable {
+enum FabStyle: String, CaseIterable, Identifiable, Codable {
     case ring = "ring"      // 長按圓環
     case menu = "menu"      // 膠囊選單（同 iPad）
 
@@ -29,21 +29,27 @@ enum FabStyle: String, CaseIterable, Identifiable {
         }
     }
 
-    // MARK: - 持久化
+    // MARK: - 持久化（StorageManager）
 
-    private static let storageKey = "fab_style_v1"
+    private static let storageKey = "fab.style"
+    private static let legacyKey = "fab_style_v1"
 
     static var current: FabStyle {
         get {
-            guard let raw = UserDefaults.standard.string(forKey: storageKey),
-                  let style = FabStyle(rawValue: raw) else {
-                return .ring  // 預設圓環
-            }
-            return style
+            migrateLegacyIfNeeded()
+            return StorageManager.load(FabStyle.self, forKey: storageKey) ?? .ring
         }
         set {
-            UserDefaults.standard.set(newValue.rawValue, forKey: storageKey)
+            StorageManager.save(newValue, forKey: storageKey)
         }
+    }
+
+    private static func migrateLegacyIfNeeded() {
+        let ud = UserDefaults.standard
+        guard let raw = ud.string(forKey: legacyKey),
+              let style = FabStyle(rawValue: raw) else { return }
+        StorageManager.save(style, forKey: storageKey)
+        ud.removeObject(forKey: legacyKey)
     }
 }
 

@@ -7,7 +7,7 @@ struct OnboardingView: View {
 
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var phoneModeStore: PhoneModeStore
-    @AppStorage("onboarding_completed_v1") private var completed = false
+    @State private var completed = false
 
     @State private var currentPage = 0
 
@@ -196,6 +196,7 @@ struct OnboardingView: View {
                 Button {
                     withAnimation(.easeInOut(duration: 0.35)) {
                         completed = true
+                        OnboardingTracker.markCompleted()
                     }
                 } label: {
                     Text("開始使用")
@@ -214,6 +215,7 @@ struct OnboardingView: View {
                 Button {
                     withAnimation(.easeInOut(duration: 0.35)) {
                         completed = true
+                        OnboardingTracker.markCompleted()
                     }
                 } label: {
                     Text("跳過")
@@ -270,5 +272,28 @@ struct OnboardingView: View {
             }
         }
         .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Onboarding 狀態追蹤（StorageManager）
+
+enum OnboardingTracker {
+    private static let storageKey = "onboarding.completed"
+    private static let legacyKey = "onboarding_completed_v1"
+
+    static var isCompleted: Bool {
+        migrateLegacyIfNeeded()
+        return StorageManager.load(Bool.self, forKey: storageKey) ?? false
+    }
+
+    static func markCompleted() {
+        StorageManager.save(true, forKey: storageKey)
+    }
+
+    private static func migrateLegacyIfNeeded() {
+        let ud = UserDefaults.standard
+        guard ud.bool(forKey: legacyKey) else { return }
+        StorageManager.save(true, forKey: storageKey)
+        ud.removeObject(forKey: legacyKey)
     }
 }
