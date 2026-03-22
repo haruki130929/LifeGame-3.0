@@ -10,6 +10,7 @@ struct HomeDrawerView: View {
     
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
+    @EnvironmentObject private var updateChecker: AppUpdateChecker
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -53,6 +54,14 @@ struct HomeDrawerView: View {
             } label: {
                 HStack(spacing: 10) {
                     Image(systemName: "gearshape")
+                        .overlay(alignment: .topTrailing) {
+                            if updateChecker.hasUpdate {
+                                Circle()
+                                    .fill(.red)
+                                    .frame(width: 8, height: 8)
+                                    .offset(x: 3, y: -3)
+                            }
+                        }
                     Text("設定")
                     Spacer()
                 }

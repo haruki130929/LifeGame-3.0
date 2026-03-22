@@ -5,6 +5,7 @@ struct SettingsView: View {
 
     @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var theme: ThemeStore
+    @EnvironmentObject private var updateChecker: AppUpdateChecker
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
     @EnvironmentObject private var ringSettings: TomorrowRingSettingsStore
     @EnvironmentObject private var phoneModeStore: PhoneModeStore
@@ -31,6 +32,7 @@ struct SettingsView: View {
             appearanceSection
             storageSection
             feedbackSection
+            updateSection
             aboutSection
         }
         .navigationTitle("設定")
@@ -199,6 +201,35 @@ private extension SettingsView {
             Text("意見回饋")
         } footer: {
             Text("告訴我你的使用體驗、建議或遇到的問題")
+        }
+    }
+
+    // MARK: 版本更新
+    var updateSection: some View {
+        Section {
+            Button {
+                updateChecker.openAppStore()
+            } label: {
+                HStack {
+                    Label("版本更新", systemImage: "arrow.down.app")
+                        .foregroundStyle(theme.isDark ? .white : Color(.label))
+                    Spacer()
+                    if updateChecker.hasUpdate, let version = updateChecker.latestVersion {
+                        Text("v\(version) 可更新")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    } else {
+                        Text("已是最新版本")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+                    if updateChecker.hasUpdate {
+                        Circle()
+                            .fill(.red)
+                            .frame(width: 10, height: 10)
+                    }
+                }
+            }
         }
     }
 

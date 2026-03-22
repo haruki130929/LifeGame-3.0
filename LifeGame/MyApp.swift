@@ -25,6 +25,7 @@ struct LifeGameApp: App {
     @StateObject private var moodSettings = MoodSettingsStore()
     @StateObject private var mandalaStore = MandalaStore()
     @StateObject private var todoStore = TodoQuadrantStore()
+    @StateObject private var updateChecker = AppUpdateChecker()
 
     init() {
         // 1. 註冊所有 @Model 類型
@@ -98,6 +99,7 @@ struct LifeGameApp: App {
                         .environmentObject(moodSettings)
                         .environmentObject(mandalaStore)
                         .environmentObject(todoStore)
+                        .environmentObject(updateChecker)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
                         .modelContainer(coordinator.modelContainer)
                         .id(storageConfig.currentMode)
