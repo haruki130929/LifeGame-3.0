@@ -73,6 +73,33 @@ struct WhatsNewView: View {
 
     static func items(for version: String) -> [WhatsNewItem] {
         switch version {
+        case "1.02":
+            return [
+                WhatsNewItem(
+                    icon: "circle.dotted",
+                    title: "圓環選單改進",
+                    description: "修復了功能頁「＋」按鈕無法選取的問題，圓環選單在所有頁面都能正常使用。",
+                    color: .blue
+                ),
+                WhatsNewItem(
+                    icon: "arrow.down.circle.fill",
+                    title: "版本更新提醒",
+                    description: "有新版本時，設定圖示會出現紅點提醒，點擊即可前往 App Store 更新。",
+                    color: .red
+                ),
+                WhatsNewItem(
+                    icon: "face.smiling.fill",
+                    title: "心情紀錄回饋",
+                    description: "紀錄每小時心情後，會顯示「已紀錄」的確認訊息。",
+                    color: .green
+                ),
+                WhatsNewItem(
+                    icon: "icloud.fill",
+                    title: "資料同步強化",
+                    description: "角色設定資料已支援 iCloud 同步，所有裝置間保持一致。",
+                    color: .cyan
+                ),
+            ]
         case "1.01":
             return [
                 WhatsNewItem(
