@@ -11,8 +11,12 @@ final class AppUpdateChecker: ObservableObject {
     private var cancellable: AnyCancellable?
 
     init() {
-        checkForUpdate()
+        // TODO: 測試完畢後取消下面兩行註解，並刪除 hasUpdate/latestVersion 的預設值
+        // checkForUpdate()
+        // listenForeground()
+    }
 
+    private func listenForeground() {
         // 每次 App 回到前景時重新檢查
         cancellable = NotificationCenter.default
             .publisher(for: UIApplication.willEnterForegroundNotification)
