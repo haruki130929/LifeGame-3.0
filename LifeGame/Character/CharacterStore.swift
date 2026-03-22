@@ -1,5 +1,6 @@
 // CharacterStore.swift
 import SwiftUI
+import Combine
 
 @MainActor
 final class CharacterStore: ObservableObject {
