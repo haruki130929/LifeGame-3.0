@@ -2,14 +2,8 @@ import SwiftUI
 
 struct CharacterProfileView: View {
     @EnvironmentObject private var theme: ThemeStore
-    @State private var abilities: AbilitySet = .default
-    @State private var avatarImage: UIImage? = nil
+    @EnvironmentObject private var character: CharacterStore
     @State private var showImagePicker = false
-    @State private var characterName: String = ""
-
-    private let avatarStorageKey = "character_avatar_data"
-    private let nameStorageKey = "character_name_v1"
-    private let abilitiesStorageKey = "character_abilities_v1"
 
     var body: some View {
         Group {
@@ -21,9 +15,13 @@ struct CharacterProfileView: View {
         }
         .navigationTitle("角色設定")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear(perform: loadData)
         .sheet(isPresented: $showImagePicker) {
-            ImagePicker(image: $avatarImage, onDone: saveAvatar)
+            ImagePicker(image: Binding(
+                get: { character.avatarImage },
+                set: { newImage in
+                    character.setAvatar(newImage)
+                }
+            ), onDone: {})
         }
     }
 
@@ -31,13 +29,9 @@ struct CharacterProfileView: View {
 
     private var iPadLayout: some View {
         HStack(spacing: 0) {
-            // 左：頭像
             avatarSection
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-
             Divider()
-
-            // 右：能力值五角圖
             abilitySection
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
@@ -50,7 +44,6 @@ struct CharacterProfileView: View {
             VStack(spacing: 24) {
                 avatarSection
                     .frame(height: 280)
-
                 abilitySection
             }
             .padding(.bottom, 80)
@@ -63,12 +56,11 @@ struct CharacterProfileView: View {
         VStack(spacing: 16) {
             Spacer()
 
-            // 頭像
             Button {
                 showImagePicker = true
             } label: {
                 ZStack {
-                    if let img = avatarImage {
+                    if let img = character.avatarImage {
                         Image(uiImage: img)
                             .resizable()
                             .scaledToFill()
@@ -85,7 +77,6 @@ struct CharacterProfileView: View {
                             )
                     }
 
-                    // 編輯 badge
                     Circle()
                         .fill(theme.isDark ? Color.white.opacity(0.2) : Color.black.opacity(0.1))
                         .frame(width: 36, height: 36)
@@ -99,13 +90,12 @@ struct CharacterProfileView: View {
             }
             .buttonStyle(.plain)
 
-            // 名稱
-            TextField("角色名稱", text: $characterName)
+            TextField("角色名稱", text: $character.name)
                 .font(.title3.bold())
                 .multilineTextAlignment(.center)
                 .frame(maxWidth: 200)
-                .onChange(of: characterName) { _, newName in
-                    UserDefaults.standard.set(newName, forKey: nameStorageKey)
+                .onChange(of: character.name) { _, newName in
+                    character.setName(newName)
                 }
 
             Spacer()
@@ -120,10 +110,9 @@ struct CharacterProfileView: View {
             Text("能力值")
                 .font(.headline)
 
-            AbilityPentagonView(abilities: abilities, isDark: theme.isDark)
+            AbilityPentagonView(abilities: character.abilities, isDark: theme.isDark)
                 .padding(.horizontal, 20)
 
-            // 調整 Sliders
             VStack(spacing: 12) {
                 ForEach(0..<5, id: \.self) { i in
                     abilitySlider(index: i)
@@ -152,7 +141,7 @@ struct CharacterProfileView: View {
             )
             .tint(.cyan)
 
-            Text("\(abilities.values[index])")
+            Text("\(character.abilities.values[index])")
                 .font(.caption.monospacedDigit())
                 .frame(width: 24, alignment: .trailing)
                 .foregroundStyle(.secondary)
@@ -161,51 +150,21 @@ struct CharacterProfileView: View {
 
     private func bindingForIndex(_ index: Int) -> Binding<Double> {
         Binding<Double>(
-            get: { Double(abilities.values[index]) },
+            get: { Double(character.abilities.values[index]) },
             set: { newValue in
+                var updated = character.abilities
                 let intVal = Int(newValue)
                 switch index {
-                case 0: abilities.stamina = intVal
-                case 1: abilities.focus = intVal
-                case 2: abilities.execution = intVal
-                case 3: abilities.awareness = intVal
-                case 4: abilities.timeManagement = intVal
+                case 0: updated.stamina = intVal
+                case 1: updated.focus = intVal
+                case 2: updated.execution = intVal
+                case 3: updated.awareness = intVal
+                case 4: updated.timeManagement = intVal
                 default: break
                 }
-                saveAbilities()
+                character.setAbilities(updated)
             }
         )
-    }
-
-    // MARK: - 持久化
-
-    private func loadData() {
-        // 名稱
-        characterName = UserDefaults.standard.string(forKey: nameStorageKey) ?? ""
-
-        // 頭像
-        if let data = UserDefaults.standard.data(forKey: avatarStorageKey),
-           let img = UIImage(data: data) {
-            avatarImage = img
-        }
-
-        // 能力值
-        if let data = UserDefaults.standard.data(forKey: abilitiesStorageKey),
-           let decoded = try? JSONDecoder().decode(AbilitySet.self, from: data) {
-            abilities = decoded
-        }
-    }
-
-    private func saveAvatar() {
-        guard let img = avatarImage,
-              let data = img.jpegData(compressionQuality: 0.7) else { return }
-        UserDefaults.standard.set(data, forKey: avatarStorageKey)
-    }
-
-    private func saveAbilities() {
-        if let data = try? JSONEncoder().encode(abilities) {
-            UserDefaults.standard.set(data, forKey: abilitiesStorageKey)
-        }
     }
 }
 
