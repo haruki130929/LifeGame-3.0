@@ -7,7 +7,7 @@ struct OnboardingView: View {
 
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var phoneModeStore: PhoneModeStore
-    @State private var completed = false
+    @Binding var completed: Bool
 
     @State private var currentPage = 0
 

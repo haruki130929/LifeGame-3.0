@@ -121,7 +121,7 @@ struct LifeGameApp: App {
                             .interactiveDismissDisabled()
                         }
                 } else {
-                    OnboardingView()
+                    OnboardingView(completed: $onboardingCompleted)
                         .environmentObject(theme)
                         .environmentObject(phoneModeStore)
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
