@@ -99,7 +99,8 @@ struct CoachMarkOverlay: View {
             if let reported = coachStore.buttonCenters[mark] { return reported }
             return CGPoint(x: screenSize.width - 36, y: insets.top + 40)
         case .fabButton:
-            // FAB 位置固定在右下角，不依賴回報值（動畫中可能不準）
+            // 優先使用 FAB 回報的實際座標
+            if let reported = coachStore.buttonCenters[mark] { return reported }
             let fabX = screenSize.width - safeTrailing - LayoutTokens.fabSideGap - 30
             let fabY = screenSize.height - safeBottom - LayoutTokens.fabBottomGap - 30
             return CGPoint(x: fabX, y: fabY)
@@ -110,6 +111,7 @@ struct CoachMarkOverlay: View {
         case .quickSwipe:
             return CGPoint(x: screenSize.width / 2, y: screenSize.height / 2)
         case .quickSettings:
+            if let reported = coachStore.buttonCenters[mark] { return reported }
             let fabX = screenSize.width - safeTrailing - LayoutTokens.fabSideGap - 30
             let fabY = screenSize.height - safeBottom - LayoutTokens.fabBottomGap - 30
             return CGPoint(x: fabX, y: fabY)
