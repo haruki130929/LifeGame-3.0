@@ -260,6 +260,9 @@ final class FabStore: ObservableObject {
             result += [
                 FabAction(title: "新增日記", systemImage: "plus.circle", route: .addDailyLog) { [weak self] in
                     self?.route = .addDailyLog; self?.collapse()
+                },
+                FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { [weak self] in
+                    self?.route = .featureSettings(.dailyLog); self?.collapse()
                 }
             ]
         case .todoQuadrant:
