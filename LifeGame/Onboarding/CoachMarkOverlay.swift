@@ -86,27 +86,33 @@ struct CoachMarkOverlay: View {
         for mark: CoachMarkStore.Mark,
         screenSize: CGSize
     ) -> CGPoint {
-        // 優先使用按鈕回報的實際螢幕座標
-        if let reported = coachStore.buttonCenters[mark] {
-            return reported
-        }
-        // fallback（按鈕尚未回報時的大致位置）
         let insets = windowInsets
+        let safeBottom = insets.bottom
+        let safeTrailing: CGFloat = 0
+
         switch mark {
         // Full Mode
         case .drawerButton:
+            if let reported = coachStore.buttonCenters[mark] { return reported }
             return CGPoint(x: 36, y: insets.top + 40)
         case .rightPanel:
+            if let reported = coachStore.buttonCenters[mark] { return reported }
             return CGPoint(x: screenSize.width - 36, y: insets.top + 40)
         case .fabButton:
-            return CGPoint(x: screenSize.width - 46, y: screenSize.height - 46)
+            // FAB 位置固定在右下角，不依賴回報值（動畫中可能不準）
+            let fabX = screenSize.width - safeTrailing - LayoutTokens.fabSideGap - 30
+            let fabY = screenSize.height - safeBottom - LayoutTokens.fabBottomGap - 30
+            return CGPoint(x: fabX, y: fabY)
         case .tabEdit:
+            if let reported = coachStore.buttonCenters[mark] { return reported }
             return CGPoint(x: 150, y: insets.top + 120)
         // Quick Mode
         case .quickSwipe:
             return CGPoint(x: screenSize.width / 2, y: screenSize.height / 2)
         case .quickSettings:
-            return CGPoint(x: screenSize.width - 46, y: screenSize.height - 46)
+            let fabX = screenSize.width - safeTrailing - LayoutTokens.fabSideGap - 30
+            let fabY = screenSize.height - safeBottom - LayoutTokens.fabBottomGap - 30
+            return CGPoint(x: fabX, y: fabY)
         }
     }
 
