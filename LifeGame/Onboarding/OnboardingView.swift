@@ -275,25 +275,17 @@ struct OnboardingView: View {
     }
 }
 
-// MARK: - Onboarding 狀態追蹤（StorageManager）
+// MARK: - Onboarding 狀態追蹤（UserDefaults）
+// ⚠️ 必須用 UserDefaults，因為 MyApp.init() 讀取時 StorageCoordinator 尚未初始化
 
 enum OnboardingTracker {
-    private static let storageKey = "onboarding.completed"
-    private static let legacyKey = "onboarding_completed_v1"
+    private static let udKey = "onboarding_completed_v1"
 
     static var isCompleted: Bool {
-        migrateLegacyIfNeeded()
-        return StorageManager.load(Bool.self, forKey: storageKey) ?? false
+        UserDefaults.standard.bool(forKey: udKey)
     }
 
     static func markCompleted() {
-        StorageManager.save(true, forKey: storageKey)
-    }
-
-    private static func migrateLegacyIfNeeded() {
-        let ud = UserDefaults.standard
-        guard ud.bool(forKey: legacyKey) else { return }
-        StorageManager.save(true, forKey: storageKey)
-        ud.removeObject(forKey: legacyKey)
+        UserDefaults.standard.set(true, forKey: udKey)
     }
 }
