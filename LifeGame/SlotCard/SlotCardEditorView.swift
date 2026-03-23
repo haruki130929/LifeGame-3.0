@@ -58,6 +58,6 @@ struct SlotCardEditorView: View {
             }
         }
         .navigationTitle("編輯卡片")
-        .toolbar { EditButton() }
+        .toolbar { EditButton().environment(\.locale, Locale(identifier: "zh-Hant")) }
     }
 }
