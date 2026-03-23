@@ -114,6 +114,17 @@ final class FabStore: ObservableObject {
         collapse()
     }
 
+    /// 返回主頁時強制清除所有功能頁的 action stack
+    func popToRoot() {
+        guard featureStack.count > 1 else { return }
+        while featureStack.count > 1 {
+            featureStack.removeLast()
+        }
+        self.actions = featureStack.last ?? []
+        hideSubMenu()
+        collapse()
+    }
+
     func collapse() {
         withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
             isExpanded = false
