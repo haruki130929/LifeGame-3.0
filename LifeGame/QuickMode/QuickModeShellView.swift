@@ -11,7 +11,7 @@ struct QuickModeShellView: View {
     @EnvironmentObject private var calendarStore: CalendarStore
     @EnvironmentObject private var wishStore: WishStore
     @EnvironmentObject private var ledgerStore: LedgerStore
-    @EnvironmentObject private var coachMarkStore: CoachMarkStore
+
 
     @State private var navigationPath = NavigationPath()
     @State private var showSettings = false
@@ -43,7 +43,7 @@ struct QuickModeShellView: View {
                             completedCount = completed
                         }
                     )
-                    .background(coachButtonReporter(.quickSwipe))
+                    .coachAnchor(.quickSwipe)
                 }
 
                 // 右下角設定按鈕（取代 FAB）
@@ -63,7 +63,7 @@ struct QuickModeShellView: View {
                                 .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 3)
                                 .accessibilityLabel("設定")
                         }
-                        .background(coachButtonReporter(.quickSettings))
+                        .coachAnchor(.quickSettings)
                         .padding(.trailing, 20)
                         .padding(.bottom, 20)
                     }
@@ -106,23 +106,4 @@ struct QuickModeShellView: View {
         }
     }
 
-    // MARK: - Coach Mark 按鈕位置回報
-
-    private func coachButtonReporter(_ mark: CoachMarkStore.Mark) -> some View {
-        GeometryReader { geo in
-            Color.clear
-                .onAppear {
-                    DispatchQueue.main.async {
-                        let f = geo.frame(in: .global)
-                        coachMarkStore.reportCenter(CGPoint(x: f.midX, y: f.midY), for: mark)
-                    }
-                }
-                .onChange(of: geo.frame(in: .global)) { _, newFrame in
-                    coachMarkStore.reportCenter(
-                        CGPoint(x: newFrame.midX, y: newFrame.midY),
-                        for: mark
-                    )
-                }
-        }
-    }
 }

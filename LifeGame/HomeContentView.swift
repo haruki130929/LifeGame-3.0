@@ -13,7 +13,7 @@ struct HomeContentView: View {
     @EnvironmentObject private var ledgerStore: LedgerStore
     @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var customTabStore: CustomTabStore
-    @EnvironmentObject private var coachMarkStore: CoachMarkStore
+
 
     @State private var selectedTab: TabSelection = .tab(UUID())
     @State private var currentSlot: TimeSlot = .beforeLeave
@@ -85,7 +85,7 @@ struct HomeContentView: View {
                     }
                     .opacity(isContentOpen ? 0.5 : 1)
                     .disabled(isContentOpen)
-                    .background(coachButtonReporter(.drawerButton))
+                    .coachAnchor(.drawerButton)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                     .padding(.top, topButtonsY)
                     .padding(.leading, safeLeading + (leftTopButtonWidth - LayoutTokens.floatButtonSize) / 2)
@@ -98,7 +98,7 @@ struct HomeContentView: View {
                     }
                     .opacity((isDrawerOpen || isContentOpen) ? 0.5 : 1)
                     .disabled(isDrawerOpen || isContentOpen)
-                    .background(coachButtonReporter(.rightPanel))
+                    .coachAnchor(.rightPanel)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .padding(.top, topButtonsY)
                     .padding(.trailing, safeTrailing + LayoutTokens.floatSideGap)
@@ -228,25 +228,4 @@ private extension HomeContentView {
         game.applyRingDeductions(plan: plan)
     }
 
-    // MARK: - Coach Mark 按鈕位置回報
-
-    /// 用 .background() 附加在按鈕上，回報按鈕中心的螢幕座標
-    /// 使用 DispatchQueue.main.async 確保 layout 完成後再讀取
-    private func coachButtonReporter(_ mark: CoachMarkStore.Mark) -> some View {
-        GeometryReader { geo in
-            Color.clear
-                .onAppear {
-                    DispatchQueue.main.async {
-                        let f = geo.frame(in: .global)
-                        coachMarkStore.reportCenter(CGPoint(x: f.midX, y: f.midY), for: mark)
-                    }
-                }
-                .onChange(of: geo.frame(in: .global)) { _, newFrame in
-                    coachMarkStore.reportCenter(
-                        CGPoint(x: newFrame.midX, y: newFrame.midY),
-                        for: mark
-                    )
-                }
-        }
-    }
 }

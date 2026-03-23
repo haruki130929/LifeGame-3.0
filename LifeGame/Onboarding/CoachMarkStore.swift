@@ -25,20 +25,12 @@ final class CoachMarkStore: ObservableObject {
     /// 目前正在顯示的步驟（nil = 不顯示）
     @Published var currentMark: Mark?
 
-    /// 各按鈕的螢幕座標中心點（由各 View 用 .global 座標回報）
-    @Published var buttonCenters: [Mark: CGPoint] = [:]
-
     /// 目前使用的教學序列
     private(set) var activeSequence: [Mark] = []
 
     /// 供 Overlay 讀取目前的教學序列（用於計算步驟進度）
     var activeSequenceForDisplay: [Mark] {
         activeSequence.isEmpty ? Self.fullSequence : activeSequence
-    }
-
-    /// 回報某按鈕的螢幕中心點
-    func reportCenter(_ center: CGPoint, for mark: Mark) {
-        buttonCenters[mark] = center
     }
 
     /// 是否已完成整套引導

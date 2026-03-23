@@ -29,32 +29,33 @@ struct HomeRootContainerView: View {
     private let dailyLogStore = DailyLogStore()
 
     var body: some View {
-        ZStack {
-            Group {
-                if AppLayout.isIPad {
+        Group {
+            if AppLayout.isIPad {
+                fullModeView
+            } else {
+                switch phoneModeStore.mode {
+                case .full:
                     fullModeView
-                } else {
-                    switch phoneModeStore.mode {
-                    case .full:
-                        fullModeView
-                    case .quick:
-                        QuickModeShellView(
-                            game: game,
-                            moodStore: moodStore,
-                            dailyLogStore: dailyLogStore
-                        )
-                        .environmentObject(monthlyScoreStore)
-                        .environmentObject(customTabStore)
-                        .environmentObject(timeSlotNameStore)
-                        .environmentObject(game)
-                        .environmentObject(moodStore)
-                    }
+                case .quick:
+                    QuickModeShellView(
+                        game: game,
+                        moodStore: moodStore,
+                        dailyLogStore: dailyLogStore
+                    )
+                    .environmentObject(monthlyScoreStore)
+                    .environmentObject(customTabStore)
+                    .environmentObject(timeSlotNameStore)
+                    .environmentObject(game)
+                    .environmentObject(moodStore)
                 }
             }
-
-            CoachMarkOverlay()
         }
-        .coordinateSpace(name: "coachRoot")
+        .overlayPreferenceValue(CoachAnchorKey.self) { anchors in
+            GeometryReader { proxy in
+                CoachMarkOverlay(anchors: anchors, proxy: proxy)
+            }
+            .ignoresSafeArea()
+        }
         .onAppear {
             let isQuick = !AppLayout.isIPad && phoneModeStore.mode == .quick
             coachMarkStore.startIfNeeded(isQuickMode: isQuick)
