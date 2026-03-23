@@ -9,7 +9,6 @@ struct HomeDashboardContentView: View {
     @EnvironmentObject private var customTabStore: CustomTabStore
     @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
     @EnvironmentObject private var theme: ThemeStore
-    @EnvironmentObject private var coachMarkStore: CoachMarkStore
 
     @ObservedObject var slotCardStore: SlotCardConfigStore
 
@@ -104,26 +103,7 @@ struct HomeDashboardContentView: View {
                     .accessibilityLabel("編輯卡片")
             }
             .buttonStyle(.plain)
-            .background(
-                GeometryReader { geo in
-                    Color.clear
-                        .onAppear {
-                            DispatchQueue.main.async {
-                                let frame = geo.frame(in: .global)
-                                coachMarkStore.reportCenter(
-                                    CGPoint(x: frame.midX, y: frame.midY),
-                                    for: .tabEdit
-                                )
-                            }
-                        }
-                        .onChange(of: geo.frame(in: .global)) { _, newFrame in
-                            coachMarkStore.reportCenter(
-                                CGPoint(x: newFrame.midX, y: newFrame.midY),
-                                for: .tabEdit
-                            )
-                        }
-                }
-            )
+            .coachAnchor(.tabEdit)
         }
         .foregroundStyle(theme.isDark ? .white.opacity(0.7) : .primary.opacity(0.6))
         .padding(.leading, 2)
