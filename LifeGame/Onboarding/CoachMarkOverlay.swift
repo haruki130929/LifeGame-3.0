@@ -136,33 +136,32 @@ struct CoachMarkOverlay: View {
         screenSize: CGSize
     ) -> CGPoint {
         let gap: CGFloat = 24
+        let cardW: CGFloat = 240  // 卡片估計寬度
+        let cardH: CGFloat = 180  // 卡片估計高度
+        let margin: CGFloat = 20  // 螢幕邊距
+
+        var pt: CGPoint
 
         switch mark {
         case .drawerButton:
-            // 左上角 → 卡片在聚光燈正右邊
-            return CGPoint(x: spot.x + radius + gap + 120, y: spot.y + 40)
-
+            pt = CGPoint(x: spot.x + radius + gap + cardW / 2, y: spot.y + 40)
         case .rightPanel:
-            // 右上角 → 卡片在聚光燈正左邊
-            return CGPoint(x: spot.x - radius - gap - 120, y: spot.y + 40)
-
+            pt = CGPoint(x: spot.x - radius - gap - cardW / 2, y: spot.y + 40)
         case .fabButton:
-            // 右下角 → 卡片在聚光燈左上方
-            return CGPoint(x: spot.x - radius - gap - 120, y: spot.y - radius - gap - 60)
-
+            pt = CGPoint(x: spot.x - radius - gap - cardW / 2, y: spot.y - radius - gap - cardH / 2)
         case .tabEdit:
-            // tab 區域 → 卡片在下方
-            let x = min(spot.x + 80, screenSize.width / 2)
-            return CGPoint(x: x, y: spot.y + radius + gap + 80)
-
+            pt = CGPoint(x: min(spot.x + 80, screenSize.width / 2), y: spot.y + radius + gap + cardH / 2)
         case .quickSwipe:
-            // 卡片中央 → 提示卡在下方
-            return CGPoint(x: screenSize.width / 2, y: spot.y + radius + gap + 80)
-
+            pt = CGPoint(x: screenSize.width / 2, y: spot.y + radius + gap + cardH / 2)
         case .quickSettings:
-            // 右下角 → 卡片在左上方
-            return CGPoint(x: spot.x - radius - gap - 120, y: spot.y - radius - gap - 60)
+            pt = CGPoint(x: spot.x - radius - gap - cardW / 2, y: spot.y - radius - gap - cardH / 2)
         }
+
+        // Clamp：確保卡片不超出螢幕
+        pt.x = max(margin + cardW / 2, min(pt.x, screenSize.width - margin - cardW / 2))
+        pt.y = max(margin + cardH / 2, min(pt.y, screenSize.height - margin - cardH / 2))
+
+        return pt
     }
 
     // MARK: - 說明卡片
