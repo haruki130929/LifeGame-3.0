@@ -237,7 +237,7 @@ final class FabStore: ObservableObject {
             ]
         case .wish:
             result += [
-                FabAction(title: "新增慾望", systemImage: "sparkles", route: .addWish) { [weak self] in
+                FabAction(title: "新增願望", systemImage: "sparkles", route: .addWish) { [weak self] in
                     self?.route = .addWish; self?.collapse()
                 },
                 FabAction(title: "編輯", systemImage: "pencil", route: .editWishList) { [weak self] in

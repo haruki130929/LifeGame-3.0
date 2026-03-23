@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 新增慾望的表單（從 FAB 觸發）
+/// 新增願望的表單（從 FAB 觸發）
 struct AddWishSheet: View {
     @ObservedObject var store: WishStore
     @Environment(\.dismiss) private var dismiss
@@ -13,7 +13,7 @@ struct AddWishSheet: View {
         NavigationStack {
             Form {
                 Section {
-                    TextField("慾望名稱", text: $title)
+                    TextField("願望名稱", text: $title)
                     TextField("預算（選填）", text: $priceText)
                         .keyboardType(.numberPad)
                 }
@@ -22,7 +22,7 @@ struct AddWishSheet: View {
                     Stepper("\(coolDownDays) 天", value: $coolDownDays, in: 0...90)
                 }
             }
-            .navigationTitle("新增慾望")
+            .navigationTitle("新增願望")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
