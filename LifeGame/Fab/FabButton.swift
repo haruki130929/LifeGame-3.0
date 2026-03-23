@@ -80,6 +80,7 @@ private struct FabButtoniPhone: View {
                 theme.isDark ? Color.white.opacity(0.10) : Color.black.opacity(0.08),
                 lineWidth: 1))
             .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.12), radius: 12, x: 0, y: 8)
+            .coachAnchor(.fabButton)
             .scaleEffect(isRingActive ? 0.85 : 1.0)
             .rotationEffect(.degrees(isRingActive ? 45 : 0))
             .onTapGesture {
