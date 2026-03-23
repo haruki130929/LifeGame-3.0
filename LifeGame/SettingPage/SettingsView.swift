@@ -9,6 +9,7 @@ struct SettingsView: View {
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
     @EnvironmentObject private var ringSettings: TomorrowRingSettingsStore
     @EnvironmentObject private var phoneModeStore: PhoneModeStore
+    @EnvironmentObject private var slotNameStore: TimeSlotNameStore
 
     // MARK: - 通知
     @State private var hourlyMoodEnabled: Bool = false
@@ -26,6 +27,7 @@ struct SettingsView: View {
             if !AppLayout.isIPad {
                 interfaceSection
             }
+            roleSection
             notificationSection
             dailyLogSection
             featureSection
@@ -92,6 +94,19 @@ private extension SettingsView {
                 InterfaceSettingsView()
             } label: {
                 Label("「＋」按鈕操作方式", systemImage: "hand.tap")
+            }
+        }
+    }
+
+    // MARK: 身份設定
+    var roleSection: some View {
+        Section("身份設定") {
+            Picker(selection: $slotNameStore.role) {
+                ForEach(UserRole.allCases) { role in
+                    Text(role.displayName).tag(role)
+                }
+            } label: {
+                Label("我的身份", systemImage: slotNameStore.role == .student ? "graduationcap.fill" : "briefcase.fill")
             }
         }
     }
