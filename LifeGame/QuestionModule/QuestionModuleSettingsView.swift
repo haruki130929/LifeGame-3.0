@@ -32,7 +32,7 @@ struct QuestionModuleSettingsView: View {
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
-                EditButton()
+                EditButton().environment(\.locale, Locale(identifier: "zh-Hant"))
             }
         }
         .sheet(isPresented: $showingAddSheet) {
