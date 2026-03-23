@@ -65,7 +65,7 @@ final class CoachMarkStore: ObservableObject {
 
         activeSequence = isQuickMode ? Self.quickSequence : Self.fullSequence
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
             guard let self, self.currentMark == nil, !self.allCompleted else { return }
             self.currentMark = self.activeSequence.first
         }
