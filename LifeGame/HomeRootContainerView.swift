@@ -23,7 +23,7 @@ struct HomeRootContainerView: View {
     @StateObject private var slotCardStore = SlotCardConfigStore()
     @StateObject private var monthlyScoreStore = MonthlyScoreStore()
     @StateObject private var customTabStore = CustomTabStore()
-    @StateObject private var timeSlotNameStore = TimeSlotNameStore()
+    @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
 
     // MARK: - Non-observable (不需要 UI 更新就維持 let)
     private let dailyLogStore = DailyLogStore()

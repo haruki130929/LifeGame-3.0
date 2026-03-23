@@ -27,6 +27,7 @@ struct LifeGameApp: App {
     @StateObject private var todoStore = TodoQuadrantStore()
     @StateObject private var updateChecker = AppUpdateChecker()
     @StateObject private var characterStore = CharacterStore()
+    @StateObject private var slotNameStore = TimeSlotNameStore()
 
     init() {
         // 1. 註冊所有 @Model 類型
@@ -102,6 +103,7 @@ struct LifeGameApp: App {
                         .environmentObject(todoStore)
                         .environmentObject(updateChecker)
                         .environmentObject(characterStore)
+                        .environmentObject(slotNameStore)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
                         .modelContainer(coordinator.modelContainer)
                         .id(storageConfig.currentMode)
@@ -124,6 +126,7 @@ struct LifeGameApp: App {
                     OnboardingView(completed: $onboardingCompleted)
                         .environmentObject(theme)
                         .environmentObject(phoneModeStore)
+                        .environmentObject(slotNameStore)
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
                 }
             } else {
