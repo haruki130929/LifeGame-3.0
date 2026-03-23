@@ -1,64 +1,72 @@
 import SwiftUI
 
+// MARK: - Anchor PreferenceKey
+
+/// 各按鈕用 .anchorPreference 回報自己的中心點
+/// SwiftUI 自動轉換座標系，保證準確
+struct CoachAnchorKey: PreferenceKey {
+    static var defaultValue: [CoachMarkStore.Mark: Anchor<CGPoint>] = [:]
+    static func reduce(value: inout Value, nextValue: () -> Value) {
+        value.merge(nextValue()) { $1 }
+    }
+}
+
+// MARK: - 便利修飾器
+
+extension View {
+    /// 在按鈕上加上這個修飾器，自動回報位置給 CoachMark 系統
+    func coachAnchor(_ mark: CoachMarkStore.Mark) -> some View {
+        self.anchorPreference(key: CoachAnchorKey.self, value: .center) { [mark: $0] }
+    }
+}
+
+// MARK: - CoachMark Overlay
+
 /// 聚光燈式新手引導覆蓋層
-/// 畫面變暗，只有目標元素用圓形高亮（圓圈內是亮的），說明卡片在聚光燈旁邊
-///
-/// ⚠️ 關鍵設計：
-///   GeometryReader 使用 .ignoresSafeArea()，讓 GR origin = 螢幕左上角。
-///   所有元素（Path hole、Ring、TipCard）都在同一個「螢幕座標」系統中，
-///   避免不同 .ignoresSafeArea() 層級造成座標不對齊。
-///   按鈕位置使用 UIKit safe area insets 計算，確保可靠。
+/// 使用 Anchor Preference 取得按鈕精確座標，不再依賴 GeometryReader(.global)
 struct CoachMarkOverlay: View {
+    let anchors: [CoachMarkStore.Mark: Anchor<CGPoint>]
+    let proxy: GeometryProxy
+
     @EnvironmentObject private var coachStore: CoachMarkStore
     @EnvironmentObject private var theme: ThemeStore
 
-    /// 從 UIKit 取得 safe area insets（可靠，不受 SwiftUI ignoresSafeArea 影響）
-    private var windowInsets: UIEdgeInsets {
-        UIApplication.shared.connectedScenes
-            .compactMap { $0 as? UIWindowScene }
-            .first?.keyWindow?.safeAreaInsets ?? .zero
-    }
-
     var body: some View {
         if let mark = coachStore.currentMark {
-            GeometryReader { geo in
-                let screenSize = geo.size
-                let spot = spotlightCenter(for: mark, screenSize: screenSize)
-                let radius = spotlightRadius(for: mark)
-                let fullRect = CGRect(origin: .zero, size: screenSize)
+            let screenSize = proxy.size
+            let spot = spotlightCenter(for: mark)
+            let radius = spotlightRadius(for: mark)
+            let fullRect = CGRect(origin: .zero, size: screenSize)
 
-                ZStack {
-                    // ① 聚光燈遮罩（全螢幕深色 + 圓形鏤空）
-                    spotlightMask(center: spot, radius: radius, fullRect: fullRect)
-                        .fill(Color.black.opacity(0.78), style: FillStyle(eoFill: true))
-                        .onTapGesture {
-                            withAnimation(.easeInOut(duration: 0.25)) {
-                                coachStore.next()
-                            }
+            ZStack {
+                // ① 聚光燈遮罩（全螢幕深色 + 圓形鏤空）
+                spotlightMask(center: spot, radius: radius, fullRect: fullRect)
+                    .fill(Color.black.opacity(0.78), style: FillStyle(eoFill: true))
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.25)) {
+                            coachStore.next()
                         }
+                    }
 
-                    // ② 聚光燈光環
-                    Circle()
-                        .strokeBorder(theme.accentColor.opacity(0.8), lineWidth: 3)
-                        .frame(width: radius * 2, height: radius * 2)
-                        .position(spot)
+                // ② 聚光燈光環
+                Circle()
+                    .strokeBorder(theme.accentColor.opacity(0.8), lineWidth: 3)
+                    .frame(width: radius * 2, height: radius * 2)
+                    .position(spot)
 
-                    // ③ 說明卡片
-                    tipCard(for: mark)
-                        .fixedSize()
-                        .position(
-                            cardPosition(
-                                for: mark,
-                                spot: spot,
-                                radius: radius,
-                                screenSize: screenSize
-                            )
+                // ③ 說明卡片
+                tipCard(for: mark)
+                    .fixedSize()
+                    .position(
+                        cardPosition(
+                            for: mark,
+                            spot: spot,
+                            radius: radius,
+                            screenSize: screenSize
                         )
-                }
-                .animation(.easeInOut(duration: 0.3), value: mark)
+                    )
             }
-            .ignoresSafeArea()   // ← GR 覆蓋全螢幕，所有座標 = 螢幕座標
-            .transition(.opacity)
+            .animation(.easeInOut(duration: 0.3), value: mark)
         }
     }
 
@@ -80,40 +88,16 @@ struct CoachMarkOverlay: View {
         return path
     }
 
-    // MARK: - 聚光燈圓心（螢幕座標）
+    // MARK: - 聚光燈圓心（使用 anchor 精確座標）
 
-    private func spotlightCenter(
-        for mark: CoachMarkStore.Mark,
-        screenSize: CGSize
-    ) -> CGPoint {
-        let insets = windowInsets
-        let safeBottom = insets.bottom
-        let safeTrailing: CGFloat = 0
-
-        switch mark {
-        // Full Mode
-        case .drawerButton:
-            if let reported = coachStore.buttonCenters[mark] { return reported }
-            return CGPoint(x: 36, y: insets.top + 40)
-        case .rightPanel:
-            if let reported = coachStore.buttonCenters[mark] { return reported }
-            return CGPoint(x: screenSize.width - 36, y: insets.top + 40)
-        case .fabButton:
-            // FAB 固定位置（不用回報值，回報的可能是外層 frame 中心）
-            let fabX = screenSize.width - safeTrailing - LayoutTokens.fabSideGap - 30
-            let fabY = screenSize.height - safeBottom - LayoutTokens.fabBottomGap - 30
-            return CGPoint(x: fabX, y: fabY)
-        case .tabEdit:
-            if let reported = coachStore.buttonCenters[mark] { return reported }
-            return CGPoint(x: 150, y: insets.top + 120)
-        // Quick Mode
-        case .quickSwipe:
-            return CGPoint(x: screenSize.width / 2, y: screenSize.height / 2)
-        case .quickSettings:
-            let fabX = screenSize.width - safeTrailing - LayoutTokens.fabSideGap - 30
-            let fabY = screenSize.height - safeBottom - LayoutTokens.fabBottomGap - 30
-            return CGPoint(x: fabX, y: fabY)
+    private func spotlightCenter(for mark: CoachMarkStore.Mark) -> CGPoint {
+        // 優先使用 anchor 座標（精確）
+        if let anchor = anchors[mark] {
+            return proxy[anchor]
         }
+        // fallback：quickSwipe 沒有對應按鈕，用畫面中央
+        let screenSize = proxy.size
+        return CGPoint(x: screenSize.width / 2, y: screenSize.height / 2)
     }
 
     // MARK: - 各步驟圓圈半徑
@@ -127,7 +111,7 @@ struct CoachMarkOverlay: View {
         case .tabEdit:
             return 22
         case .quickSwipe:
-            return 80   // 較大圓圈框住卡片中央區域
+            return 80
         case .quickSettings:
             return 36
         }
@@ -142,9 +126,9 @@ struct CoachMarkOverlay: View {
         screenSize: CGSize
     ) -> CGPoint {
         let gap: CGFloat = 24
-        let cardW: CGFloat = 240  // 卡片估計寬度
-        let cardH: CGFloat = 180  // 卡片估計高度
-        let margin: CGFloat = 20  // 螢幕邊距
+        let cardW: CGFloat = 240
+        let cardH: CGFloat = 180
+        let margin: CGFloat = 20
 
         var pt: CGPoint
 
@@ -241,44 +225,18 @@ struct CoachMarkOverlay: View {
 
     private func tipInfo(for mark: CoachMarkStore.Mark) -> TipInfo {
         switch mark {
-        // Full Mode
         case .drawerButton:
-            return TipInfo(
-                icon: "line.3.horizontal",
-                title: "功能選單",
-                desc: "點這裡打開所有功能分類"
-            )
+            return TipInfo(icon: "line.3.horizontal", title: "功能選單", desc: "點這裡打開所有功能分類")
         case .rightPanel:
-            return TipInfo(
-                icon: "arrow.right.square",
-                title: "工具面板",
-                desc: "點這裡開啟右側工具面板"
-            )
+            return TipInfo(icon: "arrow.right.square", title: "工具面板", desc: "點這裡開啟右側工具面板")
         case .fabButton:
-            return TipInfo(
-                icon: "plus.circle.fill",
-                title: "快速操作",
-                desc: "點這裡新增或操作功能"
-            )
+            return TipInfo(icon: "plus.circle.fill", title: "快速操作", desc: "點這裡新增或操作功能")
         case .tabEdit:
-            return TipInfo(
-                icon: "pencil.circle.fill",
-                title: "編輯卡片",
-                desc: "點這裡自訂時段顯示的卡片"
-            )
-        // Quick Mode
+            return TipInfo(icon: "pencil.circle.fill", title: "編輯卡片", desc: "點這裡自訂時段顯示的卡片")
         case .quickSwipe:
-            return TipInfo(
-                icon: "hand.draw",
-                title: "滑動卡片",
-                desc: "左右滑動完成每張任務卡片"
-            )
+            return TipInfo(icon: "hand.draw", title: "滑動卡片", desc: "左右滑動完成每張任務卡片")
         case .quickSettings:
-            return TipInfo(
-                icon: "gearshape.fill",
-                title: "設定",
-                desc: "點這裡開啟設定"
-            )
+            return TipInfo(icon: "gearshape.fill", title: "設定", desc: "點這裡開啟設定")
         }
     }
 }
