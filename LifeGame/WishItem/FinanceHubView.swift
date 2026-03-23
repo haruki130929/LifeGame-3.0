@@ -23,7 +23,7 @@ struct FinanceHubView: View {
     var body: some View {
         VStack(spacing: 12) {
             Picker("", selection: $tab) {
-                Text("慾望清單").tag(0)
+                Text("願望清單").tag(0)
                 Text("記帳").tag(1)
             }
             .pickerStyle(.segmented)

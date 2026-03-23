@@ -7,9 +7,9 @@ struct WishListView: View {
     var body: some View {
         if store.items.isEmpty {
             ContentUnavailableView {
-                Label("尚無慾望清單", systemImage: "sparkles")
+                Label("尚無願望清單", systemImage: "sparkles")
             } description: {
-                Text("點擊右下角「＋」按鈕，選擇「新增慾望」來加入你想買的東西吧！")
+                Text("點擊右下角「＋」按鈕，選擇「新增願望」來加入你想買的東西吧！")
             }
         } else {
             List {
@@ -21,7 +21,7 @@ struct WishListView: View {
                             ledgerStore.addExpense(
                                 title: item.title,
                                 amount: amount,
-                                note: "來自慾望清單",
+                                note: "來自願望清單",
                                 wishID: item.id
                             )
                         }

@@ -32,7 +32,7 @@ struct LedgerView: View {
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                             if e.wishID != nil {
-                                Text("來自慾望清單")
+                                Text("來自願望清單")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
