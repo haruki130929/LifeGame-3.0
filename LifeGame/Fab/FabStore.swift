@@ -76,6 +76,7 @@ final class FabStore: ObservableObject {
     @Published var currentFeatures: [FeatureID] = []
 
     private var featureStack: [[FabAction]] = []
+    private var lastHomeFeatures: [FeatureID] = []
 
     /// 是否在功能頁（有 push 過 actions）
     var isOnFeaturePage: Bool { featureStack.count > 1 }
@@ -105,6 +106,10 @@ final class FabStore: ObservableObject {
         guard featureStack.count > 1 else { return }
         featureStack.removeLast()
         self.actions = featureStack.last ?? []
+        // 回到根層級時清除 currentFeatures，讓 refreshFabMenu 恢復主頁面功能列表
+        if featureStack.count <= 1 {
+            currentFeatures = lastHomeFeatures
+        }
         hideSubMenu()
         collapse()
     }
@@ -141,6 +146,7 @@ final class FabStore: ObservableObject {
     func apply(context: FabContext) {
         switch context {
         case let .home(_, features):
+            lastHomeFeatures = features
             // 如果已經在功能頁（stack 有 push），不要覆蓋 currentFeatures
             if featureStack.count <= 1 {
                 currentFeatures = features
