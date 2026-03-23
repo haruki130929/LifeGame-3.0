@@ -26,7 +26,8 @@ struct DailyLogHistoryView: View {
         .fabMenu([
             FabAction(title: "寫新日記", systemImage: "plus") {
                 showingAdd = true
-            }
+            },
+            FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { }
         ])
         .sheet(isPresented: $showingAdd) {
             NavigationStack {
