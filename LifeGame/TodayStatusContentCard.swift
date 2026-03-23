@@ -3,6 +3,12 @@ import Combine
 
 struct TodayStatusContentCard: View {
     @ObservedObject var game: LifeGame
+    @EnvironmentObject private var slotNameStore: TimeSlotNameStore
+
+    /// 依角色顯示不同按鈕文字
+    private var actionButtonTitle: String {
+        slotNameStore.role == .worker ? "工作一小時" : "上一堂課"
+    }
 
     /// 上一堂課：記錄按下的時間，1 小時內可取消
     @State private var classUndoTime: Date? = nil
@@ -42,7 +48,7 @@ struct TodayStatusContentCard: View {
                         game.applyClassCost()
                         classUndoTime = Date()
                     } label: {
-                        Text("上一堂課")
+                        Text(actionButtonTitle)
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)

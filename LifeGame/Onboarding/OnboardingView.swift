@@ -1,18 +1,19 @@
 import SwiftUI
 
 /// 第一次打開 App 時顯示的新手引導
-/// iPad: 2 頁（歡迎 → 準備）
-/// iPhone: 3 頁（歡迎 → 裝置選擇 → 準備）
+/// iPad: 3 頁（歡迎 → 角色選擇 → 準備）
+/// iPhone: 4 頁（歡迎 → 角色選擇 → 裝置選擇 → 準備）
 struct OnboardingView: View {
 
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var phoneModeStore: PhoneModeStore
+    @EnvironmentObject private var slotNameStore: TimeSlotNameStore
     @Binding var completed: Bool
 
     @State private var currentPage = 0
 
     private let iPad = AppLayout.isIPad
-    private var totalPages: Int { iPad ? 2 : 3 }
+    private var totalPages: Int { iPad ? 3 : 4 }
 
     var body: some View {
         ZStack {
@@ -24,11 +25,13 @@ struct OnboardingView: View {
                 TabView(selection: $currentPage) {
                     welcomePage.tag(0)
 
+                    roleChoicePage.tag(1)
+
                     if !iPad {
-                        deviceChoicePage.tag(1)
+                        deviceChoicePage.tag(2)
                     }
 
-                    readyPage.tag(iPad ? 1 : 2)
+                    readyPage.tag(iPad ? 2 : 3)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.3), value: currentPage)
@@ -80,7 +83,55 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Page 2 (iPhone only): 裝置選擇
+    // MARK: - Page 2: 角色選擇
+
+    private var roleChoicePage: some View {
+        VStack(spacing: iPad ? 32 : 28) {
+            Spacer()
+
+            Image(systemName: "person.2.fill")
+                .font(.system(size: iPad ? 80 : 68))
+                .foregroundStyle(theme.accentColor)
+
+            Text("你的身份")
+                .font(.system(size: iPad ? 34 : 26, weight: .bold))
+
+            Text("我們會根據你的身份\n調整介面用語")
+                .font(.system(size: iPad ? 18 : 15))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+
+            VStack(spacing: 14) {
+                deviceChoiceButton(
+                    icon: "graduationcap.fill",
+                    title: "學生",
+                    desc: "上一堂課扣 HP、FP",
+                    isSelected: slotNameStore.role == .student
+                ) {
+                    withAnimation(.spring(response: 0.3)) {
+                        slotNameStore.role = .student
+                    }
+                }
+
+                deviceChoiceButton(
+                    icon: "briefcase.fill",
+                    title: "上班族",
+                    desc: "工作一小時扣 HP、FP",
+                    isSelected: slotNameStore.role == .worker
+                ) {
+                    withAnimation(.spring(response: 0.3)) {
+                        slotNameStore.role = .worker
+                    }
+                }
+            }
+            .padding(.horizontal, 32)
+
+            Spacer()
+        }
+    }
+
+    // MARK: - Page 3 (iPhone only): 裝置選擇
 
     private var deviceChoicePage: some View {
         VStack(spacing: 28) {
