@@ -106,6 +106,11 @@ struct HomeRootView: View {
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.mandala) }
             }
         }
+        .onChange(of: navigationPath) {
+            if navigationPath.isEmpty {
+                fab.popToRoot()
+            }
+        }
         .sheet(isPresented: $showAddCalendarEvent) {
             AddCalendarEventView(
                 store: calendarStore,
