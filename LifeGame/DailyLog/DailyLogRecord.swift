@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class DailyLogRecord {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var date: Date
     var payload: Data   // DailyLogEntry 的 JSON Data
 

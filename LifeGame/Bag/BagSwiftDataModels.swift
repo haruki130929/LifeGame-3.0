@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class BagItemModel {
-    @Attribute(.unique) var id: UUID
+    var id: UUID
     var name: String
     var icon: String
     var isRequired: Bool
