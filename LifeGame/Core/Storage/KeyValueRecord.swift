@@ -3,9 +3,9 @@ import Foundation
 
 @Model
 final class KeyValueRecord {
-    var key: String
-    var data: Data
-    var updatedAt: Date
+    var key: String = ""
+    var data: Data = Data()
+    var updatedAt: Date = Date()
 
     init(key: String, data: Data) {
         self.key = key

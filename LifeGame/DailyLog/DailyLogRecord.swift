@@ -3,9 +3,9 @@ import SwiftData
 
 @Model
 final class DailyLogRecord {
-    var id: UUID
-    var date: Date
-    var payload: Data   // DailyLogEntry 的 JSON Data
+    var id: UUID = UUID()
+    var date: Date = Date()
+    var payload: Data = Data()
 
     init(id: UUID, date: Date, payload: Data) {
         self.id = id

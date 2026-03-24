@@ -3,11 +3,11 @@ import SwiftData
 
 @Model
 final class BagItemModel {
-    var id: UUID
-    var name: String
-    var icon: String
-    var isRequired: Bool
-    var isChecked: Bool   // ✅ 新增：把「是否勾選」也存到 SwiftData
+    var id: UUID = UUID()
+    var name: String = ""
+    var icon: String = ""
+    var isRequired: Bool = false
+    var isChecked: Bool = false
     
     init(
         id: UUID = UUID(),
