@@ -26,7 +26,15 @@ final class StorageConfiguration: @unchecked Sendable {
             defaults.set(keychainMode, forKey: Keys.storageMode)
             debugLog("🔑 從 Keychain 回復儲存模式：\(keychainMode)")
         } else {
-            raw = StorageMode.local.rawValue
+            // 首次安裝：如果 iCloud 可用就預設用 iCloud，確保資料從一開始就同步到雲端
+            if FileManager.default.ubiquityIdentityToken != nil {
+                raw = StorageMode.iCloud.rawValue
+                defaults.set(raw, forKey: Keys.storageMode)
+                KeychainHelper.save(raw, forKey: Keys.keychainStorageMode)
+                debugLog("☁️ 首次安裝，iCloud 可用，預設使用 iCloud 儲存")
+            } else {
+                raw = StorageMode.local.rawValue
+            }
         }
 
         self.currentMode = StorageMode(rawValue: raw) ?? .local
