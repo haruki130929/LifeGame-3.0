@@ -60,6 +60,8 @@ final class WatchDataStore: ObservableObject {
         static let stats = "shared.stats"
         static let mood = "shared.mood"
         static let todos = "shared.todos"
+        static let watchMoodUpdatedAt = "shared.watchMoodUpdatedAt"
+        static let watchTodosUpdatedAt = "shared.watchTodosUpdatedAt"
     }
 
     private func loadAll() {
@@ -94,12 +96,15 @@ final class WatchDataStore: ObservableObject {
     private func saveMood() {
         if let data = try? JSONEncoder().encode(todayMoodEntries) {
             defaults.set(data, forKey: Keys.mood)
+            // 標記 Watch 有更新，讓 iOS 知道要來讀取
+            defaults.set(Date().timeIntervalSince1970, forKey: Keys.watchMoodUpdatedAt)
         }
     }
 
     private func saveTodos() {
         if let data = try? JSONEncoder().encode(todoItems) {
             defaults.set(data, forKey: Keys.todos)
+            defaults.set(Date().timeIntervalSince1970, forKey: Keys.watchTodosUpdatedAt)
         }
     }
 }

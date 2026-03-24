@@ -69,6 +69,7 @@ struct LifeGameApp: App {
 
     @State private var onboardingCompleted = OnboardingTracker.isCompleted
     @State private var showWhatsNew = false
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
@@ -110,6 +111,11 @@ struct LifeGameApp: App {
                             .interactiveDismissDisabled()
                         }
                         .overlay { ToastOverlay() }
+                        .onChange(of: scenePhase) { _, phase in
+                            if phase == .active {
+                                WatchChangeObserver.shared.checkForWatchChanges()
+                            }
+                        }
                 } else {
                     OnboardingView(completed: $onboardingCompleted)
                         .environment(coordinator)

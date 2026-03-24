@@ -20,5 +20,9 @@ enum SharedConstants {
         static let stats = "shared.stats"
         static let mood = "shared.mood"
         static let todos = "shared.todos"
+
+        // Watch → iOS 變更時間戳
+        static let watchMoodUpdatedAt = "shared.watchMoodUpdatedAt"
+        static let watchTodosUpdatedAt = "shared.watchTodosUpdatedAt"
     }
 }
