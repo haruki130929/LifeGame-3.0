@@ -84,7 +84,7 @@ final class FabStore: ObservableObject {
     func setRootActions(_ actions: [FabAction]) {
         if featureStack.isEmpty {
             featureStack = [actions]
-        } else {
+        } else if featureStack.indices.contains(0) {
             featureStack[0] = actions
         }
         // 只有在根層級時才更新顯示的 actions；功能頁 push 過 actions 時保留功能頁的

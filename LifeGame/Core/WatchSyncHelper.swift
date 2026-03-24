@@ -1,5 +1,18 @@
 import Foundation
 
+// MARK: - 共享 Codable 型別（iOS ↔ watchOS 共用）
+
+struct SyncStatCodable: Codable {
+    var current: Int
+    var max: Int
+}
+
+struct SyncStatsPayload: Codable {
+    var hp: SyncStatCodable
+    var fp: SyncStatCodable
+    var mp: SyncStatCodable
+}
+
 /// 將 iOS 端資料同步到 App Groups 的 shared UserDefaults，供 watchOS 讀取
 enum WatchSyncHelper {
 
@@ -8,39 +21,38 @@ enum WatchSyncHelper {
     // MARK: - Stats (HP / FP / MP)
 
     static func syncStats(hp: Stat, fp: Stat, mp: Stat) {
-        struct StatsPayload: Codable {
-            var hp: StatCodable
-            var fp: StatCodable
-            var mp: StatCodable
-        }
-        struct StatCodable: Codable {
-            var current: Int
-            var max: Int
-        }
-
-        let payload = StatsPayload(
-            hp: StatCodable(current: hp.current, max: hp.max),
-            fp: StatCodable(current: fp.current, max: fp.max),
-            mp: StatCodable(current: mp.current, max: mp.max)
+        let payload = SyncStatsPayload(
+            hp: SyncStatCodable(current: hp.current, max: hp.max),
+            fp: SyncStatCodable(current: fp.current, max: fp.max),
+            mp: SyncStatCodable(current: mp.current, max: mp.max)
         )
-        if let data = try? JSONEncoder().encode(payload) {
+        do {
+            let data = try JSONEncoder().encode(payload)
             defaults.set(data, forKey: SharedConstants.Keys.stats)
+        } catch {
+            debugLog("⚠️ WatchSync: Stats 編碼失敗 - \(error.localizedDescription)")
         }
     }
 
     // MARK: - Mood (今日心情紀錄)
 
     static func syncMoodEntries(_ entries: [MoodEntry]) {
-        if let data = try? JSONEncoder().encode(entries) {
+        do {
+            let data = try JSONEncoder().encode(entries)
             defaults.set(data, forKey: SharedConstants.Keys.mood)
+        } catch {
+            debugLog("⚠️ WatchSync: Mood 編碼失敗 - \(error.localizedDescription)")
         }
     }
 
     // MARK: - Todos (待辦事項)
 
     static func syncTodos(_ items: [TodoItem]) {
-        if let data = try? JSONEncoder().encode(items) {
+        do {
+            let data = try JSONEncoder().encode(items)
             defaults.set(data, forKey: SharedConstants.Keys.todos)
+        } catch {
+            debugLog("⚠️ WatchSync: Todos 編碼失敗 - \(error.localizedDescription)")
         }
     }
 }

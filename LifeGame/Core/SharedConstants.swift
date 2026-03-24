@@ -6,7 +6,12 @@ enum SharedConstants {
     /// iOS 與 watchOS 共用的 UserDefaults（透過 App Groups）
     /// 如果 App Group 尚未在 Xcode 中啟用，會 fallback 到 standard
     static var sharedDefaults: UserDefaults {
-        UserDefaults(suiteName: appGroupID) ?? .standard
+        if let shared = UserDefaults(suiteName: appGroupID) {
+            return shared
+        } else {
+            debugLog("⚠️ App Group '\(appGroupID)' 無法建立，使用 .standard fallback（Watch 同步將無法運作）")
+            return .standard
+        }
     }
 
     // MARK: - Shared Keys
