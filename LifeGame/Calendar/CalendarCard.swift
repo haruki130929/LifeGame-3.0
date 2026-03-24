@@ -205,14 +205,15 @@ struct CalendarCard: View {
     }
     
     // MARK: - Footer（依 size 自動選擇）
+    @ViewBuilder
     private var footer: some View {
         switch size {
         case .large:
-            return AnyView(largeFooter)
+            largeFooter
         case .medium:
-            return AnyView(mediumFooter)
+            mediumFooter
         case .small:
-            return AnyView(EmptyView())
+            EmptyView()
         }
     }
     
@@ -324,11 +325,11 @@ struct CalendarCard: View {
     private var monthNumber: Int { cal.component(.month, from: monthDate) }
     
     private var monthStart: Date {
-        cal.date(from: cal.dateComponents([.year, .month], from: monthDate))!
+        cal.date(from: cal.dateComponents([.year, .month], from: monthDate)) ?? monthDate
     }
-    
+
     private var monthEnd: Date {
-        cal.date(byAdding: DateComponents(month: 1), to: monthStart)!
+        cal.date(byAdding: DateComponents(month: 1), to: monthStart) ?? monthDate
     }
     
     private func clippedToMonth(_ r: CalendarRange) -> CalendarRange? {
@@ -402,115 +403,9 @@ struct CalendarCard: View {
     }
 }
 
-// MARK: - Local Models（放同檔也 OK）
+// MARK: - Local Models
+
 private struct CalendarDayCell {
     let date: Date?
     let isInCurrentMonth: Bool
-}
-
-struct CalendarRange: Identifiable {
-    let id = UUID()
-    let start: Date
-    let end: Date
-    let color: Color
-}
-
-struct RangeSegment: Identifiable {
-    let id = UUID()
-    let row: Int
-    let startCol: Int
-    let endCol: Int
-}
-
-struct CalendarRangeProvider {
-    let cal = Calendar.current
-    
-    func ranges(from events: [CalendarEvent], in monthDate: Date) -> [CalendarRange] {
-        let monthStart = cal.date(from: cal.dateComponents([.year, .month], from: monthDate))!
-        let monthEnd = cal.date(byAdding: .month, value: 1, to: monthStart)!
-        
-        return events.compactMap { e in
-            let rawStart = min(e.start, e.end)
-            let rawEnd   = max(e.start, e.end)
-            
-            let s = max(rawStart, monthStart)
-            let e = min(rawEnd, monthEnd)
-            guard s < e else { return nil }
-            
-            return CalendarRange(start: s, end: e, color: Color.cyan.opacity(0.70))
-        }
-    }
-}
-
-private struct RangeBarShape: Shape {
-    let isStart: Bool
-    let isEnd: Bool
-    let radius: CGFloat
-    
-    func path(in rect: CGRect) -> Path {
-        let tl: CGFloat = isStart ? radius : 0
-        let bl: CGFloat = isStart ? radius : 0
-        let tr: CGFloat = isEnd ? radius : 0
-        let br: CGFloat = isEnd ? radius : 0
-        
-        var p = Path()
-        p.addRoundedRect(in: rect,
-                         topLeftRadius: tl,
-                         topRightRadius: tr,
-                         bottomLeftRadius: bl,
-                         bottomRightRadius: br)
-        return p
-    }
-}
-
-private extension Path {
-    mutating func addRoundedRect(in rect: CGRect,
-                                 topLeftRadius: CGFloat,
-                                 topRightRadius: CGFloat,
-                                 bottomLeftRadius: CGFloat,
-                                 bottomRightRadius: CGFloat) {
-        let w = rect.width, h = rect.height
-        let x = rect.minX, y = rect.minY
-        
-        let tl = min(min(topLeftRadius, h/2), w/2)
-        let tr = min(min(topRightRadius, h/2), w/2)
-        let bl = min(min(bottomLeftRadius, h/2), w/2)
-        let br = min(min(bottomRightRadius, h/2), w/2)
-        
-        move(to: CGPoint(x: x + tl, y: y))
-        addLine(to: CGPoint(x: x + w - tr, y: y))
-        addArc(center: CGPoint(x: x + w - tr, y: y + tr),
-               radius: tr,
-               startAngle: .degrees(-90),
-               endAngle: .degrees(0),
-               clockwise: false)
-        
-        addLine(to: CGPoint(x: x + w, y: y + h - br))
-        addArc(center: CGPoint(x: x + w - br, y: y + h - br),
-               radius: br,
-               startAngle: .degrees(0),
-               endAngle: .degrees(90),
-               clockwise: false)
-        
-        addLine(to: CGPoint(x: x + bl, y: y + h))
-        addArc(center: CGPoint(x: x + bl, y: y + h - bl),
-               radius: bl,
-               startAngle: .degrees(90),
-               endAngle: .degrees(180),
-               clockwise: false)
-        
-        addLine(to: CGPoint(x: x, y: y + tl))
-        addArc(center: CGPoint(x: x + tl, y: y + tl),
-               radius: tl,
-               startAngle: .degrees(180),
-               endAngle: .degrees(270),
-               clockwise: false)
-        
-        closeSubpath()
-    }
-}
-
-struct UrgentImportantTask: Identifiable {
-    let id = UUID()
-    let title: String
 }
