@@ -40,7 +40,7 @@ enum StorageManager {
             try context.save()
         } catch {
             debugLog("Storage save failed:", error)
-            ErrorManager.shared.showError("資料儲存失敗", error: error)
+            ErrorManager.shared.showError(L10n.Error.saveFailed, error: error)
         }
     }
 
@@ -84,7 +84,7 @@ enum StorageManager {
             }
         } catch {
             debugLog("Storage remove failed:", error)
-            ErrorManager.shared.showError("資料刪除失敗", error: error)
+            ErrorManager.shared.showError(L10n.Error.deleteFailed, error: error)
         }
     }
 }

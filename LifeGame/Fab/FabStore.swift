@@ -330,18 +330,18 @@ final class FabStore: ObservableObject {
 
     func title(for feature: FeatureID) -> String {
         switch feature {
-        case .calendar:               return "行事曆"
-        case .diary:                  return "日記"
-        case .wish:                   return "願望"
-        case .ledger:                 return "記帳"
-        case .settings:               return "設定"
-        case .dailyLog:               return "每日紀錄"
-        case .todoQuadrant:           return "待辦四象限"
-        case .tomorrowRing:           return "時間圓環"
-        case .bagRequired:            return "整理書包"
-        case .monthlyScoreCalendar:   return "本月結算"
-        case .moodThermometer:        return "心情溫度計"
-        case .mandala:                return "曼陀羅圖表"
+        case .calendar:               return L10n.Title.calendar
+        case .diary:                  return L10n.Title.diary
+        case .wish:                   return L10n.Title.wish
+        case .ledger:                 return L10n.Title.ledger
+        case .settings:               return L10n.Title.settings
+        case .dailyLog:               return L10n.Title.dailyLog
+        case .todoQuadrant:           return L10n.Title.todoQuadrant
+        case .tomorrowRing:           return L10n.Title.tomorrowRing
+        case .bagRequired:            return L10n.Title.bagRequired
+        case .monthlyScoreCalendar:   return L10n.Title.monthlyScore
+        case .moodThermometer:        return L10n.Title.moodThermometer
+        case .mandala:                return L10n.Title.mandala
         }
     }
 

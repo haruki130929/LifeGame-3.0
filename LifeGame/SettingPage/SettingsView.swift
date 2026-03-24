@@ -41,7 +41,7 @@ struct SettingsView: View {
             updateSection
             aboutSection
         }
-        .navigationTitle("設定")
+        .navigationTitle(L10n.Title.settings)
         .onAppear {
             hourlyMoodEnabled = StorageManager.load(Bool.self, forKey: hourlyMoodEnabledKey) ?? false
             fab.isHidden = true
@@ -142,52 +142,52 @@ private extension SettingsView {
 
     // MARK: 功能設定
     var featureSection: some View {
-        Section("功能設定") {
+        Section(L10n.Settings.featureSettings) {
             NavigationLink {
                 CalendarSettingsView(settings: calendarSettings)
             } label: {
-                Label("行事曆", systemImage: "calendar")
+                Label(L10n.Title.calendar, systemImage: "calendar")
             }
             NavigationLink {
                 TodoQuadrantSettingsView()
             } label: {
-                Label("待辦四象限", systemImage: "list.bullet.clipboard")
+                Label(L10n.Title.todoQuadrant, systemImage: "list.bullet.clipboard")
             }
             NavigationLink {
                 TomorrowRingSettingsView(settings: ringSettings)
             } label: {
-                Label("時間圓環", systemImage: "clock")
+                Label(L10n.Title.tomorrowRing, systemImage: "clock")
             }
             NavigationLink {
                 MonthlyScoreSettingsView()
             } label: {
-                Label("本月結算", systemImage: "calendar.badge.clock")
+                Label(L10n.Title.monthlyScore, systemImage: "calendar.badge.clock")
             }
             NavigationLink {
                 BagSettingsView()
             } label: {
-                Label("整理書包", systemImage: "backpack")
+                Label(L10n.Title.bagRequired, systemImage: "backpack")
             }
             NavigationLink {
                 MoodSettingsView()
             } label: {
-                Label("心情溫度計", systemImage: "heart.text.square")
+                Label(L10n.Title.moodThermometer, systemImage: "heart.text.square")
             }
             NavigationLink {
                 MandalaSettingsView()
             } label: {
-                Label("曼陀羅圖表", systemImage: "square.grid.3x3")
+                Label(L10n.Title.mandala, systemImage: "square.grid.3x3")
             }
         }
     }
 
     // MARK: 外觀設定
     var appearanceSection: some View {
-        Section("外觀設定") {
+        Section(L10n.Settings.appearance) {
             NavigationLink {
                 AppearanceSettingsView()
             } label: {
-                Label("主題與配色", systemImage: "paintbrush")
+                Label(L10n.Title.themeSettings, systemImage: "paintbrush")
             }
         }
     }
@@ -240,16 +240,16 @@ private extension SettingsView {
 
     // MARK: 資料儲存
     var storageSection: some View {
-        Section("資料儲存") {
+        Section(L10n.Settings.dataStorage) {
             NavigationLink {
                 StorageSettingsView()
             } label: {
-                Label("儲存方式", systemImage: "externaldrive.fill.badge.icloud")
+                Label(L10n.Settings.storageMethod, systemImage: "externaldrive.fill.badge.icloud")
             }
             NavigationLink {
                 BackupSettingsView()
             } label: {
-                Label("資料備份", systemImage: "arrow.triangle.2.circlepath")
+                Label(L10n.Title.backupSettings, systemImage: "arrow.triangle.2.circlepath")
             }
         }
     }
@@ -268,7 +268,7 @@ private extension SettingsView {
                     .foregroundStyle(theme.isDark ? .white : Color(.label))
             }
         } header: {
-            Text("意見回饋")
+            Text(L10n.Settings.feedback)
         } footer: {
             Text("告訴我你的使用體驗、建議或遇到的問題")
         }
@@ -305,15 +305,15 @@ private extension SettingsView {
 
     // MARK: 關於
     var aboutSection: some View {
-        Section("關於") {
+        Section(L10n.Settings.about) {
             HStack {
-                Text("版本")
+                Text(L10n.Settings.version)
                 Spacer()
                 Text(appVersionString)
                     .foregroundStyle(.secondary)
             }
             HStack {
-                Text("開發者")
+                Text(L10n.Settings.developer)
                 Spacer()
                 Text("はるき")
                     .foregroundStyle(.secondary)
