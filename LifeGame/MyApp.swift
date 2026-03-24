@@ -109,6 +109,7 @@ struct LifeGameApp: App {
                             }
                             .interactiveDismissDisabled()
                         }
+                        .overlay { ToastOverlay() }
                 } else {
                     OnboardingView(completed: $onboardingCompleted)
                         .environment(coordinator)

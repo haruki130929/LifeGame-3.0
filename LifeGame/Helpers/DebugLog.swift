@@ -20,6 +20,7 @@ extension ModelContext {
         } catch {
             let fileName = (file as NSString).lastPathComponent
             debugLog("❌ ModelContext.save() 失敗 [\(fileName):\(line)]: \(error)")
+            ErrorManager.shared.showError("資料儲存失敗", error: error)
         }
     }
 }

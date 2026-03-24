@@ -72,6 +72,7 @@ final class DailyLogStore: ObservableObject {
             load()
         } catch {
             debugLog("DailyLogStore upsert failed:", error)
+            ErrorManager.shared.showError("紀錄儲存失敗", error: error)
         }
     }
     
@@ -94,6 +95,7 @@ final class DailyLogStore: ObservableObject {
             load()
         } catch {
             debugLog("DailyLogStore delete failed:", error)
+            ErrorManager.shared.showError("紀錄刪除失敗", error: error)
         }
     }
     
