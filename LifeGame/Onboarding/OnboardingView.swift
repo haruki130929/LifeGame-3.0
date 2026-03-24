@@ -1,19 +1,21 @@
 import SwiftUI
+import AuthenticationServices
 
 /// 第一次打開 App 時顯示的新手引導
-/// iPad: 3 頁（歡迎 → 角色選擇 → 準備）
-/// iPhone: 4 頁（歡迎 → 角色選擇 → 裝置選擇 → 準備）
 struct OnboardingView: View {
 
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var phoneModeStore: PhoneModeStore
     @EnvironmentObject private var slotNameStore: TimeSlotNameStore
+    @EnvironmentObject private var appleSignIn: AppleSignInManager
+    @Environment(StorageCoordinator.self) private var coordinator: StorageCoordinator?
+    @Environment(StorageConfiguration.self) private var storageConfig: StorageConfiguration?
     @Binding var completed: Bool
 
     @State private var currentPage = 0
 
     private let iPad = AppLayout.isIPad
-    private var totalPages: Int { iPad ? 3 : 4 }
+    private var totalPages: Int { iPad ? 4 : 5 }
 
     var body: some View {
         ZStack {
@@ -31,7 +33,9 @@ struct OnboardingView: View {
                         deviceChoicePage.tag(2)
                     }
 
-                    readyPage.tag(iPad ? 2 : 3)
+                    iCloudPage.tag(iPad ? 2 : 3)
+
+                    readyPage.tag(iPad ? 3 : 4)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .animation(.easeInOut(duration: 0.3), value: currentPage)
@@ -179,6 +183,64 @@ struct OnboardingView: View {
         }
     }
 
+    // MARK: - Apple ID 登入
+
+    private var iCloudPage: some View {
+        VStack(spacing: iPad ? 32 : 24) {
+            Spacer()
+
+            if appleSignIn.isSignedIn {
+                // 已登入狀態
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: iPad ? 80 : 68))
+                    .foregroundStyle(.green)
+
+                Text("已登入")
+                    .font(.system(size: iPad ? 34 : 26, weight: .bold))
+
+                Text(appleSignIn.displayName)
+                    .font(.system(size: iPad ? 20 : 17))
+                    .foregroundStyle(.secondary)
+
+                Text("你的資料會自動同步到 iCloud\n刪除 App 重新安裝也不會遺失")
+                    .font(.system(size: iPad ? 18 : 15))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            } else {
+                // 未登入狀態
+                Image(systemName: "person.crop.circle.badge.plus")
+                    .font(.system(size: iPad ? 80 : 68))
+                    .foregroundStyle(theme.accentColor)
+
+                Text("登入 Apple ID")
+                    .font(.system(size: iPad ? 34 : 26, weight: .bold))
+
+                Text("登入後資料會自動備份到 iCloud\n刪除 App 重新安裝也不會遺失")
+                    .font(.system(size: iPad ? 18 : 15))
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+
+                SignInWithAppleButton(.signIn) { request in
+                    request.requestedScopes = [.fullName, .email]
+                } onCompletion: { result in
+                    appleSignIn.handleSignInResult(result)
+                    if appleSignIn.isSignedIn {
+                        // 登入成功 → 自動開啟 iCloud 同步
+                        coordinator?.scheduleSwitch(to: .iCloud)
+                    }
+                }
+                .signInWithAppleButtonStyle(theme.isDark ? .white : .black)
+                .frame(height: 50)
+                .frame(maxWidth: 280)
+                .padding(.top, 8)
+            }
+
+            Spacer()
+        }
+    }
+
     // MARK: - Last Page: 準備就緒
 
     private var readyPage: some View {
@@ -245,10 +307,7 @@ struct OnboardingView: View {
                 .padding(.horizontal, 40)
             } else {
                 Button {
-                    withAnimation(.easeInOut(duration: 0.35)) {
-                        completed = true
-                        OnboardingTracker.markCompleted()
-                    }
+                    applySettingsAndComplete()
                 } label: {
                     Text("開始使用")
                         .font(iPad ? .title3.bold() : .headline)
@@ -264,16 +323,22 @@ struct OnboardingView: View {
             // 跳過
             if currentPage < totalPages - 1 {
                 Button {
-                    withAnimation(.easeInOut(duration: 0.35)) {
-                        completed = true
-                        OnboardingTracker.markCompleted()
-                    }
+                    applySettingsAndComplete()
                 } label: {
                     Text("跳過")
                         .font(iPad ? .body : .subheadline)
                         .foregroundStyle(.secondary)
                 }
             }
+        }
+    }
+
+    // MARK: - 完成 Onboarding
+
+    private func applySettingsAndComplete() {
+        withAnimation(.easeInOut(duration: 0.35)) {
+            completed = true
+            OnboardingTracker.markCompleted()
         }
     }
 

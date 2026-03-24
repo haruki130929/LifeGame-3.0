@@ -25,6 +25,18 @@ struct HomeRootContainerView: View {
     @StateObject private var customTabStore = CustomTabStore()
     @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
 
+    // MARK: - 功能頁專用 Store（從 MyApp 移入，只在功能頁面使用時才需要）
+    @StateObject private var calendarSettings = CalendarSettingsStore()
+    @StateObject private var moodHistory = MoodHistoryStore()
+    @StateObject private var ringSettings = TomorrowRingSettingsStore()
+    @StateObject private var moduleStore = QuestionModuleStore()
+    @StateObject private var historyStore = HistoryStore()
+    @StateObject private var moodSettings = MoodSettingsStore()
+    @StateObject private var mandalaStore = MandalaStore()
+    @StateObject private var todoStore = TodoQuadrantStore()
+    @StateObject private var updateChecker = AppUpdateChecker()
+    @StateObject private var characterStore = CharacterStore()
+
     // MARK: - Non-observable (不需要 UI 更新就維持 let)
     private let dailyLogStore = DailyLogStore()
 
@@ -47,6 +59,16 @@ struct HomeRootContainerView: View {
                     .environmentObject(timeSlotNameStore)
                     .environmentObject(game)
                     .environmentObject(moodStore)
+                    .environmentObject(calendarSettings)
+                    .environmentObject(moodHistory)
+                    .environmentObject(ringSettings)
+                    .environmentObject(moduleStore)
+                    .environmentObject(historyStore)
+                    .environmentObject(moodSettings)
+                    .environmentObject(mandalaStore)
+                    .environmentObject(todoStore)
+                    .environmentObject(updateChecker)
+                    .environmentObject(characterStore)
                 }
             }
         }
@@ -75,5 +97,16 @@ struct HomeRootContainerView: View {
         .environmentObject(timeSlotNameStore)
         .environmentObject(game)
         .environmentObject(moodStore)
+        // 功能頁專用 Store（從 MyApp 移入）
+        .environmentObject(calendarSettings)
+        .environmentObject(moodHistory)
+        .environmentObject(ringSettings)
+        .environmentObject(moduleStore)
+        .environmentObject(historyStore)
+        .environmentObject(moodSettings)
+        .environmentObject(mandalaStore)
+        .environmentObject(todoStore)
+        .environmentObject(updateChecker)
+        .environmentObject(characterStore)
     }
 }

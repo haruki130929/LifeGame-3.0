@@ -101,6 +101,21 @@ final class MoodHistoryStore: ObservableObject {
 
     private func save() {
         StorageManager.save(points, forKey: saveKey)
+        syncMoodToWatch()
+    }
+
+    /// 將今日的心情記錄同步到 Watch
+    private func syncMoodToWatch() {
+        let calendar = Calendar.current
+        let todayEntries = points
+            .filter { calendar.isDateInToday($0.timestamp) }
+            .map { point -> MoodEntry in
+                let fmt = DateFormatter()
+                fmt.dateFormat = "yyyy-MM-dd HH"
+                let hourKey = fmt.string(from: point.timestamp)
+                return MoodEntry(id: hourKey, hourKey: hourKey, value: Int(point.score))
+            }
+        WatchSyncHelper.syncMoodEntries(todayEntries)
     }
 
     private func load() {
