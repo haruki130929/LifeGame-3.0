@@ -87,4 +87,16 @@ final class CoachMarkStore: ObservableObject {
         currentMark = nil
         allCompleted = true
     }
+
+    /// 從設定頁重新播放新手引導
+    func restart(isQuickMode: Bool = false) {
+        allCompleted = false
+        currentMark = nil
+        activeSequence = isQuickMode ? Self.quickSequence : Self.fullSequence
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+            guard let self else { return }
+            self.currentMark = self.activeSequence.first
+        }
+    }
 }

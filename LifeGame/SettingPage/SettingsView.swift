@@ -37,6 +37,7 @@ struct SettingsView: View {
             appearanceSection
             accountSection
             storageSection
+            tutorialSection
             feedbackSection
             updateSection
             aboutSection
@@ -250,6 +251,17 @@ private extension SettingsView {
                 BackupSettingsView()
             } label: {
                 Label(L10n.Title.backupSettings, systemImage: "arrow.triangle.2.circlepath")
+            }
+        }
+    }
+
+    // MARK: 使用教學
+    var tutorialSection: some View {
+        Section(L10n.Tutorial.title) {
+            NavigationLink {
+                TutorialView()
+            } label: {
+                Label(L10n.Tutorial.title, systemImage: "book.fill")
             }
         }
     }

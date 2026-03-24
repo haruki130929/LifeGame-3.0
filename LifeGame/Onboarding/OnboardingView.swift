@@ -270,6 +270,16 @@ struct OnboardingView: View {
                     .padding(.horizontal, 40)
             }
 
+            // 教學提示
+            HStack(spacing: 6) {
+                Image(systemName: "book.fill")
+                    .font(.caption)
+                Text("隨時到 設定 → 使用教學 查看操作說明")
+                    .font(.caption)
+            }
+            .foregroundStyle(.tertiary)
+            .padding(.top, 8)
+
             Spacer()
         }
     }

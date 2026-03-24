@@ -105,4 +105,14 @@ enum L10n {
         static let noWish = "尚無願望清單"
         static let noRecord = "尚無紀錄"
     }
+
+    // MARK: - 使用教學
+    enum Tutorial {
+        static let title = "使用教學"
+        static let concepts = "基本概念"
+        static let features = "功能介紹"
+        static let operationTips = "操作技巧"
+        static let replayCoachMark = "重新播放新手引導"
+        static let tip = "小技巧"
+    }
 }
