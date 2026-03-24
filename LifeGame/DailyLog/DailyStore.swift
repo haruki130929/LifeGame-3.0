@@ -7,27 +7,37 @@ import SwiftData
 final class DailyLogStore: ObservableObject {
     
     @Published private(set) var entries: [DailyLogEntry] = []
-    
+    @Published private(set) var initError: String?
+
     private let context: ModelContext
     private var isLoading = false
-    
+
+    /// 建立 in-memory fallback 容器（StorageCoordinator 不可用時）
+    private static func makeInMemoryContext() -> ModelContext {
+        // in-memory 容器幾乎不可能失敗，但仍做防護
+        do {
+            let container = try ModelContainer(
+                for: DailyLogRecord.self,
+                configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            )
+            return ModelContext(container)
+        } catch {
+            debugLog("❌ DailyLogStore: in-memory 容器也失敗: \(error)")
+            // 極端情況：用最簡化設定再試一次
+            let container = try! ModelContainer(for: DailyLogRecord.self)
+            return ModelContext(container)
+        }
+    }
+
     init(context: ModelContext? = nil) {
         if let context {
             self.context = context
         } else if let coord = StorageManager.coordinator {
             self.context = ModelContext(coord.modelContainer)
         } else {
-            // coordinator 尚未初始化 → 用臨時 in-memory 容器，避免 crash
             debugLog("⚠️ DailyLogStore: StorageCoordinator 尚未初始化，使用 in-memory 容器")
-            do {
-                let fallback = try ModelContainer(
-                    for: DailyLogRecord.self,
-                    configurations: ModelConfiguration(isStoredInMemoryOnly: true)
-                )
-                self.context = ModelContext(fallback)
-            } catch {
-                fatalError("DailyLogStore: 無法建立 in-memory ModelContainer: \(error)")
-            }
+            self.context = Self.makeInMemoryContext()
+            self.initError = "儲存系統尚未就緒，資料暫存於記憶體中"
         }
         load()
     }
