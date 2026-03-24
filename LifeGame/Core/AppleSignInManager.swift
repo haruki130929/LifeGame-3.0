@@ -1,7 +1,6 @@
 import Foundation
 import AuthenticationServices
 
-@MainActor
 final class AppleSignInManager: ObservableObject {
 
     @Published private(set) var isSignedIn: Bool = false
