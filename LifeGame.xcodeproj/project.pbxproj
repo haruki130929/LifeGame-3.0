@@ -172,9 +172,22 @@
 				TargetAttributes = {
 					EB0764002F6BF53A000462AB = {
 						CreatedOnToolsVersion = 26.3;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+						};
 					};
 					EB7D275C2F5DAA2500E67CBE = {
 						CreatedOnToolsVersion = 26.1.1;
+						SystemCapabilities = {
+							com.apple.ApplicationGroups.iOS = {
+								enabled = 1;
+							};
+							com.apple.developer.applesignin = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};

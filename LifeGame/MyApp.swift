@@ -9,25 +9,21 @@ struct LifeGameApp: App {
     @State private var keyValueStore: KeyValueStore?
     @State private var startupError: String?
 
-    // MARK: - 既有的 Store（保持不動）
+    // MARK: - 全域 Store（跨功能或 Onboarding 時需要）
     @StateObject private var theme = ThemeStore()
     @StateObject private var calendarStore = CalendarStore()
-    @StateObject private var calendarSettings = CalendarSettingsStore()
     @StateObject private var fab = FabStore()
     @StateObject private var wishStore = WishStore()
     @StateObject private var ledgerStore = LedgerStore()
-    @StateObject private var moodHistory = MoodHistoryStore()
-    @StateObject private var ringSettings = TomorrowRingSettingsStore()
     @StateObject private var phoneModeStore = PhoneModeStore()
-    @StateObject private var moduleStore = QuestionModuleStore()
-    @StateObject private var historyStore = HistoryStore()
     @StateObject private var coachMarkStore = CoachMarkStore()
-    @StateObject private var moodSettings = MoodSettingsStore()
-    @StateObject private var mandalaStore = MandalaStore()
-    @StateObject private var todoStore = TodoQuadrantStore()
-    @StateObject private var updateChecker = AppUpdateChecker()
-    @StateObject private var characterStore = CharacterStore()
     @StateObject private var slotNameStore = TimeSlotNameStore()
+    @StateObject private var appleSignIn = AppleSignInManager()
+
+    // NOTE: 以下 Store 已移至 HomeRootContainerView（功能頁面層級）：
+    // calendarSettings, moodHistory, ringSettings, moduleStore,
+    // historyStore, moodSettings, mandalaStore, todoStore,
+    // updateChecker, characterStore
 
     init() {
         // 1. 註冊所有 @Model 類型
@@ -85,25 +81,16 @@ struct LifeGameApp: App {
                         .environment(keyValueStore)
                         // 主題套用（tint / colorScheme / dynamicType）
                         .applyTheme()
-                        // 既有的 Store
+                        // 全域 Store（功能頁專用的已移至 HomeRootContainerView）
                         .environmentObject(theme)
                         .environmentObject(calendarStore)
-                        .environmentObject(calendarSettings)
                         .environmentObject(fab)
                         .environmentObject(wishStore)
                         .environmentObject(ledgerStore)
-                        .environmentObject(moodHistory)
-                        .environmentObject(ringSettings)
                         .environmentObject(phoneModeStore)
-                        .environmentObject(moduleStore)
-                        .environmentObject(historyStore)
                         .environmentObject(coachMarkStore)
-                        .environmentObject(moodSettings)
-                        .environmentObject(mandalaStore)
-                        .environmentObject(todoStore)
-                        .environmentObject(updateChecker)
-                        .environmentObject(characterStore)
                         .environmentObject(slotNameStore)
+                        .environmentObject(appleSignIn)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
                         .modelContainer(coordinator.modelContainer)
                         .id(storageConfig.currentMode)
@@ -124,9 +111,12 @@ struct LifeGameApp: App {
                         }
                 } else {
                     OnboardingView(completed: $onboardingCompleted)
+                        .environment(coordinator)
+                        .environment(storageConfig)
                         .environmentObject(theme)
                         .environmentObject(phoneModeStore)
                         .environmentObject(slotNameStore)
+                        .environmentObject(appleSignIn)
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
                 }
             } else {

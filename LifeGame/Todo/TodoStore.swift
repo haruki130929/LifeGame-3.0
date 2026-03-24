@@ -55,5 +55,6 @@ final class TodoQuadrantStore: ObservableObject {
     
     private func save() {
         StorageManager.save(items, forKey: storageKey)
+        WatchSyncHelper.syncTodos(items)
     }
 }

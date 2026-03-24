@@ -5,6 +5,7 @@ final class StorageConfiguration: @unchecked Sendable {
     private enum Keys {
         static let storageMode = "lifegame.storage.mode"
         static let pendingMode = "lifegame.storage.pendingMode"
+        static let keychainStorageMode = "lifegame.storage.mode" // Keychain key
     }
 
     private let defaults: UserDefaults
@@ -14,7 +15,20 @@ final class StorageConfiguration: @unchecked Sendable {
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
-        let raw = defaults.string(forKey: Keys.storageMode) ?? StorageMode.local.rawValue
+
+        // 優先從 UserDefaults 讀取；若不存在（首次安裝或重裝後），從 Keychain 回復
+        let raw: String
+        if let udMode = defaults.string(forKey: Keys.storageMode) {
+            raw = udMode
+        } else if let keychainMode = KeychainHelper.load(forKey: Keys.keychainStorageMode) {
+            // 從 Keychain 回復（App 曾被刪除重裝）
+            raw = keychainMode
+            defaults.set(keychainMode, forKey: Keys.storageMode)
+            debugLog("🔑 從 Keychain 回復儲存模式：\(keychainMode)")
+        } else {
+            raw = StorageMode.local.rawValue
+        }
+
         self.currentMode = StorageMode(rawValue: raw) ?? .local
 
         if let pendingRaw = defaults.string(forKey: Keys.pendingMode) {
@@ -24,6 +38,8 @@ final class StorageConfiguration: @unchecked Sendable {
 
     func setMode(_ mode: StorageMode) {
         defaults.set(mode.rawValue, forKey: Keys.storageMode)
+        // 同時存到 Keychain，確保刪除 App 後重裝能回復
+        KeychainHelper.save(mode.rawValue, forKey: Keys.keychainStorageMode)
         currentMode = mode
     }
 

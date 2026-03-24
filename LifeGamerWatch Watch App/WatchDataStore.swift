@@ -22,9 +22,7 @@ final class WatchDataStore: ObservableObject {
 
     // MARK: - Storage
 
-    private let defaults = UserDefaults.standard
-    // 未來改用 App Group：
-    // private let defaults = UserDefaults(suiteName: "group.com.haruki.lifegame")!
+    private let defaults = UserDefaults(suiteName: "group.com.haruki.lifegame") ?? .standard
 
     init() {
         loadAll()
@@ -57,9 +55,16 @@ final class WatchDataStore: ObservableObject {
 
     // MARK: - Persistence
 
+    // 共用 key（與 iOS 端 SharedConstants.Keys 對應）
+    private enum Keys {
+        static let stats = "shared.stats"
+        static let mood = "shared.mood"
+        static let todos = "shared.todos"
+    }
+
     private func loadAll() {
         // HP / FP / MP
-        if let data = defaults.data(forKey: "watch.stats"),
+        if let data = defaults.data(forKey: Keys.stats),
            let stats = try? JSONDecoder().decode(WatchStats.self, from: data) {
             hp = stats.hp
             fp = stats.fp
@@ -67,13 +72,13 @@ final class WatchDataStore: ObservableObject {
         }
 
         // Mood
-        if let data = defaults.data(forKey: "watch.mood"),
+        if let data = defaults.data(forKey: Keys.mood),
            let entries = try? JSONDecoder().decode([MoodEntry].self, from: data) {
             todayMoodEntries = entries
         }
 
         // Todos
-        if let data = defaults.data(forKey: "watch.todos"),
+        if let data = defaults.data(forKey: Keys.todos),
            let items = try? JSONDecoder().decode([TodoItem].self, from: data) {
             todoItems = items
         }
@@ -82,19 +87,19 @@ final class WatchDataStore: ObservableObject {
     func saveStats() {
         let stats = WatchStats(hp: hp, fp: fp, mp: mp)
         if let data = try? JSONEncoder().encode(stats) {
-            defaults.set(data, forKey: "watch.stats")
+            defaults.set(data, forKey: Keys.stats)
         }
     }
 
     private func saveMood() {
         if let data = try? JSONEncoder().encode(todayMoodEntries) {
-            defaults.set(data, forKey: "watch.mood")
+            defaults.set(data, forKey: Keys.mood)
         }
     }
 
     private func saveTodos() {
         if let data = try? JSONEncoder().encode(todoItems) {
-            defaults.set(data, forKey: "watch.todos")
+            defaults.set(data, forKey: Keys.todos)
         }
     }
 }

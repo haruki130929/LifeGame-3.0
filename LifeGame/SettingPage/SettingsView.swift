@@ -1,5 +1,6 @@
 import SwiftUI
 import MessageUI
+import AuthenticationServices
 
 struct SettingsView: View {
 
@@ -10,6 +11,8 @@ struct SettingsView: View {
     @EnvironmentObject private var ringSettings: TomorrowRingSettingsStore
     @EnvironmentObject private var phoneModeStore: PhoneModeStore
     @EnvironmentObject private var slotNameStore: TimeSlotNameStore
+    @EnvironmentObject private var appleSignIn: AppleSignInManager
+    @Environment(StorageCoordinator.self) private var coordinator: StorageCoordinator?
 
     // MARK: - 通知
     @State private var hourlyMoodEnabled: Bool = false
@@ -32,6 +35,7 @@ struct SettingsView: View {
             dailyLogSection
             featureSection
             appearanceSection
+            accountSection
             storageSection
             feedbackSection
             updateSection
@@ -188,6 +192,52 @@ private extension SettingsView {
         }
     }
 
+    // MARK: 帳號
+    var accountSection: some View {
+        Section {
+            if appleSignIn.isSignedIn {
+                HStack(spacing: 12) {
+                    Image(systemName: "person.crop.circle.fill")
+                        .font(.system(size: 36))
+                        .foregroundStyle(theme.accentColor)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(appleSignIn.displayName)
+                            .font(.body.weight(.medium))
+                        Text("已透過 Apple ID 登入")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Spacer()
+                    Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                }
+            } else {
+                VStack(spacing: 12) {
+                    Text("登入 Apple ID 以同步資料")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    SignInWithAppleButton(.signIn) { request in
+                        request.requestedScopes = [.fullName, .email]
+                    } onCompletion: { result in
+                        appleSignIn.handleSignInResult(result)
+                        if appleSignIn.isSignedIn {
+                            coordinator?.scheduleSwitch(to: .iCloud)
+                        }
+                    }
+                    .signInWithAppleButtonStyle(theme.isDark ? .white : .black)
+                    .frame(height: 44)
+                }
+            }
+        } header: {
+            Text("帳號")
+        } footer: {
+            if appleSignIn.isSignedIn {
+                Text("資料會自動同步到 iCloud，刪除 App 重裝後資料會自動恢復")
+            }
+        }
+    }
+
     // MARK: 資料儲存
     var storageSection: some View {
         Section("資料儲存") {
@@ -195,6 +245,11 @@ private extension SettingsView {
                 StorageSettingsView()
             } label: {
                 Label("儲存方式", systemImage: "externaldrive.fill.badge.icloud")
+            }
+            NavigationLink {
+                BackupSettingsView()
+            } label: {
+                Label("資料備份", systemImage: "arrow.triangle.2.circlepath")
             }
         }
     }

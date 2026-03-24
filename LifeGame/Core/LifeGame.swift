@@ -18,12 +18,22 @@ final class LifeGame: ObservableObject {
     
     let maxEquipWeight: Int = 10
     
+    private var syncCancellable: AnyCancellable?
+
     init() {
         if let saved: Int = StorageManager.load(Int.self, forKey: "game.startMP") {
             self.startMP = saved
         } else {
             self.startMP = 40
         }
+
+        // 當 HP/FP/MP 變化時，同步到 Watch
+        syncCancellable = objectWillChange
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
+            .sink { [weak self] _ in
+                guard let self else { return }
+                WatchSyncHelper.syncStats(hp: self.hp, fp: self.fp, mp: self.mp)
+            }
     }
     
     func weight(of item: EquipItem) -> Int {
