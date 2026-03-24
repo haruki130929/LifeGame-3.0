@@ -11,6 +11,8 @@ struct QuickModeShellView: View {
     @EnvironmentObject private var calendarStore: CalendarStore
     @EnvironmentObject private var wishStore: WishStore
     @EnvironmentObject private var ledgerStore: LedgerStore
+    @EnvironmentObject private var appleSignIn: AppleSignInManager
+    @Environment(StorageCoordinator.self) private var coordinator: StorageCoordinator?
 
 
     @State private var navigationPath = NavigationPath()
@@ -103,6 +105,8 @@ struct QuickModeShellView: View {
                 SettingsView()
                     .navigationBarTitleDisplayMode(.inline)
             }
+            .environmentObject(appleSignIn)
+            .environment(coordinator)
         }
     }
 
