@@ -73,6 +73,33 @@ struct WhatsNewView: View {
 
     static func items(for version: String) -> [WhatsNewItem] {
         switch version {
+        case "1.05":
+            return [
+                WhatsNewItem(
+                    icon: "book.fill",
+                    title: "使用教學",
+                    description: "在設定中新增「使用教學」頁面，隨時查看 App 概念和各功能操作說明。",
+                    color: .blue
+                ),
+                WhatsNewItem(
+                    icon: "person.crop.circle.fill",
+                    title: "Apple ID 登入",
+                    description: "支援 Sign in with Apple，登入後自動開啟 iCloud 同步，刪除 App 重裝也不怕遺失資料。",
+                    color: .green
+                ),
+                WhatsNewItem(
+                    icon: "applewatch",
+                    title: "Watch 雙向同步",
+                    description: "在 Apple Watch 上記錄心情或勾選待辦，回到 iPhone/iPad 時資料自動合併。",
+                    color: .cyan
+                ),
+                WhatsNewItem(
+                    icon: "exclamationmark.triangle.fill",
+                    title: "錯誤通知改善",
+                    description: "儲存或同步失敗時，畫面頂部會顯示通知提醒，不再靜默失敗。",
+                    color: .orange
+                ),
+            ]
         case "1.03":
             return [
                 WhatsNewItem(
