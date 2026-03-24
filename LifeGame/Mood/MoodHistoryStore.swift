@@ -22,6 +22,11 @@ final class MoodHistoryStore: ObservableObject {
     init() {
         migrateFromUserDefaultsIfNeeded()
         load()
+
+        // 接收 Watch 傳來的心情資料
+        WatchChangeObserver.shared.onMoodEntriesFromWatch = { [weak self] entries in
+            self?.mergeFromWatch(entries)
+        }
     }
 
     @discardableResult
@@ -95,6 +100,43 @@ final class MoodHistoryStore: ObservableObject {
             current = calendar.date(byAdding: .hour, value: 1, to: hourStart) ?? current.addingTimeInterval(3600)
         }
         return result
+    }
+
+    // MARK: - Watch 合併
+
+    /// 將 Watch 傳來的 MoodEntry 合併到 iOS 端
+    private func mergeFromWatch(_ entries: [MoodEntry]) {
+        let calendar = Calendar.current
+        var changed = false
+
+        for entry in entries {
+            let fmt = DateFormatter()
+            fmt.dateFormat = "yyyy-MM-dd HH"
+            guard let date = fmt.date(from: entry.hourKey) else { continue }
+            guard let hourStart = calendar.dateInterval(of: .hour, for: date)?.start else { continue }
+
+            let score = Double(entry.value)
+
+            // 同一小時已有記錄就更新，沒有就新增
+            if let idx = points.firstIndex(where: {
+                calendar.dateInterval(of: .hour, for: $0.timestamp)?.start == hourStart
+            }) {
+                let old = points[idx]
+                if old.score != score {
+                    points[idx] = MoodPoint(id: old.id, timestamp: old.timestamp, score: score)
+                    changed = true
+                }
+            } else {
+                points.append(MoodPoint(timestamp: date, score: score))
+                changed = true
+            }
+        }
+
+        if changed {
+            points.sort { $0.timestamp < $1.timestamp }
+            save()
+            debugLog("✅ 已合併 Watch 心情資料")
+        }
     }
 
     // MARK: - Persistence (StorageManager → SwiftData)

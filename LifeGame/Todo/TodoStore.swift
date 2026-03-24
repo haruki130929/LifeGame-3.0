@@ -13,6 +13,11 @@ final class TodoQuadrantStore: ObservableObject {
     
     init() {
         load()
+
+        // 接收 Watch 傳來的待辦變更
+        WatchChangeObserver.shared.onTodoItemsFromWatch = { [weak self] watchItems in
+            self?.mergeFromWatch(watchItems)
+        }
     }
     
     func add(title: String, quadrant: TodoQuadrant) {
@@ -43,6 +48,27 @@ final class TodoQuadrantStore: ObservableObject {
         Array(items(in: quadrant).prefix(limit))
     }
     
+    // MARK: - Watch 合併
+
+    /// 將 Watch 傳來的 TodoItem 合併回 iOS（主要是 isDone 狀態）
+    private func mergeFromWatch(_ watchItems: [TodoItem]) {
+        var changed = false
+
+        for watchItem in watchItems {
+            if let idx = items.firstIndex(where: { $0.id == watchItem.id }) {
+                if items[idx].isDone != watchItem.isDone {
+                    items[idx].isDone = watchItem.isDone
+                    changed = true
+                }
+            }
+        }
+
+        if changed {
+            debugLog("✅ 已合併 Watch 待辦變更")
+            // items 的 didSet 會自動觸發 save()
+        }
+    }
+
     private func load() {
         if let saved: [TodoItem] = StorageManager.load([TodoItem].self, forKey: storageKey) {
             items = saved
