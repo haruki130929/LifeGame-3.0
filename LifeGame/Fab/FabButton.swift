@@ -491,6 +491,7 @@ private struct FabButtoniPad: View {
                 .accessibilityLabel(fab.isExpanded ? "收合選單" : "展開選單")
         }
         .buttonStyle(.plain)
+        .coachAnchor(.fabButton)
         .disabled(isAnimating)
     }
 
