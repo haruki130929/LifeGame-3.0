@@ -78,25 +78,25 @@ struct WhatsNewView: View {
                 WhatsNewItem(
                     icon: "book.fill",
                     title: "使用教學",
-                    description: "在設定中新增「使用教學」頁面，隨時查看 App 概念和各功能操作說明。",
+                    description: "左側選單新增「使用教學」入口，第一次進入各功能頁時也會自動彈出教學說明。",
                     color: .blue
                 ),
                 WhatsNewItem(
                     icon: "person.crop.circle.fill",
-                    title: "Apple ID 登入",
-                    description: "支援 Sign in with Apple，登入後自動開啟 iCloud 同步，刪除 App 重裝也不怕遺失資料。",
+                    title: "Apple ID 登入 & iCloud 同步",
+                    description: "支援 Sign in with Apple，資料自動同步到 iCloud，刪除 App 重裝也不怕遺失資料。",
                     color: .green
                 ),
                 WhatsNewItem(
-                    icon: "applewatch",
-                    title: "Watch 雙向同步",
-                    description: "在 Apple Watch 上記錄心情或勾選待辦，回到 iPhone/iPad 時資料自動合併。",
-                    color: .cyan
+                    icon: "lightbulb.fill",
+                    title: "新手引導升級",
+                    description: "聚光燈引導流程新增「使用教學」位置提示，讓你更快上手。",
+                    color: .yellow
                 ),
                 WhatsNewItem(
                     icon: "exclamationmark.triangle.fill",
-                    title: "錯誤通知改善",
-                    description: "儲存或同步失敗時，畫面頂部會顯示通知提醒，不再靜默失敗。",
+                    title: "穩定性改善",
+                    description: "修復多項閃退問題，儲存失敗時會顯示通知提醒。",
                     color: .orange
                 ),
             ]
