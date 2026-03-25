@@ -40,6 +40,7 @@ struct MonthlyScoreChartView: View {
             radius: 8, x: 0, y: 3
         )
         .clipShape(shape)
+        .featureTutorial(.monthlyScore)
     }
 
     // MARK: - Header

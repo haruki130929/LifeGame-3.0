@@ -9,6 +9,16 @@ struct TutorialItem: Identifiable {
     let color: Color
     let steps: [TutorialStep]
     let tip: String?
+    let featureKey: FeatureTutorialTracker.FeatureKey?
+
+    init(icon: String, title: String, color: Color, steps: [TutorialStep], tip: String?, featureKey: FeatureTutorialTracker.FeatureKey? = nil) {
+        self.icon = icon
+        self.title = title
+        self.color = color
+        self.steps = steps
+        self.tip = tip
+        self.featureKey = featureKey
+    }
 }
 
 struct TutorialStep {
@@ -119,7 +129,8 @@ enum TutorialData {
                 TutorialStep(text: "所有數值以 5 點為一個單位增減。有些事情會減少 HP、FP，但可以增加 MP。"),
                 TutorialStep(text: "注意：一天之中 HP、FP、MP 都不可以變成負值！"),
             ],
-            tip: "假設上完課／下班後（8 小時 = 80 點），HP 和 FP 只剩 20 點，你就只能用這 20 點來分配晚上的活動。這個設計是避免做超過自己可以負荷的事情。"
+            tip: "假設上完課／下班後（8 小時 = 80 點），HP 和 FP 只剩 20 點，你就只能用這 20 點來分配晚上的活動。這個設計是避免做超過自己可以負荷的事情。",
+            featureKey: .hpFpMp
         ),
         TutorialItem(
             icon: "sun.max.fill",
@@ -131,7 +142,8 @@ enum TutorialData {
                 TutorialStep(text: "完成越多待辦事項、保持好心情、合理安排時間，分數越高。"),
                 TutorialStep(text: "結算後，HP/FP/MP 會重置，準備迎接新的一天。"),
             ],
-            tip: "如果結算錯誤，可以使用「撤銷結算」功能回復。"
+            tip: "如果結算錯誤，可以使用「撤銷結算」功能回復。",
+            featureKey: .dailySettle
         ),
         TutorialItem(
             icon: "shield.fill",
@@ -142,7 +154,8 @@ enum TutorialData {
                 TutorialStep(text: "每件裝備有不同的重量，角色可以攜帶的總重量有限。"),
                 TutorialStep(text: "選擇適合你目前需求的裝備組合，平衡 HP、FP、MP 的加成。"),
             ],
-            tip: "裝備不會消失，可以隨時更換。"
+            tip: "裝備不會消失，可以隨時更換。",
+            featureKey: .equipment
         ),
     ]
 
@@ -158,7 +171,8 @@ enum TutorialData {
                 TutorialStep(text: "點擊日期可以查看當天的行程，彩色橫條代表跨天的行程。"),
                 TutorialStep(text: "按右下角「＋」→「新增行程」來建立新的行程。"),
             ],
-            tip: "可以在設定中選擇一週的起始日（週日或週一）。"
+            tip: "可以在設定中選擇一週的起始日（週日或週一）。",
+            featureKey: .calendar
         ),
         TutorialItem(
             icon: "list.bullet.clipboard",
@@ -172,7 +186,8 @@ enum TutorialData {
                 TutorialStep(text: "第四象限：不重要不緊急 → 考慮是否需要做"),
                 TutorialStep(text: "完成任務後點擊打勾，會影響每日結算分數。"),
             ],
-            tip: "優先處理第一象限，多花時間在第二象限，減少第三、四象限的事。"
+            tip: "優先處理第一象限，多花時間在第二象限，減少第三、四象限的事。",
+            featureKey: .todoQuadrant
         ),
         TutorialItem(
             icon: "clock",
@@ -184,7 +199,8 @@ enum TutorialData {
                 TutorialStep(text: "按「新增時段」來加入活動，按「快速接續」可以自動接在上一個時段之後。"),
                 TutorialStep(text: "時間圓環會自動扣減 HP/FP/MP，不同活動消耗不同。"),
             ],
-            tip: nil
+            tip: nil,
+            featureKey: .timeRing
         ),
         TutorialItem(
             icon: "square.and.pencil",
@@ -196,7 +212,8 @@ enum TutorialData {
                 TutorialStep(text: "還可以附加照片，記錄生活中的重要時刻。"),
                 TutorialStep(text: "長期記錄可以幫助你發現自己的狀態模式。"),
             ],
-            tip: "可以在設定中自訂要顯示哪些問題模組。"
+            tip: "可以在設定中自訂要顯示哪些問題模組。",
+            featureKey: .dailyLog
         ),
         TutorialItem(
             icon: "heart.text.square",
@@ -207,7 +224,8 @@ enum TutorialData {
                 TutorialStep(text: "可以看到一整天的心情變化趨勢圖。"),
                 TutorialStep(text: "在 Watch App 上也可以快速記錄心情。"),
             ],
-            tip: "開啟「每小時提醒」，系統會定時提醒你記錄心情。"
+            tip: "開啟「每小時提醒」，系統會定時提醒你記錄心情。",
+            featureKey: .moodThermometer
         ),
         TutorialItem(
             icon: "backpack",
@@ -218,7 +236,8 @@ enum TutorialData {
                 TutorialStep(text: "可以設定哪些是「必帶」物品，確保不會忘記。"),
                 TutorialStep(text: "每天出門前打勾確認，養成整理的好習慣。"),
             ],
-            tip: nil
+            tip: nil,
+            featureKey: .bag
         ),
         TutorialItem(
             icon: "square.grid.3x3",
@@ -229,7 +248,8 @@ enum TutorialData {
                 TutorialStep(text: "中間放核心目標，周圍 8 格放達成核心目標所需的子目標。"),
                 TutorialStep(text: "每個子目標又可以再展開 8 個具體行動項目。"),
             ],
-            tip: "從核心目標開始，一層一層向外展開思考。"
+            tip: "從核心目標開始，一層一層向外展開思考。",
+            featureKey: .mandala
         ),
         TutorialItem(
             icon: "calendar.badge.clock",
@@ -240,7 +260,8 @@ enum TutorialData {
                 TutorialStep(text: "顏色深淺代表當天的表現，一眼就能看出整月的趨勢。"),
                 TutorialStep(text: "點擊「統計」可以查看更詳細的數據分析。"),
             ],
-            tip: nil
+            tip: nil,
+            featureKey: .monthlyScore
         ),
         TutorialItem(
             icon: "sparkles",
@@ -251,7 +272,8 @@ enum TutorialData {
                 TutorialStep(text: "記帳功能幫你追蹤收支，了解錢花到哪裡去了。"),
                 TutorialStep(text: "搭配使用，可以為願望存錢，達成目標時標記「買了！」。"),
             ],
-            tip: nil
+            tip: nil,
+            featureKey: .finance
         ),
     ]
 
@@ -295,4 +317,14 @@ enum TutorialData {
             tip: "建議開啟 iCloud 同步，確保資料安全。"
         ),
     ]
+
+    // MARK: 查詢
+
+    /// 所有教學項目
+    static var all: [TutorialItem] { concepts + features + tips }
+
+    /// 根據 FeatureKey 取得對應的教學項目
+    static func item(for key: FeatureTutorialTracker.FeatureKey) -> TutorialItem? {
+        all.first { $0.featureKey == key }
+    }
 }

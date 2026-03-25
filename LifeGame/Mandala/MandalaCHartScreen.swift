@@ -34,6 +34,7 @@ struct MandalaChartScreen: View {
                 break
             }
         }
+        .featureTutorial(.mandala)
     }
 
     // MARK: - 底部頁面指示器

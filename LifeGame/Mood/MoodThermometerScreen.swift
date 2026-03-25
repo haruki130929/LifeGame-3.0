@@ -86,6 +86,7 @@ struct MoodThermometerScreen: View {
         .onDisappear {
             fab.popActions()
         }
+        .featureTutorial(.moodThermometer)
     }
 
     // MARK: - 建立圖表資料點

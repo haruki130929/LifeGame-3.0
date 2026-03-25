@@ -259,6 +259,7 @@ struct TodoQuadrantBoardView: View {
             AddTodoToQuadrantSheet(store: store, quadrant: quadrant)
         }
         .environment(\.editMode, isEditMode ? .constant(.active) : .constant(.inactive))
+        .featureTutorial(.todoQuadrant)
     }
 
     // 越上越重要、越右越緊急（給善甯自己看的提示）

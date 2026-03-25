@@ -187,6 +187,7 @@ struct Bag_BackpackChecklistView: View {
                 break
             }
         }
+        .featureTutorial(.bag)
     }
     
     // MARK: - Actions (SwiftData)

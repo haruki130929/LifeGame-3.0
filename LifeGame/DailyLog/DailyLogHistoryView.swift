@@ -34,6 +34,7 @@ struct DailyLogHistoryView: View {
                 DailyLogEditorView(mode: .add, store: store)
             }
         }
+        .featureTutorial(.dailyLog)
     }
 }
 

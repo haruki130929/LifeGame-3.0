@@ -72,6 +72,7 @@ struct FinanceHubView: View {
         .sheet(isPresented: $showLedgerChart) {
             LedgerChartSheet(store: ledgerStore)
         }
+        .featureTutorial(.finance)
     }
 
     private func applyFabContext() {

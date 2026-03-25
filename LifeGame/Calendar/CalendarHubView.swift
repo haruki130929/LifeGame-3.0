@@ -92,6 +92,7 @@ struct CalendarHubView: View {
                 }
             }
         }
+        .featureTutorial(.calendar)
     }
     
     private var bottomToolbar: some View {

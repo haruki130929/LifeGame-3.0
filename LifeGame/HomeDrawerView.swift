@@ -48,7 +48,21 @@ struct HomeDrawerView: View {
             categoryLink(.diary,  label: "日記",     systemImage: "book")
             
             Spacer()
-            
+
+            NavigationLink {
+                TutorialView()
+            } label: {
+                HStack(spacing: 10) {
+                    Image(systemName: "book.fill")
+                    Text("使用教學")
+                    Spacer()
+                }
+                .padding(10)
+                .foregroundStyle(theme.accentColor)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
             NavigationLink {
                 SettingsView()
             } label: {
