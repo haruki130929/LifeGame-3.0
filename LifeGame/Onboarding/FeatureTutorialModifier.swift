@@ -3,7 +3,7 @@ import SwiftUI
 /// 在功能頁首次出現時自動彈出教學 sheet
 struct FeatureTutorialModifier: ViewModifier {
     let featureKey: FeatureTutorialTracker.FeatureKey
-    @EnvironmentObject private var tutorialTracker: FeatureTutorialTracker
+    @Environment(FeatureTutorialTracker.self) private var tutorialTracker
     @EnvironmentObject private var theme: ThemeStore
     @State private var showTutorial = false
 

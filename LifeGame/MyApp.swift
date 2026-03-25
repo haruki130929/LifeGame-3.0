@@ -19,7 +19,7 @@ struct LifeGameApp: App {
     @StateObject private var coachMarkStore = CoachMarkStore()
     @StateObject private var slotNameStore = TimeSlotNameStore()
     @StateObject private var appleSignIn = AppleSignInManager()
-    @StateObject private var tutorialTracker = FeatureTutorialTracker()
+    @State private var tutorialTracker = FeatureTutorialTracker()
 
     // NOTE: 以下 Store 已移至 HomeRootContainerView（功能頁面層級）：
     // calendarSettings, moodHistory, ringSettings, moduleStore,
@@ -93,7 +93,7 @@ struct LifeGameApp: App {
                         .environmentObject(coachMarkStore)
                         .environmentObject(slotNameStore)
                         .environmentObject(appleSignIn)
-                        .environmentObject(tutorialTracker)
+                        .environment(tutorialTracker)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
                         .modelContainer(coordinator.modelContainer)
                         .id(storageConfig.currentMode)
@@ -126,7 +126,7 @@ struct LifeGameApp: App {
                         .environmentObject(phoneModeStore)
                         .environmentObject(slotNameStore)
                         .environmentObject(appleSignIn)
-                        .environmentObject(tutorialTracker)
+                        .environment(tutorialTracker)
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
                 }
             } else {

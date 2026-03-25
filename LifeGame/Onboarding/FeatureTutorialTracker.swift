@@ -1,10 +1,12 @@
 import SwiftUI
+import Observation
 
 /// 追蹤使用者是否已看過各功能頁的教學
-final class FeatureTutorialTracker: ObservableObject {
+@Observable
+final class FeatureTutorialTracker {
 
     /// 功能頁 key，每個對應 TutorialData 裡的一個 TutorialItem
-    enum FeatureKey: String, CaseIterable {
+    enum FeatureKey: String, CaseIterable, Equatable {
         case hpFpMp         // HP / FP / MP
         case dailySettle    // 每日結算
         case equipment      // 裝備系統
@@ -22,12 +24,7 @@ final class FeatureTutorialTracker: ObservableObject {
     private let storageKey = "tutorial.seenFeatures"
 
     /// 已看過教學的功能 key set
-    private var seenKeys: Set<String> {
-        didSet {
-            let array = Array(seenKeys)
-            StorageManager.save(array, forKey: storageKey)
-        }
-    }
+    private var seenKeys: Set<String>
 
     init() {
         let saved: [String]? = StorageManager.load([String].self, forKey: storageKey)
@@ -42,12 +39,13 @@ final class FeatureTutorialTracker: ObservableObject {
     /// 標記為已看過
     func markAsSeen(_ key: FeatureKey) {
         seenKeys.insert(key.rawValue)
-        objectWillChange.send()
+        let array = Array(seenKeys)
+        StorageManager.save(array, forKey: storageKey)
     }
 
     /// 重置全部（供設定頁使用）
     func resetAll() {
         seenKeys.removeAll()
-        objectWillChange.send()
+        StorageManager.save([String](), forKey: storageKey)
     }
 }
