@@ -13,6 +13,7 @@ struct HomeContentView: View {
     @EnvironmentObject private var ledgerStore: LedgerStore
     @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var customTabStore: CustomTabStore
+    @EnvironmentObject private var coachMarkStore: CoachMarkStore
 
 
     @State private var selectedTab: TabSelection = .tab(UUID())
@@ -166,6 +167,19 @@ struct HomeContentView: View {
                 fab.isHidden = open || isContentOpen
             }
             if open { fab.collapse() }
+        }
+        // 聚光燈引導：自動打開抽屜
+        .onChange(of: coachMarkStore.currentMark) { _, mark in
+            if mark == .openDrawer {
+                // openDrawer 步驟：聚光燈指向選單按鈕，按下一步後自動打開抽屜
+                // 不需要在這裡開，等使用者點「下一步」時開
+            }
+            if mark == .tutorialLink && !isDrawerOpen {
+                withAnimation(DrawerPanel.panelSpring) {
+                    isDrawerOpen = true
+                    isContentOpen = false
+                }
+            }
         }
         .onReceive(Timer.publish(every: 60, on: .main, in: .common).autoconnect()) { _ in
             checkRingDeductions()

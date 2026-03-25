@@ -62,6 +62,7 @@ struct HomeDrawerView: View {
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
+            .coachAnchor(.tutorialLink)
 
             NavigationLink {
                 SettingsView()

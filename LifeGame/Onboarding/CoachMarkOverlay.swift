@@ -91,8 +91,11 @@ struct CoachMarkOverlay: View {
     // MARK: - 聚光燈圓心（使用 anchor 精確座標）
 
     private func spotlightCenter(for mark: CoachMarkStore.Mark) -> CGPoint {
+        // openDrawer 復用 drawerButton 的位置
+        let lookupMark = (mark == .openDrawer) ? .drawerButton : mark
+
         // 優先使用 anchor 座標（精確）
-        if let anchor = anchors[mark] {
+        if let anchor = anchors[lookupMark] {
             return proxy[anchor]
         }
         // fallback：quickSwipe 沒有對應按鈕，用畫面中央
@@ -110,6 +113,10 @@ struct CoachMarkOverlay: View {
             return 40
         case .tabEdit:
             return 22
+        case .openDrawer:
+            return 36
+        case .tutorialLink:
+            return 50
         case .quickSwipe:
             return 80
         case .quickSettings:
@@ -141,6 +148,10 @@ struct CoachMarkOverlay: View {
             pt = CGPoint(x: spot.x - radius - gap - cardW / 2, y: spot.y - radius - gap - cardH / 2)
         case .tabEdit:
             pt = CGPoint(x: min(spot.x + 80, screenSize.width / 2), y: spot.y + radius + gap + cardH / 2)
+        case .openDrawer:
+            pt = CGPoint(x: spot.x + radius + gap + cardW / 2, y: spot.y + 40)
+        case .tutorialLink:
+            pt = CGPoint(x: spot.x + radius + gap + cardW / 2, y: spot.y)
         case .quickSwipe:
             pt = CGPoint(x: screenSize.width / 2, y: spot.y + radius + gap + cardH / 2)
         case .quickSettings:
@@ -233,6 +244,10 @@ struct CoachMarkOverlay: View {
             return TipInfo(icon: "plus.circle.fill", title: "快速操作", desc: "點這裡新增或操作功能")
         case .tabEdit:
             return TipInfo(icon: "pencil.circle.fill", title: "編輯卡片", desc: "點這裡自訂時段顯示的卡片")
+        case .openDrawer:
+            return TipInfo(icon: "line.3.horizontal", title: "打開選單", desc: "點擊這裡打開側邊選單")
+        case .tutorialLink:
+            return TipInfo(icon: "book.fill", title: "使用教學", desc: "這裡有完整的使用教學，隨時可以查看各功能的操作說明")
         case .quickSwipe:
             return TipInfo(icon: "hand.draw", title: "滑動卡片", desc: "左右滑動完成每張任務卡片")
         case .quickSettings:

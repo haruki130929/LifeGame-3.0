@@ -11,6 +11,8 @@ final class CoachMarkStore: ObservableObject {
         case rightPanel     // 右上角工具欄按鈕
         case fabButton      // 右下角 FAB
         case tabEdit        // 時段名稱旁的編輯
+        case openDrawer     // 引導打開抽屜
+        case tutorialLink   // 抽屜裡的「使用教學」
 
         // Quick Mode 步驟
         case quickSwipe     // 卡片左右滑動
@@ -18,7 +20,7 @@ final class CoachMarkStore: ObservableObject {
     }
 
     /// Full Mode 教學流程
-    static let fullSequence: [Mark] = [.drawerButton, .rightPanel, .fabButton, .tabEdit]
+    static let fullSequence: [Mark] = [.drawerButton, .rightPanel, .fabButton, .tabEdit, .openDrawer, .tutorialLink]
     /// Quick Mode 教學流程
     static let quickSequence: [Mark] = [.quickSwipe, .quickSettings]
 
