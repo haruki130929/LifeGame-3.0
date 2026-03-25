@@ -72,8 +72,8 @@ struct LGCategoryHubView: View {
             NavigationLink { DiaryView() } label: {
                 Label("日記", systemImage: "book")
             }
-            NavigationLink { KyudoNoteListView() } label: {
-                Label("弓道筆記", systemImage: "target")
+            NavigationLink { PracticeDiaryListView() } label: {
+                Label("練習日記", systemImage: "pencil.and.list.clipboard")
             }
         }
     }
