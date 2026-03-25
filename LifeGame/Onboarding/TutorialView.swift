@@ -112,13 +112,14 @@ enum TutorialData {
             title: "HP / FP / MP 是什麼",
             color: .red,
             steps: [
-                TutorialStep(text: "LifeGame 把你的生活遊戲化，用三種數值來追蹤你的狀態。"),
-                TutorialStep(text: "HP（體力值）：代表你的身體狀態。上課、工作會消耗體力，休息可以恢復。"),
-                TutorialStep(text: "FP（疲勞值）：代表你的疲勞程度。數值越高代表越累，需要適當休息。"),
-                TutorialStep(text: "MP（精神值）：代表你的精神能量。學習新事物、做有創意的事會消耗精神。"),
-                TutorialStep(text: "你可以在主畫面上方看到這三個數值，隨時掌握自己的狀態。"),
+                TutorialStep(text: "LifeGame 把你的生活遊戲化，用三種數值來管理你每天的精力分配。"),
+                TutorialStep(text: "HP（Health Point）＝ 體力值：每天 100 點，上一堂課或工作一小時（50 分鐘）各消耗 10 點。"),
+                TutorialStep(text: "FP（Focus Point）＝ 專注力值：每天 100 點，需要集中注意力的活動會消耗 FP。"),
+                TutorialStep(text: "MP（Mood Point）＝ 心情值：每天早上 40 點起跳，目標是達到 60 點。每天要做一些能提升心情的事！"),
+                TutorialStep(text: "所有數值以 5 點為一個單位增減。有些事情會減少 HP、FP，但可以增加 MP。"),
+                TutorialStep(text: "注意：一天之中 HP、FP、MP 都不可以變成負值！"),
             ],
-            tip: "每天結算時，系統會根據你的活動自動調整數值。"
+            tip: "假設上完課／下班後（8 小時 = 80 點），HP 和 FP 只剩 20 點，你就只能用這 20 點來分配晚上的活動。這個設計是避免做超過自己可以負荷的事情。"
         ),
         TutorialItem(
             icon: "sun.max.fill",
