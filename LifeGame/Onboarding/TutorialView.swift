@@ -132,31 +132,6 @@ enum TutorialData {
             tip: "假設上完課／下班後（8 小時 = 80 點），HP 和 FP 只剩 20 點，你就只能用這 20 點來分配晚上的活動。這個設計是避免做超過自己可以負荷的事情。",
             featureKey: .hpFpMp
         ),
-        TutorialItem(
-            icon: "sun.max.fill",
-            title: "每日結算怎麼運作",
-            color: .orange,
-            steps: [
-                TutorialStep(text: "每天結束時，你可以進行「每日結算」來回顧今天的表現。"),
-                TutorialStep(text: "結算會根據你今天完成的任務、記錄的心情、時間安排來計算分數。"),
-                TutorialStep(text: "完成越多待辦事項、保持好心情、合理安排時間，分數越高。"),
-                TutorialStep(text: "結算後，HP/FP/MP 會重置，準備迎接新的一天。"),
-            ],
-            tip: "如果結算錯誤，可以使用「撤銷結算」功能回復。",
-            featureKey: .dailySettle
-        ),
-        TutorialItem(
-            icon: "shield.fill",
-            title: "裝備系統",
-            color: .purple,
-            steps: [
-                TutorialStep(text: "裝備系統讓你為自己的角色配備各種道具，增加能力值上限。"),
-                TutorialStep(text: "每件裝備有不同的重量，角色可以攜帶的總重量有限。"),
-                TutorialStep(text: "選擇適合你目前需求的裝備組合，平衡 HP、FP、MP 的加成。"),
-            ],
-            tip: "裝備不會消失，可以隨時更換。",
-            featureKey: .equipment
-        ),
     ]
 
     // MARK: 功能介紹
