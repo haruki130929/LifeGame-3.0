@@ -7,6 +7,7 @@ struct CalendarCard: View {
     let onPrevMonth: () -> Void
     let onNextMonth: () -> Void
     let urgentImportantTasks: [UrgentImportantTask]
+    var onTapEvent: ((UUID) -> Void)? = nil
 
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
@@ -151,11 +152,15 @@ struct CalendarCard: View {
                             .fill(r.color)
                             .frame(width: x2 - x1, height: barH)
                             .position(x: (x1 + x2) / 2, y: y)
+                            .onTapGesture {
+                                if let eventId = r.eventId {
+                                    onTapEvent?(eventId)
+                                }
+                            }
                     }
                 }
             }
         }
-        .allowsHitTesting(false)
     }
     
     private func dayCellView(_ cell: CalendarDayCell) -> some View {

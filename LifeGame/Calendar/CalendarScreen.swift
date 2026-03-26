@@ -31,7 +31,13 @@ struct CalendarScreen: View {
                     onNextMonth: { monthOffset += 1 },
                     urgentImportantTasks: todoStore.items(in: .importantUrgent)
                         .filter { !$0.isDone }
-                        .map { UrgentImportantTask(title: $0.title) }
+                        .map { UrgentImportantTask(title: $0.title) },
+                    onTapEvent: { eventId in
+                        if let event = calendarStore.events.first(where: { $0.id == eventId }) {
+                            editingEvent = event
+                            showEditor = true
+                        }
+                    }
                 )
                 .padding(.horizontal, 12)
 

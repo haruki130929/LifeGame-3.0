@@ -7,6 +7,7 @@ struct CalendarRange: Identifiable {
     let start: Date
     let end: Date
     let color: Color
+    var eventId: UUID? = nil
 }
 
 struct RangeSegment: Identifiable {
@@ -28,15 +29,15 @@ struct CalendarRangeProvider {
         let monthStart = cal.date(from: cal.dateComponents([.year, .month], from: monthDate)) ?? monthDate
         let monthEnd = cal.date(byAdding: .month, value: 1, to: monthStart) ?? monthDate
 
-        return events.compactMap { e in
-            let rawStart = min(e.start, e.end)
-            let rawEnd   = max(e.start, e.end)
+        return events.compactMap { event in
+            let rawStart = min(event.start, event.end)
+            let rawEnd   = max(event.start, event.end)
 
             let s = max(rawStart, monthStart)
             let e = min(rawEnd, monthEnd)
             guard s < e else { return nil }
 
-            return CalendarRange(start: s, end: e, color: Color.cyan.opacity(0.70))
+            return CalendarRange(start: s, end: e, color: Color.cyan.opacity(0.70), eventId: event.id)
         }
     }
 }
