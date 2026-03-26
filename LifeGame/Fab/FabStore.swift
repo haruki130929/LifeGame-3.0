@@ -224,9 +224,6 @@ final class FabStore: ObservableObject {
             result += [
                 FabAction(title: "新增行程", systemImage: "calendar.badge.plus", route: .addCalendarEvent) { [weak self] in
                     self?.route = .addCalendarEvent; self?.collapse()
-                },
-                FabAction(title: "跳到今天", systemImage: "sun.max", route: .jumpToToday) { [weak self] in
-                    self?.route = .jumpToToday; self?.collapse()
                 }
             ]
         case .diary:
