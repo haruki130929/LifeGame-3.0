@@ -150,13 +150,14 @@ struct CalendarCard: View {
                         
                         RangeBarShape(isStart: isFirst, isEnd: isLast, radius: barH / 2)
                             .fill(r.color)
-                            .frame(width: x2 - x1, height: barH)
-                            .position(x: (x1 + x2) / 2, y: y)
+                            .contentShape(Rectangle())
                             .onTapGesture {
                                 if let eventId = r.eventId {
                                     onTapEvent?(eventId)
                                 }
                             }
+                            .frame(width: x2 - x1, height: barH)
+                            .position(x: (x1 + x2) / 2, y: y)
                     }
                 }
             }
@@ -341,7 +342,7 @@ struct CalendarCard: View {
         let s = max(r.start, monthStart)
         let e = min(r.end, monthEnd)
         guard s < e else { return nil }
-        return CalendarRange(start: s, end: e, color: r.color)
+        return CalendarRange(start: s, end: e, color: r.color, eventId: r.eventId)
     }
     
     private var selectedDayNumber: Int { cal.component(.day, from: selected) }

@@ -10,7 +10,6 @@ struct CalendarScreen: View {
     @State private var selected: Date = Date()
 
     @State private var showNewEvent: Bool = false
-    @State private var showEditor: Bool = false
     @State private var editingEvent: CalendarEvent? = nil
     
     private let cal = Calendar.current
@@ -35,7 +34,6 @@ struct CalendarScreen: View {
                     onTapEvent: { eventId in
                         if let event = calendarStore.events.first(where: { $0.id == eventId }) {
                             editingEvent = event
-                            showEditor = true
                         }
                     }
                 )
@@ -81,20 +79,14 @@ struct CalendarScreen: View {
         }
 
         // ✅ 編輯行程
-        .sheet(isPresented: $showEditor) {
-            if let e = editingEvent {
-                EditEventSheet(event: e, onSave: { newTitle, newStart, newEnd in
-                    // 找到原本事件，更新
-                    if let idx = calendarStore.events.firstIndex(where: { $0.id == e.id }) {
-                        calendarStore.events[idx] = CalendarEvent(id: e.id, title: newTitle, start: newStart, end: newEnd)
-                    }
-                }, onDelete: {
-                    calendarStore.events.removeAll { $0.id == e.id }
-                })
-            } else {
-                Text("沒有選到要編輯的行程")
-                    .padding()
-            }
+        .sheet(item: $editingEvent) { e in
+            EditEventSheet(event: e, onSave: { newTitle, newStart, newEnd in
+                if let idx = calendarStore.events.firstIndex(where: { $0.id == e.id }) {
+                    calendarStore.events[idx] = CalendarEvent(id: e.id, title: newTitle, start: newStart, end: newEnd)
+                }
+            }, onDelete: {
+                calendarStore.events.removeAll { $0.id == e.id }
+            })
         }
     }
     
@@ -180,7 +172,6 @@ struct CalendarScreen: View {
             Spacer()
             Button {
                 editingEvent = e
-                showEditor = true
             } label: {
                 Image(systemName: "pencil.circle")
                     .font(.title3)
