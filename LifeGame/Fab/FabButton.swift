@@ -110,7 +110,7 @@ private struct FabButtoniPhone: View {
                 }
             }
             .gesture(
-                LongPressGesture(minimumDuration: 0.3)
+                LongPressGesture(minimumDuration: 0.15)
                     .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .global))
                     .onChanged { value in
                         switch value {
