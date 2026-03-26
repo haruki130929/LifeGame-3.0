@@ -155,7 +155,7 @@ final class StorageCoordinator {
         debugLog("☁️ ubiquityIdentityToken: \(FileManager.default.ubiquityIdentityToken != nil ? "有（已登入 iCloud）" : "無（未登入 iCloud）")")
 
         // 檢查 CloudKit 帳號狀態
-        CKContainer(identifier: "iCloud.com.haruki.lifegame").accountStatus { status, error in
+        CKContainer(identifier: "iCloud.com.haruki.lifegame2").accountStatus { status, error in
             let statusText: String
             switch status {
             case .available:      statusText = "✅ available（正常）"

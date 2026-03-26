@@ -97,6 +97,8 @@ struct QuickModeShellView: View {
                     MoodThermometerScreen()
                 case .mandala:
                     MandalaChartScreen()
+                case .practiceDiary:
+                    PracticeDiaryListView()
                 }
             }
         }

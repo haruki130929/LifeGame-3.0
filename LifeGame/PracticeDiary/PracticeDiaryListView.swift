@@ -3,8 +3,10 @@ import SwiftUI
 /// 練習日記列表 — 顯示所有使用者建立的練習日記
 struct PracticeDiaryListView: View {
     @StateObject private var store = PracticeDiaryStore()
+    @EnvironmentObject private var fab: FabStore
     @State private var showingAddDiary = false
     @State private var diaryToEdit: PracticeDiary?
+    @State private var isEditMode = false
 
     var body: some View {
         Group {
@@ -42,16 +44,22 @@ struct PracticeDiaryListView: View {
                         }
                     }
                 }
+                .environment(\.editMode, isEditMode ? .constant(.active) : .constant(.inactive))
             }
         }
         .navigationTitle("練習日記")
-        .toolbar {
-            ToolbarItem(placement: .primaryAction) {
-                Button {
-                    showingAddDiary = true
-                } label: {
-                    Image(systemName: "plus")
-                }
+        .onAppear { fab.apply(context: .feature(.practiceDiary)) }
+        .onDisappear { fab.popActions() }
+        .onChange(of: fab.route) { _, newRoute in
+            switch newRoute {
+            case .addPracticeDiary:
+                fab.route = nil
+                showingAddDiary = true
+            case .practiceDiaryEditMode:
+                fab.route = nil
+                isEditMode.toggle()
+            default:
+                break
             }
         }
         .sheet(isPresented: $showingAddDiary) {

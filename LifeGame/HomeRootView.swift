@@ -54,6 +54,8 @@ struct HomeRootView: View {
                     MoodThermometerScreen()
                 case .mandala:
                     MandalaChartScreen()
+                case .practiceDiary:
+                    PracticeDiaryListView()
                 }
             }
         }
@@ -104,6 +106,8 @@ struct HomeRootView: View {
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.bagRequired) }
             case .addMandalaChart, .mandalaEditMode:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.mandala) }
+            case .addPracticeDiary, .practiceDiaryEditMode:
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.practiceDiary) }
             }
         }
         .onChange(of: navigationPath) {

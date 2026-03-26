@@ -37,6 +37,9 @@ final class FabStore: ObservableObject {
         // ── 曼陀羅圖表專用 ──
         case addMandalaChart
         case mandalaEditMode
+        // ── 練習日記專用 ──
+        case addPracticeDiary
+        case practiceDiaryEditMode
         // ── 功能設定 ──
         case featureSettings(FeatureID)
 
@@ -59,6 +62,8 @@ final class FabStore: ObservableObject {
             case .bagEditMode:              return "bagEditMode"
             case .addMandalaChart:          return "addMandalaChart"
             case .mandalaEditMode:          return "mandalaEditMode"
+            case .addPracticeDiary:         return "addPracticeDiary"
+            case .practiceDiaryEditMode:    return "practiceDiaryEditMode"
             case .featureSettings(let f):   return "featureSettings-\(f)"
             }
         }
@@ -316,6 +321,15 @@ final class FabStore: ObservableObject {
                     self?.route = .mandalaEditMode; self?.collapse()
                 }
             ]
+        case .practiceDiary:
+            result += [
+                FabAction(title: "新增練習日記", systemImage: "plus.circle", route: .addPracticeDiary) { [weak self] in
+                    self?.route = .addPracticeDiary; self?.collapse()
+                },
+                FabAction(title: "編輯", systemImage: "pencil", route: .practiceDiaryEditMode) { [weak self] in
+                    self?.route = .practiceDiaryEditMode; self?.collapse()
+                }
+            ]
         }
 
         return result
@@ -337,6 +351,7 @@ final class FabStore: ObservableObject {
         case .monthlyScoreCalendar:   return L10n.Title.monthlyScore
         case .moodThermometer:        return L10n.Title.moodThermometer
         case .mandala:                return L10n.Title.mandala
+        case .practiceDiary:          return "練習日記"
         }
     }
 
@@ -354,6 +369,7 @@ final class FabStore: ObservableObject {
         case .monthlyScoreCalendar:   return "calendar.badge.clock"
         case .moodThermometer:        return "heart.text.square"
         case .mandala:                return "square.grid.3x3"
+        case .practiceDiary:          return "pencil.and.list.clipboard"
         }
     }
 }
