@@ -23,6 +23,9 @@ struct CustomTabEditorSheet: View {
                 nameSection
                 cardSelectionSection
                 cardOrderSection
+                if editingTab != nil {
+                    deleteSection
+                }
             }
             .navigationTitle(editingTab == nil ? "新增切頁" : "編輯切頁")
             .navigationBarTitleDisplayMode(.inline)
@@ -101,6 +104,33 @@ struct CustomTabEditorSheet: View {
                 .onMove { from, to in
                     selectedCardTypes.move(fromOffsets: from, toOffset: to)
                 }
+            }
+        }
+    }
+
+    // MARK: - 刪除切頁
+
+    @State private var showDeleteConfirmation = false
+
+    private var deleteSection: some View {
+        Section {
+            Button(role: .destructive) {
+                showDeleteConfirmation = true
+            } label: {
+                HStack {
+                    Spacer()
+                    Text("刪除此切頁")
+                    Spacer()
+                }
+            }
+            .confirmationDialog("確定要刪除「\(editingTab?.name ?? "")」嗎？", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+                Button("刪除", role: .destructive) {
+                    if let tab = editingTab {
+                        customTabStore.remove(id: tab.id)
+                    }
+                    dismiss()
+                }
+                Button("取消", role: .cancel) {}
             }
         }
     }

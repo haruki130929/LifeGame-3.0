@@ -94,6 +94,12 @@ struct WhatsNewView: View {
                     color: .purple
                 ),
                 WhatsNewItem(
+                    icon: "trash.fill",
+                    title: "切頁可刪除",
+                    description: "編輯切頁時底部新增刪除按鈕，不需要的切頁可以輕鬆移除。",
+                    color: .red
+                ),
+                WhatsNewItem(
                     icon: "clock.fill",
                     title: "時間圓環教學修正",
                     description: "教學彈窗改為進入功能頁時才顯示，不再於主頁重複彈出。",
