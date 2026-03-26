@@ -22,7 +22,7 @@ struct CalendarScreen: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 12) {
-                
+
                 CalendarCard(
                     size: .large,
                     monthDate: monthDate,
@@ -34,9 +34,13 @@ struct CalendarScreen: View {
                         .map { UrgentImportantTask(title: $0.title) }
                 )
                 .padding(.horizontal, 12)
-                
-                // ✅ 當日清單
-                dayList
+
+                // ✅ 今日行程
+                todaySection
+                    .padding(.horizontal, 12)
+
+                // ✅ 當月行程
+                monthEventSection
                     .padding(.horizontal, 12)
             }
             .padding(.vertical, 12)
@@ -65,12 +69,6 @@ struct CalendarScreen: View {
             case .addCalendarEvent:
                 fab.route = nil
                 showNewEvent = true
-            case .jumpToToday:
-                fab.route = nil
-                withAnimation {
-                    monthOffset = 0
-                    selected = Date()
-                }
             default:
                 break
             }
@@ -99,50 +97,26 @@ struct CalendarScreen: View {
         CalendarRangeProvider().ranges(from: calendarStore.events, in: monthDate)
     }
     
-    // MARK: - Day list
-    private var dayList: some View {
-        let events = calendarStore.events(on: selected, calendar: cal)
-        
+    // MARK: - 今日行程
+
+    private var todaySection: some View {
+        let today = Date()
+        let todayEvents = calendarStore.events(on: today, calendar: cal)
+
         return VStack(alignment: .leading, spacing: 10) {
-            HStack {
-                Text(dayTitle(selected))
-                    .font(.headline)
-                Spacer()
-                Text("共 \(events.count) 筆")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
-            
-            if events.isEmpty {
-                Text("今天沒有行程")
+            Text("今日")
+                .font(.headline)
+
+            if todayEvents.isEmpty {
+                Text("今日尚未有安排")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.vertical, 8)
             } else {
                 VStack(spacing: 8) {
-                    ForEach(events) { e in
-                        Button {
-                            editingEvent = e
-                            showEditor = true
-                        } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text(e.title)
-                                        .font(.headline)
-                                    Text(timeRangeText(e))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .padding(12)
-                            .background(.thinMaterial)
-                            .clipShape(RoundedRectangle(cornerRadius: 16))
-                        }
-                        .buttonStyle(.plain)
+                    ForEach(todayEvents) { e in
+                        eventRow(e)
                     }
                 }
             }
@@ -151,17 +125,83 @@ struct CalendarScreen: View {
         .background(.ultraThinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
-    
-    private func dayTitle(_ d: Date) -> String {
-        let y = cal.component(.year, from: d)
-        let m = cal.component(.month, from: d)
-        let day = cal.component(.day, from: d)
-        return "\(y)/\(m)/\(day)"
+
+    // MARK: - 當月行程
+
+    private var monthEventSection: some View {
+        let monthEvents = eventsForCurrentMonth()
+
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack {
+                Text("當月行程")
+                    .font(.headline)
+                Spacer()
+                Text("共 \(monthEvents.count) 筆")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            if monthEvents.isEmpty {
+                Text("本月沒有行程")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.vertical, 8)
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(monthEvents) { e in
+                        eventRow(e)
+                    }
+                }
+            }
+        }
+        .padding(14)
+        .background(.ultraThinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 18))
+    }
+
+    // MARK: - 行程列
+
+    private func eventRow(_ e: CalendarEvent) -> some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(e.title)
+                    .font(.headline)
+                Text(eventDateTimeText(e))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button {
+                editingEvent = e
+                showEditor = true
+            } label: {
+                Image(systemName: "pencil.circle")
+                    .font(.title3)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+        }
+        .padding(12)
+        .background(.thinMaterial)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func eventsForCurrentMonth() -> [CalendarEvent] {
+        guard let monthStart = cal.date(from: cal.dateComponents([.year, .month], from: monthDate)),
+              let monthEnd = cal.date(byAdding: .month, value: 1, to: monthStart) else {
+            return []
+        }
+        return calendarStore.events
+            .filter { $0.start >= monthStart && $0.start < monthEnd }
+            .sorted { $0.start < $1.start }
     }
     
-    private func timeRangeText(_ e: CalendarEvent) -> String {
-        let f = DateFormatter()
-        f.dateFormat = "HH:mm"
-        return "\(f.string(from: e.start)) – \(f.string(from: e.end))"
+    private func eventDateTimeText(_ e: CalendarEvent) -> String {
+        let df = DateFormatter()
+        df.dateFormat = "M/d"
+        let tf = DateFormatter()
+        tf.dateFormat = "HH:mm"
+        return "\(df.string(from: e.start)) \(tf.string(from: e.start)) – \(tf.string(from: e.end))"
     }
 }
