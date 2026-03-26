@@ -4,11 +4,15 @@ import SwiftUI
 struct SlotCardEditorSheet: View {
     let slot: TimeSlot
     @ObservedObject var slotCardStore: SlotCardConfigStore
+    var selectedTab: TabSelection? = nil
+    var onDeleteTab: (() -> Void)? = nil
 
     @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
+    @EnvironmentObject private var customTabStore: CustomTabStore
     @Environment(\.dismiss) private var dismiss
 
     @State private var selectedCardTypes: [CardType] = []
+    @State private var showDeleteConfirmation = false
 
     // 可選的卡片類型
     private let availableCardTypes: [CardType] = [
@@ -21,6 +25,7 @@ struct SlotCardEditorSheet: View {
             Form {
                 cardSelectionSection
                 cardOrderSection
+                deleteTabSection
             }
             .navigationTitle("編輯「\(timeSlotNameStore.displayName(for: slot))」卡片")
             .navigationBarTitleDisplayMode(.inline)
@@ -87,6 +92,35 @@ struct SlotCardEditorSheet: View {
                 .onMove { from, to in
                     selectedCardTypes.move(fromOffsets: from, toOffset: to)
                 }
+            }
+        }
+    }
+
+    // MARK: - 刪除切頁
+
+    @ViewBuilder
+    private var deleteTabSection: some View {
+        if let selectedTab, case .tab(let tabId) = selectedTab,
+           customTabStore.tabs.count > 1 {
+            Section {
+                Button(role: .destructive) {
+                    showDeleteConfirmation = true
+                } label: {
+                    HStack {
+                        Spacer()
+                        Label("刪除此切頁", systemImage: "trash")
+                        Spacer()
+                    }
+                }
+            }
+            .confirmationDialog("確定要刪除此切頁嗎？刪除後無法復原。", isPresented: $showDeleteConfirmation, titleVisibility: .visible) {
+                Button("刪除", role: .destructive) {
+                    dismiss()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                        onDeleteTab?()
+                    }
+                }
+                Button("取消", role: .cancel) {}
             }
         }
     }

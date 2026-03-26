@@ -110,7 +110,13 @@ struct HomeDashboardContentView: View {
         .sheet(isPresented: $showTabEditor) {
             SlotCardEditorSheet(
                 slot: currentSlot,
-                slotCardStore: slotCardStore
+                slotCardStore: slotCardStore,
+                selectedTab: selectedTab,
+                onDeleteTab: {
+                    if case .tab(let tabId) = selectedTab {
+                        customTabStore.remove(id: tabId)
+                    }
+                }
             )
         }
     }
