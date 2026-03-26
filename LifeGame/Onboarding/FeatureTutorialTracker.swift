@@ -24,20 +24,32 @@ final class FeatureTutorialTracker {
     private let storageKey = "tutorial.seenFeatures"
 
     /// 已看過教學的功能 key set
-    private var seenKeys: Set<String>
+    private var seenKeys: Set<String> = []
+
+    /// 是否已從 StorageManager 載入過
+    private var hasLoaded = false
 
     init() {
+        // 不在 init 裡載入，因為 StorageManager.coordinator 可能尚未設定
+    }
+
+    /// 確保已從持久化儲存載入 seenKeys（延遲載入）
+    private func ensureLoaded() {
+        guard !hasLoaded, StorageManager.coordinator != nil else { return }
         let saved: [String]? = StorageManager.load([String].self, forKey: storageKey)
-        self.seenKeys = Set(saved ?? [])
+        seenKeys = Set(saved ?? [])
+        hasLoaded = true
     }
 
     /// 是否應該顯示該功能的教學（尚未看過）
     func shouldShowTutorial(for key: FeatureKey) -> Bool {
-        !seenKeys.contains(key.rawValue)
+        ensureLoaded()
+        return !seenKeys.contains(key.rawValue)
     }
 
     /// 標記為已看過
     func markAsSeen(_ key: FeatureKey) {
+        ensureLoaded()
         seenKeys.insert(key.rawValue)
         let array = Array(seenKeys)
         StorageManager.save(array, forKey: storageKey)
@@ -46,6 +58,7 @@ final class FeatureTutorialTracker {
     /// 重置全部（供設定頁使用）
     func resetAll() {
         seenKeys.removeAll()
+        hasLoaded = true
         StorageManager.save([String](), forKey: storageKey)
     }
 }

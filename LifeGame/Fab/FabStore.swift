@@ -17,7 +17,6 @@ final class FabStore: ObservableObject {
         case navigate(FeatureID)
         // ── 時間圓環專用 ──
         case addRingItem
-        case quickAppendRing
         // ── 待辦四象限專用 ──
         case addTodoToQuadrant(TodoQuadrant)
         case todoEditMode
@@ -47,7 +46,6 @@ final class FabStore: ObservableObject {
             case .jumpToToday:              return "jumpToToday"
             case .navigate(let f):          return "navigate-\(f)"
             case .addRingItem:              return "addRingItem"
-            case .quickAppendRing:          return "quickAppendRing"
             case .addTodoToQuadrant(let q): return "addTodo-\(q.rawValue)"
             case .todoEditMode:             return "todoEditMode"
             case .addDailyLog:              return "addDailyLog"
@@ -286,9 +284,6 @@ final class FabStore: ObservableObject {
             result += [
                 FabAction(title: "新增時段", systemImage: "plus.circle", route: .addRingItem) { [weak self] in
                     self?.route = .addRingItem; self?.collapse()
-                },
-                FabAction(title: "快速接續", systemImage: "arrow.right.circle", route: .quickAppendRing) { [weak self] in
-                    self?.route = .quickAppendRing; self?.collapse()
                 }
             ]
         case .bagRequired:

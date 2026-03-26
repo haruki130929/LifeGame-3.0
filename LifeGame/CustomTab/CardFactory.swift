@@ -25,6 +25,7 @@ struct CardFactory: View {
     }()
     @State private var showCalendarScreen = false
     @State private var showTomorrowRingDetail = false
+    @State private var showTodoQuadrantScreen = false
     @State private var showBagScreen = false
     @State private var showMonthlyScoreScreen = false
 
@@ -55,6 +56,12 @@ struct CardFactory: View {
 
         case .todoQuadrant:
             TodoQuadrantCardLarge(store: todoStore)
+                .onTapGesture { showTodoQuadrantScreen = true }
+                .navigationDestination(isPresented: $showTodoQuadrantScreen) {
+                    TodoQuadrantBoardView(store: todoStore)
+                        .navigationTitle("待辦四象限")
+                        .navigationBarTitleDisplayMode(.inline)
+                }
 
         case .todayStatus:
             EmptyView()  // 已移除，保留 case 避免已存儲資料解碼失敗

@@ -25,7 +25,7 @@ struct TodoQuadrantCardLarge: View {
     }
 
     private var cardBody: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 14) {
             HStack {
                 Text("待辦四象限")
                     .font(.headline)

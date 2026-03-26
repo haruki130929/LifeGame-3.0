@@ -1,5 +1,7 @@
 import SwiftUI
 import SwiftData
+import CloudKit
+import CoreData
 
 @MainActor
 @Observable
@@ -138,5 +140,84 @@ final class StorageCoordinator {
 
     var mainContext: ModelContext {
         modelContainer.mainContext
+    }
+
+    // MARK: - CloudKit 同步診斷
+
+    /// 啟動時呼叫，印出 CloudKit 同步狀態與資料筆數
+    func diagnoseiCloudSync() {
+        guard configuration.currentMode == .iCloud else {
+            debugLog("📦 儲存模式：本機（不使用 iCloud）")
+            return
+        }
+
+        debugLog("☁️ 儲存模式：iCloud")
+        debugLog("☁️ ubiquityIdentityToken: \(FileManager.default.ubiquityIdentityToken != nil ? "有（已登入 iCloud）" : "無（未登入 iCloud）")")
+
+        // 檢查 CloudKit 帳號狀態
+        CKContainer(identifier: "iCloud.com.haruki.lifegame").accountStatus { status, error in
+            let statusText: String
+            switch status {
+            case .available:      statusText = "✅ available（正常）"
+            case .noAccount:      statusText = "❌ noAccount（未登入）"
+            case .restricted:     statusText = "⚠️ restricted（受限）"
+            case .couldNotDetermine: statusText = "❓ couldNotDetermine"
+            case .temporarilyUnavailable: statusText = "⏳ temporarilyUnavailable"
+            @unknown default:     statusText = "❓ unknown(\(status.rawValue))"
+            }
+            debugLog("☁️ CloudKit 帳號狀態：\(statusText)")
+            if let error {
+                debugLog("☁️ CloudKit 帳號錯誤：\(error)")
+            }
+        }
+
+        // 查詢目前 SwiftData 裡有多少筆 KeyValueRecord
+        Task { @MainActor in
+            do {
+                let descriptor = FetchDescriptor<KeyValueRecord>()
+                let records = try mainContext.fetch(descriptor)
+                debugLog("☁️ SwiftData KeyValueRecord 筆數：\(records.count)")
+                for record in records {
+                    debugLog("   📝 key: \(record.key), 大小: \(record.data.count) bytes, 更新: \(record.updatedAt)")
+                }
+            } catch {
+                debugLog("☁️ 查詢 KeyValueRecord 失敗：\(error)")
+            }
+
+            // 監聽 NSPersistentCloudKitContainer 的同步事件
+            listenForCloudKitEvents()
+        }
+    }
+
+    /// 監聽 CloudKit 同步事件通知
+    private func listenForCloudKitEvents() {
+        NotificationCenter.default.addObserver(
+            forName: NSPersistentCloudKitContainer.eventChangedNotification,
+            object: nil,
+            queue: .main
+        ) { notification in
+            guard let event = notification.userInfo?[NSPersistentCloudKitContainer.eventNotificationUserInfoKey]
+                    as? NSPersistentCloudKitContainer.Event else { return }
+
+            let typeText: String
+            switch event.type {
+            case .setup:  typeText = "setup"
+            case .import: typeText = "import（從雲端拉取）"
+            case .export: typeText = "export（推送到雲端）"
+            @unknown default: typeText = "unknown"
+            }
+
+            if event.endDate != nil {
+                // 事件結束
+                if let error = event.error {
+                    debugLog("☁️ CloudKit 同步 [\(typeText)] ❌ 失敗：\(error)")
+                } else {
+                    debugLog("☁️ CloudKit 同步 [\(typeText)] ✅ 完成")
+                }
+            } else {
+                debugLog("☁️ CloudKit 同步 [\(typeText)] ⏳ 開始...")
+            }
+        }
+        debugLog("☁️ 已開始監聽 CloudKit 同步事件")
     }
 }

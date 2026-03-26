@@ -54,9 +54,6 @@ struct TomorrowRingDetailView: View {
             case .addRingItem:
                 fab.route = nil
                 isPresentingAdd = true
-            case .quickAppendRing:
-                fab.route = nil
-                quickAppend()
             default:
                 break
             }
@@ -147,25 +144,6 @@ struct TomorrowRingDetailView: View {
         .padding(.horizontal, 14)
         .padding(.top, 10)
         .padding(.bottom, 80)
-    }
-
-    // MARK: - 快速接續
-
-    private func quickAppend() {
-        if let last = plan.items.last {
-            var copy = last
-            copy.id = UUID()
-            copy.startMinute = last.endMinute
-            copy.endMinute = (last.endMinute + 60) % 1440
-            copy.title = "新時段"
-            withAnimation {
-                plan.items.append(copy)
-                plan.items.sort { $0.startMinute < $1.startMinute }
-            }
-        } else {
-            // 沒有任何時段時，直接開啟新增 Sheet
-            isPresentingAdd = true
-        }
     }
 
     // MARK: - Empty

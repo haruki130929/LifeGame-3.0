@@ -88,7 +88,7 @@ struct HomeRootView: View {
             // 功能頁面專用 route：
             // 已經在功能頁（navigationPath 不為空）→ 不做事，讓功能頁接手
             // 在首頁 → 先導航到對應功能頁
-            case .addRingItem, .quickAppendRing:
+            case .addRingItem:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.tomorrowRing) }
             case .jumpToToday:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.calendar) }

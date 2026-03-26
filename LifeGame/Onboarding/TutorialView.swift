@@ -171,7 +171,7 @@ enum TutorialData {
             steps: [
                 TutorialStep(text: "時間圓環幫你規劃一天的時間分配，以環形圖呈現。"),
                 TutorialStep(text: "每個時段用不同顏色區分，可以看到時間的佔比。"),
-                TutorialStep(text: "按「新增時段」來加入活動，按「快速接續」可以自動接在上一個時段之後。"),
+                TutorialStep(text: "按「新增時段」來加入活動，設定時段名稱與起訖時間。"),
                 TutorialStep(text: "時間圓環會自動扣減 HP/FP/MP，不同活動消耗不同。"),
             ],
             tip: nil,
