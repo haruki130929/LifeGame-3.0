@@ -59,7 +59,6 @@ struct TomorrowRingView: View {
         .onChange(of: selectedItemID) { _, newVal in
             if selectedID != newVal { selectedID = newVal }
         }
-        .featureTutorial(.timeRing)
     }
 }
 

@@ -39,6 +39,7 @@ struct TomorrowRingDetailView: View {
         )
         .navigationTitle("時間圓環")
         .navigationBarTitleDisplayMode(.inline)
+        .featureTutorial(.timeRing)
 
         // ── 進入/離開時切換 FAB 選單 ──
         .onAppear {

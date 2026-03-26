@@ -73,6 +73,33 @@ struct WhatsNewView: View {
 
     static func items(for version: String) -> [WhatsNewItem] {
         switch version {
+        case "1.06":
+            return [
+                WhatsNewItem(
+                    icon: "icloud.fill",
+                    title: "iCloud 同步修復",
+                    description: "修復 CloudKit 同步失敗的問題，資料現在能正確備份至 iCloud，重裝 App 也不會遺失。",
+                    color: .cyan
+                ),
+                WhatsNewItem(
+                    icon: "pencil.and.list.clipboard",
+                    title: "全新「練習日記」",
+                    description: "取代原有弓道筆記，可自訂練習項目與欄位，支援數值、評分、文字等多種記錄方式。",
+                    color: .blue
+                ),
+                WhatsNewItem(
+                    icon: "chart.pie.fill",
+                    title: "練習日記圖表分析",
+                    description: "練習日記支援圓餅圖、折線圖、雷達圖，輕鬆追蹤練習成效與趨勢。",
+                    color: .purple
+                ),
+                WhatsNewItem(
+                    icon: "clock.fill",
+                    title: "時間圓環教學修正",
+                    description: "教學彈窗改為進入功能頁時才顯示，不再於主頁重複彈出。",
+                    color: .orange
+                ),
+            ]
         case "1.05":
             return [
                 WhatsNewItem(
