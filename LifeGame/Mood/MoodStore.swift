@@ -5,10 +5,12 @@ import Combine
 final class MoodStore: ObservableObject {
     
     private static let storageKey = "mood_score_v1"
-    
+
     @Published var score: Double = 5 {
         didSet { save() }
     }
+    @Published var focus: Double = 5
+    @Published var fatigue: Double = 5
     
     init() {
         load()

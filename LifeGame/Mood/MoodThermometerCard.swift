@@ -12,28 +12,44 @@ struct MoodThermometerCard: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("心情溫度計")
                 .font(.headline)
-            
-            // ✅ (B) 加這段：顯示上一個小時區間
+
             Text("紀錄時段：\(previousHourRangeText())")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            
-            // ✅ 顯示目前分數（加在 Slider 上面）
+
+            // 情緒
             HStack {
-                Text("分數")
+                Text("😊 情緒")
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("\(Int(mood.score))")
                     .font(.headline)
             }
-            
-            // 你原本的 Slider（示意）
             Slider(value: $mood.score, in: moodSettings.scoreRange, step: 1)
-            
-            // ✅ (C) 把「儲存」改成「紀錄」，並寫入 history（紀錄上一個小時）
+
+            // 專注力
+            HStack {
+                Text("🎯 專注力")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("\(Int(mood.focus))")
+                    .font(.headline)
+            }
+            Slider(value: $mood.focus, in: moodSettings.scoreRange, step: 1)
+
+            // 疲勞度
+            HStack {
+                Text("😴 疲勞度")
+                    .foregroundStyle(.secondary)
+                Spacer()
+                Text("\(Int(mood.fatigue))")
+                    .font(.headline)
+            }
+            Slider(value: $mood.fatigue, in: moodSettings.scoreRange, step: 1)
+
             Button {
                 let previousHour = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
-                let ok = history.add(score: mood.score, at: previousHour)
+                let ok = history.add(score: mood.score, focus: mood.focus, fatigue: mood.fatigue, at: previousHour)
                 if ok {
                     showRecordedToast = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

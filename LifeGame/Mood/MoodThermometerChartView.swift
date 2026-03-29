@@ -3,12 +3,33 @@ import Charts
 
 struct MoodThermometerChartView: View {
     let points: [MoodPoint]
-    let rangeStart: Date          // 永遠是今天 8:00
-    let rangeEnd: Date            // 永遠是隔天 8:00
+    let rangeStart: Date
+    let rangeEnd: Date
     var period: MoodTimePeriod = .day
 
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var moodSettings: MoodSettingsStore
+
+    private struct ChartEntry: Identifiable {
+        let id = UUID()
+        let timestamp: Date
+        let value: Double
+        let category: String
+    }
+
+    private var chartEntries: [ChartEntry] {
+        var result: [ChartEntry] = []
+        for p in points {
+            result.append(ChartEntry(timestamp: p.timestamp, value: p.score, category: "😊 情緒"))
+            if let focus = p.focus {
+                result.append(ChartEntry(timestamp: p.timestamp, value: focus, category: "🎯 專注力"))
+            }
+            if let fatigue = p.fatigue {
+                result.append(ChartEntry(timestamp: p.timestamp, value: fatigue, category: "😴 疲勞度"))
+            }
+        }
+        return result
+    }
 
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 16)
@@ -17,33 +38,39 @@ struct MoodThermometerChartView: View {
             Text(period.chartTitle)
                 .font(.headline)
 
-            Chart {
-                ForEach(points) { p in
-                    LineMark(
-                        x: .value("時間", p.timestamp),
-                        y: .value("分數", p.score)
-                    )
-                    .interpolationMethod(.catmullRom)
+            Chart(chartEntries) { entry in
+                LineMark(
+                    x: .value("時間", entry.timestamp),
+                    y: .value("分數", entry.value),
+                    series: .value("類別", entry.category)
+                )
+                .interpolationMethod(.catmullRom)
+                .foregroundStyle(by: .value("類別", entry.category))
 
-                    PointMark(
-                        x: .value("時間", p.timestamp),
-                        y: .value("分數", p.score)
-                    )
-                }
+                PointMark(
+                    x: .value("時間", entry.timestamp),
+                    y: .value("分數", entry.value)
+                )
+                .foregroundStyle(by: .value("類別", entry.category))
             }
+            .chartForegroundStyleScale([
+                "😊 情緒": Color.orange,
+                "🎯 專注力": Color.blue,
+                "😴 疲勞度": Color.purple
+            ])
             .chartYScale(domain: moodSettings.scoreRange)
             .chartXScale(domain: rangeStart...rangeEnd)
             .chartYAxis {
                 AxisMarks(position: .leading)
             }
             .chartXAxis {
-                // 橫軸永遠是一天中的時間，每 4 小時一刻度
                 AxisMarks(values: .stride(by: .hour, count: 4)) { _ in
                     AxisGridLine()
                     AxisTick()
                     AxisValueLabel(format: .dateTime.hour(.twoDigits(amPM: .abbreviated)))
                 }
             }
+            .chartLegend(position: .bottom)
             .frame(height: 220 * AppLayout.heightScale)
             .padding(.vertical, 8)
         }

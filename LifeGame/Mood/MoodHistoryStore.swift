@@ -5,11 +5,15 @@ struct MoodPoint: Identifiable, Codable {
     let id: UUID
     let timestamp: Date
     let score: Double
-    
-    init(id: UUID = UUID(), timestamp: Date = Date(), score: Double) {
+    var focus: Double?
+    var fatigue: Double?
+
+    init(id: UUID = UUID(), timestamp: Date = Date(), score: Double, focus: Double? = nil, fatigue: Double? = nil) {
         self.id = id
         self.timestamp = timestamp
         self.score = score
+        self.focus = focus
+        self.fatigue = fatigue
     }
 }
 
@@ -30,8 +34,10 @@ final class MoodHistoryStore: ObservableObject {
     }
 
     @discardableResult
-    func add(score: Double, at date: Date = Date()) -> Bool {
+    func add(score: Double, focus: Double? = nil, fatigue: Double? = nil, at date: Date = Date()) -> Bool {
         let clamped = min(10, max(0, score))
+        let clampedFocus = focus.map { min(10, max(0, $0)) }
+        let clampedFatigue = fatigue.map { min(10, max(0, $0)) }
 
         let calendar = Calendar.current
         guard let hourStart = calendar.dateInterval(of: .hour, for: date)?.start else {
@@ -47,7 +53,7 @@ final class MoodHistoryStore: ObservableObject {
             }
         }
 
-        points.append(MoodPoint(timestamp: date, score: clamped))
+        points.append(MoodPoint(timestamp: date, score: clamped, focus: clampedFocus, fatigue: clampedFatigue))
         points.sort { $0.timestamp < $1.timestamp }
         save()
         return true
@@ -58,27 +64,35 @@ final class MoodHistoryStore: ObservableObject {
     }
 
     /// 更新已有記錄的分數
-    func update(id: UUID, score: Double) {
+    func update(id: UUID, score: Double, focus: Double? = nil, fatigue: Double? = nil) {
         guard let idx = points.firstIndex(where: { $0.id == id }) else { return }
         let old = points[idx]
-        points[idx] = MoodPoint(id: old.id, timestamp: old.timestamp, score: min(10, max(0, score)))
+        points[idx] = MoodPoint(
+            id: old.id, timestamp: old.timestamp,
+            score: min(10, max(0, score)),
+            focus: focus.map { min(10, max(0, $0)) } ?? old.focus,
+            fatigue: fatigue.map { min(10, max(0, $0)) } ?? old.fatigue
+        )
         save()
     }
 
     /// 同一小時有記錄就更新，沒有就新增
     @discardableResult
-    func addOrUpdate(score: Double, forHour date: Date) -> Bool {
+    func addOrUpdate(score: Double, focus: Double? = nil, fatigue: Double? = nil, forHour date: Date) -> Bool {
         let calendar = Calendar.current
         guard let hourStart = calendar.dateInterval(of: .hour, for: date)?.start else { return false }
         let clamped = min(10, max(0, score))
+        let clampedFocus = focus.map { min(10, max(0, $0)) }
+        let clampedFatigue = fatigue.map { min(10, max(0, $0)) }
 
         if let idx = points.firstIndex(where: {
             calendar.dateInterval(of: .hour, for: $0.timestamp)?.start == hourStart
         }) {
             let old = points[idx]
-            points[idx] = MoodPoint(id: old.id, timestamp: old.timestamp, score: clamped)
+            points[idx] = MoodPoint(id: old.id, timestamp: old.timestamp, score: clamped,
+                                     focus: clampedFocus ?? old.focus, fatigue: clampedFatigue ?? old.fatigue)
         } else {
-            points.append(MoodPoint(timestamp: date, score: clamped))
+            points.append(MoodPoint(timestamp: date, score: clamped, focus: clampedFocus, fatigue: clampedFatigue))
             points.sort { $0.timestamp < $1.timestamp }
         }
         save()
