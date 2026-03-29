@@ -102,7 +102,6 @@ struct LifeGameApp: App {
                         // 版本更新內容
                         .onAppear {
                             coordinator.diagnoseiCloudSync()
-                            VersionTracker.resetForTesting() // ⚠️ 測試用，上架前刪除
                             if VersionTracker.shouldShowWhatsNew {
                                 showWhatsNew = true
                             }
