@@ -47,21 +47,25 @@ struct MoodThermometerCard: View {
             }
             Slider(value: $mood.fatigue, in: moodSettings.scoreRange, step: 1)
 
-            Button {
-                let previousHour = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
-                let ok = history.add(score: mood.score, focus: mood.focus, fatigue: mood.fatigue, at: previousHour)
-                if ok {
-                    showRecordedToast = true
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                        showRecordedToast = false
+            HStack {
+                Spacer()
+                Button {
+                    let previousHour = Calendar.current.date(byAdding: .hour, value: -1, to: Date())!
+                    let ok = history.add(score: mood.score, focus: mood.focus, fatigue: mood.fatigue, at: previousHour)
+                    if ok {
+                        showRecordedToast = true
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                            showRecordedToast = false
+                        }
+                    } else {
+                        showHourlyLimitAlert = true
                     }
-                } else {
-                    showHourlyLimitAlert = true
+                } label: {
+                    Text("紀錄上一小時")
                 }
-            } label: {
-                Text("紀錄上一小時")
+                .buttonStyle(.borderedProminent)
+                Spacer()
             }
-            .buttonStyle(.borderedProminent)
             .alert("上一個小時已經記錄過了", isPresented: $showHourlyLimitAlert) {
                 Button("好", role: .cancel) { }
             } message: {
