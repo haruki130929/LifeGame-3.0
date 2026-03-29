@@ -1,77 +1,80 @@
 import SwiftUI
 
-/// 共用色票選擇器 — 顯示 ColorPalette 中的所有顏色供選擇
-struct PaletteColorPicker: View {
+/// 設定主題用 — 橫向滾動色票
+struct ScrollPaletteColorPicker: View {
     @Binding var selectedHex: String
-    var columns: Int = 8
-
-    private let gridItems: [GridItem]
-
-    init(selectedHex: Binding<String>, columns: Int = 8) {
-        _selectedHex = selectedHex
-        self.columns = columns
-        gridItems = Array(repeating: GridItem(.flexible(), spacing: 6), count: columns)
-    }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            ForEach(ColorPalette.allGroups) { group in
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(group.name)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    LazyVGrid(columns: gridItems, spacing: 6) {
-                        ForEach(group.colors) { pc in
-                            let isSelected = selectedHex.uppercased() == pc.hex.uppercased()
-                            Button {
-                                selectedHex = pc.hex
-                            } label: {
-                                RoundedRectangle(cornerRadius: 6)
-                                    .fill(pc.color)
-                                    .aspectRatio(1, contentMode: .fit)
-                                    .overlay(
-                                        RoundedRectangle(cornerRadius: 6)
-                                            .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
-                                    )
-                                    .overlay(
-                                        isSelected
-                                            ? Image(systemName: "checkmark")
-                                                .font(.caption2.bold())
-                                                .foregroundStyle(.white)
-                                                .shadow(radius: 2)
-                                            : nil
-                                    )
-                            }
-                            .buttonStyle(.plain)
-                            .help(pc.name)
-                        }
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 4) {
+                ForEach(ColorPalette.allColors) { pc in
+                    let isSelected = selectedHex.uppercased() == pc.hex.uppercased()
+                    Button {
+                        selectedHex = pc.hex
+                    } label: {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(pc.color)
+                            .frame(width: 28, height: 28)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 4)
+                                    .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
+                            )
                     }
+                    .buttonStyle(.plain)
                 }
             }
+            .padding(.vertical, 4)
         }
     }
 }
 
-/// 緊湊版色票選擇器 — 小方格密集排列，類似 Word 色盤
+/// 緊湊版色票選擇器 — 小方格分頁顯示
 struct CompactPaletteColorPicker: View {
     @Binding var selectedHex: String
+    @State private var selectedGroup: Int = 0
 
-    private let gridItems = Array(repeating: GridItem(.fixed(20), spacing: 2), count: 25)
+    private let gridItems = Array(repeating: GridItem(.fixed(22), spacing: 3), count: 10)
 
     var body: some View {
-        LazyVGrid(columns: gridItems, spacing: 2) {
-            ForEach(ColorPalette.allColors) { pc in
-                let isSelected = selectedHex.uppercased() == pc.hex.uppercased()
-                Button {
-                    selectedHex = pc.hex
-                } label: {
-                    Rectangle()
-                        .fill(pc.color)
-                        .frame(width: 20, height: 20)
-                        .border(isSelected ? Color.white : Color.clear, width: 2)
+        let groups = ColorPalette.allGroups
+
+        VStack(spacing: 8) {
+            // 分頁標籤
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 6) {
+                    ForEach(Array(groups.enumerated()), id: \.element.id) { idx, group in
+                        Button {
+                            selectedGroup = idx
+                        } label: {
+                            Text(group.name)
+                                .font(.caption2)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(selectedGroup == idx ? Color.accentColor : Color.secondary.opacity(0.2))
+                                .foregroundStyle(selectedGroup == idx ? .white : .primary)
+                                .clipShape(Capsule())
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
-                .buttonStyle(.plain)
+            }
+
+            // 方格
+            if selectedGroup < groups.count {
+                LazyVGrid(columns: gridItems, spacing: 3) {
+                    ForEach(groups[selectedGroup].colors) { pc in
+                        let isSelected = selectedHex.uppercased() == pc.hex.uppercased()
+                        Button {
+                            selectedHex = pc.hex
+                        } label: {
+                            Rectangle()
+                                .fill(pc.color)
+                                .frame(width: 22, height: 22)
+                                .border(isSelected ? Color.white : Color.clear, width: 2)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
         }
     }

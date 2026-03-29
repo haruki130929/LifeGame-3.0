@@ -38,7 +38,7 @@ struct AppearanceSettingsView: View {
         List {
             // MARK: 主色
             Section("主色") {
-                CompactPaletteColorPicker(selectedHex: Binding(
+                ScrollPaletteColorPicker(selectedHex: Binding(
                     get: { draftCustomHex },
                     set: { newHex in
                         draftCustomHex = newHex
