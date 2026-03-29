@@ -20,12 +20,12 @@ struct MoodThermometerChartView: View {
     private var chartEntries: [ChartEntry] {
         var result: [ChartEntry] = []
         for p in points {
-            result.append(ChartEntry(timestamp: p.timestamp, value: p.score, category: "😊 情緒"))
+            result.append(ChartEntry(timestamp: p.timestamp, value: p.score, category: "情緒"))
             if let focus = p.focus {
-                result.append(ChartEntry(timestamp: p.timestamp, value: focus, category: "🎯 專注力"))
+                result.append(ChartEntry(timestamp: p.timestamp, value: focus, category: "專注力"))
             }
             if let fatigue = p.fatigue {
-                result.append(ChartEntry(timestamp: p.timestamp, value: fatigue, category: "😴 疲勞度"))
+                result.append(ChartEntry(timestamp: p.timestamp, value: fatigue, category: "疲勞度"))
             }
         }
         return result
@@ -54,9 +54,9 @@ struct MoodThermometerChartView: View {
                 .foregroundStyle(by: .value("類別", entry.category))
             }
             .chartForegroundStyleScale([
-                "😊 情緒": Color.orange,
-                "🎯 專注力": Color.blue,
-                "😴 疲勞度": Color.purple
+                "情緒": Color.orange,
+                "專注力": Color.blue,
+                "疲勞度": Color.purple
             ])
             .chartYScale(domain: moodSettings.scoreRange)
             .chartXScale(domain: rangeStart...rangeEnd)

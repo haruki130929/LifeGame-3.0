@@ -19,7 +19,7 @@ struct MoodThermometerCard: View {
 
             // 情緒
             HStack {
-                Text("😊 情緒")
+                Text("情緒")
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("\(Int(mood.score))")
@@ -29,7 +29,7 @@ struct MoodThermometerCard: View {
 
             // 專注力
             HStack {
-                Text("🎯 專注力")
+                Text("專注力")
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("\(Int(mood.focus))")
@@ -39,7 +39,7 @@ struct MoodThermometerCard: View {
 
             // 疲勞度
             HStack {
-                Text("😴 疲勞度")
+                Text("疲勞度")
                     .foregroundStyle(.secondary)
                 Spacer()
                 Text("\(Int(mood.fatigue))")

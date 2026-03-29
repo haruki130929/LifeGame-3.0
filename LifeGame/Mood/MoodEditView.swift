@@ -22,21 +22,21 @@ struct MoodEditView: View {
 
                         // 情緒
                         sliderRow(
-                            label: "😊 情緒",
+                            label: "情緒",
                             value: binding(for: entry, drafts: $scoreDrafts, keyPath: \.score, default: defaultScore),
                             range: moodSettings.scoreRange
                         )
 
                         // 專注力
                         sliderRow(
-                            label: "🎯 專注力",
+                            label: "專注力",
                             value: binding(for: entry, drafts: $focusDrafts, keyPath: \.focus, default: defaultScore),
                             range: moodSettings.scoreRange
                         )
 
                         // 疲勞度
                         sliderRow(
-                            label: "😴 疲勞度",
+                            label: "疲勞度",
                             value: binding(for: entry, drafts: $fatigueDrafts, keyPath: \.fatigue, default: defaultScore),
                             range: moodSettings.scoreRange
                         )
