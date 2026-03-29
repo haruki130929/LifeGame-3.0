@@ -5,38 +5,51 @@ struct QuestionModuleSettingsView: View {
     @State private var showingAddSheet = false
     @State private var showDeleteConfirm = false
     @State private var moduleToDelete: DailyLogModule?
+    @State private var isEditMode = false
+    @State private var showActionMenu = false
 
-    /// 依 sortOrder 排序的模組清單（用於 List 顯示）
     private var sortedModules: [DailyLogModule] {
         moduleStore.modules.sorted { $0.sortOrder < $1.sortOrder }
     }
 
     var body: some View {
-        List {
-            Section {
-                ForEach(sortedModules) { module in
-                    moduleRow(module)
+        ZStack(alignment: .bottomTrailing) {
+            List {
+                Section {
+                    ForEach(sortedModules) { module in
+                        moduleRow(module)
+                    }
+                    .onMove(perform: moveModules)
+                } header: {
+                    Text("點選模組可編輯，左滑可刪除")
                 }
-                .onMove(perform: moveModules)
-            } header: {
-                Text("拖曳排序，開關控制是否顯示")
-            } footer: {
-                Text("內建模組無法刪除，僅可開關與排序")
             }
-        }
-        .navigationTitle("問題模組管理")
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
+            .environment(\.editMode, isEditMode ? .constant(.active) : .constant(.inactive))
+
+            // 右下角 ＋ 按鈕
+            Menu {
                 Button {
                     showingAddSheet = true
                 } label: {
-                    Image(systemName: "plus")
+                    Label("新增模組", systemImage: "plus.circle")
                 }
+                Button {
+                    isEditMode.toggle()
+                } label: {
+                    Label(isEditMode ? "完成排序" : "排序", systemImage: isEditMode ? "checkmark" : "arrow.up.arrow.down")
+                }
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 52, height: 52)
+                    .background(Circle().fill(Color.accentColor))
+                    .shadow(color: .black.opacity(0.2), radius: 6, y: 3)
             }
-            ToolbarItem(placement: .topBarTrailing) {
-                EditButton().environment(\.locale, Locale(identifier: "zh-Hant"))
-            }
+            .padding(.trailing, 20)
+            .padding(.bottom, 20)
         }
+        .navigationTitle("問題模組管理")
         .confirmationDialog("確定要刪除「\(moduleToDelete?.displayTitle ?? "")」嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
             Button("刪除", role: .destructive) {
                 if let m = moduleToDelete {
@@ -55,14 +68,22 @@ struct QuestionModuleSettingsView: View {
         }
     }
 
-    // MARK: - 模組列
+    // MARK: - 模組列（所有模組都可編輯、可刪除）
 
-    @ViewBuilder
     private func moduleRow(_ module: DailyLogModule) -> some View {
-        if module.kind.isBuiltIn {
+        NavigationLink {
+            CustomModuleEditorView(mode: .edit(module)) { updated in
+                if module.kind.isBuiltIn {
+                    // 內建模組：更新 title/icon/questions
+                    moduleStore.updateBuiltInModule(updated)
+                } else {
+                    moduleStore.updateCustomModule(updated)
+                }
+            }
+        } label: {
             HStack {
                 Image(systemName: module.displayIcon)
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(module.kind.isBuiltIn ? .blue : .orange)
                     .frame(width: 24)
                 Text(module.displayTitle)
                 Spacer()
@@ -72,40 +93,13 @@ struct QuestionModuleSettingsView: View {
                 ))
                 .labelsHidden()
             }
-            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                Button(role: .destructive) {
-                    moduleToDelete = module
-                    showDeleteConfirm = true
-                } label: {
-                    Label("刪除", systemImage: "trash")
-                }
-            }
-        } else {
-            NavigationLink {
-                CustomModuleEditorView(mode: .edit(module)) { updated in
-                    moduleStore.updateCustomModule(updated)
-                }
+        }
+        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+            Button(role: .destructive) {
+                moduleToDelete = module
+                showDeleteConfirm = true
             } label: {
-                HStack {
-                    Image(systemName: module.displayIcon)
-                        .foregroundStyle(.orange)
-                        .frame(width: 24)
-                    Text(module.displayTitle)
-                    Spacer()
-                    Toggle("", isOn: Binding(
-                        get: { module.isEnabled },
-                        set: { _ in moduleStore.toggle(id: module.id) }
-                    ))
-                    .labelsHidden()
-                }
-            }
-            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                Button(role: .destructive) {
-                    moduleToDelete = module
-                    showDeleteConfirm = true
-                } label: {
-                    Label("刪除", systemImage: "trash")
-                }
+                Label("刪除", systemImage: "trash")
             }
         }
     }

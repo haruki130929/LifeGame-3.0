@@ -84,6 +84,14 @@ final class QuestionModuleStore: ObservableObject {
         modules.removeAll { $0.id == id }
     }
 
+    /// 更新內建模組（允許修改 title、icon、questions）
+    func updateBuiltInModule(_ module: DailyLogModule) {
+        guard let idx = modules.firstIndex(where: { $0.id == module.id }) else { return }
+        modules[idx].title = module.title
+        modules[idx].icon = module.icon
+        modules[idx].questions = module.questions
+    }
+
     // MARK: - Persistence
 
     private func save() {
