@@ -24,6 +24,42 @@ enum DaySlot: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+// MARK: - Weekday
+enum Weekday: Int, CaseIterable, Codable, Identifiable, Hashable {
+    case sunday = 1, monday = 2, tuesday = 3, wednesday = 4,
+         thursday = 5, friday = 6, saturday = 7
+
+    var id: Int { rawValue }
+
+    var shortTitle: String {
+        switch self {
+        case .sunday: return "日"
+        case .monday: return "一"
+        case .tuesday: return "二"
+        case .wednesday: return "三"
+        case .thursday: return "四"
+        case .friday: return "五"
+        case .saturday: return "六"
+        }
+    }
+
+    var title: String {
+        switch self {
+        case .sunday: return "週日"
+        case .monday: return "週一"
+        case .tuesday: return "週二"
+        case .wednesday: return "週三"
+        case .thursday: return "週四"
+        case .friday: return "週五"
+        case .saturday: return "週六"
+        }
+    }
+
+    static var today: Weekday {
+        Weekday(rawValue: Calendar.current.component(.weekday, from: Date())) ?? .monday
+    }
+}
+
 // MARK: - RingItem
 struct RingItem: Identifiable, Codable, Hashable {
     var id = UUID()
@@ -35,6 +71,20 @@ struct RingItem: Identifiable, Codable, Hashable {
     var colorHex: String
     var hpCost: Int
     var fpCost: Int
+    var isFromSchedule: Bool = false
+}
+
+// MARK: - WeeklySchedule
+struct WeeklySchedule: Codable {
+    var scheduleByDay: [Int: [RingItem]] = [:]
+
+    func items(for weekday: Weekday) -> [RingItem] {
+        scheduleByDay[weekday.rawValue] ?? []
+    }
+
+    mutating func setItems(_ items: [RingItem], for weekday: Weekday) {
+        scheduleByDay[weekday.rawValue] = items
+    }
 }
 
 // MARK: - TomorrowRingPlan

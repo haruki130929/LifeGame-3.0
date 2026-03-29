@@ -13,6 +13,7 @@ struct CardFactory: View {
 
     @EnvironmentObject private var calendarStore: CalendarStore
     @EnvironmentObject private var game: LifeGame
+    @EnvironmentObject private var weeklyScheduleStore: WeeklyScheduleStore
 
     // 各卡片需要的 Store
     @EnvironmentObject private var todoStore: TodoQuadrantStore
@@ -78,6 +79,11 @@ struct CardFactory: View {
                 }
                 .onChange(of: tomorrowPlan) { _, newPlan in
                     StorageManager.save(newPlan, forKey: "tomorrow_ring_plan")
+                }
+                .onAppear {
+                    if weeklyScheduleStore.applyScheduleIfNeeded(to: &tomorrowPlan) {
+                        StorageManager.save(tomorrowPlan, forKey: "tomorrow_ring_plan")
+                    }
                 }
 
         case .bagRequired:

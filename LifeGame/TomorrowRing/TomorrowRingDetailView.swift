@@ -9,6 +9,7 @@ struct TomorrowRingDetailView: View {
     @State private var isPresentingAdd = false
     @State private var editingItem: RingItem? = nil
     @State private var ringSelectedID: UUID? = nil
+    @State private var showScheduleEditor = false
 
     var body: some View {
         Group {
@@ -55,6 +56,9 @@ struct TomorrowRingDetailView: View {
             case .addRingItem:
                 fab.route = nil
                 isPresentingAdd = true
+            case .editSchedule:
+                fab.route = nil
+                showScheduleEditor = true
             default:
                 break
             }
@@ -86,6 +90,11 @@ struct TomorrowRingDetailView: View {
                 }
             } onDelete: {
                 plan.items.removeAll { $0.id == item.id }
+            }
+        }
+        .sheet(isPresented: $showScheduleEditor) {
+            NavigationStack {
+                WeeklyScheduleEditorView()
             }
         }
     }
@@ -292,9 +301,16 @@ struct RingRow: View {
                 .frame(width: 8, height: 8)
 
             VStack(alignment: .leading, spacing: 2) {
-                Text(item.title)
-                    .font(.footnote)
-                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    Text(item.title)
+                        .font(.footnote)
+                        .lineLimit(1)
+                    if item.isFromSchedule {
+                        Image(systemName: "calendar")
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
+                    }
+                }
 
                 Text("\(minuteText(item.startMinute)) 〜 \(minuteText(item.endMinute))")
                     .font(.caption2)

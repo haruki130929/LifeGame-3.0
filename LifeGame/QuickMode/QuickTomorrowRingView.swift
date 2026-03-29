@@ -3,6 +3,7 @@ import SwiftUI
 /// Quick Mode 專用：時間圓環上方 + 時段列表下方（垂直佈局）
 struct QuickTomorrowRingView: View {
     @EnvironmentObject private var game: LifeGame
+    @EnvironmentObject private var weeklyScheduleStore: WeeklyScheduleStore
 
     @State private var plan: TomorrowRingPlan = {
         if let saved: TomorrowRingPlan = StorageManager.load(
@@ -54,6 +55,11 @@ struct QuickTomorrowRingView: View {
         }
         .onChange(of: plan) { _, newPlan in
             StorageManager.save(newPlan, forKey: "tomorrow_ring_plan")
+        }
+        .onAppear {
+            if weeklyScheduleStore.applyScheduleIfNeeded(to: &plan) {
+                StorageManager.save(plan, forKey: "tomorrow_ring_plan")
+            }
         }
         .sheet(item: $editingItem) { item in
             EditRingItemSheet(item: item) { updated in
