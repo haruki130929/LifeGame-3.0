@@ -59,8 +59,7 @@ struct MoodThermometerCard: View {
                     showHourlyLimitAlert = true
                 }
             } label: {
-                Text("紀錄")
-                    .frame(maxWidth: .infinity)
+                Text("紀錄上一小時")
             }
             .buttonStyle(.borderedProminent)
             .alert("上一個小時已經記錄過了", isPresented: $showHourlyLimitAlert) {
