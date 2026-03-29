@@ -79,6 +79,11 @@ final class QuestionModuleStore: ObservableObject {
         modules.removeAll { $0.id == id && $0.kind == .custom }
     }
 
+    /// 刪除任何模組（含內建）
+    func removeModule(id: UUID) {
+        modules.removeAll { $0.id == id }
+    }
+
     // MARK: - Persistence
 
     private func save() {

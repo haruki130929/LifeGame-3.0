@@ -3,6 +3,8 @@ import SwiftUI
 struct QuestionModuleSettingsView: View {
     @EnvironmentObject private var moduleStore: QuestionModuleStore
     @State private var showingAddSheet = false
+    @State private var showDeleteConfirm = false
+    @State private var moduleToDelete: DailyLogModule?
 
     /// 依 sortOrder 排序的模組清單（用於 List 顯示）
     private var sortedModules: [DailyLogModule] {
@@ -35,6 +37,15 @@ struct QuestionModuleSettingsView: View {
                 EditButton().environment(\.locale, Locale(identifier: "zh-Hant"))
             }
         }
+        .confirmationDialog("確定要刪除「\(moduleToDelete?.displayTitle ?? "")」嗎？", isPresented: $showDeleteConfirm, titleVisibility: .visible) {
+            Button("刪除", role: .destructive) {
+                if let m = moduleToDelete {
+                    moduleStore.removeModule(id: m.id)
+                }
+                moduleToDelete = nil
+            }
+            Button("取消", role: .cancel) { moduleToDelete = nil }
+        }
         .sheet(isPresented: $showingAddSheet) {
             NavigationStack {
                 CustomModuleEditorView(mode: .create) { newModule in
@@ -49,7 +60,6 @@ struct QuestionModuleSettingsView: View {
     @ViewBuilder
     private func moduleRow(_ module: DailyLogModule) -> some View {
         if module.kind.isBuiltIn {
-            // 內建模組：Toggle 開關，不可刪除
             HStack {
                 Image(systemName: module.displayIcon)
                     .foregroundStyle(.blue)
@@ -62,8 +72,15 @@ struct QuestionModuleSettingsView: View {
                 ))
                 .labelsHidden()
             }
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(role: .destructive) {
+                    moduleToDelete = module
+                    showDeleteConfirm = true
+                } label: {
+                    Label("刪除", systemImage: "trash")
+                }
+            }
         } else {
-            // 自訂模組：可編輯、可刪除
             NavigationLink {
                 CustomModuleEditorView(mode: .edit(module)) { updated in
                     moduleStore.updateCustomModule(updated)
@@ -84,7 +101,8 @@ struct QuestionModuleSettingsView: View {
             }
             .swipeActions(edge: .trailing, allowsFullSwipe: true) {
                 Button(role: .destructive) {
-                    moduleStore.removeCustomModule(id: module.id)
+                    moduleToDelete = module
+                    showDeleteConfirm = true
                 } label: {
                     Label("刪除", systemImage: "trash")
                 }

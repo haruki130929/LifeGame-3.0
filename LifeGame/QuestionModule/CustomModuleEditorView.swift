@@ -40,16 +40,10 @@ struct CustomModuleEditorView: View {
         Form {
             Section("模組資訊") {
                 TextField("模組名稱", text: $title)
+            }
 
-                HStack {
-                    Text("圖示")
-                    Spacer()
-                    Image(systemName: icon)
-                        .foregroundStyle(.blue)
-                    TextField("SF Symbol 名稱", text: $icon)
-                        .multilineTextAlignment(.trailing)
-                        .frame(maxWidth: 180)
-                }
+            Section("圖示") {
+                iconPicker
             }
 
             Section {
@@ -119,6 +113,49 @@ struct CustomModuleEditorView: View {
     private var isCreating: Bool {
         if case .create = mode { return true }
         return false
+    }
+
+    // MARK: - 圖示選擇器
+
+    private static let iconOptions: [(String, [String])] = [
+        ("常用", ["square.grid.2x2", "list.bullet", "checklist", "doc.text", "note.text", "pencil.and.list.clipboard", "clipboard", "chart.bar", "chart.pie", "chart.line.uptrend.xyaxis"]),
+        ("心理", ["brain.head.profile", "heart", "heart.text.square", "face.smiling", "sun.max", "moon.stars", "cloud.rain", "bolt.heart", "waveform.path.ecg", "eye"]),
+        ("學習", ["book", "graduationcap", "pencil", "ruler", "lightbulb", "theatermasks", "music.note", "paintbrush", "globe", "questionmark.circle"]),
+        ("生活", ["fork.knife", "cup.and.saucer", "bed.double", "figure.walk", "figure.run", "dumbbell", "bicycle", "leaf", "pills", "cross.case"]),
+        ("其他", ["star", "flag", "bell", "tag", "bookmark", "calendar", "clock", "timer", "gamecontroller", "camera"]),
+    ]
+
+    private var iconPicker: some View {
+        let gridItems = Array(repeating: GridItem(.fixed(36), spacing: 8), count: 8)
+
+        return VStack(alignment: .leading, spacing: 12) {
+            ForEach(Self.iconOptions, id: \.0) { category, icons in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(category)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                    LazyVGrid(columns: gridItems, spacing: 8) {
+                        ForEach(icons, id: \.self) { name in
+                            Button {
+                                icon = name
+                            } label: {
+                                Image(systemName: name)
+                                    .font(.system(size: 18))
+                                    .frame(width: 36, height: 36)
+                                    .background(icon == name ? Color.accentColor.opacity(0.2) : Color.clear)
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 6)
+                                            .stroke(icon == name ? Color.accentColor : Color.clear, lineWidth: 1.5)
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .foregroundStyle(icon == name ? .blue : .primary)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private func save() {
