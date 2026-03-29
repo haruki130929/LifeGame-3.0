@@ -8,6 +8,9 @@ struct MandalaSettingsView: View {
     @State private var goalColor: Color = .clear
     @State private var themeColor: Color = .clear
     @State private var actionColor: Color = .clear
+    @State private var goalHex: String = "4DA3FF"
+    @State private var themeHex: String = "3AD29F"
+    @State private var actionHex: String = "F6C445"
     @State private var useCustomGoalColor = false
     @State private var useCustomThemeColor = false
     @State private var useCustomActionColor = false
@@ -52,25 +55,28 @@ struct MandalaSettingsView: View {
         Section {
             Toggle("自訂目標格顏色", isOn: $useCustomGoalColor)
             if useCustomGoalColor {
-                ColorPicker("目標格顏色", selection: $goalColor, supportsOpacity: false)
-                    .onChange(of: goalColor) { _, newColor in
-                        applyColorToGoal(newColor)
+                CompactPaletteColorPicker(selectedHex: $goalHex)
+                    .onChange(of: goalHex) { _, newHex in
+                        goalColor = Color(hex: newHex)
+                        applyColorToGoal(goalColor)
                     }
             }
 
             Toggle("自訂主題格顏色", isOn: $useCustomThemeColor)
             if useCustomThemeColor {
-                ColorPicker("主題格顏色", selection: $themeColor, supportsOpacity: false)
-                    .onChange(of: themeColor) { _, newColor in
-                        applyColorToThemes(newColor)
+                CompactPaletteColorPicker(selectedHex: $themeHex)
+                    .onChange(of: themeHex) { _, newHex in
+                        themeColor = Color(hex: newHex)
+                        applyColorToThemes(themeColor)
                     }
             }
 
             Toggle("自訂行動格顏色", isOn: $useCustomActionColor)
             if useCustomActionColor {
-                ColorPicker("行動格顏色", selection: $actionColor, supportsOpacity: false)
-                    .onChange(of: actionColor) { _, newColor in
-                        applyColorToActions(newColor)
+                CompactPaletteColorPicker(selectedHex: $actionHex)
+                    .onChange(of: actionHex) { _, newHex in
+                        actionColor = Color(hex: newHex)
+                        applyColorToActions(actionColor)
                     }
             }
         } header: {
@@ -124,15 +130,17 @@ struct MandalaSettingsView: View {
     private func loadColors() {
         if let hex = store.cellColor(row: 4, col: 4) {
             goalColor = Color(hex: hex)
+            goalHex = hex
             useCustomGoalColor = true
         }
         if let hex = store.cellColor(row: 3, col: 3) {
             themeColor = Color(hex: hex)
+            themeHex = hex
             useCustomThemeColor = true
         }
-        // 取第一個行動格的顏色作為代表
         if let hex = store.cellColor(row: 0, col: 0) {
             actionColor = Color(hex: hex)
+            actionHex = hex
             useCustomActionColor = true
         }
     }

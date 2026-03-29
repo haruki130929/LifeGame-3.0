@@ -214,10 +214,7 @@ struct EditRingItemSheet: View {
                 }
 
                 Section("顏色") {
-                    colorRow("藍", "4DA3FF")
-                    colorRow("綠", "3AD29F")
-                    colorRow("黃", "F6C445")
-                    colorRow("紫", "9B7BFF")
+                    CompactPaletteColorPicker(selectedHex: $item.colorHex)
                 }
 
                 Section("時間") {

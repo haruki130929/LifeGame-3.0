@@ -46,11 +46,7 @@ struct AddRingItemSheet: View {
                 }
                 
                 Section("顏色") {
-                    // 先用固定選項，最穩，不用做 ColorPicker->Hex 轉換
-                    colorRow("藍", "4DA3FF")
-                    colorRow("綠", "3AD29F")
-                    colorRow("黃", "F6C445")
-                    colorRow("紫", "9B7BFF")
+                    CompactPaletteColorPicker(selectedHex: $draft.colorHex)
                 }
                 
                 Section("時間") {

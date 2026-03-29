@@ -56,30 +56,37 @@ struct AppearanceSettingsView: View {
                 .padding(.vertical, 4)
                 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("自訂顏色碼（Hex）")
+                    Text("或從色票選擇")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
-                    
+
+                    CompactPaletteColorPicker(selectedHex: Binding(
+                        get: { draftCustomHex },
+                        set: { newHex in
+                            draftCustomHex = newHex
+                            draftUseCustomAccent = true
+                        }
+                    ))
+
                     HStack(spacing: 10) {
-                        TextField("例如 #FF8800", text: $draftCustomHex)
+                        TextField("自訂色碼 #RRGGBB", text: $draftCustomHex)
                             .textInputAutocapitalization(.characters)
                             .disableAutocorrection(true)
                             .onChange(of: draftCustomHex) { _, newValue in
-                                // 輸入一變成有效色碼，就自動切到自訂模式
                                 if Color(hex: newValue.trimmingCharacters(in: .whitespacesAndNewlines)) != nil {
                                     draftUseCustomAccent = true
                                 }
                             }
-                        
+
                         Circle()
                             .fill(previewAccent)
                             .frame(width: 18, height: 18)
                             .overlay(Circle().stroke(.secondary.opacity(0.35), lineWidth: 1))
                     }
-                    
+
                     Toggle("使用自訂色", isOn: $draftUseCustomAccent)
                         .disabled(trimmedHex.isEmpty)
-                    
+
                     if !trimmedHex.isEmpty && !isHexValid {
                         Text("色碼格式不正確（可用：#RRGGBB 或 RRGGBB 或 RGB）")
                             .font(.footnote)

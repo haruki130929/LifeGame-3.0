@@ -211,6 +211,10 @@ private struct ScheduleEditSheet: View {
                     TimePicker(label: "結束", minute: $endMinute)
                 }
 
+                Section("顏色") {
+                    CompactPaletteColorPicker(selectedHex: $colorHex)
+                }
+
                 Section("消耗") {
                     Stepper("HP -\(hpCost)", value: $hpCost, in: 0...100, step: 5)
                     Stepper("FP -\(fpCost)", value: $fpCost, in: 0...100, step: 5)
