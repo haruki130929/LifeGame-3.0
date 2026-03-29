@@ -53,38 +53,48 @@ struct PaletteColorPicker: View {
     }
 }
 
-/// 緊湊版色票選擇器 — 只顯示一行可滾動的色票
+/// 緊湊版色票選擇器 — 方格排列，按色系分組
 struct CompactPaletteColorPicker: View {
     @Binding var selectedHex: String
+    var columns: Int = 10
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 6) {
-                ForEach(ColorPalette.allColors) { pc in
-                    let isSelected = selectedHex.uppercased() == pc.hex.uppercased()
-                    Button {
-                        selectedHex = pc.hex
-                    } label: {
-                        Circle()
-                            .fill(pc.color)
-                            .frame(width: 28, height: 28)
-                            .overlay(
-                                Circle()
-                                    .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
-                            )
-                            .overlay(
-                                isSelected
-                                    ? Image(systemName: "checkmark")
-                                        .font(.system(size: 10, weight: .bold))
-                                        .foregroundStyle(.white)
-                                        .shadow(radius: 2)
-                                    : nil
-                            )
+        let gridItems = Array(repeating: GridItem(.flexible(), spacing: 4), count: columns)
+
+        VStack(alignment: .leading, spacing: 12) {
+            ForEach(ColorPalette.allGroups) { group in
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(group.name)
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+
+                    LazyVGrid(columns: gridItems, spacing: 4) {
+                        ForEach(group.colors) { pc in
+                            let isSelected = selectedHex.uppercased() == pc.hex.uppercased()
+                            Button {
+                                selectedHex = pc.hex
+                            } label: {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(pc.color)
+                                    .aspectRatio(1, contentMode: .fit)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 4)
+                                            .stroke(isSelected ? Color.white : Color.clear, lineWidth: 2)
+                                    )
+                                    .overlay(
+                                        isSelected
+                                            ? Image(systemName: "checkmark")
+                                                .font(.system(size: 9, weight: .bold))
+                                                .foregroundStyle(.white)
+                                                .shadow(radius: 2)
+                                            : nil
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
             }
-            .padding(.vertical, 4)
         }
     }
 }
