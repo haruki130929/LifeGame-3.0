@@ -26,7 +26,7 @@ final class CalendarStore: ObservableObject {
         }
     }
     
-    func add(title: String, start: Date, end: Date) async {
+    func add(title: String, start: Date, end: Date, colorHex: String = "33A6B8") async {
         var appleEventIdentifier: String? = nil
         
         let granted = await requestAccessIfNeeded()
@@ -50,6 +50,7 @@ final class CalendarStore: ObservableObject {
             title: title,
             start: start,
             end: end,
+            colorHex: colorHex,
             appleEventIdentifier: appleEventIdentifier
         )
         

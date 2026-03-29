@@ -37,7 +37,8 @@ struct CalendarRangeProvider {
             let e = min(rawEnd, monthEnd)
             guard s < e else { return nil }
 
-            return CalendarRange(start: s, end: e, color: Color.cyan.opacity(0.70), eventId: event.id)
+            let barColor = Color(hex: event.colorHex)?.opacity(0.85) ?? Color.cyan.opacity(0.70)
+            return CalendarRange(start: s, end: e, color: barColor, eventId: event.id)
         }
     }
 }

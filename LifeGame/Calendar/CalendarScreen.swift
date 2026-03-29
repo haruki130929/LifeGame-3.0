@@ -49,9 +49,9 @@ struct CalendarScreen: View {
         
         // ✅ 新增行程
         .sheet(isPresented: $showNewEvent) {
-            NewEventSheet { title, start, end in
+            NewEventSheet { title, start, end, colorHex in
                 Task {
-                    await calendarStore.add(title: title, start: start, end: end)
+                    await calendarStore.add(title: title, start: start, end: end, colorHex: colorHex)
                 }
             }
         }
@@ -75,9 +75,9 @@ struct CalendarScreen: View {
 
         // ✅ 編輯行程
         .sheet(item: $editingEvent) { e in
-            EditEventSheet(event: e, onSave: { newTitle, newStart, newEnd in
+            EditEventSheet(event: e, onSave: { newTitle, newStart, newEnd, newColorHex in
                 if let idx = calendarStore.events.firstIndex(where: { $0.id == e.id }) {
-                    calendarStore.events[idx] = CalendarEvent(id: e.id, title: newTitle, start: newStart, end: newEnd)
+                    calendarStore.events[idx] = CalendarEvent(id: e.id, title: newTitle, start: newStart, end: newEnd, colorHex: newColorHex)
                 }
             }, onDelete: {
                 calendarStore.events.removeAll { $0.id == e.id }
@@ -156,7 +156,11 @@ struct CalendarScreen: View {
     // MARK: - 行程列
 
     private func eventRow(_ e: CalendarEvent) -> some View {
-        HStack {
+        HStack(spacing: 10) {
+            RoundedRectangle(cornerRadius: 3)
+                .fill(Color(hex: e.colorHex) ?? .cyan)
+                .frame(width: 6)
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(e.title)
                     .font(.headline)

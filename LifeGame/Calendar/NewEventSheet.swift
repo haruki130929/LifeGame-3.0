@@ -2,19 +2,50 @@ import SwiftUI
 
 struct NewEventSheet: View {
     @Environment(\.dismiss) private var dismiss
-    
+    @EnvironmentObject private var calendarSettings: CalendarSettingsStore
+
     @State private var title: String = ""
     @State private var start: Date = Date()
     @State private var end: Date = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
-    
-    let onSave: (String, Date, Date) -> Void
-    
+    @State private var colorHex: String = "33A6B8"
+
+    let onSave: (String, Date, Date, String) -> Void
+
     var body: some View {
         NavigationStack {
             Form {
-                TextField("標題", text: $title)
-                DatePicker("開始", selection: $start)
-                DatePicker("結束", selection: $end)
+                Section("基本") {
+                    TextField("標題", text: $title)
+                    DatePicker("開始", selection: $start)
+                    DatePicker("結束", selection: $end)
+                }
+
+                Section("顏色") {
+                    if !calendarSettings.colorPresets.isEmpty {
+                        ForEach(calendarSettings.colorPresets) { preset in
+                            Button {
+                                colorHex = preset.colorHex
+                                if title.isEmpty {
+                                    title = preset.name
+                                }
+                            } label: {
+                                HStack(spacing: 10) {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(Color(hex: preset.colorHex))
+                                        .frame(width: 24, height: 24)
+                                    Text(preset.name)
+                                        .foregroundStyle(.primary)
+                                    Spacer()
+                                    if colorHex.uppercased() == preset.colorHex.uppercased() {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.blue)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    CompactPaletteColorPicker(selectedHex: $colorHex)
+                }
             }
             .navigationTitle("新增行程")
             .toolbar {
@@ -25,9 +56,14 @@ struct NewEventSheet: View {
                     Button("儲存") {
                         let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !t.isEmpty else { return }
-                        onSave(t, start, end)
+                        onSave(t, start, end, colorHex)
                         dismiss()
                     }
+                }
+            }
+            .onChange(of: colorHex) { _, newHex in
+                if let presetName = calendarSettings.presetName(for: newHex), title.isEmpty {
+                    title = presetName
                 }
             }
         }
@@ -36,31 +72,60 @@ struct NewEventSheet: View {
 
 struct EditEventSheet: View {
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var calendarSettings: CalendarSettingsStore
 
     let event: CalendarEvent
-    let onSave: (String, Date, Date) -> Void
+    let onSave: (String, Date, Date, String) -> Void
     var onDelete: (() -> Void)? = nil
 
     @State private var title: String
     @State private var start: Date
     @State private var end: Date
+    @State private var colorHex: String
     @State private var showDeleteConfirmation = false
 
-    init(event: CalendarEvent, onSave: @escaping (String, Date, Date) -> Void, onDelete: (() -> Void)? = nil) {
+    init(event: CalendarEvent, onSave: @escaping (String, Date, Date, String) -> Void, onDelete: (() -> Void)? = nil) {
         self.event = event
         self.onSave = onSave
         self.onDelete = onDelete
         _title = State(initialValue: event.title)
         _start = State(initialValue: event.start)
         _end = State(initialValue: event.end)
+        _colorHex = State(initialValue: event.colorHex)
     }
 
     var body: some View {
         NavigationStack {
             Form {
-                TextField("標題", text: $title)
-                DatePicker("開始", selection: $start)
-                DatePicker("結束", selection: $end)
+                Section("基本") {
+                    TextField("標題", text: $title)
+                    DatePicker("開始", selection: $start)
+                    DatePicker("結束", selection: $end)
+                }
+
+                Section("顏色") {
+                    if !calendarSettings.colorPresets.isEmpty {
+                        ForEach(calendarSettings.colorPresets) { preset in
+                            Button {
+                                colorHex = preset.colorHex
+                            } label: {
+                                HStack(spacing: 10) {
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .fill(Color(hex: preset.colorHex))
+                                        .frame(width: 24, height: 24)
+                                    Text(preset.name)
+                                        .foregroundStyle(.primary)
+                                    Spacer()
+                                    if colorHex.uppercased() == preset.colorHex.uppercased() {
+                                        Image(systemName: "checkmark")
+                                            .foregroundStyle(.blue)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    CompactPaletteColorPicker(selectedHex: $colorHex)
+                }
 
                 Section {
                     Button(role: .destructive) {
@@ -83,7 +148,7 @@ struct EditEventSheet: View {
                     Button("儲存") {
                         let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !t.isEmpty else { return }
-                        onSave(t, start, end)
+                        onSave(t, start, end, colorHex)
                         dismiss()
                     }
                 }
