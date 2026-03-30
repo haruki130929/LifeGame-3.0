@@ -18,6 +18,7 @@ struct QuestionEditorView: View {
     @State private var triggerParentId: UUID?
     @State private var triggerValues: String
     @State private var customTriggerInput: String = ""
+    @State private var triggerOptions: [String] = []  // 可編輯的觸發選項列表
 
     private let questionId: UUID
 
@@ -37,6 +38,15 @@ struct QuestionEditorView: View {
             _triggerParentId = State(initialValue: q.conditionalTrigger?.parentQuestionId)
             _triggerValues = State(initialValue: q.conditionalTrigger?.triggerValues.joined(separator: ", ") ?? "")
             questionId = q.id
+            // 初始化可編輯的觸發選項
+            if q.conditionalTrigger != nil {
+                var opts = allQuestions.filter { $0.id != q.id }.flatMap { $0.options ?? [] }
+                let existing = q.conditionalTrigger?.triggerValues ?? []
+                for v in existing where !opts.contains(v) {
+                    opts.append(v)
+                }
+                _triggerOptions = State(initialValue: opts)
+            }
         } else {
             _title = State(initialValue: "")
             _type = State(initialValue: .freeText)
@@ -182,93 +192,79 @@ struct QuestionEditorView: View {
     private var conditionalTriggerSection: some View {
         Section {
             Toggle("依選項決定是否顯示", isOn: $hasConditionalTrigger)
+                .onChange(of: hasConditionalTrigger) { _, on in
+                    if on && triggerOptions.isEmpty {
+                        // 從其他問題收集所有選項作為預設
+                        triggerOptions = allQuestions
+                            .filter { $0.id != questionId }
+                            .flatMap { $0.options ?? [] }
+                        // 加入已有的自訂觸發值
+                        let existing = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                        for v in existing where !triggerOptions.contains(v) {
+                            triggerOptions.append(v)
+                        }
+                    }
+                }
 
             if hasConditionalTrigger {
-                let grouped = Dictionary(grouping: allAvailableOptions, by: { $0.questionTitle })
-                let sortedKeys = allQuestions.filter { $0.id != questionId }.compactMap { q in
-                    grouped[q.title] != nil ? q : nil
-                }
-
-                if sortedKeys.isEmpty {
-                    Text("目前沒有其他問題的選項可以作為條件")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                } else {
-                    ForEach(sortedKeys) { q in
-                        let opts = q.options ?? []
-                        if !opts.isEmpty {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text(q.title)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                ForEach(opts, id: \.self) { option in
-                                    let selected = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                                    let isChecked = selected.contains(option)
-                                    Button {
-                                        triggerParentId = q.id
-                                        toggleTriggerValue(option)
-                                    } label: {
-                                        HStack {
-                                            Image(systemName: isChecked ? "checkmark.square.fill" : "square")
-                                                .foregroundStyle(isChecked ? .blue : .secondary)
-                                            Text(option)
-                                                .foregroundStyle(.primary)
-                                        }
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // 自訂條件
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("自訂條件")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-
-                    // 顯示已加入的自訂值
-                    let selected = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-                    let allOptions = allAvailableOptions.map { $0.option }
-                    let customValues = selected.filter { !allOptions.contains($0) }
-
-                    ForEach(customValues, id: \.self) { value in
-                        HStack {
-                            Image(systemName: "checkmark.square.fill")
-                                .foregroundStyle(.blue)
-                            Text(value)
-                            Spacer()
-                            Button {
-                                toggleTriggerValue(value)
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.secondary)
-                            }
-                            .buttonStyle(.plain)
-                        }
-                    }
+                // 可編輯的選項列表
+                ForEach(triggerOptions.indices, id: \.self) { idx in
+                    let selected = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                    let isChecked = selected.contains(triggerOptions[idx])
 
                     HStack {
-                        TextField("輸入自訂條件", text: $customTriggerInput)
                         Button {
-                            let value = customTriggerInput.trimmingCharacters(in: .whitespaces)
-                            guard !value.isEmpty else { return }
-                            toggleTriggerValue(value)
-                            customTriggerInput = ""
+                            toggleTriggerValue(triggerOptions[idx])
                         } label: {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundStyle(.blue)
+                            Image(systemName: isChecked ? "checkmark.square.fill" : "square")
+                                .foregroundStyle(isChecked ? .blue : .secondary)
                         }
                         .buttonStyle(.plain)
-                        .disabled(customTriggerInput.trimmingCharacters(in: .whitespaces).isEmpty)
+
+                        TextField("選項", text: $triggerOptions[idx])
+                            .onChange(of: triggerOptions[idx]) { oldVal, newVal in
+                                // 如果這個選項被勾選了，同步更新 triggerValues
+                                var values = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                                if let i = values.firstIndex(of: oldVal) {
+                                    values[i] = newVal
+                                    triggerValues = values.joined(separator: ", ")
+                                }
+                            }
+
+                        Button {
+                            // 先取消勾選
+                            var values = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                            values.removeAll { $0 == triggerOptions[idx] }
+                            triggerValues = values.joined(separator: ", ")
+                            triggerOptions.remove(at: idx)
+                        } label: {
+                            Image(systemName: "minus.circle.fill")
+                                .foregroundStyle(.red.opacity(0.7))
+                        }
+                        .buttonStyle(.plain)
                     }
+                }
+
+                // 新增選項
+                HStack {
+                    TextField("新增條件選項", text: $customTriggerInput)
+                    Button {
+                        let value = customTriggerInput.trimmingCharacters(in: .whitespaces)
+                        guard !value.isEmpty else { return }
+                        triggerOptions.append(value)
+                        customTriggerInput = ""
+                    } label: {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundStyle(.blue)
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(customTriggerInput.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         } header: {
             Text("條件顯示")
         } footer: {
-            Text("勾選選項或輸入自訂條件，此問題只會在符合條件時才出現")
+            Text("勾選選項後，此問題只會在使用者選了該選項時才出現。可編輯或新增選項。")
         }
     }
 
