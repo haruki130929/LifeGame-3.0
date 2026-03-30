@@ -76,14 +76,18 @@ struct RingItem: Identifiable, Codable, Hashable {
 
 // MARK: - WeeklySchedule
 struct WeeklySchedule: Codable {
-    var scheduleByDay: [Int: [RingItem]] = [:]
+    var scheduleByDay: [String: [RingItem]] = [:]
 
     func items(for weekday: Weekday) -> [RingItem] {
-        scheduleByDay[weekday.rawValue] ?? []
+        scheduleByDay[String(weekday.rawValue)] ?? []
     }
 
     mutating func setItems(_ items: [RingItem], for weekday: Weekday) {
-        scheduleByDay[weekday.rawValue] = items
+        scheduleByDay[String(weekday.rawValue)] = items
+    }
+
+    init() {
+        scheduleByDay = [:]
     }
 }
 
