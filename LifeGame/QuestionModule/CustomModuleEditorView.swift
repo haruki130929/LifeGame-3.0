@@ -190,10 +190,11 @@ struct CustomModuleEditorView: View {
             )
         case .edit(let existing):
             module = existing
-            module.title = title
+            module.title = title.isEmpty ? nil : title
             module.icon = icon
-            module.questions = questions
+            module.questions = questions.isEmpty ? nil : questions
         }
+        debugLog("💾 儲存模組：\(module.displayTitle), questions: \(module.questions?.count ?? 0) 題")
         onSave(module)
     }
 }
