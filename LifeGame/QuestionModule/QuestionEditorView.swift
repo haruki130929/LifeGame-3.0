@@ -45,18 +45,19 @@ struct QuestionEditorView: View {
             _triggerValues = State(initialValue: q.conditionalTrigger?.triggerValues.joined(separator: ", ") ?? "")
             questionId = q.id
             // 初始化可編輯的觸發選項
-            if q.conditionalTrigger != nil {
-                let checked = q.conditionalTrigger?.triggerValues ?? []
-                // 優先用儲存的選項列表，沒有才從其他問題收集
+            if let trigger = q.conditionalTrigger {
+                let checked = trigger.triggerValues
                 let opts: [String]
                 if let saved = q.triggerOptionLabels, !saved.isEmpty {
                     opts = saved
-                } else {
-                    var collected = allQuestions.filter { $0.id != q.id }.flatMap { $0.options ?? [] }
+                } else if let parent = allQuestions.first(where: { $0.id == trigger.parentQuestionId }) {
+                    var collected = parent.options ?? []
                     for v in checked where !collected.contains(v) {
                         collected.append(v)
                     }
                     opts = collected
+                } else {
+                    opts = checked
                 }
                 _triggerOptionItems = State(initialValue: opts.map { TriggerOptionItem(label: $0, isChecked: checked.contains($0)) })
             }
@@ -203,65 +204,90 @@ struct QuestionEditorView: View {
     }
 
     private var conditionalTriggerSection: some View {
-        Section {
+        let otherQuestions = allQuestions.filter { $0.id != questionId && $0.options != nil && !($0.options ?? []).isEmpty }
+
+        return Section {
             Toggle("依選項決定是否顯示", isOn: $hasConditionalTrigger)
-                .onChange(of: hasConditionalTrigger) { _, on in
-                    if on && triggerOptionItems.isEmpty {
-                        // 第一次開啟：從其他問題收集選項
-                        let opts = allQuestions
-                            .filter { $0.id != questionId }
-                            .flatMap { $0.options ?? [] }
-                        triggerOptionItems = opts.map { TriggerOptionItem(label: $0, isChecked: false) }
-                    }
-                }
 
             if hasConditionalTrigger {
-                ForEach($triggerOptionItems) { $item in
-                    HStack {
-                        Button {
-                            item.isChecked.toggle()
-                            syncTriggerValues()
-                        } label: {
-                            Image(systemName: item.isChecked ? "checkmark.square.fill" : "square")
-                                .foregroundStyle(item.isChecked ? .blue : .secondary)
+                if otherQuestions.isEmpty {
+                    Text("目前沒有含選項的問題可以作為條件")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    // 第一步：選擇哪一個問題
+                    Picker("當哪一題", selection: $triggerParentId) {
+                        Text("選擇問題").tag(nil as UUID?)
+                        ForEach(otherQuestions) { q in
+                            Text(q.title).tag(q.id as UUID?)
                         }
-                        .buttonStyle(.plain)
+                    }
+                    .onChange(of: triggerParentId) { _, newId in
+                        guard let newId, let parent = allQuestions.first(where: { $0.id == newId }) else {
+                            triggerOptionItems = []
+                            return
+                        }
+                        let opts = parent.options ?? []
+                        let checked = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                        triggerOptionItems = opts.map { TriggerOptionItem(label: $0, isChecked: checked.contains($0)) }
+                    }
 
-                        TextField("選項", text: $item.label)
-                            .onChange(of: item.label) { _, _ in
-                                syncTriggerValues()
+                    // 第二步：勾選該問題的哪些選項
+                    if triggerParentId != nil && !triggerOptionItems.isEmpty {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("選了以下選項時才顯示：")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            ForEach($triggerOptionItems) { $item in
+                                HStack {
+                                    Button {
+                                        item.isChecked.toggle()
+                                        syncTriggerValues()
+                                    } label: {
+                                        Image(systemName: item.isChecked ? "checkmark.square.fill" : "square")
+                                            .foregroundStyle(item.isChecked ? .blue : .secondary)
+                                    }
+                                    .buttonStyle(.plain)
+
+                                    TextField("選項", text: $item.label)
+                                        .onChange(of: item.label) { _, _ in
+                                            syncTriggerValues()
+                                        }
+
+                                    Button {
+                                        triggerOptionItems.removeAll { $0.id == item.id }
+                                        syncTriggerValues()
+                                    } label: {
+                                        Image(systemName: "minus.circle.fill")
+                                            .foregroundStyle(.red.opacity(0.7))
+                                    }
+                                    .buttonStyle(.plain)
+                                }
                             }
 
-                        Button {
-                            triggerOptionItems.removeAll { $0.id == item.id }
-                            syncTriggerValues()
-                        } label: {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundStyle(.red.opacity(0.7))
+                            HStack {
+                                TextField("新增條件選項", text: $customTriggerInput)
+                                Button {
+                                    let value = customTriggerInput.trimmingCharacters(in: .whitespaces)
+                                    guard !value.isEmpty else { return }
+                                    triggerOptionItems.append(TriggerOptionItem(label: value, isChecked: false))
+                                    customTriggerInput = ""
+                                } label: {
+                                    Image(systemName: "plus.circle.fill")
+                                        .foregroundStyle(.blue)
+                                }
+                                .buttonStyle(.plain)
+                                .disabled(customTriggerInput.trimmingCharacters(in: .whitespaces).isEmpty)
+                            }
                         }
-                        .buttonStyle(.plain)
                     }
-                }
-
-                HStack {
-                    TextField("新增條件選項", text: $customTriggerInput)
-                    Button {
-                        let value = customTriggerInput.trimmingCharacters(in: .whitespaces)
-                        guard !value.isEmpty else { return }
-                        triggerOptionItems.append(TriggerOptionItem(label: value, isChecked: false))
-                        customTriggerInput = ""
-                    } label: {
-                        Image(systemName: "plus.circle.fill")
-                            .foregroundStyle(.blue)
-                    }
-                    .buttonStyle(.plain)
-                    .disabled(customTriggerInput.trimmingCharacters(in: .whitespaces).isEmpty)
                 }
             }
         } header: {
             Text("條件顯示")
         } footer: {
-            Text("勾選選項後，此問題只會在使用者選了該選項時才出現。可編輯或新增選項。")
+            Text("先選擇哪一個問題，再勾選觸發的選項。此問題只會在使用者選了該選項時才出現。")
         }
     }
 
