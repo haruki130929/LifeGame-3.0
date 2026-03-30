@@ -8,8 +8,11 @@ final class WeeklyScheduleStore: ObservableObject {
     private let lastLoadedDateKey = "schedule_last_loaded_date"
 
     @Published var schedule: WeeklySchedule = WeeklySchedule()
+    private var hasLoaded = false
 
-    init() {
+    func loadIfNeeded() {
+        guard !hasLoaded else { return }
+        hasLoaded = true
         if let saved: WeeklySchedule = StorageManager.load(WeeklySchedule.self, forKey: storageKey) {
             schedule = saved
         }
@@ -18,7 +21,8 @@ final class WeeklyScheduleStore: ObservableObject {
     // MARK: - CRUD
 
     func items(for weekday: Weekday) -> [RingItem] {
-        schedule.items(for: weekday)
+        loadIfNeeded()
+        return schedule.items(for: weekday)
     }
 
     func addItem(_ item: RingItem, for weekday: Weekday) {
@@ -58,6 +62,7 @@ final class WeeklyScheduleStore: ObservableObject {
     /// - Returns: true 表示有載入新課表
     @discardableResult
     func applyScheduleIfNeeded(to plan: inout TomorrowRingPlan) -> Bool {
+        loadIfNeeded()
         let todayKey = dateKeyString()
         let lastLoaded: String? = StorageManager.load(String.self, forKey: lastLoadedDateKey)
 
