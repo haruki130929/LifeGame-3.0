@@ -72,7 +72,9 @@ final class QuestionModuleStore: ObservableObject {
 
     func updateCustomModule(_ module: DailyLogModule) {
         guard let i = modules.firstIndex(where: { $0.id == module.id }) else { return }
-        modules[i] = module
+        var updated = modules
+        updated[i] = module
+        modules = updated
     }
 
     func removeCustomModule(id: UUID) {
@@ -87,9 +89,11 @@ final class QuestionModuleStore: ObservableObject {
     /// 更新內建模組（允許修改 title、icon、questions）
     func updateBuiltInModule(_ module: DailyLogModule) {
         guard let idx = modules.firstIndex(where: { $0.id == module.id }) else { return }
-        modules[idx].title = module.title
-        modules[idx].icon = module.icon
-        modules[idx].questions = module.questions
+        var updated = modules
+        updated[idx].title = module.title
+        updated[idx].icon = module.icon
+        updated[idx].questions = module.questions
+        modules = updated
     }
 
     // MARK: - Persistence
