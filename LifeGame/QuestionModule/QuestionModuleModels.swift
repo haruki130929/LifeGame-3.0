@@ -58,60 +58,60 @@ enum ModuleKind: String, Codable, CaseIterable, Identifiable {
         allCases.filter { $0.isBuiltIn }
     }
 
-    /// 內建模組的預設問題
+    /// 內建模組的預設問題（與每日紀錄硬編碼畫面同步）
     var defaultQuestions: [QuestionDefinition] {
         switch self {
         case .basic:
             return [
+                QuestionDefinition(type: .singleSelect, title: "天氣", options: ["晴", "雨"]),
                 QuestionDefinition(type: .timePicker, title: "起床時間"),
                 QuestionDefinition(type: .timePicker, title: "昨晚上床時間"),
-                QuestionDefinition(type: .singleSelect, title: "天氣", options: ["晴", "多雲", "陰", "小雨", "大雨", "雷雨", "雪"]),
             ]
         case .moodMental:
             return [
-                QuestionDefinition(type: .slider, title: "整體情緒分數", rangeMin: 0, rangeMax: 10),
-                QuestionDefinition(type: .slider, title: "焦慮程度", rangeMin: 0, rangeMax: 10),
+                QuestionDefinition(type: .slider, title: "整體情緒分數", rangeMin: 1, rangeMax: 10),
+                QuestionDefinition(type: .slider, title: "焦慮程度", rangeMin: 1, rangeMax: 10),
             ]
         case .moodChange:
             return [
-                QuestionDefinition(type: .singleSelect, title: "狀態", options: ["穩定", "略有波動", "明顯波動", "劇烈波動"]),
-                QuestionDefinition(type: .multiSelect, title: "原因", options: ["課業壓力", "人際關係", "家庭", "身體不適", "睡眠不足", "其他"]),
+                QuestionDefinition(type: .singleSelect, title: "狀態（單選）", options: ["穩定", "變高"]),
+                QuestionDefinition(type: .multiSelect, title: "原因（可複選）", options: ["焦慮", "突發狀況", "其他"]),
                 QuestionDefinition(type: .freeText, title: "持續時間"),
-                QuestionDefinition(type: .multiSelect, title: "穩定方式", options: ["深呼吸", "散步", "聽音樂", "找人聊", "寫日記", "運動", "其他"]),
+                QuestionDefinition(type: .multiSelect, title: "用什麼方式穩定下來（可複選）", options: ["深呼吸", "聽音樂", "活動身體", "其他"]),
             ]
         case .anxiety:
             return [
-                QuestionDefinition(type: .singleSelect, title: "程度", options: ["無", "輕微", "中等", "嚴重"]),
-                QuestionDefinition(type: .multiSelect, title: "原因", options: ["課業", "考試", "人際", "未來擔憂", "家庭", "其他"]),
+                QuestionDefinition(type: .singleSelect, title: "程度（單選）", options: ["無", "輕微", "中等", "嚴重"]),
+                QuestionDefinition(type: .multiSelect, title: "原因（可複選）", options: ["環境", "課業", "突發狀況", "其他"]),
                 QuestionDefinition(type: .freeText, title: "持續時間"),
-                QuestionDefinition(type: .multiSelect, title: "焦慮表現", options: ["心跳加速", "手抖", "胃不舒服", "注意力渙散", "呼吸急促", "其他"]),
-                QuestionDefinition(type: .multiSelect, title: "穩定方式", options: ["深呼吸", "轉移注意", "找人聊", "運動", "其他"]),
+                QuestionDefinition(type: .multiSelect, title: "焦慮表現（可複選）", options: ["心跳快", "顫抖", "冒汗", "其他"]),
+                QuestionDefinition(type: .multiSelect, title: "用什麼方式穩定下來（可複選）", options: ["深呼吸", "聽音樂", "活動身體", "其他"]),
             ]
         case .impulse:
             return [
-                QuestionDefinition(type: .singleSelect, title: "是否有衝動行為", options: ["無", "有"]),
-                QuestionDefinition(type: .multiSelect, title: "衝動類型", options: ["言語衝動", "情緒爆發", "衝動消費", "暴飲暴食", "其他"]),
+                QuestionDefinition(type: .multiSelect, title: "程度（可複選）", options: ["輕微", "中等", "嚴重"]),
+                QuestionDefinition(type: .multiSelect, title: "衝動行為（可複選）", options: ["上網", "做喜歡的事", "衝動購物", "熬夜", "其他"]),
             ]
         case .sleep:
             return [
-                QuestionDefinition(type: .singleSelect, title: "入睡所需時間", options: ["少於 15 分鐘", "15-30 分鐘", "30-60 分鐘", "超過 1 小時"]),
+                QuestionDefinition(type: .singleSelect, title: "入睡所需時間（單選）", options: ["30分鐘以內", "30分鐘～1小時內", "超過1小時以上"]),
                 QuestionDefinition(type: .numberInput, title: "睡眠時長（小時）", rangeMin: 0, rangeMax: 16),
-                QuestionDefinition(type: .singleSelect, title: "睡眠品質", options: ["很好", "普通", "不太好", "很差"]),
+                QuestionDefinition(type: .singleSelect, title: "睡眠品質（單選）", options: ["不錯（起床之後很有動力做事，情緒穩定，不太感到疲勞）", "普通（起床之後可以做事）", "不好（難以起床做事或容易感到疲勞）"]),
             ]
         case .studyFocus:
             return [
-                QuestionDefinition(type: .singleSelect, title: "是否完成今日待辦事項", options: ["全部完成", "部分完成", "沒有完成"]),
-                QuestionDefinition(type: .singleSelect, title: "今日專注度", options: ["很好", "普通", "不太好", "很差"]),
-                QuestionDefinition(type: .multiSelect, title: "影響專注的原因", options: ["手機", "噪音", "疲勞", "心情", "其他"]),
-                QuestionDefinition(type: .singleSelect, title: "有未完成事項嗎", options: ["沒有", "有"]),
-                QuestionDefinition(type: .multiSelect, title: "遇到的困難", options: ["不理解內容", "缺乏動力", "時間不夠", "太難", "其他"]),
+                QuestionDefinition(type: .singleSelect, title: "是否完成今日待辦事項（單選）", options: ["是，全部完成", "否，全部沒完成", "部分完成"]),
+                QuestionDefinition(type: .singleSelect, title: "今日專注度（單選）", options: ["不錯（可以順利做完該做的事，並有餘力做想做的事）", "普通（可以順利做完該做的事）", "容易分心（勉強做完該做的事）", "無法專注"]),
+                QuestionDefinition(type: .multiSelect, title: "可能原因（可複選）", options: ["疲勞", "一直想想做的事", "其他"]),
+                QuestionDefinition(type: .singleSelect, title: "今日未完成事項（單選）", options: ["無", "有"]),
+                QuestionDefinition(type: .multiSelect, title: "遇到的困難（可複選）", options: ["時間不夠", "忘記作業內容", "不會做", "無法專注", "疲勞", "做想做的事", "其他"]),
             ]
         case .body:
             return [
-                QuestionDefinition(type: .slider, title: "今日疲勞程度", rangeMin: 0, rangeMax: 10),
-                QuestionDefinition(type: .multiSelect, title: "不舒服的地方", options: ["頭", "眼睛", "肩頸", "背", "腰", "胃", "四肢", "無"]),
-                QuestionDefinition(type: .singleSelect, title: "是否注意到身體狀況", options: ["有", "沒有"]),
-                QuestionDefinition(type: .multiSelect, title: "原因", options: ["運動", "久坐", "壓力", "睡眠不足", "飲食", "其他"]),
+                QuestionDefinition(type: .slider, title: "今日疲勞程度", rangeMin: 1, rangeMax: 10),
+                QuestionDefinition(type: .multiSelect, title: "不舒服的地方（可複選）", options: ["頭痛", "肚子痛", "肌肉緊繃", "經痛", "眼睛乾澀"]),
+                QuestionDefinition(type: .singleSelect, title: "是否注意到身體的狀況（單選）", options: ["有，很快就注意到", "有，經過一段時間才注意到", "沒有"]),
+                QuestionDefinition(type: .multiSelect, title: "因為（可複選）", options: ["手受傷", "肢體僵硬", "無法開口", "疲勞", "拔頭髮", "其他"]),
             ]
         case .observation:
             return [
