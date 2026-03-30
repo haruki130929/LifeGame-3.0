@@ -29,9 +29,9 @@ struct CustomModuleEditorView: View {
             _questions = State(initialValue: [])
             moduleId = UUID()
         case .edit(let module):
-            _title = State(initialValue: module.title ?? "")
-            _icon = State(initialValue: module.icon ?? "square.grid.2x2")
-            _questions = State(initialValue: module.questions ?? [])
+            _title = State(initialValue: module.title ?? module.kind.defaultTitle)
+            _icon = State(initialValue: module.icon ?? module.kind.defaultIcon)
+            _questions = State(initialValue: module.displayQuestions)
             moduleId = module.id
         }
     }

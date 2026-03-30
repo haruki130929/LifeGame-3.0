@@ -85,16 +85,10 @@ struct QuestionModuleSettingsView: View {
                         .frame(width: 24)
                     VStack(alignment: .leading, spacing: 2) {
                         Text(module.displayTitle)
-                        let qCount = module.questions?.count ?? 0
-                        if qCount > 0 {
-                            Text("\(qCount) 個問題")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        } else if module.kind.isBuiltIn {
-                            Text("內建模組")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
+                        let qCount = module.displayQuestions.count
+                        Text("\(qCount) 個問題")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
