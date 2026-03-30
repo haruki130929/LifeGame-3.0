@@ -6,6 +6,7 @@ struct QuestionEditorView: View {
     let onSave: (QuestionDefinition) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var fab: FabStore
 
     @State private var title: String
     @State private var type: QuestionType
@@ -81,6 +82,8 @@ struct QuestionEditorView: View {
         }
         .navigationTitle(question == nil ? "新增問題" : "編輯問題")
         .navigationBarTitleDisplayMode(.inline)
+        .onAppear { fab.isHidden = true }
+        .onDisappear { fab.isHidden = false }
         .toolbar {
             if question == nil {
                 ToolbarItem(placement: .cancellationAction) {
