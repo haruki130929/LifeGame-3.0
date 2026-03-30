@@ -56,6 +56,8 @@ struct HomeRootView: View {
                     MandalaChartScreen()
                 case .practiceDiary:
                     PracticeDiaryListView()
+                case .questionModule:
+                    QuestionModuleSettingsView()
                 }
             }
         }
@@ -108,6 +110,8 @@ struct HomeRootView: View {
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.mandala) }
             case .addPracticeDiary, .practiceDiaryEditMode:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.practiceDiary) }
+            case .addQuestionModule, .questionModuleEditMode:
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.questionModule) }
             }
         }
         .onChange(of: navigationPath) {

@@ -99,6 +99,8 @@ struct QuickModeShellView: View {
                     MandalaChartScreen()
                 case .practiceDiary:
                     PracticeDiaryListView()
+                case .questionModule:
+                    QuestionModuleSettingsView()
                 }
             }
         }
