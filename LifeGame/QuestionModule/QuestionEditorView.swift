@@ -169,53 +169,54 @@ struct QuestionEditorView: View {
 
     // MARK: - 條件觸發
 
+    /// 收集其他問題裡所有的選項，以 (問題標題, 選項, 問題ID) 分組
+    private var allAvailableOptions: [(questionTitle: String, questionId: UUID, option: String)] {
+        allQuestions
+            .filter { $0.id != questionId }
+            .flatMap { q in
+                (q.options ?? []).map { (q.title, q.id, $0) }
+            }
+    }
+
     private var conditionalTriggerSection: some View {
         Section {
-            Toggle("依前題答案決定是否顯示", isOn: $hasConditionalTrigger)
+            Toggle("依選項決定是否顯示", isOn: $hasConditionalTrigger)
 
             if hasConditionalTrigger {
-                let otherQuestions = allQuestions.filter { $0.id != questionId }
+                let grouped = Dictionary(grouping: allAvailableOptions, by: { $0.questionTitle })
+                let sortedKeys = allQuestions.filter { $0.id != questionId }.compactMap { q in
+                    grouped[q.title] != nil ? q : nil
+                }
 
-                if otherQuestions.isEmpty {
-                    Text("目前沒有其他問題可以作為條件")
+                if sortedKeys.isEmpty {
+                    Text("目前沒有其他問題的選項可以作為條件")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 } else {
-                    Picker("當哪一題", selection: $triggerParentId) {
-                        Text("選擇問題").tag(nil as UUID?)
-                        ForEach(otherQuestions) { q in
-                            Text(q.title).tag(q.id as UUID?)
-                        }
-                    }
-
-                    if let parentId = triggerParentId,
-                       let parent = allQuestions.first(where: { $0.id == parentId }),
-                       let parentOptions = parent.options, !parentOptions.isEmpty {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("答案是以下選項時才顯示：")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            ForEach(parentOptions, id: \.self) { option in
-                                let selected = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                                Button {
-                                    toggleTriggerValue(option)
-                                } label: {
-                                    HStack {
-                                        Image(systemName: selected.contains(option) ? "checkmark.square.fill" : "square")
-                                            .foregroundStyle(selected.contains(option) ? .blue : .secondary)
-                                        Text(option)
-                                            .foregroundStyle(.primary)
+                    ForEach(sortedKeys) { q in
+                        let opts = q.options ?? []
+                        if !opts.isEmpty {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(q.title)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                                ForEach(opts, id: \.self) { option in
+                                    let selected = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                                    let isChecked = selected.contains(option)
+                                    Button {
+                                        triggerParentId = q.id
+                                        toggleTriggerValue(option)
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: isChecked ? "checkmark.square.fill" : "square")
+                                                .foregroundStyle(isChecked ? .blue : .secondary)
+                                            Text(option)
+                                                .foregroundStyle(.primary)
+                                        }
                                     }
+                                    .buttonStyle(.plain)
                                 }
-                                .buttonStyle(.plain)
                             }
-                        }
-                    } else if triggerParentId != nil {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("當答案數值等於（逗號分隔多個值）：")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            TextField("例如：5, 8", text: $triggerValues)
                         }
                     }
                 }
@@ -223,7 +224,7 @@ struct QuestionEditorView: View {
         } header: {
             Text("條件顯示")
         } footer: {
-            Text("開啟後，此問題只會在前一題選了指定答案時才出現")
+            Text("勾選選項後，此問題只會在使用者選了該選項時才出現")
         }
     }
 
