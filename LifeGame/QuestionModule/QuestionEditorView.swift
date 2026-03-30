@@ -17,6 +17,7 @@ struct QuestionEditorView: View {
     @State private var hasConditionalTrigger: Bool
     @State private var triggerParentId: UUID?
     @State private var triggerValues: String
+    @State private var customTriggerInput: String = ""
 
     private let questionId: UUID
 
@@ -220,11 +221,54 @@ struct QuestionEditorView: View {
                         }
                     }
                 }
+
+                // 自訂條件
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("自訂條件")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+
+                    // 顯示已加入的自訂值
+                    let selected = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                    let allOptions = allAvailableOptions.map { $0.option }
+                    let customValues = selected.filter { !allOptions.contains($0) }
+
+                    ForEach(customValues, id: \.self) { value in
+                        HStack {
+                            Image(systemName: "checkmark.square.fill")
+                                .foregroundStyle(.blue)
+                            Text(value)
+                            Spacer()
+                            Button {
+                                toggleTriggerValue(value)
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+
+                    HStack {
+                        TextField("輸入自訂條件", text: $customTriggerInput)
+                        Button {
+                            let value = customTriggerInput.trimmingCharacters(in: .whitespaces)
+                            guard !value.isEmpty else { return }
+                            toggleTriggerValue(value)
+                            customTriggerInput = ""
+                        } label: {
+                            Image(systemName: "plus.circle.fill")
+                                .foregroundStyle(.blue)
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(customTriggerInput.trimmingCharacters(in: .whitespaces).isEmpty)
+                    }
+                }
             }
         } header: {
             Text("條件顯示")
         } footer: {
-            Text("勾選選項後，此問題只會在使用者選了該選項時才出現")
+            Text("勾選選項或輸入自訂條件，此問題只會在符合條件時才出現")
         }
     }
 
