@@ -60,26 +60,43 @@ struct QuestionModuleSettingsView: View {
     // MARK: - 模組列
 
     private func moduleRow(_ module: DailyLogModule) -> some View {
-        NavigationLink {
-            CustomModuleEditorView(mode: .edit(module)) { updated in
-                if module.kind.isBuiltIn {
-                    moduleStore.updateBuiltInModule(updated)
-                } else {
-                    moduleStore.updateCustomModule(updated)
+        HStack(spacing: 12) {
+            // 開關
+            Toggle("", isOn: Binding(
+                get: { module.isEnabled },
+                set: { _ in moduleStore.toggle(id: module.id) }
+            ))
+            .labelsHidden()
+            .fixedSize()
+
+            // 模組資訊（點擊進入編輯）
+            NavigationLink {
+                CustomModuleEditorView(mode: .edit(module)) { updated in
+                    if module.kind.isBuiltIn {
+                        moduleStore.updateBuiltInModule(updated)
+                    } else {
+                        moduleStore.updateCustomModule(updated)
+                    }
                 }
-            }
-        } label: {
-            HStack {
-                Image(systemName: module.displayIcon)
-                    .foregroundStyle(module.kind.isBuiltIn ? .blue : .orange)
-                    .frame(width: 24)
-                Text(module.displayTitle)
-                Spacer()
-                Toggle("", isOn: Binding(
-                    get: { module.isEnabled },
-                    set: { _ in moduleStore.toggle(id: module.id) }
-                ))
-                .labelsHidden()
+            } label: {
+                HStack {
+                    Image(systemName: module.displayIcon)
+                        .foregroundStyle(module.kind.isBuiltIn ? .blue : .orange)
+                        .frame(width: 24)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(module.displayTitle)
+                        let qCount = module.questions?.count ?? 0
+                        if qCount > 0 {
+                            Text("\(qCount) 個問題")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else if module.kind.isBuiltIn {
+                            Text("內建模組")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
             }
         }
         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
