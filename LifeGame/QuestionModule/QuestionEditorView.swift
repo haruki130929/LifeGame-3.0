@@ -285,12 +285,18 @@ struct QuestionEditorView: View {
         let filteredGroups = nestedGroups.filter { !$0.label.trimmingCharacters(in: .whitespaces).isEmpty }
 
         var trigger: ConditionalTrigger? = nil
-        if hasConditionalTrigger, let parentId = triggerParentId {
+        if hasConditionalTrigger {
             let values = triggerValues
                 .split(separator: ",")
                 .map { $0.trimmingCharacters(in: .whitespaces) }
                 .filter { !$0.isEmpty }
-            trigger = ConditionalTrigger(parentQuestionId: parentId, triggerValues: values)
+            if !values.isEmpty {
+                // 嘗試找到包含被勾選選項的父問題
+                let parentId = triggerParentId ?? allQuestions.first(where: { q in
+                    q.id != questionId && (q.options ?? []).contains(where: { values.contains($0) })
+                })?.id ?? questionId
+                trigger = ConditionalTrigger(parentQuestionId: parentId, triggerValues: values)
+            }
         }
 
         let q = QuestionDefinition(
