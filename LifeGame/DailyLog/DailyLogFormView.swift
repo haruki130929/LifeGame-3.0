@@ -15,27 +15,34 @@ struct DailyLogFormView: View {
     @ViewBuilder
     private func moduleSection(for module: DailyLogModule, number: Int) -> some View {
         let header = "\(number). \(module.displayTitle)"
-        switch module.kind {
-        case .basic:
-            BasicSectionView(entry: $entry, header: header)
-        case .moodMental:
-            MoodMentalSectionView(entry: $entry, header: header)
-        case .moodChange:
-            MoodChangeSectionView(entry: $entry, header: header)
-        case .anxiety:
-            AnxietySectionView(entry: $entry, header: header)
-        case .impulse:
-            ImpulseSectionView(entry: $entry, header: header)
-        case .sleep:
-            SleepSectionView(entry: $entry, header: header)
-        case .studyFocus:
-            StudyFocusSectionView(entry: $entry, header: header)
-        case .body:
-            BodySectionView(entry: $entry, header: header)
-        case .observation:
-            ObservationSectionView(entry: $entry, header: header)
-        case .custom:
+
+        // 如果使用者有自訂問題，優先用動態渲染
+        if module.questions != nil && !(module.questions ?? []).isEmpty {
             CustomModuleSectionView(module: module, answers: $entry.customAnswers, header: header)
+        } else {
+            // 沒有自訂問題，用內建的硬編碼畫面
+            switch module.kind {
+            case .basic:
+                BasicSectionView(entry: $entry, header: header)
+            case .moodMental:
+                MoodMentalSectionView(entry: $entry, header: header)
+            case .moodChange:
+                MoodChangeSectionView(entry: $entry, header: header)
+            case .anxiety:
+                AnxietySectionView(entry: $entry, header: header)
+            case .impulse:
+                ImpulseSectionView(entry: $entry, header: header)
+            case .sleep:
+                SleepSectionView(entry: $entry, header: header)
+            case .studyFocus:
+                StudyFocusSectionView(entry: $entry, header: header)
+            case .body:
+                BodySectionView(entry: $entry, header: header)
+            case .observation:
+                ObservationSectionView(entry: $entry, header: header)
+            case .custom:
+                CustomModuleSectionView(module: module, answers: $entry.customAnswers, header: header)
+            }
         }
     }
 }
