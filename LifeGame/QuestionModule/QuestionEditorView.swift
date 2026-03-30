@@ -18,7 +18,13 @@ struct QuestionEditorView: View {
     @State private var triggerParentId: UUID?
     @State private var triggerValues: String
     @State private var customTriggerInput: String = ""
-    @State private var triggerOptions: [String] = []  // 可編輯的觸發選項列表
+    @State private var triggerOptionItems: [TriggerOptionItem] = []
+
+    struct TriggerOptionItem: Identifiable {
+        let id = UUID()
+        var label: String
+        var isChecked: Bool
+    }
 
     private let questionId: UUID
 
@@ -41,11 +47,11 @@ struct QuestionEditorView: View {
             // 初始化可編輯的觸發選項
             if q.conditionalTrigger != nil {
                 var opts = allQuestions.filter { $0.id != q.id }.flatMap { $0.options ?? [] }
-                let existing = q.conditionalTrigger?.triggerValues ?? []
-                for v in existing where !opts.contains(v) {
+                let checked = q.conditionalTrigger?.triggerValues ?? []
+                for v in checked where !opts.contains(v) {
                     opts.append(v)
                 }
-                _triggerOptions = State(initialValue: opts)
+                _triggerOptionItems = State(initialValue: opts.map { TriggerOptionItem(label: $0, isChecked: checked.contains($0)) })
             }
         } else {
             _title = State(initialValue: "")
@@ -193,50 +199,39 @@ struct QuestionEditorView: View {
         Section {
             Toggle("依選項決定是否顯示", isOn: $hasConditionalTrigger)
                 .onChange(of: hasConditionalTrigger) { _, on in
-                    if on && triggerOptions.isEmpty {
-                        // 從其他問題收集所有選項作為預設
-                        triggerOptions = allQuestions
+                    if on && triggerOptionItems.isEmpty {
+                        let opts = allQuestions
                             .filter { $0.id != questionId }
                             .flatMap { $0.options ?? [] }
-                        // 加入已有的自訂觸發值
-                        let existing = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-                        for v in existing where !triggerOptions.contains(v) {
-                            triggerOptions.append(v)
+                        let checked = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                        var items = opts.map { TriggerOptionItem(label: $0, isChecked: checked.contains($0)) }
+                        for v in checked where !opts.contains(v) {
+                            items.append(TriggerOptionItem(label: v, isChecked: true))
                         }
+                        triggerOptionItems = items
                     }
                 }
 
             if hasConditionalTrigger {
-                // 可編輯的選項列表
-                ForEach(triggerOptions.indices, id: \.self) { idx in
-                    let selected = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
-                    let isChecked = selected.contains(triggerOptions[idx])
-
+                ForEach($triggerOptionItems) { $item in
                     HStack {
                         Button {
-                            toggleTriggerValue(triggerOptions[idx])
+                            item.isChecked.toggle()
+                            syncTriggerValues()
                         } label: {
-                            Image(systemName: isChecked ? "checkmark.square.fill" : "square")
-                                .foregroundStyle(isChecked ? .blue : .secondary)
+                            Image(systemName: item.isChecked ? "checkmark.square.fill" : "square")
+                                .foregroundStyle(item.isChecked ? .blue : .secondary)
                         }
                         .buttonStyle(.plain)
 
-                        TextField("選項", text: $triggerOptions[idx])
-                            .onChange(of: triggerOptions[idx]) { oldVal, newVal in
-                                // 如果這個選項被勾選了，同步更新 triggerValues
-                                var values = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-                                if let i = values.firstIndex(of: oldVal) {
-                                    values[i] = newVal
-                                    triggerValues = values.joined(separator: ", ")
-                                }
+                        TextField("選項", text: $item.label)
+                            .onChange(of: item.label) { _, _ in
+                                syncTriggerValues()
                             }
 
                         Button {
-                            // 先取消勾選
-                            var values = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-                            values.removeAll { $0 == triggerOptions[idx] }
-                            triggerValues = values.joined(separator: ", ")
-                            triggerOptions.remove(at: idx)
+                            triggerOptionItems.removeAll { $0.id == item.id }
+                            syncTriggerValues()
                         } label: {
                             Image(systemName: "minus.circle.fill")
                                 .foregroundStyle(.red.opacity(0.7))
@@ -245,13 +240,12 @@ struct QuestionEditorView: View {
                     }
                 }
 
-                // 新增選項
                 HStack {
                     TextField("新增條件選項", text: $customTriggerInput)
                     Button {
                         let value = customTriggerInput.trimmingCharacters(in: .whitespaces)
                         guard !value.isEmpty else { return }
-                        triggerOptions.append(value)
+                        triggerOptionItems.append(TriggerOptionItem(label: value, isChecked: false))
                         customTriggerInput = ""
                     } label: {
                         Image(systemName: "plus.circle.fill")
@@ -268,14 +262,12 @@ struct QuestionEditorView: View {
         }
     }
 
-    private func toggleTriggerValue(_ value: String) {
-        var values = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-        if values.contains(value) {
-            values.removeAll { $0 == value }
-        } else {
-            values.append(value)
-        }
-        triggerValues = values.joined(separator: ", ")
+    /// 從 triggerOptionItems 同步到 triggerValues 字串
+    private func syncTriggerValues() {
+        triggerValues = triggerOptionItems
+            .filter { $0.isChecked && !$0.label.trimmingCharacters(in: .whitespaces).isEmpty }
+            .map { $0.label }
+            .joined(separator: ", ")
     }
 
     // MARK: - Save
