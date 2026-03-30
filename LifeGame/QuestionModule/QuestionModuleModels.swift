@@ -216,6 +216,9 @@ struct QuestionDefinition: Identifiable, Codable, Equatable {
     /// 條件觸發：當父問題的答案符合時才顯示
     var conditionalTrigger: ConditionalTrigger?
 
+    /// 條件顯示的選項列表（儲存使用者編輯後的完整列表）
+    var triggerOptionLabels: [String]?
+
     /// 子問題（條件式）
     var subQuestions: [QuestionDefinition]?
 

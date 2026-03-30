@@ -46,10 +46,17 @@ struct QuestionEditorView: View {
             questionId = q.id
             // 初始化可編輯的觸發選項
             if q.conditionalTrigger != nil {
-                var opts = allQuestions.filter { $0.id != q.id }.flatMap { $0.options ?? [] }
                 let checked = q.conditionalTrigger?.triggerValues ?? []
-                for v in checked where !opts.contains(v) {
-                    opts.append(v)
+                // 優先用儲存的選項列表，沒有才從其他問題收集
+                let opts: [String]
+                if let saved = q.triggerOptionLabels, !saved.isEmpty {
+                    opts = saved
+                } else {
+                    var collected = allQuestions.filter { $0.id != q.id }.flatMap { $0.options ?? [] }
+                    for v in checked where !collected.contains(v) {
+                        collected.append(v)
+                    }
+                    opts = collected
                 }
                 _triggerOptionItems = State(initialValue: opts.map { TriggerOptionItem(label: $0, isChecked: checked.contains($0)) })
             }
@@ -200,15 +207,11 @@ struct QuestionEditorView: View {
             Toggle("依選項決定是否顯示", isOn: $hasConditionalTrigger)
                 .onChange(of: hasConditionalTrigger) { _, on in
                     if on && triggerOptionItems.isEmpty {
+                        // 第一次開啟：從其他問題收集選項
                         let opts = allQuestions
                             .filter { $0.id != questionId }
                             .flatMap { $0.options ?? [] }
-                        let checked = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
-                        var items = opts.map { TriggerOptionItem(label: $0, isChecked: checked.contains($0)) }
-                        for v in checked where !opts.contains(v) {
-                            items.append(TriggerOptionItem(label: v, isChecked: true))
-                        }
-                        triggerOptionItems = items
+                        triggerOptionItems = opts.map { TriggerOptionItem(label: $0, isChecked: false) }
                     }
                 }
 
@@ -291,6 +294,11 @@ struct QuestionEditorView: View {
             }
         }
 
+        // 儲存觸發選項列表（使用者編輯過的）
+        let savedTriggerLabels: [String]? = hasConditionalTrigger
+            ? triggerOptionItems.map { $0.label }.filter { !$0.trimmingCharacters(in: .whitespaces).isEmpty }
+            : nil
+
         let q = QuestionDefinition(
             id: questionId,
             type: type,
@@ -299,6 +307,7 @@ struct QuestionEditorView: View {
             rangeMin: (type == .slider || type == .numberInput) ? rangeMin : nil,
             rangeMax: (type == .slider || type == .numberInput) ? rangeMax : nil,
             conditionalTrigger: trigger,
+            triggerOptionLabels: savedTriggerLabels,
             subQuestions: nil,
             nestedGroups: filteredGroups.isEmpty ? nil : filteredGroups
         )
