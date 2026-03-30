@@ -167,21 +167,66 @@ struct QuestionEditorView: View {
     // MARK: - 條件觸發
 
     private var conditionalTriggerSection: some View {
-        Section("條件觸發") {
-            Toggle("僅在特定條件下顯示", isOn: $hasConditionalTrigger)
+        Section {
+            Toggle("依前題答案決定是否顯示", isOn: $hasConditionalTrigger)
 
             if hasConditionalTrigger {
-                // 選擇父問題
-                Picker("父問題", selection: $triggerParentId) {
-                    Text("請選擇").tag(nil as UUID?)
-                    ForEach(allQuestions.filter { $0.id != questionId }) { q in
-                        Text(q.title).tag(q.id as UUID?)
+                let otherQuestions = allQuestions.filter { $0.id != questionId }
+
+                if otherQuestions.isEmpty {
+                    Text("目前沒有其他問題可以作為條件")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Picker("當哪一題", selection: $triggerParentId) {
+                        Text("選擇問題").tag(nil as UUID?)
+                        ForEach(otherQuestions) { q in
+                            Text(q.title).tag(q.id as UUID?)
+                        }
+                    }
+
+                    if let parentId = triggerParentId,
+                       let parent = allQuestions.first(where: { $0.id == parentId }),
+                       let parentOptions = parent.options, !parentOptions.isEmpty {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("答案是以下選項時才顯示：")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            ForEach(parentOptions, id: \.self) { option in
+                                let selected = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+                                Button {
+                                    toggleTriggerValue(option)
+                                } label: {
+                                    HStack {
+                                        Image(systemName: selected.contains(option) ? "checkmark.square.fill" : "square")
+                                            .foregroundStyle(selected.contains(option) ? .blue : .secondary)
+                                        Text(option)
+                                            .foregroundStyle(.primary)
+                                    }
+                                }
+                                .buttonStyle(.plain)
+                            }
+                        }
+                    } else if triggerParentId != nil {
+                        TextField("答案包含（逗號分隔）", text: $triggerValues)
                     }
                 }
-
-                TextField("觸發值（逗號分隔）", text: $triggerValues)
             }
+        } header: {
+            Text("條件顯示")
+        } footer: {
+            Text("開啟後，此問題只會在前一題選了指定答案時才出現")
         }
+    }
+
+    private func toggleTriggerValue(_ value: String) {
+        var values = triggerValues.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+        if values.contains(value) {
+            values.removeAll { $0 == value }
+        } else {
+            values.append(value)
+        }
+        triggerValues = values.joined(separator: ", ")
     }
 
     // MARK: - Save
