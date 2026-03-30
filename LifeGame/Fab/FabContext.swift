@@ -18,6 +18,7 @@ enum FeatureID: String, Hashable, Identifiable {
     case mandala
     case practiceDiary
     case questionModule
+    case moduleEditor
 }
 
 enum FabContext {

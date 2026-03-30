@@ -101,6 +101,8 @@ struct QuickModeShellView: View {
                     PracticeDiaryListView()
                 case .questionModule:
                     QuestionModuleSettingsView()
+                case .moduleEditor:
+                    EmptyView()
                 }
             }
         }

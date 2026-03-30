@@ -211,7 +211,12 @@ struct QuestionEditorView: View {
                             }
                         }
                     } else if triggerParentId != nil {
-                        TextField("答案包含（逗號分隔）", text: $triggerValues)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("當答案數值等於（逗號分隔多個值）：")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            TextField("例如：5, 8", text: $triggerValues)
+                        }
                     }
                 }
             }

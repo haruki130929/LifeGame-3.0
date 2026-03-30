@@ -58,6 +58,8 @@ struct HomeRootView: View {
                     PracticeDiaryListView()
                 case .questionModule:
                     QuestionModuleSettingsView()
+                case .moduleEditor:
+                    EmptyView() // handled via sheet, not navigation
                 }
             }
         }
@@ -112,6 +114,8 @@ struct HomeRootView: View {
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.practiceDiary) }
             case .addQuestionModule, .questionModuleEditMode:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.questionModule) }
+            case .addQuestion, .questionEditMode:
+                break // handled inside CustomModuleEditorView
             }
         }
         .onChange(of: navigationPath) {

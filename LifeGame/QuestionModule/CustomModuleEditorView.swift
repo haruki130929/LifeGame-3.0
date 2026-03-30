@@ -16,6 +16,7 @@ struct CustomModuleEditorView: View {
     @State private var icon: String
     @State private var questions: [QuestionDefinition]
     @State private var showingQuestionEditor = false
+    @State private var isEditMode = false
 
     private let moduleId: UUID
 
@@ -73,19 +74,26 @@ struct CustomModuleEditorView: View {
                 .onMove { from, to in
                     questions.move(fromOffsets: from, toOffset: to)
                 }
-
-                Button {
-                    showingQuestionEditor = true
-                } label: {
-                    Label("新增問題", systemImage: "plus.circle")
-                }
             } header: {
                 Text("問題列表")
             }
         }
+        .environment(\.editMode, isEditMode ? .constant(.active) : .constant(.inactive))
         .navigationTitle(isCreating ? "新增自訂模組" : "編輯模組")
-        .onAppear { fab.isHidden = true }
-        .onDisappear { fab.isHidden = false }
+        .onAppear { fab.apply(context: .feature(.moduleEditor)) }
+        .onDisappear { fab.popActions() }
+        .onChange(of: fab.route) { _, newRoute in
+            switch newRoute {
+            case .addQuestion:
+                fab.route = nil
+                showingQuestionEditor = true
+            case .questionEditMode:
+                fab.route = nil
+                isEditMode.toggle()
+            default:
+                break
+            }
+        }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if isCreating {

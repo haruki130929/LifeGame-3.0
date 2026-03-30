@@ -44,6 +44,9 @@ final class FabStore: ObservableObject {
         // ── 問題模組專用 ──
         case addQuestionModule
         case questionModuleEditMode
+        // ── 模組編輯器專用 ──
+        case addQuestion
+        case questionEditMode
         // ── 功能設定 ──
         case featureSettings(FeatureID)
 
@@ -71,6 +74,8 @@ final class FabStore: ObservableObject {
             case .practiceDiaryEditMode:    return "practiceDiaryEditMode"
             case .addQuestionModule:        return "addQuestionModule"
             case .questionModuleEditMode:   return "questionModuleEditMode"
+            case .addQuestion:             return "addQuestion"
+            case .questionEditMode:        return "questionEditMode"
             case .featureSettings(let f):   return "featureSettings-\(f)"
             }
         }
@@ -346,6 +351,15 @@ final class FabStore: ObservableObject {
                     self?.route = .questionModuleEditMode; self?.collapse()
                 }
             ]
+        case .moduleEditor:
+            result += [
+                FabAction(title: "新增問題", systemImage: "plus.circle", route: .addQuestion) { [weak self] in
+                    self?.route = .addQuestion; self?.collapse()
+                },
+                FabAction(title: "排序", systemImage: "arrow.up.arrow.down", route: .questionEditMode) { [weak self] in
+                    self?.route = .questionEditMode; self?.collapse()
+                }
+            ]
         }
 
         return result
@@ -369,6 +383,7 @@ final class FabStore: ObservableObject {
         case .mandala:                return L10n.Title.mandala
         case .practiceDiary:          return "練習日記"
         case .questionModule:         return "問題模組"
+        case .moduleEditor:           return "編輯模組"
         }
     }
 
@@ -388,6 +403,7 @@ final class FabStore: ObservableObject {
         case .mandala:                return "square.grid.3x3"
         case .practiceDiary:          return "pencil.and.list.clipboard"
         case .questionModule:         return "square.grid.2x2"
+        case .moduleEditor:           return "pencil.and.list.clipboard"
         }
     }
 }
