@@ -81,7 +81,13 @@ struct CustomModuleEditorView: View {
         .environment(\.editMode, isEditMode ? .constant(.active) : .constant(.inactive))
         .navigationTitle(isCreating ? "新增自訂模組" : "編輯模組")
         .onAppear { fab.apply(context: .feature(.moduleEditor)) }
-        .onDisappear { fab.popActions() }
+        .onDisappear {
+            fab.popActions()
+            // 離開時自動儲存（編輯模式）
+            if !isCreating && !title.trimmingCharacters(in: .whitespaces).isEmpty {
+                save()
+            }
+        }
         .onChange(of: fab.route) { _, newRoute in
             switch newRoute {
             case .addQuestion:
