@@ -7,13 +7,11 @@ final class WeeklyScheduleStore: ObservableObject {
     private let storageKey = "weekly_schedule_v1"
     private let lastLoadedDateKey = "schedule_last_loaded_date"
 
-    @Published var schedule: WeeklySchedule
+    @Published var schedule: WeeklySchedule = WeeklySchedule()
 
     init() {
         if let saved: WeeklySchedule = StorageManager.load(WeeklySchedule.self, forKey: storageKey) {
             schedule = saved
-        } else {
-            schedule = WeeklySchedule()
         }
     }
 
