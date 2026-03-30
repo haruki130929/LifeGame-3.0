@@ -10,6 +10,7 @@ struct CustomModuleEditorView: View {
     let onSave: (DailyLogModule) -> Void
 
     @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject private var fab: FabStore
 
     @State private var title: String
     @State private var icon: String
@@ -83,6 +84,8 @@ struct CustomModuleEditorView: View {
             }
         }
         .navigationTitle(isCreating ? "新增自訂模組" : "編輯模組")
+        .onAppear { fab.isHidden = true }
+        .onDisappear { fab.isHidden = false }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             if isCreating {
