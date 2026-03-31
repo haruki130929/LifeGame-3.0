@@ -100,6 +100,7 @@ private extension TomorrowRingView {
 
                 if let id = selectedID,
                    let item = currentItems.first(where: { $0.id == id }) {
+                    let layer = overlapLayers(for: currentItems)[item.id] ?? 0
                     RingSelectionMarkers(
                         startMinute: item.startMinute,
                         endMinute: item.endMinute,
@@ -109,15 +110,15 @@ private extension TomorrowRingView {
                         lineWidth: 3,
                         strokeOpacity: 0.25
                     )
+                    .padding(CGFloat(layer) * layerOffset)
                     .allowsHitTesting(false)
                 }
 
                 segments(center: ringCenter, items: currentItems)
 
-                if mode == .detail, ringSettings.showSegmentIcons {
-                    segmentIcons(center: ringCenter, size: size, items: currentItems)
-                        .allowsHitTesting(false)
-                }
+                // 時段分隔圓圈（深色圓 + icon，在起點處）
+                segmentMarkers(center: ringCenter, size: size, items: currentItems)
+                    .allowsHitTesting(false)
 
                 currentTimeNeedle
                     .allowsHitTesting(false)
@@ -135,47 +136,118 @@ private extension TomorrowRingView {
     }
     
     var baseRing: some View {
-        Circle()
-            .stroke(.primary.opacity(0.13), lineWidth: ringLineWidth)
-    }
-    
-    func segments(center: CGPoint, items: [RingItem]) -> some View {
-        ForEach(items) { item in
-            segment(for: item, center: center)
-                .zIndex(selectedID == item.id ? 10 : 0)
-        }
-    }
-
-    func segmentIcons(center: CGPoint, size: CGFloat, items: [RingItem]) -> some View {
-        let r = size / 2
+        let maxLayer = maxOverlapLayer(for: currentItems)
         return ZStack {
-            ForEach(items) { item in
-                Image(systemName: item.icon)
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(.primary.opacity(0.9))
-                    .position(iconPosition(for: item, center: center, radius: r))
+            ForEach(0...maxLayer, id: \.self) { layer in
+                Circle()
+                    .stroke(.primary.opacity(layer == 0 ? 0.13 : 0.06), lineWidth: ringLineWidth)
+                    .padding(CGFloat(layer) * layerOffset)
             }
         }
     }
 
-    func iconPosition(for item: RingItem, center: CGPoint, radius: CGFloat) -> CGPoint {
-        // 靠近時段起始端（左側 20%）
-        let dur = positiveDuration(from: item.startMinute, to: item.endMinute)
-        let offsetMinute = (item.startMinute + dur / 16) % TOTAL_MINUTES
-        let angle = CGFloat(offsetMinute) / CGFloat(TOTAL_MINUTES) * 2 * .pi - .pi / 2
+    func maxOverlapLayer(for items: [RingItem]) -> Int {
+        let layers = overlapLayers(for: items)
+        return layers.values.max() ?? 0
+    }
+    
+    func segments(center: CGPoint, items: [RingItem]) -> some View {
+        let layers = overlapLayers(for: items)
+        return ForEach(items) { item in
+            let layer = layers[item.id] ?? 0
+            segment(for: item, center: center, layer: layer)
+                .zIndex(selectedID == item.id ? 10 : Double(layer))
+        }
+    }
+
+    /// 計算每個 item 的圖層（0 = 最外層，1 = 內一層...）
+    func overlapLayers(for items: [RingItem]) -> [UUID: Int] {
+        var result: [UUID: Int] = [:]
+        var layerRanges: [[RingItem]] = [] // layerRanges[layer] = items assigned to that layer
+
+        let sorted = items.sorted { $0.startMinute < $1.startMinute }
+
+        for item in sorted {
+            var placed = false
+            for layerIdx in 0..<layerRanges.count {
+                let conflicts = layerRanges[layerIdx].contains { other in
+                    timeRangesOverlap(
+                        s1: item.startMinute, e1: item.endMinute,
+                        s2: other.startMinute, e2: other.endMinute
+                    )
+                }
+                if !conflicts {
+                    layerRanges[layerIdx].append(item)
+                    result[item.id] = layerIdx
+                    placed = true
+                    break
+                }
+            }
+            if !placed {
+                layerRanges.append([item])
+                result[item.id] = layerRanges.count - 1
+            }
+        }
+        return result
+    }
+
+    func timeRangesOverlap(s1: Int, e1: Int, s2: Int, e2: Int) -> Bool {
+        // 正規化：轉為 (start, duration)
+        let d1 = e1 >= s1 ? e1 - s1 : e1 + TOTAL_MINUTES - s1
+        let d2 = e2 >= s2 ? e2 - s2 : e2 + TOTAL_MINUTES - s2
+        guard d1 > 0, d2 > 0 else { return false }
+
+        // 把 range2 的起點相對於 range1 的起點來看
+        let offset = ((s2 - s1) % TOTAL_MINUTES + TOTAL_MINUTES) % TOTAL_MINUTES
+        // range2 在 range1 的起始點偏移 offset 分鐘處
+        // 重疊條件：offset < d1 || (TOTAL_MINUTES - offset) < d2 的補集不成立
+        // 簡化：range2 起點落在 range1 內，或 range1 起點落在 range2 內
+        let offset2 = ((s1 - s2) % TOTAL_MINUTES + TOTAL_MINUTES) % TOTAL_MINUTES
+        return offset < d1 || offset2 < d2
+    }
+
+    private var segmentIconSize: CGFloat { mode == .detail ? 12 : 7 }
+
+    /// icon 直接畫在弧線起點上，不加額外背景
+    func segmentMarkers(center: CGPoint, size: CGFloat, items: [RingItem]) -> some View {
+        let r = size / 2
+        let layers = overlapLayers(for: items)
+        return ZStack {
+            ForEach(items) { item in
+                let layer = layers[item.id] ?? 0
+                let layerR = r - CGFloat(layer) * layerOffset
+                let pos = pointOnRing(minute: item.startMinute, center: center, radius: layerR)
+
+                Image(systemName: item.icon)
+                    .font(.system(size: segmentIconSize, weight: .bold))
+                    .foregroundStyle(.white)
+                    .position(pos)
+            }
+        }
+    }
+
+    func pointOnRing(minute: Int, center: CGPoint, radius: CGFloat) -> CGPoint {
+        let angle = CGFloat(minute) / CGFloat(TOTAL_MINUTES) * 2 * .pi - .pi / 2
         return CGPoint(
             x: center.x + cos(angle) * radius,
             y: center.y + sin(angle) * radius
         )
     }
     
-    func segment(for item: RingItem, center: CGPoint) -> some View {
+    /// 每多一層往內縮的距離
+    private var layerOffset: CGFloat { ringLineWidth + 4 }
+
+    /// 每個時段頭尾各縮的分鐘數（兩段之間的間隔 = halfGap × 2）
+    private var halfGap: Int { 5 }
+
+    func segment(for item: RingItem, center: CGPoint, layer: Int = 0) -> some View {
         let arc = ArcShape(
-            startMinute: item.startMinute,
-            endMinute: item.endMinute,
+            startMinute: (item.startMinute + halfGap) % TOTAL_MINUTES,
+            endMinute: (item.endMinute - halfGap + TOTAL_MINUTES) % TOTAL_MINUTES,
             totalMinutes: TOTAL_MINUTES
         )
-        
+        let inset = CGFloat(layer) * layerOffset
+
         return ZStack {
             arc.stroke(
                 Color(hex: item.colorHex),
@@ -189,9 +261,9 @@ private extension TomorrowRingView {
                 )
             }
         }
-        .contentShape(
-            arc.stroke(style: StrokeStyle(lineWidth: hitWidth, lineCap: .round))
-        )
+        .padding(inset)
+        .allowsHitTesting(true)
+        .contentShape(Rectangle())
         .gesture(segmentInteractionGesture(item: item, center: center))
     }
     

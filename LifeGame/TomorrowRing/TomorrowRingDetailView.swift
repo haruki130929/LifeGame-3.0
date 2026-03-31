@@ -5,27 +5,48 @@ struct TomorrowRingDetailView: View {
 
     @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var game: LifeGame
+    @EnvironmentObject private var scheduleStore: WeeklyScheduleStore
 
     @State private var isPresentingAdd = false
     @State private var editingItem: RingItem? = nil
     @State private var ringSelectedID: UUID? = nil
     @State private var showScheduleEditor = false
+    @State private var selectedDay: Weekday = Weekday.today
+
+    /// 其他天的課表預覽 plan（非今天時使用）
+    @State private var previewPlan = TomorrowRingPlan(date: Date(), items: [])
+
+    /// 目前是否正在看今天
+    private var isToday: Bool { selectedDay == Weekday.today }
+
+    /// 顯示用的 plan（今天 = 真正的 plan，其他天 = 課表預覽）
+    private var displayPlan: Binding<TomorrowRingPlan> {
+        isToday ? $plan : $previewPlan
+    }
+
+    /// 顯示用的時段列表
+    private var displayItems: [RingItem] {
+        isToday ? plan.items : previewPlan.items
+    }
 
     var body: some View {
-        Group {
-            if AppLayout.isIPad {
-                // iPad：左右並排
-                HStack(alignment: .top, spacing: 0) {
-                    ringSection
-                    listSection
-                }
-            } else {
-                // iPhone：上下排列（圓環在上，時段列表在下）
-                ScrollView {
-                    VStack(spacing: 0) {
+        VStack(spacing: 0) {
+            // ── 星期選擇器 ──
+            daySelectorBar
+
+            Group {
+                if AppLayout.isIPad {
+                    HStack(alignment: .top, spacing: 0) {
                         ringSection
-                            .frame(height: 360)
-                        phoneListSection
+                        listSection
+                    }
+                } else {
+                    ScrollView {
+                        VStack(spacing: 0) {
+                            ringSection
+                                .frame(height: 360)
+                            phoneListSection
+                        }
                     }
                 }
             }
@@ -42,20 +63,31 @@ struct TomorrowRingDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .featureTutorial(.timeRing)
 
-        // ── 進入/離開時切換 FAB 選單 ──
+        // ── 進入時同步課表 & 切換 FAB 選單 ──
         .onAppear {
+            syncScheduleToPlan()
             fab.apply(context: .feature(.tomorrowRing))
         }
         .onDisappear {
             fab.popActions()
         }
 
-        // ── 監聽 FAB route，觸發對應動作 ──
+        // ── 切換星期時更新預覽 ──
+        .onChange(of: selectedDay) { _, newDay in
+            ringSelectedID = nil
+            if newDay == Weekday.today {
+                syncScheduleToPlan()
+            } else {
+                loadPreview(for: newDay)
+            }
+        }
+
+        // ── 監聯 FAB route，觸發對應動作 ──
         .onChange(of: fab.route) { _, newRoute in
             switch newRoute {
             case .addRingItem:
                 fab.route = nil
-                isPresentingAdd = true
+                if isToday { isPresentingAdd = true }
             case .editSchedule:
                 fab.route = nil
                 showScheduleEditor = true
@@ -84,18 +116,65 @@ struct TomorrowRingDetailView: View {
 
         .sheet(item: $editingItem) { item in
             EditRingItemSheet(item: item) { updated in
-                if let i = plan.items.firstIndex(where: { $0.id == updated.id }) {
-                    plan.items[i] = updated
-                    plan.items.sort { $0.startMinute < $1.startMinute }
+                if isToday {
+                    if let i = plan.items.firstIndex(where: { $0.id == updated.id }) {
+                        plan.items[i] = updated
+                        plan.items.sort { $0.startMinute < $1.startMinute }
+                    }
                 }
             } onDelete: {
-                plan.items.removeAll { $0.id == item.id }
+                if isToday {
+                    plan.items.removeAll { $0.id == item.id }
+                }
             }
         }
-        .sheet(isPresented: $showScheduleEditor) {
+        .sheet(isPresented: $showScheduleEditor, onDismiss: {
+            if isToday {
+                syncScheduleToPlan()
+            } else {
+                loadPreview(for: selectedDay)
+            }
+        }) {
             NavigationStack {
                 WeeklyScheduleEditorView()
             }
+        }
+    }
+
+    // MARK: - 星期選擇器
+
+    private var daySelectorBar: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 6) {
+                ForEach(Weekday.allCases) { day in
+                    let isCurrent = day == selectedDay
+                    let isDayToday = day == Weekday.today
+
+                    Button {
+                        selectedDay = day
+                    } label: {
+                        VStack(spacing: 2) {
+                            Text(day.shortTitle)
+                                .font(.system(size: 14, weight: isCurrent ? .bold : .regular))
+
+                            if isDayToday {
+                                Circle()
+                                    .fill(isCurrent ? .white : Color.accentColor)
+                                    .frame(width: 4, height: 4)
+                            }
+                        }
+                        .foregroundStyle(isCurrent ? .white : .primary)
+                        .frame(width: 38, height: 44)
+                        .background(
+                            isCurrent ? Color.accentColor : Color(.tertiarySystemFill),
+                            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        )
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 8)
         }
     }
 
@@ -103,11 +182,11 @@ struct TomorrowRingDetailView: View {
 
     private var ringSection: some View {
         TomorrowRingView(
-            plan: $plan,
+            plan: displayPlan,
             selectedItemID: $ringSelectedID,
             mode: .detail,
-            gameHP: game.hp,
-            gameFP: game.fp
+            gameHP: isToday ? game.hp : nil,
+            gameFP: isToday ? game.fp : nil
         )
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -115,15 +194,16 @@ struct TomorrowRingDetailView: View {
     private var listSection: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 10) {
-                Text("時段")
-                    .font(.headline)
+                listHeader
 
-                if plan.items.isEmpty {
+                if displayItems.isEmpty {
                     emptyPlaceholder
                 } else {
-                    ForEach(plan.items) { item in
+                    ForEach(displayItems) { item in
                         RingRow(item: item) {
-                            editingItem = item
+                            if isToday {
+                                editingItem = item
+                            }
                         }
                     }
                 }
@@ -138,15 +218,16 @@ struct TomorrowRingDetailView: View {
     /// iPhone 用：不包 ScrollView（外層已有）
     private var phoneListSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("時段")
-                .font(.headline)
+            listHeader
 
-            if plan.items.isEmpty {
+            if displayItems.isEmpty {
                 emptyPlaceholder
             } else {
-                ForEach(plan.items) { item in
+                ForEach(displayItems) { item in
                     RingRow(item: item) {
-                        editingItem = item
+                        if isToday {
+                            editingItem = item
+                        }
                     }
                 }
             }
@@ -156,6 +237,20 @@ struct TomorrowRingDetailView: View {
         .padding(.bottom, 80)
     }
 
+    @ViewBuilder
+    private var listHeader: some View {
+        HStack {
+            Text(isToday ? "時段" : "\(selectedDay.title)課表")
+                .font(.headline)
+            Spacer()
+            if !isToday {
+                Text("課表預覽")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
     // MARK: - Empty
 
     private var emptyPlaceholder: some View {
@@ -163,15 +258,56 @@ struct TomorrowRingDetailView: View {
             Image(systemName: "clock.badge.questionmark")
                 .font(.system(size: 36))
                 .foregroundStyle(.tertiary)
-            Text("還沒有任何時段")
+            Text(isToday ? "還沒有任何時段" : "\(selectedDay.title)尚未設定課表")
                 .font(.subheadline)
                 .foregroundStyle(.secondary)
-            Text("點右下角「＋」新增第一個時段")
+            if isToday {
+                Text("點右下角「＋」新增第一個時段")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+            } else {
+                Button("編輯課表") {
+                    showScheduleEditor = true
+                }
                 .font(.caption)
-                .foregroundStyle(.tertiary)
+            }
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 30)
+    }
+
+    // MARK: - 課表同步
+
+    /// 把今天的課表時段同步到圓環 plan
+    private func syncScheduleToPlan() {
+        scheduleStore.loadIfNeeded()
+        let today = Weekday.today
+        let scheduleItems = scheduleStore.items(for: today)
+
+        plan.items.removeAll { $0.isFromSchedule }
+
+        for template in scheduleItems {
+            var newItem = template
+            newItem.id = UUID()
+            newItem.isFromSchedule = true
+            plan.items.append(newItem)
+        }
+
+        plan.items.sort { $0.startMinute < $1.startMinute }
+    }
+
+    /// 載入其他天的課表作為預覽
+    private func loadPreview(for day: Weekday) {
+        scheduleStore.loadIfNeeded()
+        let items = scheduleStore.items(for: day)
+        var previewItems: [RingItem] = []
+        for template in items {
+            var item = template
+            item.isFromSchedule = true
+            previewItems.append(item)
+        }
+        previewItems.sort { $0.startMinute < $1.startMinute }
+        previewPlan = TomorrowRingPlan(date: Date(), items: previewItems)
     }
 
     // MARK: - Helpers
@@ -204,12 +340,15 @@ struct EditRingItemSheet: View {
                 Section("基本") {
                     TextField("名稱", text: $item.title)
 
-                    Picker("圖示", selection: $item.icon) {
-                        Label("時鐘", systemImage: "clock").tag("clock")
-                        Label("書本", systemImage: "book").tag("book")
-                        Label("走路", systemImage: "figure.walk").tag("figure.walk")
-                        Label("用餐", systemImage: "fork.knife").tag("fork.knife")
-                        Label("睡眠", systemImage: "moon").tag("moon")
+                    DisclosureGroup {
+                        RingIconPicker(selected: $item.icon)
+                    } label: {
+                        HStack {
+                            Text("圖示")
+                            Spacer()
+                            Image(systemName: item.icon)
+                                .foregroundStyle(.secondary)
+                        }
                     }
                 }
 

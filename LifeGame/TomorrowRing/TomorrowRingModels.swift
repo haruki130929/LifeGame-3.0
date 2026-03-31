@@ -108,6 +108,59 @@ struct TomorrowRingPlan: Identifiable, Codable, Hashable {
     }
 }
 
+// MARK: - 時段圖示選單
+
+struct RingIconGroup: Identifiable {
+    let id: String
+    let title: String
+    let icons: [(name: String, label: String)]
+}
+
+enum RingIcons {
+    static let groups: [RingIconGroup] = [
+        RingIconGroup(id: "daily", title: "日常", icons: [
+            ("clock", "時鐘"), ("alarm", "鬧鐘"), ("bed.double", "睡覺"),
+            ("moon.zzz", "睡眠"), ("cup.and.saucer", "休息"),
+            ("fork.knife", "用餐"), ("mug", "飲料"),
+            ("house", "在家"), ("car", "交通"), ("bus", "公車"),
+            ("tram", "捷運"), ("figure.walk", "走路"),
+        ]),
+        RingIconGroup(id: "study", title: "學習", icons: [
+            ("book", "書本"), ("book.closed", "閱讀"),
+            ("pencil.and.ruler", "作業"), ("graduationcap", "上課"),
+            ("desktopcomputer", "電腦"), ("laptopcomputer", "筆電"),
+            ("brain.head.profile", "思考"), ("lightbulb", "靈感"),
+            ("text.book.closed", "教科書"), ("pencil", "寫字"),
+        ]),
+        RingIconGroup(id: "exercise", title: "運動", icons: [
+            ("figure.run", "跑步"), ("figure.yoga", "瑜珈"),
+            ("figure.basketball", "籃球"), ("figure.swimming", "游泳"),
+            ("figure.badminton", "羽球"), ("figure.archery", "弓道"),
+            ("bicycle", "騎車"), ("dumbbell", "重訓"),
+            ("figure.martial.arts", "武術"), ("figure.dance", "舞蹈"),
+        ]),
+        RingIconGroup(id: "life", title: "生活", icons: [
+            ("cart", "購物"), ("bag", "外出"),
+            ("paintbrush", "創作"), ("music.note", "音樂"),
+            ("gamecontroller", "遊戲"), ("tv", "看劇"),
+            ("camera", "拍照"), ("heart", "約會"),
+            ("person.2", "社交"), ("phone", "通話"),
+            ("bubble.left", "聊天"), ("hand.raised", "志工"),
+        ]),
+        RingIconGroup(id: "work", title: "工作", icons: [
+            ("briefcase", "工作"), ("doc.text", "文件"),
+            ("calendar", "會議"), ("envelope", "信件"),
+            ("chart.bar", "報表"), ("wrench", "修理"),
+            ("scissors", "手作"), ("printer", "列印"),
+        ]),
+    ]
+
+    /// 所有圖示的扁平列表
+    static var all: [(name: String, label: String)] {
+        groups.flatMap(\.icons)
+    }
+}
+
 // MARK: - Sample (for preview / development)
 extension TomorrowRingPlan {
     static var sample: TomorrowRingPlan {
