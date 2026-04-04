@@ -36,15 +36,12 @@ struct AddRingItemSheet: View {
                 Section("基本") {
                     TextField("名稱", text: $draft.title)
 
-                    DisclosureGroup {
-                        RingIconPicker(selected: $draft.icon)
-                    } label: {
-                        HStack {
-                            Text("圖示")
-                            Spacer()
-                            Image(systemName: draft.icon)
-                                .foregroundStyle(.secondary)
-                        }
+                    Picker("圖示", selection: $draft.icon) {
+                        Label("時鐘", systemImage: "clock").tag("clock")
+                        Label("書本", systemImage: "book").tag("book")
+                        Label("走路", systemImage: "figure.walk").tag("figure.walk")
+                        Label("用餐", systemImage: "fork.knife").tag("fork.knife")
+                        Label("睡眠", systemImage: "moon").tag("moon")
                     }
                 }
                 

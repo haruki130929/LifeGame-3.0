@@ -197,15 +197,12 @@ private struct ScheduleEditSheet: View {
                 Section("基本資訊") {
                     TextField("名稱", text: $title)
 
-                    DisclosureGroup {
-                        RingIconPicker(selected: $icon)
-                    } label: {
-                        HStack {
-                            Text("圖示")
-                            Spacer()
-                            Image(systemName: icon)
-                                .foregroundStyle(.secondary)
-                        }
+                    Picker("圖示", selection: $icon) {
+                        Label("時鐘", systemImage: "clock").tag("clock")
+                        Label("書本", systemImage: "book").tag("book")
+                        Label("運動", systemImage: "figure.walk").tag("figure.walk")
+                        Label("飲食", systemImage: "fork.knife").tag("fork.knife")
+                        Label("休息", systemImage: "moon").tag("moon")
                     }
                 }
 
