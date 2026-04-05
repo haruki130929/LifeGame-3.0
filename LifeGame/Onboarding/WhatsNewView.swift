@@ -9,8 +9,6 @@ struct WhatsNewView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer()
-
             // 標題
             VStack(spacing: 8) {
                 Text("v\(version) 更新內容")
@@ -20,17 +18,19 @@ struct WhatsNewView: View {
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
-            .padding(.bottom, 36)
+            .padding(.top, 32)
+            .padding(.bottom, 24)
 
-            // 更新項目
-            VStack(alignment: .leading, spacing: 24) {
-                ForEach(items, id: \.title) { item in
-                    featureRow(item)
+            // 更新項目（ScrollView 確保內容多時可捲動）
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    ForEach(items, id: \.title) { item in
+                        featureRow(item)
+                    }
                 }
+                .padding(.horizontal, 32)
+                .padding(.vertical, 8)
             }
-            .padding(.horizontal, 32)
-
-            Spacer()
 
             // 繼續按鈕
             Button(action: onDismiss) {
@@ -42,9 +42,9 @@ struct WhatsNewView: View {
             .buttonStyle(.borderedProminent)
             .tint(theme.accentColor)
             .padding(.horizontal, 32)
+            .padding(.top, 12)
             .padding(.bottom, 16)
         }
-        .padding(.vertical, 24)
     }
 
     private func featureRow(_ item: WhatsNewItem) -> some View {
@@ -74,6 +74,45 @@ struct WhatsNewView: View {
 
     static func items(for version: String) -> [WhatsNewItem] {
         switch version {
+        case "1.07":
+            return [
+                WhatsNewItem(
+                    icon: "clock.badge.checkmark",
+                    title: "時間圓環大改版",
+                    description: "全新雙圈設計：內圈「預定行程」、外圈「實際執行」，一眼看出計畫與現實的差距。",
+                    color: .orange
+                ),
+                WhatsNewItem(
+                    icon: "plus.circle.dashed",
+                    title: "空時段一鍵新增",
+                    description: "空時段用虛線框顯示，中央有「＋」按鈕，輕點就能在該空檔新增行程，不用再自己選時間。",
+                    color: .green
+                ),
+                WhatsNewItem(
+                    icon: "hand.tap.fill",
+                    title: "長按拖曳更直覺",
+                    description: "長按時段會浮起並震動回饋，拖曳即可移動；放開後自動回到軌道上。時段之間會自動避免重疊。",
+                    color: .purple
+                ),
+                WhatsNewItem(
+                    icon: "book.closed.fill",
+                    title: "課表系統整合",
+                    description: "新增獨立課表模組，設定每週固定課程後，系統會每天自動填入內圈並依時段扣除 HP/FP。",
+                    color: .blue
+                ),
+                WhatsNewItem(
+                    icon: "paintpalette.fill",
+                    title: "主題色全 App 統一",
+                    description: "你在設定選的主題色現在會套用到所有標示 — 今日日期、選取指示、按鈕等等，視覺終於一致。",
+                    color: .pink
+                ),
+                WhatsNewItem(
+                    icon: "circle.grid.cross",
+                    title: "顏色選擇器升級",
+                    description: "顏色選擇器改為左右滑動分頁，圓形色塊更易辨識，七種日本傳統色分類隨手切換。",
+                    color: .red
+                ),
+            ]
         case "1.06":
             return [
                 WhatsNewItem(

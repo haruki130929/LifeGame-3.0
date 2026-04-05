@@ -12,7 +12,8 @@ final class FeatureTutorialTracker {
         case equipment      // 裝備系統
         case calendar       // 行事曆
         case todoQuadrant   // 待辦四象限
-        case timeRing       // 時間圓環
+        case timeRing       // 時間圓環（V1 — 已棄用，保留以相容舊紀錄）
+        case timeRingV2     // 時間圓環（V2 — 雙圈設計）
         case dailyLog       // 每日紀錄
         case moodThermometer // 心情溫度計
         case bag            // 整理書包

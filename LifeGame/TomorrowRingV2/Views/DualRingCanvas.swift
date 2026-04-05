@@ -221,16 +221,16 @@ struct DualRingCanvas: View {
     // MARK: - Center Info
 
     private var centerInfo: some View {
-        VStack(spacing: mode == .card ? 4 : 8) {
+        VStack(spacing: mode == .card ? 6 : 8) {
             // Live updating time (uses app's default font)
             TimelineView(.periodic(from: .now, by: 1)) { context in
                 Text(RingTimeHelpers.timeString(for: RingTimeHelpers.minute(from: context.date)))
-                    .font(mode == .card ? .subheadline.weight(.semibold) : .title3.weight(.semibold))
+                    .font(mode == .card ? .title2.weight(.bold) : .title3.weight(.semibold))
                     .foregroundStyle(.primary)
                     .contentTransition(.numericText())
             }
 
-            VStack(spacing: mode == .card ? 3 : 5) {
+            VStack(spacing: mode == .card ? 4 : 5) {
                 StatBar(
                     label: "HP",
                     current: store.plan.remainingHP,
@@ -246,7 +246,7 @@ struct DualRingCanvas: View {
                     compact: mode == .card
                 )
             }
-            .frame(width: mode == .card ? 70 : 110)
+            .frame(width: mode == .card ? 100 : 110)
         }
     }
 
@@ -401,11 +401,11 @@ private struct StatBar: View {
     }
 
     var body: some View {
-        HStack(spacing: compact ? 4 : 6) {
+        HStack(spacing: compact ? 5 : 6) {
             Text(label)
-                .font(compact ? .system(size: 8, weight: .semibold) : .caption2.weight(.semibold))
+                .font(compact ? .caption2.weight(.bold) : .caption2.weight(.semibold))
                 .foregroundStyle(color)
-                .frame(width: compact ? 14 : 16, alignment: .leading)
+                .frame(width: compact ? 18 : 16, alignment: .leading)
 
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
@@ -416,7 +416,7 @@ private struct StatBar: View {
                         .frame(width: geo.size.width * progress)
                 }
             }
-            .frame(height: compact ? 3 : 5)
+            .frame(height: compact ? 5 : 5)
         }
     }
 }

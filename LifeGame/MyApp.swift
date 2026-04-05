@@ -111,6 +111,7 @@ struct LifeGameApp: App {
                                 VersionTracker.markAsShown()
                                 showWhatsNew = false
                             }
+                            .environmentObject(theme)
                             .interactiveDismissDisabled()
                         }
                         .overlay { ToastOverlay() }

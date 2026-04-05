@@ -44,6 +44,7 @@ struct RingDetailPageV2: View {
         }
         .navigationTitle("時間圓環")
         .navigationBarTitleDisplayMode(.inline)
+        .featureTutorial(.timeRingV2)
 
         // Switch FAB to tomorrowRing feature context
         .onAppear {

@@ -29,6 +29,7 @@ struct FeatureTutorialModifier: ViewModifier {
                                 }
                             }
                     }
+                    .environmentObject(theme)  // sheet 重建環境，需顯式傳入
                     .presentationDetents([.medium, .large])
                 }
             }

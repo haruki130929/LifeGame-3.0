@@ -165,17 +165,19 @@ enum TutorialData {
             featureKey: .todoQuadrant
         ),
         TutorialItem(
-            icon: "clock",
+            icon: "clock.badge.checkmark",
             title: L10n.Title.tomorrowRing,
-            color: .cyan,
+            color: .orange,
             steps: [
-                TutorialStep(text: "時間圓環幫你規劃一天的時間分配，以環形圖呈現。"),
-                TutorialStep(text: "每個時段用不同顏色區分，可以看到時間的佔比。"),
-                TutorialStep(text: "按「新增時段」來加入活動，設定時段名稱與起訖時間。"),
-                TutorialStep(text: "時間圓環會自動扣減 HP/FP/MP，不同活動消耗不同。"),
+                TutorialStep(text: "時間圓環用「雙圈」呈現你的一天 — 內圈是你「預定」要做的事，外圈是你「實際」執行的情況，弧長差異一眼看出計畫與現實的落差。"),
+                TutorialStep(text: "時段不是連續的軌道，而是一段段獨立的「圓角膠囊」。有行程的時段用實心顏色顯示，空檔則用虛線框起來。"),
+                TutorialStep(text: "想在空檔新增行程，直接點虛線段中央的「＋」按鈕，系統會自動帶入該時段的起訖時間。"),
+                TutorialStep(text: "長按一個時段約 0.3 秒，時段會浮起並震動，這時候就可以拖曳它移動位置。相鄰的時段會自動避讓，放開後時段回到軌道上。"),
+                TutorialStep(text: "畫面右下角的「＋」FAB 按鈕可以新增時段或進入「課表」設定。課表是獨立的每週範本 — 設好每週固定課程後，系統每天會自動填入內圈。"),
+                TutorialStep(text: "圓環中央即時顯示當前時間，下方的 HP / FP 膠囊進度條會根據時段消耗即時扣減。已結束的時段會自動把消耗的點數從你的 HP/FP 扣掉。"),
             ],
-            tip: nil,
-            featureKey: .timeRing
+            tip: "建議先到「課表」把每週固定行程（上課、上班、固定運動）設好，之後每天只需要補上臨時行程，輕鬆掌握時間。",
+            featureKey: .timeRingV2
         ),
         TutorialItem(
             icon: "square.and.pencil",
