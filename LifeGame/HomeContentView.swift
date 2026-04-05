@@ -14,6 +14,7 @@ struct HomeContentView: View {
     @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var customTabStore: CustomTabStore
     @EnvironmentObject private var coachMarkStore: CoachMarkStore
+    @EnvironmentObject private var tomorrowRingStore: TomorrowRingStore
 
 
     @State private var selectedTab: TabSelection = .tab(UUID())
@@ -234,12 +235,9 @@ private extension HomeContentView {
         fab.apply(context: .home(timeSlot: currentSlot, features: currentFabFeatures))
     }
 
-    /// 載入時間圓環計畫，檢查已結束的時段並扣除 HP/FP
+    /// 載入時間圓環計畫，檢查已結束的時段並扣除 HP/FP (V2)
     func checkRingDeductions() {
-        guard let plan: TomorrowRingPlan = StorageManager.load(
-            TomorrowRingPlan.self, forKey: "tomorrow_ring_plan"
-        ) else { return }
-        game.applyRingDeductions(plan: plan)
+        tomorrowRingStore.deductCompletedSegments(game: game)
     }
 
 }

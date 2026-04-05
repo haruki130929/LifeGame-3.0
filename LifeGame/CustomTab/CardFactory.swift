@@ -71,19 +71,9 @@ struct CardFactory: View {
             EmptyView()  // 已移除卡片，保留 case 避免已存儲資料解碼失敗
 
         case .tomorrowRing:
-            TomorrowRingCard(size: .large, plan: $tomorrowPlan,
-                             selectedSegmentID: $ringSelectedID,
-                             onTap: { showTomorrowRingDetail = true })
+            RingCardV2(size: .large, onTap: { showTomorrowRingDetail = true })
                 .navigationDestination(isPresented: $showTomorrowRingDetail) {
-                    TomorrowRingDetailView(plan: $tomorrowPlan)
-                }
-                .onChange(of: tomorrowPlan) { _, newPlan in
-                    StorageManager.save(newPlan, forKey: "tomorrow_ring_plan")
-                }
-                .onAppear {
-                    if weeklyScheduleStore.applyScheduleIfNeeded(to: &tomorrowPlan) {
-                        StorageManager.save(tomorrowPlan, forKey: "tomorrow_ring_plan")
-                    }
+                    RingDetailPageV2()
                 }
 
         case .bagRequired:

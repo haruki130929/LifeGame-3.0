@@ -12,27 +12,10 @@ struct TodoQuadrantPageWrapper: View {
     }
 }
 
-/// 時間圓環 — 包裝 TomorrowRingDetailView，自帶 plan state
+/// 時間圓環 — 使用 V2 系統
 struct TomorrowRingPageWrapper: View {
-    @EnvironmentObject private var weeklyScheduleStore: WeeklyScheduleStore
-    @State private var plan: TomorrowRingPlan = {
-        if let saved: TomorrowRingPlan = StorageManager.load(TomorrowRingPlan.self, forKey: "tomorrow_ring_plan") {
-            return saved
-        }
-        return .sample
-    }()
-
     var body: some View {
-        TomorrowRingDetailView(plan: $plan)
-            .navigationTitle("時間圓環")
-            .onChange(of: plan) { _, newPlan in
-                StorageManager.save(newPlan, forKey: "tomorrow_ring_plan")
-            }
-            .onAppear {
-                if weeklyScheduleStore.applyScheduleIfNeeded(to: &plan) {
-                    StorageManager.save(plan, forKey: "tomorrow_ring_plan")
-                }
-            }
+        RingDetailPageV2()
     }
 }
 
