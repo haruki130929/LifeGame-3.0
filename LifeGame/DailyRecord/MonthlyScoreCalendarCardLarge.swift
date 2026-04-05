@@ -3,6 +3,7 @@ import Foundation
 
 struct MonthlyScoreCalendarCardLarge: View {
     @EnvironmentObject private var historyStore: HistoryStore
+    @EnvironmentObject private var theme: ThemeStore
 
     private let title: String
     private let icon: String
@@ -249,7 +250,7 @@ private extension MonthlyScoreCalendarCardLarge {
             Text("\(day)")
                 .font(.system(size: 14, weight: .semibold))
                 .foregroundStyle(
-                    record != nil ? .white : (isToday ? .accentColor : .primary)
+                    record != nil ? .white : (isToday ? theme.accentColor : .primary)
                 )
         }
         .frame(width: 22, height: 22)

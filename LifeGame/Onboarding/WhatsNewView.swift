@@ -5,6 +5,7 @@ import SwiftUI
 struct WhatsNewView: View {
     let version: String
     let onDismiss: () -> Void
+    @EnvironmentObject private var theme: ThemeStore
 
     var body: some View {
         VStack(spacing: 0) {
@@ -39,7 +40,7 @@ struct WhatsNewView: View {
                     .padding(.vertical, 14)
             }
             .buttonStyle(.borderedProminent)
-            .tint(.blue)
+            .tint(theme.accentColor)
             .padding(.horizontal, 32)
             .padding(.bottom, 16)
         }

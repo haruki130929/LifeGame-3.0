@@ -56,6 +56,7 @@ enum FabStyle: String, CaseIterable, Identifiable, Codable {
 // MARK: - 介面操作設定頁
 
 struct InterfaceSettingsView: View {
+    @EnvironmentObject private var theme: ThemeStore
     @State private var fabStyle: FabStyle = FabStyle.current
 
     var body: some View {
@@ -70,7 +71,7 @@ struct InterfaceSettingsView: View {
                             Image(systemName: style.icon)
                                 .font(.title3)
                                 .frame(width: 30)
-                                .foregroundStyle(fabStyle == style ? .blue : .secondary)
+                                .foregroundStyle(fabStyle == style ? theme.accentColor : .secondary)
 
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(style.title)
@@ -85,7 +86,7 @@ struct InterfaceSettingsView: View {
 
                             if fabStyle == style {
                                 Image(systemName: "checkmark")
-                                    .foregroundStyle(.blue)
+                                    .foregroundStyle(theme.accentColor)
                                     .font(.body.weight(.semibold))
                             }
                         }

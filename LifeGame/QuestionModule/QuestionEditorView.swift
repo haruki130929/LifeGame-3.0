@@ -7,6 +7,7 @@ struct QuestionEditorView: View {
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var fab: FabStore
+    @EnvironmentObject private var theme: ThemeStore
 
     @State private var title: String
     @State private var type: QuestionType
@@ -246,7 +247,7 @@ struct QuestionEditorView: View {
                                         syncTriggerValues()
                                     } label: {
                                         Image(systemName: item.isChecked ? "checkmark.square.fill" : "square")
-                                            .foregroundStyle(item.isChecked ? .blue : .secondary)
+                                            .foregroundStyle(item.isChecked ? theme.accentColor : .secondary)
                                     }
                                     .buttonStyle(.plain)
 
@@ -275,7 +276,7 @@ struct QuestionEditorView: View {
                                     customTriggerInput = ""
                                 } label: {
                                     Image(systemName: "plus.circle.fill")
-                                        .foregroundStyle(.blue)
+                                        .foregroundStyle(theme.accentColor)
                                 }
                                 .buttonStyle(.plain)
                                 .disabled(customTriggerInput.trimmingCharacters(in: .whitespaces).isEmpty)

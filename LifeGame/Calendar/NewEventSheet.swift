@@ -3,6 +3,7 @@ import SwiftUI
 struct NewEventSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
+    @EnvironmentObject private var theme: ThemeStore
 
     @State private var title: String = ""
     @State private var start: Date = Date()
@@ -38,7 +39,7 @@ struct NewEventSheet: View {
                                     Spacer()
                                     if colorHex.uppercased() == preset.colorHex.uppercased() {
                                         Image(systemName: "checkmark")
-                                            .foregroundStyle(.blue)
+                                            .foregroundStyle(theme.accentColor)
                                     }
                                 }
                             }
@@ -73,6 +74,7 @@ struct NewEventSheet: View {
 struct EditEventSheet: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
+    @EnvironmentObject private var theme: ThemeStore
 
     let event: CalendarEvent
     let onSave: (String, Date, Date, String) -> Void
@@ -118,7 +120,7 @@ struct EditEventSheet: View {
                                     Spacer()
                                     if colorHex.uppercased() == preset.colorHex.uppercased() {
                                         Image(systemName: "checkmark")
-                                            .foregroundStyle(.blue)
+                                            .foregroundStyle(theme.accentColor)
                                     }
                                 }
                             }

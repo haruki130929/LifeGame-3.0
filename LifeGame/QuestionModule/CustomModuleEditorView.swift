@@ -11,6 +11,7 @@ struct CustomModuleEditorView: View {
 
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var fab: FabStore
+    @EnvironmentObject private var theme: ThemeStore
 
     @State private var title: String
     @State private var icon: String
@@ -159,15 +160,15 @@ struct CustomModuleEditorView: View {
                                 Image(systemName: name)
                                     .font(.system(size: 18))
                                     .frame(width: 36, height: 36)
-                                    .background(icon == name ? Color.accentColor.opacity(0.2) : Color.clear)
+                                    .background(icon == name ? theme.accentColor.opacity(0.2) : Color.clear)
                                     .clipShape(RoundedRectangle(cornerRadius: 6))
                                     .overlay(
                                         RoundedRectangle(cornerRadius: 6)
-                                            .stroke(icon == name ? Color.accentColor : Color.clear, lineWidth: 1.5)
+                                            .stroke(icon == name ? theme.accentColor : Color.clear, lineWidth: 1.5)
                                     )
                             }
                             .buttonStyle(.plain)
-                            .foregroundStyle(icon == name ? .blue : .primary)
+                            .foregroundStyle(icon == name ? theme.accentColor : .primary)
                         }
                     }
                 }

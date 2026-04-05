@@ -178,10 +178,10 @@ struct CalendarCard: View {
                                 .zIndex(1)
                         }
                         
-                        // 今天紅圈
+                        // 今天圓圈（使用主題色）
                         if isToday {
                             Circle()
-                                .fill(Color.red)
+                                .fill(theme.accentColor)
                                 .frame(width: dayCircleSize * 0.78,
                                        height: dayCircleSize * 0.78)
                                 .zIndex(2)

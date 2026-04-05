@@ -4,6 +4,7 @@ struct MandalaChartView: View {
 
     @ObservedObject var store: MandalaStore
     @Binding var isEditMode: Bool
+    @EnvironmentObject private var theme: ThemeStore
     @FocusState private var focusedCell: String?
 
     // 編輯模式：拖放
@@ -32,7 +33,7 @@ struct MandalaChartView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
-                    .background(Capsule().fill(.blue))
+                    .background(Capsule().fill(theme.accentColor))
                     .padding(.top, 8)
                     .transition(.move(edge: .top).combined(with: .opacity))
             }
@@ -128,7 +129,7 @@ struct MandalaChartView: View {
             .background(style.background)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .stroke(dragSource == cellId ? Color.blue : style.border,
+                    .stroke(dragSource == cellId ? theme.accentColor : style.border,
                             lineWidth: dragSource == cellId ? 2 : style.borderWidth)
             )
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -139,7 +140,7 @@ struct MandalaChartView: View {
                         Text(displayText)
                             .font(.system(size: 13))
                             .padding(8)
-                            .background(Color.blue.opacity(0.15))
+                            .background(theme.accentColor.opacity(0.15))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                             .onAppear { dragSource = cellId }
                     }

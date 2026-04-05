@@ -3,7 +3,8 @@ import SwiftUI
 struct CalendarHubView: View {
     @ObservedObject var store: CalendarStore
     @ObservedObject var settings: CalendarSettingsStore
-    
+    @EnvironmentObject private var theme: ThemeStore
+
     @State private var scope: CalendarScope = .month
     @State private var anchorDate: Date = .now
     @State private var showingAdd: Bool = false
@@ -103,7 +104,7 @@ struct CalendarHubView: View {
                 Label("月", systemImage: "calendar")
             }
             .buttonStyle(.borderedProminent)
-            .tint(scope == .month ? .accentColor : .gray)
+            .tint(scope == .month ? theme.accentColor : .gray)
             
             Button {
                 scope = .week
@@ -111,7 +112,7 @@ struct CalendarHubView: View {
                 Label("週", systemImage: "rectangle.3.offgrid")
             }
             .buttonStyle(.borderedProminent)
-            .tint(scope == .week ? .accentColor : .gray)
+            .tint(scope == .week ? theme.accentColor : .gray)
             
             Spacer()
             
