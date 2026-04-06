@@ -197,8 +197,8 @@ struct DualRingCanvas: View {
             )
             .animation(.spring(response: 0.2, dampingFraction: 0.6), value: isBeingDragged)
 
-            // Icon near the start of the arc (offset inward a bit)
-            if mode == .detail && item.duration >= 20 {
+            // Icon near the start of the arc (iPad detail only)
+            if mode == .detail && AppLayout.isIPad && item.duration >= 20 {
                 let iconOffsetMinutes = max(item.duration / 8, totalInset + 6)
                 let iconMinute = (item.startMinute + iconOffsetMinutes) % RingTimeHelpers.totalMinutes
                 let iconAngle = RingTimeHelpers.angle(for: iconMinute)

@@ -173,18 +173,12 @@ struct RingDetailPageV2: View {
 
             // HP/FP summary
             HStack(spacing: 20) {
-                HStack(spacing: 4) {
-                    Image(systemName: "heart.fill")
-                        .foregroundStyle(.red)
-                    Text("剩餘 \(store.plan.remainingHP) / \(store.plan.baseHP)")
-                        .font(.caption)
-                }
-                HStack(spacing: 4) {
-                    Image(systemName: "flame.fill")
-                        .foregroundStyle(.orange)
-                    Text("剩餘 \(store.plan.remainingFP) / \(store.plan.baseFP)")
-                        .font(.caption)
-                }
+                Text("HP 剩餘 \(store.plan.remainingHP) / \(store.plan.baseHP)")
+                    .font(.caption)
+                    .foregroundStyle(.red)
+                Text("FP 剩餘 \(store.plan.remainingFP) / \(store.plan.baseFP)")
+                    .font(.caption)
+                    .foregroundStyle(.orange)
                 Spacer()
             }
             .padding(.horizontal, 12)
