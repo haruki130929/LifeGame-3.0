@@ -133,13 +133,15 @@ struct DualRingCanvas: View {
 
         let gaps = RingCollisionEngine.gapSegments(items: items)
 
-        // Dashed gap segments
+        // Dashed gap segments (inset by capInset so gap↔filled spacing = filled↔filled spacing)
         ForEach(Array(gaps.enumerated()), id: \.offset) { _, gap in
             let gapDuration = RingTimeHelpers.duration(from: gap.start, to: gap.end)
+            let insetStart = (gap.start + totalInset) % RingTimeHelpers.totalMinutes
+            let insetEnd = (gap.end - totalInset + RingTimeHelpers.totalMinutes) % RingTimeHelpers.totalMinutes
 
             DashedArcOutline(
-                startMinute: gap.start,
-                endMinute: gap.end,
+                startMinute: insetStart,
+                endMinute: insetEnd,
                 baseRadius: radius,
                 bandWidth: lineWidth
             )
