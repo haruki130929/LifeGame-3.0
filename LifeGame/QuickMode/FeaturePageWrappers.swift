@@ -22,6 +22,7 @@ struct TomorrowRingPageWrapper: View {
 /// 本月結算 — 包裝 MonthlyScoreCalendarCardLarge 成全頁
 struct MonthlyScorePageWrapper: View {
     @EnvironmentObject private var fab: FabStore
+    @EnvironmentObject private var historyStore: HistoryStore
     @State private var showStats = false
     @State private var showSettings = false
 
@@ -41,6 +42,7 @@ struct MonthlyScorePageWrapper: View {
         .sheet(isPresented: $showStats) {
             NavigationStack {
                 MonthlyScoreStatsView()
+                    .environmentObject(historyStore)
             }
         }
         .sheet(isPresented: $showSettings) {

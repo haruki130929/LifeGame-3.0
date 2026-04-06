@@ -80,9 +80,13 @@ struct ClassScheduleEditorV2: View {
         }
         .sheet(isPresented: $showAddCourse) {
             CourseEditSheet(day: selectedDay)
+                .environmentObject(store)
+                .environmentObject(theme)
         }
         .sheet(item: $editingCourse) { course in
             CourseEditSheet(day: selectedDay, editing: course)
+                .environmentObject(store)
+                .environmentObject(theme)
         }
     }
 

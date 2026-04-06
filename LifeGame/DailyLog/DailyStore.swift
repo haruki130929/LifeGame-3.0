@@ -23,9 +23,17 @@ final class DailyLogStore: ObservableObject {
             return ModelContext(container)
         } catch {
             debugLog("❌ DailyLogStore: in-memory 容器也失敗: \(error)")
-            // 極端情況：用最簡化設定再試一次
-            let container = try! ModelContainer(for: DailyLogRecord.self)
-            return ModelContext(container)
+            // 極端情況：用最簡化設定再試一次（仍做 do-catch 防護）
+            do {
+                let container = try ModelContainer(for: DailyLogRecord.self)
+                return ModelContext(container)
+            } catch {
+                debugLog("❌ DailyLogStore: 所有 ModelContainer 配置都失敗: \(error)")
+                // 最後手段：建立純空 in-memory 容器
+                let config = ModelConfiguration(isStoredInMemoryOnly: true)
+                let container = try! ModelContainer(for: DailyLogRecord.self, configurations: config)
+                return ModelContext(container)
+            }
         }
     }
 

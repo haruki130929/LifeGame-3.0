@@ -11,6 +11,8 @@ struct HomeRootView: View {
     @EnvironmentObject private var calendarStore: CalendarStore
     @EnvironmentObject private var wishStore: WishStore
     @EnvironmentObject private var ledgerStore: LedgerStore
+    @EnvironmentObject private var moodHistory: MoodHistoryStore
+    @EnvironmentObject private var moodSettings: MoodSettingsStore
 
     @State private var showAddCalendarEvent = false
     @State private var showAddDailyLog = false
@@ -141,6 +143,8 @@ struct HomeRootView: View {
         }
         .sheet(isPresented: $showMoodEdit) {
             MoodEditView()
+                .environmentObject(moodHistory)
+                .environmentObject(moodSettings)
         }
     }
 }
