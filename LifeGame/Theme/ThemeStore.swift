@@ -97,35 +97,22 @@ final class ThemeStore: ObservableObject {
     /// 用於在必要時強制刷新根視圖（保險用）
     @Published var refreshID: UUID = UUID()
     
-    // MARK: - iCloud key-value backup (instant sync, survives reinstall)
+    // MARK: - Keychain backup (survives app reinstall, no sync needed)
 
-    private static let ubiq = NSUbiquitousKeyValueStore.default
-
-    /// Read from StorageManager first, then fall back to iCloud KV store.
-    /// This ensures theme survives app reinstall.
+    /// Read from StorageManager first, then fall back to Keychain.
     private static func loadValue<T: Codable>(_ type: T.Type, key: String) -> T? {
-        // 1. Try local (SwiftData) — most up-to-date
+        // 1. Try local (SwiftData)
         if let local: T = StorageManager.load(type, forKey: key) {
             return local
         }
-        // 2. Fall back to iCloud KV store — survives reinstall
-        return ubiq.object(forKey: key) as? T
+        // 2. Fall back to Keychain (survives reinstall)
+        return ThemeKeychain.load(type, forKey: key)
     }
 
-    /// Save to both StorageManager and iCloud KV store.
+    /// Save to both StorageManager and Keychain.
     private static func saveValue<T: Codable>(_ value: T, key: String) {
         StorageManager.save(value, forKey: key)
-        // Also mirror to iCloud KV store for reinstall recovery
-        if let intVal = value as? Int {
-            ubiq.set(intVal, forKey: key)
-        } else if let doubleVal = value as? Double {
-            ubiq.set(doubleVal, forKey: key)
-        } else if let stringVal = value as? String {
-            ubiq.set(stringVal, forKey: key)
-        } else if let boolVal = value as? Bool {
-            ubiq.set(boolVal, forKey: key)
-        }
-        ubiq.synchronize()
+        ThemeKeychain.save(value, forKey: key)
     }
 
     // MARK: - Init
@@ -146,24 +133,19 @@ final class ThemeStore: ObservableObject {
         let appRaw: Int = Self.loadValue(Int.self, key: Keys.appearance) ?? AppAppearance.system.rawValue
         self.appearance = AppAppearance(rawValue: appRaw) ?? .system
 
-        // 一次性回填：如果本地有資料但 iCloud KV 還沒有，把現有設定同步上去
-        // 這確保舊版存的設定也能備份到 iCloud KV
-        backfillToUbiquitousStoreIfNeeded()
+        // 一次性回填：確保舊版存的設定也備份到 Keychain
+        backfillToKeychainIfNeeded()
     }
 
-    /// 把目前的本地設定回填到 iCloud KV（只在 iCloud KV 為空時執行）
-    private func backfillToUbiquitousStoreIfNeeded() {
-        let ubiq = Self.ubiq
-        // 用 accentPreset 作為指標：如果 iCloud KV 裡沒有這個 key，代表從未回填過
-        guard ubiq.object(forKey: Keys.accentPreset) == nil else { return }
-
-        ubiq.set(fontScale, forKey: Keys.fontScale)
-        ubiq.set(backgroundStyle.rawValue, forKey: Keys.backgroundStyle)
-        ubiq.set(accentPreset.rawValue, forKey: Keys.accentPreset)
-        ubiq.set(customAccentHex, forKey: Keys.customAccentHex)
-        ubiq.set(useCustomAccent, forKey: Keys.useCustomAccent)
-        ubiq.set(appearance.rawValue, forKey: Keys.appearance)
-        ubiq.synchronize()
+    /// 把目前的本地設定回填到 Keychain（只在 Keychain 為空時執行）
+    private func backfillToKeychainIfNeeded() {
+        guard ThemeKeychain.load(Int.self, forKey: Keys.accentPreset) == nil else { return }
+        ThemeKeychain.save(fontScale, forKey: Keys.fontScale)
+        ThemeKeychain.save(backgroundStyle.rawValue, forKey: Keys.backgroundStyle)
+        ThemeKeychain.save(accentPreset.rawValue, forKey: Keys.accentPreset)
+        ThemeKeychain.save(customAccentHex, forKey: Keys.customAccentHex)
+        ThemeKeychain.save(useCustomAccent, forKey: Keys.useCustomAccent)
+        ThemeKeychain.save(appearance.rawValue, forKey: Keys.appearance)
     }
     
     // MARK: - Computed
@@ -269,5 +251,53 @@ extension Color {
         }
         
         self = Color(.sRGB, red: r, green: g, blue: b, opacity: 1.0)
+    }
+}
+
+// MARK: - ThemeKeychain
+
+/// Lightweight Keychain wrapper for theme settings.
+/// Keychain data survives app uninstall on iOS.
+private enum ThemeKeychain {
+    private static let service = "com.haruki.lifegame.theme"
+
+    static func save<T: Codable>(_ value: T, forKey key: String) {
+        guard let data = try? JSONEncoder().encode(value) else { return }
+
+        // Delete existing item first
+        let deleteQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key,
+        ]
+        SecItemDelete(deleteQuery as CFDictionary)
+
+        // Add new item
+        let addQuery: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key,
+            kSecValueData as String: data,
+            kSecAttrAccessible as String: kSecAttrAccessibleAfterFirstUnlock,
+        ]
+        SecItemAdd(addQuery as CFDictionary, nil)
+    }
+
+    static func load<T: Codable>(_ type: T.Type, forKey key: String) -> T? {
+        let query: [String: Any] = [
+            kSecClass as String: kSecClassGenericPassword,
+            kSecAttrService as String: service,
+            kSecAttrAccount as String: key,
+            kSecReturnData as String: true,
+            kSecMatchLimit as String: kSecMatchLimitOne,
+        ]
+
+        var result: AnyObject?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        guard status == errSecSuccess, let data = result as? Data else {
+            return nil
+        }
+        return try? JSONDecoder().decode(type, from: data)
     }
 }
