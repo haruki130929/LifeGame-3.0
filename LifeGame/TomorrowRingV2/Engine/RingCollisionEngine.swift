@@ -116,9 +116,11 @@ enum RingCollisionEngine {
     /// Compute the gap segments between filled items on the ring.
     /// Returns array of (startMinute, endMinute) for empty arcs.
     /// Only returns gaps that are visually meaningful (> minGapMinutes).
+    /// Compute gap segments between filled items.
+    /// Returns raw boundaries — visual spacing is handled by the filled arcs' insets.
+    /// `minGapMinutes`: gaps smaller than this are skipped (adjacent segments).
     static func gapSegments(
         items: [RingItemV2],
-        gapDegrees: Double = 2.0,
         minGapMinutes: Int = 20
     ) -> [(start: Int, end: Int)] {
         guard !items.isEmpty else {
@@ -126,7 +128,6 @@ enum RingCollisionEngine {
         }
 
         let total = RingTimeHelpers.totalMinutes
-        let padMinutes = Int(gapDegrees / 360.0 * Double(total))
         let sorted = items.sorted { $0.startMinute < $1.startMinute }
         var gaps: [(start: Int, end: Int)] = []
 
@@ -134,17 +135,13 @@ enum RingCollisionEngine {
             let currentEnd = sorted[i].endMinute
             let nextStart = sorted[(i + 1) % sorted.count].startMinute
 
-            // Raw gap between two segments
             let rawDuration = RingTimeHelpers.duration(from: currentEnd, to: nextStart)
-
-            // Skip if gap is too small to show a dashed segment
             guard rawDuration > minGapMinutes else { continue }
 
-            // Inset by padding so dashed segment doesn't overlap filled arcs
-            let gapStart = (currentEnd + padMinutes) % total
-            let gapEnd = (nextStart - padMinutes + total) % total
-
-            gaps.append((start: gapStart, end: gapEnd))
+            // Use raw boundaries — no extra padding.
+            // The filled arcs are already inset by totalInset, so the visual
+            // gap between filled↔dashed equals filled↔filled.
+            gaps.append((start: currentEnd, end: nextStart))
         }
 
         return gaps

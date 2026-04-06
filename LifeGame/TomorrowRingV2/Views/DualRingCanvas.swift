@@ -134,7 +134,7 @@ struct DualRingCanvas: View {
         let extraGap = Int(segmentGapDegrees / 360.0 * Double(RingTimeHelpers.totalMinutes)) / 2
         let totalInset = capInset + extraGap
 
-        let gaps = RingCollisionEngine.gapSegments(items: items, gapDegrees: segmentGapDegrees)
+        let gaps = RingCollisionEngine.gapSegments(items: items)
 
         // Dashed gap segments
         ForEach(Array(gaps.enumerated()), id: \.offset) { _, gap in
