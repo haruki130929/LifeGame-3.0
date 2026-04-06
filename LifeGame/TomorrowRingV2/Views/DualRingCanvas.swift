@@ -128,11 +128,8 @@ struct DualRingCanvas: View {
         opacity: Double,
         ring: ActiveRing
     ) -> some View {
-        // Cap inset compensates for rounded cap overhang
-        let capInset = capInsetMinutes(radius: radius, lineWidth: lineWidth)
-        // Extra visual gap (degrees → minutes)
-        let extraGap = Int(segmentGapDegrees / 360.0 * Double(RingTimeHelpers.totalMinutes)) / 2
-        let totalInset = capInset + extraGap
+        // Gap between segments (degrees → minutes per side)
+        let totalInset = Int(segmentGapDegrees / 360.0 * Double(RingTimeHelpers.totalMinutes)) / 2
 
         let gaps = RingCollisionEngine.gapSegments(items: items)
 
