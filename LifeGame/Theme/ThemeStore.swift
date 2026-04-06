@@ -145,6 +145,25 @@ final class ThemeStore: ObservableObject {
 
         let appRaw: Int = Self.loadValue(Int.self, key: Keys.appearance) ?? AppAppearance.system.rawValue
         self.appearance = AppAppearance(rawValue: appRaw) ?? .system
+
+        // 一次性回填：如果本地有資料但 iCloud KV 還沒有，把現有設定同步上去
+        // 這確保舊版存的設定也能備份到 iCloud KV
+        backfillToUbiquitousStoreIfNeeded()
+    }
+
+    /// 把目前的本地設定回填到 iCloud KV（只在 iCloud KV 為空時執行）
+    private func backfillToUbiquitousStoreIfNeeded() {
+        let ubiq = Self.ubiq
+        // 用 accentPreset 作為指標：如果 iCloud KV 裡沒有這個 key，代表從未回填過
+        guard ubiq.object(forKey: Keys.accentPreset) == nil else { return }
+
+        ubiq.set(fontScale, forKey: Keys.fontScale)
+        ubiq.set(backgroundStyle.rawValue, forKey: Keys.backgroundStyle)
+        ubiq.set(accentPreset.rawValue, forKey: Keys.accentPreset)
+        ubiq.set(customAccentHex, forKey: Keys.customAccentHex)
+        ubiq.set(useCustomAccent, forKey: Keys.useCustomAccent)
+        ubiq.set(appearance.rawValue, forKey: Keys.appearance)
+        ubiq.synchronize()
     }
     
     // MARK: - Computed
