@@ -97,22 +97,53 @@ final class ThemeStore: ObservableObject {
     /// 用於在必要時強制刷新根視圖（保險用）
     @Published var refreshID: UUID = UUID()
     
+    // MARK: - iCloud key-value backup (instant sync, survives reinstall)
+
+    private static let ubiq = NSUbiquitousKeyValueStore.default
+
+    /// Read from StorageManager first, then fall back to iCloud KV store.
+    /// This ensures theme survives app reinstall.
+    private static func loadValue<T: Codable>(_ type: T.Type, key: String) -> T? {
+        // 1. Try local (SwiftData) — most up-to-date
+        if let local: T = StorageManager.load(type, forKey: key) {
+            return local
+        }
+        // 2. Fall back to iCloud KV store — survives reinstall
+        return ubiq.object(forKey: key) as? T
+    }
+
+    /// Save to both StorageManager and iCloud KV store.
+    private static func saveValue<T: Codable>(_ value: T, key: String) {
+        StorageManager.save(value, forKey: key)
+        // Also mirror to iCloud KV store for reinstall recovery
+        if let intVal = value as? Int {
+            ubiq.set(intVal, forKey: key)
+        } else if let doubleVal = value as? Double {
+            ubiq.set(doubleVal, forKey: key)
+        } else if let stringVal = value as? String {
+            ubiq.set(stringVal, forKey: key)
+        } else if let boolVal = value as? Bool {
+            ubiq.set(boolVal, forKey: key)
+        }
+        ubiq.synchronize()
+    }
+
     // MARK: - Init
-    
+
     init() {
-        let savedScale: Double? = StorageManager.load(Double.self, forKey: Keys.fontScale)
+        let savedScale: Double? = Self.loadValue(Double.self, key: Keys.fontScale)
         self.fontScale = savedScale ?? 1.0
-        
-        let bgRaw: Int = StorageManager.load(Int.self, forKey: Keys.backgroundStyle) ?? BackgroundStyle.system.rawValue
+
+        let bgRaw: Int = Self.loadValue(Int.self, key: Keys.backgroundStyle) ?? BackgroundStyle.system.rawValue
         self.backgroundStyle = BackgroundStyle(rawValue: bgRaw) ?? .system
-        
-        let presetRaw: Int = StorageManager.load(Int.self, forKey: Keys.accentPreset) ?? AccentPreset.blue.rawValue
+
+        let presetRaw: Int = Self.loadValue(Int.self, key: Keys.accentPreset) ?? AccentPreset.blue.rawValue
         self.accentPreset = AccentPreset(rawValue: presetRaw) ?? .blue
-        
-        self.customAccentHex = StorageManager.load(String.self, forKey: Keys.customAccentHex) ?? ""
-        self.useCustomAccent = StorageManager.load(Bool.self, forKey: Keys.useCustomAccent) ?? false
-        
-        let appRaw: Int = StorageManager.load(Int.self, forKey: Keys.appearance) ?? AppAppearance.system.rawValue
+
+        self.customAccentHex = Self.loadValue(String.self, key: Keys.customAccentHex) ?? ""
+        self.useCustomAccent = Self.loadValue(Bool.self, key: Keys.useCustomAccent) ?? false
+
+        let appRaw: Int = Self.loadValue(Int.self, key: Keys.appearance) ?? AppAppearance.system.rawValue
         self.appearance = AppAppearance(rawValue: appRaw) ?? .system
     }
     
@@ -141,40 +172,40 @@ final class ThemeStore: ObservableObject {
     
     func setFontScale(_ scale: Double) {
         fontScale = scale
-        StorageManager.save(scale, forKey: Keys.fontScale)
+        Self.saveValue(scale, key: Keys.fontScale)
     }
-    
+
     func setBackgroundStyle(_ style: BackgroundStyle) {
         backgroundStyle = style
-        StorageManager.save(style.rawValue, forKey: Keys.backgroundStyle)
+        Self.saveValue(style.rawValue, key: Keys.backgroundStyle)
     }
-    
+
     func setAccentPreset(_ preset: AccentPreset) {
         accentPreset = preset
         useCustomAccent = false
-        StorageManager.save(preset.rawValue, forKey: Keys.accentPreset)
-        StorageManager.save(false, forKey: Keys.useCustomAccent)
+        Self.saveValue(preset.rawValue, key: Keys.accentPreset)
+        Self.saveValue(false, key: Keys.useCustomAccent)
     }
-    
+
     func setUseCustomAccent(_ enabled: Bool) {
         useCustomAccent = enabled
-        StorageManager.save(enabled, forKey: Keys.useCustomAccent)
+        Self.saveValue(enabled, key: Keys.useCustomAccent)
     }
-    
+
     /// 允許輸入 "#FF8800" / "FF8800" / "fff" 這三種
     func setCustomAccentHex(_ hex: String) {
         customAccentHex = hex
-        StorageManager.save(hex, forKey: Keys.customAccentHex)
-        
+        Self.saveValue(hex, key: Keys.customAccentHex)
+
         if Color(hex: hex) != nil {
             useCustomAccent = true
-            StorageManager.save(true, forKey: Keys.useCustomAccent)
+            Self.saveValue(true, key: Keys.useCustomAccent)
         }
     }
-    
+
     func setAppearance(_ a: AppAppearance) {
         appearance = a
-        StorageManager.save(a.rawValue, forKey: Keys.appearance)
+        Self.saveValue(a.rawValue, key: Keys.appearance)
     }
     
     func bumpRefresh() {
