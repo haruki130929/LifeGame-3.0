@@ -35,8 +35,8 @@ struct DualRingCanvas: View {
 
     // MARK: - Layout constants
 
-    private var innerLineWidth: CGFloat { mode == .card ? 10 : 28 }
-    private var outerLineWidth: CGFloat { mode == .card ? 12 : 32 }
+    private var innerLineWidth: CGFloat { mode == .card ? 10 : 18 }
+    private var outerLineWidth: CGFloat { mode == .card ? 12 : 22 }
     private var ringGap: CGFloat { mode == .card ? 6 : 10 }
     private let segmentGapDegrees: Double = 2.5  // extra visual gap on top of cap inset
     private let floatScale: CGFloat = 1.08
