@@ -22,6 +22,7 @@ final class MoodHistoryStore: ObservableObject {
     @Published private(set) var points: [MoodPoint] = []
 
     private let saveKey = "mood_history_points_v1"
+    private var syncHelper: StoreSyncHelper?
 
     init() {
         migrateFromUserDefaultsIfNeeded()
@@ -30,6 +31,14 @@ final class MoodHistoryStore: ObservableObject {
         // 接收 Watch 傳來的心情資料
         WatchChangeObserver.shared.onMoodEntriesFromWatch = { [weak self] entries in
             self?.mergeFromWatch(entries)
+        }
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        if let saved: [MoodPoint] = StorageManager.load([MoodPoint].self, forKey: saveKey) {
+            points = saved
+            points.sort { $0.timestamp < $1.timestamp }
         }
     }
 

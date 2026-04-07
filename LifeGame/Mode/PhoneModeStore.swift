@@ -6,19 +6,31 @@ import Combine
 final class PhoneModeStore: ObservableObject {
 
     @Published var mode: PhoneMode {
-        didSet { saveMode() }
+        didSet { if !isReloading { saveMode() } }
     }
 
     @Published var quickPages: [QuickPage] {
-        didSet { savePages() }
+        didSet { if !isReloading { savePages() } }
     }
 
     private let modeKey = "phone_mode_v1"
     private let pagesKey = "quick_pages_v1"
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
 
     init() {
         self.mode = StorageManager.load(PhoneMode.self, forKey: modeKey) ?? .full
         self.quickPages = StorageManager.load([QuickPage].self, forKey: pagesKey) ?? Self.defaultPages
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    // MARK: - Cross-device Sync
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        mode = StorageManager.load(PhoneMode.self, forKey: modeKey) ?? .full
+        quickPages = StorageManager.load([QuickPage].self, forKey: pagesKey) ?? Self.defaultPages
     }
 
     // MARK: - 預設頁面

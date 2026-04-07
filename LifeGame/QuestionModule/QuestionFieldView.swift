@@ -42,38 +42,56 @@ struct QuestionFieldView: View {
 
     private var singleSelectField: some View {
         let options = (question.options ?? []).map { DynamicOption(rawValue: $0) }
-        return CheckboxSingleSelectList(
-            title: question.title,
-            options: options,
-            selection: Binding(
-                get: {
-                    let val = answer?.stringValue ?? ""
-                    return DynamicOption(rawValue: val)
-                },
-                set: { upsertAnswer { $0.stringValue = $1.rawValue }($0) }
+        return VStack(alignment: .leading, spacing: 4) {
+            CheckboxSingleSelectList(
+                title: question.title,
+                options: options,
+                selection: Binding(
+                    get: {
+                        let val = answer?.stringValue ?? ""
+                        return DynamicOption(rawValue: val)
+                    },
+                    set: { upsertAnswer { $0.stringValue = $1.rawValue }($0) }
+                )
             )
-        )
+            if answer?.stringValue == "其他" {
+                TextField("其他（請填寫）", text: Binding(
+                    get: { answer?.otherText ?? "" },
+                    set: { upsertAnswer { $0.otherText = $1 }($0) }
+                ))
+                .textFieldStyle(.roundedBorder)
+            }
+        }
     }
 
     // MARK: - Multi Select
 
     private var multiSelectField: some View {
         let options = (question.options ?? []).map { DynamicOption(rawValue: $0) }
-        return CheckboxMultiSelectList(
-            title: question.title,
-            options: options,
-            selected: Binding(
-                get: {
-                    let vals = answer?.stringArrayValue ?? []
-                    return Set(vals.map { DynamicOption(rawValue: $0) })
-                },
-                set: { newSet in
-                    var a = answer ?? CustomAnswer(questionId: question.id)
-                    a.stringArrayValue = Array(newSet.map(\.rawValue))
-                    upsertInPlace(a)
-                }
+        return VStack(alignment: .leading, spacing: 4) {
+            CheckboxMultiSelectList(
+                title: question.title,
+                options: options,
+                selected: Binding(
+                    get: {
+                        let vals = answer?.stringArrayValue ?? []
+                        return Set(vals.map { DynamicOption(rawValue: $0) })
+                    },
+                    set: { newSet in
+                        var a = answer ?? CustomAnswer(questionId: question.id)
+                        a.stringArrayValue = Array(newSet.map(\.rawValue))
+                        upsertInPlace(a)
+                    }
+                )
             )
-        )
+            if answer?.stringArrayValue?.contains("其他") == true {
+                TextField("其他（請填寫）", text: Binding(
+                    get: { answer?.otherText ?? "" },
+                    set: { upsertAnswer { $0.otherText = $1 }($0) }
+                ))
+                .textFieldStyle(.roundedBorder)
+            }
+        }
     }
 
     // MARK: - Free Text
@@ -173,6 +191,19 @@ struct QuestionFieldView: View {
                         }
                     )
                 )
+                if answer?.nestedValue?[group.label]?.contains("其他") == true {
+                    TextField("其他（請填寫）", text: Binding(
+                        get: { answer?.nestedOtherText?[group.label] ?? "" },
+                        set: { newText in
+                            var a = answer ?? CustomAnswer(questionId: question.id)
+                            var texts = a.nestedOtherText ?? [:]
+                            texts[group.label] = newText
+                            a.nestedOtherText = texts
+                            upsertInPlace(a)
+                        }
+                    ))
+                    .textFieldStyle(.roundedBorder)
+                }
             }
         }
     }

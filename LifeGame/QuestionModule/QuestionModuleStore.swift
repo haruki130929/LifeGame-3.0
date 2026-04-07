@@ -5,18 +5,30 @@ import SwiftUI
 @MainActor
 final class QuestionModuleStore: ObservableObject {
     @Published private(set) var modules: [DailyLogModule] {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
 
     private let key = "question_modules_v1"
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
 
     init() {
         if let saved: [DailyLogModule] = StorageManager.load([DailyLogModule].self, forKey: key) {
             self.modules = saved
         } else {
-            // 首次啟動：建立 9 個內建模組，全部啟用
             self.modules = Self.defaultBuiltInModules()
         }
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    /// 從 StorageManager 重新載入（畫面出現時 / CloudKit 同步後呼叫）
+    func reloadFromStorage() {
+        guard let saved: [DailyLogModule] = StorageManager.load([DailyLogModule].self, forKey: key) else { return }
+        guard saved != modules else { return }
+        isReloading = true
+        modules = saved
+        isReloading = false
+        debugLog("☁️ QuestionModuleStore 已從遠端同步更新")
     }
 
     // MARK: - 預設內建模組

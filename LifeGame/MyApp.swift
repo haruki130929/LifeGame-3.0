@@ -101,6 +101,7 @@ struct LifeGameApp: App {
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
                         // 版本更新內容
                         .onAppear {
+                            coordinator.deduplicateIfNeeded()
                             coordinator.diagnoseiCloudSync()
                             if VersionTracker.shouldShowWhatsNew {
                                 showWhatsNew = true

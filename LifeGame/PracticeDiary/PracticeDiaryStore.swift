@@ -8,9 +8,16 @@ final class PracticeDiaryStore: ObservableObject {
     @Published private var entriesCache: [UUID: [PracticeEntry]] = [:]
 
     private let diariesKey = "practice_diaries_v1"
+    private var syncHelper: StoreSyncHelper?
 
     init() {
         loadDiaries()
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        diaries = StorageManager.load([PracticeDiary].self, forKey: diariesKey) ?? []
+        entriesCache = [:]
     }
 
     // MARK: - Diary CRUD

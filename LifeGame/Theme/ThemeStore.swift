@@ -96,6 +96,8 @@ final class ThemeStore: ObservableObject {
     
     /// 用於在必要時強制刷新根視圖（保險用）
     @Published var refreshID: UUID = UUID()
+
+    private var syncHelper: StoreSyncHelper?
     
     // MARK: - Keychain backup (survives app reinstall, no sync needed)
 
@@ -135,6 +137,27 @@ final class ThemeStore: ObservableObject {
 
         // 一次性回填：確保舊版存的設定也備份到 Keychain
         backfillToKeychainIfNeeded()
+
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    // MARK: - Cross-device Sync
+
+    func reloadFromStorage() {
+        let savedScale: Double? = Self.loadValue(Double.self, key: Keys.fontScale)
+        fontScale = savedScale ?? 1.0
+
+        let bgRaw: Int = Self.loadValue(Int.self, key: Keys.backgroundStyle) ?? BackgroundStyle.system.rawValue
+        backgroundStyle = BackgroundStyle(rawValue: bgRaw) ?? .system
+
+        let presetRaw: Int = Self.loadValue(Int.self, key: Keys.accentPreset) ?? AccentPreset.blue.rawValue
+        accentPreset = AccentPreset(rawValue: presetRaw) ?? .blue
+
+        customAccentHex = Self.loadValue(String.self, key: Keys.customAccentHex) ?? ""
+        useCustomAccent = Self.loadValue(Bool.self, key: Keys.useCustomAccent) ?? false
+
+        let appRaw: Int = Self.loadValue(Int.self, key: Keys.appearance) ?? AppAppearance.system.rawValue
+        appearance = AppAppearance(rawValue: appRaw) ?? .system
     }
 
     /// 把目前的本地設定回填到 Keychain（只在 Keychain 為空時執行）

@@ -151,4 +151,41 @@ enum NotificationManager {
         UNUserNotificationCenter.current()
             .removePendingNotificationRequests(withIdentifiers: [hourlyMoodReminderID])
     }
+
+    // MARK: - 待辦截止提醒
+
+    /// 排程待辦到期通知
+    static func scheduleTodoReminder(id: UUID, title: String, dueDate: Date) {
+        let center = UNUserNotificationCenter.current()
+        let identifier = "todo_due_\(id.uuidString)"
+
+        // 移除舊的（更新截止日期時）
+        center.removePendingNotificationRequests(withIdentifiers: [identifier])
+
+        // 如果到期時間已過，不排程
+        guard dueDate > Date() else { return }
+
+        let content = UNMutableNotificationContent()
+        content.title = "待辦到期"
+        content.body = title
+        content.sound = .default
+
+        let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: dueDate)
+        let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)
+        let req = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
+
+        center.add(req) { err in
+            if let err = err {
+                debugLog("❌ scheduleTodoReminder error:", err)
+            } else {
+                debugLog("✅ scheduled todo reminder: \(title) at \(dueDate)")
+            }
+        }
+    }
+
+    /// 取消待辦到期通知
+    static func cancelTodoReminder(id: UUID) {
+        UNUserNotificationCenter.current()
+            .removePendingNotificationRequests(withIdentifiers: ["todo_due_\(id.uuidString)"])
+    }
 }

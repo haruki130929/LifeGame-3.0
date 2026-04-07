@@ -25,7 +25,10 @@ struct QuestionModuleSettingsView: View {
         }
         .environment(\.editMode, isEditMode ? .constant(.active) : .constant(.inactive))
         .navigationTitle("問題模組管理")
-        .onAppear { fab.apply(context: .feature(.questionModule)) }
+        .onAppear {
+            fab.apply(context: .feature(.questionModule))
+            moduleStore.reloadFromStorage()
+        }
         .onDisappear { fab.popActions() }
         .onChange(of: fab.route) { _, newRoute in
             switch newRoute {

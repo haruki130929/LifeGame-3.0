@@ -254,6 +254,8 @@ struct CustomAnswer: Codable, Equatable, Identifiable, Sendable {
     var nestedValue: [String: [String]]?  // 巢狀多選: groupLabel -> [selectedOptions]
     var dateValue: Date?
     var photoData: [Data]?
+    var otherText: String?               // 選「其他」時的自由填寫
+    var nestedOtherText: [String: String]? // 巢狀多選各分組的「其他」填寫
 }
 
 // MARK: - 動態選項包裝（讓 String 可搭配 CheckboxSingleSelectList / CheckboxMultiSelectList）

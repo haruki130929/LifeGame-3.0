@@ -24,10 +24,12 @@ final class MandalaStore: ObservableObject {
     }
 
     @Published var documents: [Document] {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
 
     @Published var currentIndex: Int = 0
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
     /// 每次顏色變更時更新，讓 SwiftUI 偵測到變化並重新渲染
     @Published private(set) var colorRevision = UUID()
 
@@ -65,6 +67,15 @@ final class MandalaStore: ObservableObject {
         // 全新
         else {
             self.documents = [.empty()]
+        }
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let docs = StorageManager.load([Document].self, forKey: keyV2), !docs.isEmpty {
+            documents = docs
         }
     }
 

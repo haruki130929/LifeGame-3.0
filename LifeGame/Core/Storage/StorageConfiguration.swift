@@ -39,6 +39,9 @@ final class StorageConfiguration: @unchecked Sendable {
 
         self.currentMode = StorageMode(rawValue: raw) ?? .local
 
+        // 確保 Keychain 永遠有最新的儲存模式（補上舊版本沒存到的情況）
+        KeychainHelper.save(currentMode.rawValue, forKey: Keys.keychainStorageMode)
+
         if let pendingRaw = defaults.string(forKey: Keys.pendingMode) {
             self.pendingMode = StorageMode(rawValue: pendingRaw)
         }

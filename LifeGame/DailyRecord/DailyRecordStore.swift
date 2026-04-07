@@ -4,13 +4,26 @@ import Combine
 @MainActor
 final class DailyRecordStore: ObservableObject {
     private static let storageKey = "daily_records_v1"
-    
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
+
     // key: "2025-12-30"
     @Published private(set) var records: [String: DailyRecord] = [:] {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
-    
-    init() { load() }
+
+    init() {
+        load()
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let saved: [String: DailyRecord] = StorageManager.load([String: DailyRecord].self, forKey: Self.storageKey) {
+            records = saved
+        }
+    }
     
     func record(for date: Date) -> DailyRecord? {
         records[key(for: date)]

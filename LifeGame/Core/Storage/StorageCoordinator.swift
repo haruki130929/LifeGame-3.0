@@ -56,7 +56,14 @@ final class StorageCoordinator {
                 schema: schema
             )
         }
+
     }
+
+    // MARK: - Remote change notification
+
+    /// 當 CloudKit 完成 import（從雲端拉取資料）時發送的通知名稱
+    /// 各 Store 可監聽此通知來重新載入資料
+    static let didReceiveRemoteChange = Notification.Name("StorageCoordinator.didReceiveRemoteChange")
 
     // MARK: - Container creation
 
@@ -142,6 +149,65 @@ final class StorageCoordinator {
         modelContainer.mainContext
     }
 
+    // MARK: - CloudKit 去重
+
+    /// 啟動時清理 CloudKit 同步造成的重複資料
+    func deduplicateIfNeeded() {
+        let context = mainContext
+
+        // 1. KeyValueRecord：同 key 只留 updatedAt 最新的
+        do {
+            let allKV = try context.fetch(FetchDescriptor<KeyValueRecord>())
+            let grouped = Dictionary(grouping: allKV, by: \.key)
+            for (key, records) in grouped where records.count > 1 {
+                let sorted = records.sorted { $0.updatedAt > $1.updatedAt }
+                for dup in sorted.dropFirst() {
+                    context.delete(dup)
+                }
+                debugLog("🧹 清理重複 KeyValueRecord: key=\(key), 刪除 \(sorted.count - 1) 筆")
+            }
+        } catch {
+            debugLog("⚠️ KeyValueRecord 去重失敗: \(error)")
+        }
+
+        // 2. BagItemModel：同 name + icon 只留一筆（保留 isRequired=true 優先）
+        do {
+            let allBag = try context.fetch(FetchDescriptor<BagItemModel>())
+            let grouped = Dictionary(grouping: allBag) { "\($0.name)|\($0.icon)" }
+            for (_, items) in grouped where items.count > 1 {
+                // 優先保留 isRequired=true 或 isChecked=true 的
+                let sorted = items.sorted { a, b in
+                    if a.isRequired != b.isRequired { return a.isRequired }
+                    if a.isChecked != b.isChecked { return a.isChecked }
+                    return false
+                }
+                for dup in sorted.dropFirst() {
+                    context.delete(dup)
+                }
+                debugLog("🧹 清理重複 BagItemModel: \(items.first?.name ?? ""), 刪除 \(sorted.count - 1) 筆")
+            }
+        } catch {
+            debugLog("⚠️ BagItemModel 去重失敗: \(error)")
+        }
+
+        // 3. DailyLogRecord：同 id 只留一筆（保留最新 date）
+        do {
+            let allLog = try context.fetch(FetchDescriptor<DailyLogRecord>())
+            let grouped = Dictionary(grouping: allLog, by: \.id)
+            for (id, records) in grouped where records.count > 1 {
+                let sorted = records.sorted { $0.date > $1.date }
+                for dup in sorted.dropFirst() {
+                    context.delete(dup)
+                }
+                debugLog("🧹 清理重複 DailyLogRecord: id=\(id), 刪除 \(sorted.count - 1) 筆")
+            }
+        } catch {
+            debugLog("⚠️ DailyLogRecord 去重失敗: \(error)")
+        }
+
+        context.safeSave()
+    }
+
     // MARK: - CloudKit 同步診斷
 
     /// 啟動時呼叫，印出 CloudKit 同步狀態與資料筆數
@@ -213,6 +279,10 @@ final class StorageCoordinator {
                     debugLog("☁️ CloudKit 同步 [\(typeText)] ❌ 失敗：\(error)")
                 } else {
                     debugLog("☁️ CloudKit 同步 [\(typeText)] ✅ 完成")
+                    // 從雲端拉取完成 → 通知各 Store 重新載入
+                    if event.type == .import {
+                        NotificationCenter.default.post(name: StorageCoordinator.didReceiveRemoteChange, object: nil)
+                    }
                 }
             } else {
                 debugLog("☁️ CloudKit 同步 [\(typeText)] ⏳ 開始...")

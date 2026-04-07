@@ -6,9 +6,19 @@ import SwiftUI
 final class WeekReviewStore: ObservableObject {
     
     private let storageKey = "weekReview.data"
+    private var syncHelper: StoreSyncHelper?
     @Published private(set) var items: [String: WeekReview] = [:]
-    
-    init() { loadFromDisk() }
+
+    init() {
+        loadFromDisk()
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        if let saved: [String: WeekReview] = StorageManager.load([String: WeekReview].self, forKey: storageKey) {
+            items = saved
+        }
+    }
     
     func review(for weekKey: String) -> WeekReview? {
         items[weekKey]

@@ -7,10 +7,12 @@ final class MonthlyScoreStore: ObservableObject {
     
     // MARK: - Storage
     private static let storageKey = "monthly_scores_by_day_v1"
-    
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
+
     /// key: "yyyy-MM-dd" -> score (Int)
     @Published private(set) var scoresByDay: [String: Int] = [:] {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
     
     /// （可選）給某些舊 UI 綁定用：當成「今天分數」
@@ -21,6 +23,16 @@ final class MonthlyScoreStore: ObservableObject {
     
     init() {
         load()
+        score = score(for: Date()) ?? 0
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let saved: [String: Int] = StorageManager.load([String: Int].self, forKey: Self.storageKey) {
+            scoresByDay = saved
+        }
         score = score(for: Date()) ?? 0
     }
     

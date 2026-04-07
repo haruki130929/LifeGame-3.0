@@ -9,6 +9,11 @@ final class WeeklyScheduleStore: ObservableObject {
 
     @Published var scheduleByDay: [String: [RingItem]] = [:]
     private var hasLoaded = false
+    private var syncHelper: StoreSyncHelper?
+
+    init() {
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
 
     func loadIfNeeded() {
         guard !hasLoaded else { return }
@@ -16,6 +21,15 @@ final class WeeklyScheduleStore: ObservableObject {
         if let saved: [String: [RingItem]] = StorageManager.load([String: [RingItem]].self, forKey: storageKey) {
             scheduleByDay = saved
         }
+    }
+
+    // MARK: - Cross-device Sync
+
+    func reloadFromStorage() {
+        if let saved: [String: [RingItem]] = StorageManager.load([String: [RingItem]].self, forKey: storageKey) {
+            scheduleByDay = saved
+        }
+        hasLoaded = true
     }
 
     // MARK: - CRUD

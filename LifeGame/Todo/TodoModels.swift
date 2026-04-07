@@ -33,4 +33,11 @@ struct TodoItem: Identifiable, Codable, Equatable {
     var quadrant: TodoQuadrant
     var isDone: Bool = false
     var createdAt: Date = Date()
+    var dueDate: Date?
+
+    /// 距離截止日期的剩餘天數（負數表示已過期）
+    var daysUntilDue: Int? {
+        guard let dueDate else { return nil }
+        return Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: .now), to: Calendar.current.startOfDay(for: dueDate)).day
+    }
 }

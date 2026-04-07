@@ -22,10 +22,12 @@ struct CustomTab: Identifiable, Codable, Equatable {
 @MainActor
 final class CustomTabStore: ObservableObject {
     @Published private(set) var tabs: [CustomTab] {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
 
     private let key = "custom_tabs_v1"
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
 
     init() {
         if var saved: [CustomTab] = StorageManager.load([CustomTab].self, forKey: key) {
@@ -56,6 +58,18 @@ final class CustomTabStore: ObservableObject {
                     cardTypes: [.tomorrowRing, .calendar, .todoQuadrant, .monthlyScoreCalendar]
                 )
             ]
+        }
+
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    // MARK: - Cross-device Sync
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let saved: [CustomTab] = StorageManager.load([CustomTab].self, forKey: key) {
+            tabs = saved
         }
     }
 

@@ -27,6 +27,8 @@ final class CharacterStore: ObservableObject {
     @Published private(set) var avatarData: Data?
     @Published var abilities: AbilitySet
 
+    private var syncHelper: StoreSyncHelper?
+
     /// 方便 View 直接使用的計算屬性
     var avatarImage: UIImage? {
         guard let data = avatarData else { return nil }
@@ -48,6 +50,14 @@ final class CharacterStore: ObservableObject {
         self.name = StorageManager.load(String.self, forKey: Keys.name) ?? ""
         self.avatarData = StorageManager.load(Data.self, forKey: Keys.avatar)
         self.abilities = StorageManager.load(AbilitySet.self, forKey: Keys.abilities) ?? .default
+
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        name = StorageManager.load(String.self, forKey: Keys.name) ?? ""
+        avatarData = StorageManager.load(Data.self, forKey: Keys.avatar)
+        abilities = StorageManager.load(AbilitySet.self, forKey: Keys.abilities) ?? .default
     }
 
     // MARK: - Mutations

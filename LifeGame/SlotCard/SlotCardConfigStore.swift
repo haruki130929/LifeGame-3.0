@@ -16,10 +16,12 @@ final class SlotCardConfigStore: ObservableObject {
     }
 
     @Published private(set) var config: Config {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
 
     private let key = "slot_card_config_v5"  // v5：睡前加入本月結算
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
 
     // MARK: - Init
 
@@ -46,6 +48,18 @@ final class SlotCardConfigStore: ObservableObject {
         debugLog("✅ SlotCardConfigStore init (v4 – 5 slots)")
         debugLog("beforeLeave types:", config.beforeLeave.map { $0.type.rawValue })
         debugLog("morning types:", config.morning.map { $0.type.rawValue })
+
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    // MARK: - Cross-device Sync
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let decoded: Config = StorageManager.load(Config.self, forKey: key) {
+            config = decoded
+        }
     }
 
     // MARK: - 預設卡片配置

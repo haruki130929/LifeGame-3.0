@@ -5,6 +5,7 @@ import SwiftUI
 @MainActor
 final class LedgerStore: ObservableObject {
     private static let storageKey = "ledger_entries_v1"
+    private var syncHelper: StoreSyncHelper?
     private var isLoading = false
     
     @Published var entries: [LedgerEntry] = [] {
@@ -29,6 +30,15 @@ final class LedgerStore: ObservableObject {
     
     init() {
         load()
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isLoading = true
+        defer { isLoading = false }
+        if let saved: [LedgerEntry] = StorageManager.load([LedgerEntry].self, forKey: Self.storageKey) {
+            entries = saved
+        }
     }
     
     func addExpense(title: String, amount: Int, note: String? = nil, wishID: UUID? = nil) {

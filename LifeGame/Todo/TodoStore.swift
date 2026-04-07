@@ -8,8 +8,11 @@ final class TodoQuadrantStore: ObservableObject {
     private let storageKey = "todo_quadrant_v1"
     
     @Published var items: [TodoItem] = [] {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
+
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
     
     init() {
         load()
@@ -18,20 +21,51 @@ final class TodoQuadrantStore: ObservableObject {
         WatchChangeObserver.shared.onTodoItemsFromWatch = { [weak self] watchItems in
             self?.mergeFromWatch(watchItems)
         }
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let saved: [TodoItem] = StorageManager.load([TodoItem].self, forKey: storageKey) {
+            items = saved
+        } else {
+            items = []
+        }
     }
     
-    func add(title: String, quadrant: TodoQuadrant) {
+    func add(title: String, quadrant: TodoQuadrant, dueDate: Date? = nil) {
         let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !t.isEmpty else { return }
-        items.insert(TodoItem(title: t, quadrant: quadrant), at: 0)
+        let item = TodoItem(title: t, quadrant: quadrant, dueDate: dueDate)
+        items.insert(item, at: 0)
+        if let dueDate {
+            NotificationManager.scheduleTodoReminder(id: item.id, title: t, dueDate: dueDate)
+        }
     }
-    
+
+    func updateDueDate(_ dueDate: Date?, for item: TodoItem) {
+        guard let idx = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[idx].dueDate = dueDate
+        if let dueDate {
+            NotificationManager.scheduleTodoReminder(id: item.id, title: item.title, dueDate: dueDate)
+        } else {
+            NotificationManager.cancelTodoReminder(id: item.id)
+        }
+    }
+
     func toggleDone(_ item: TodoItem) {
         guard let idx = items.firstIndex(where: { $0.id == item.id }) else { return }
         items[idx].isDone.toggle()
+        if items[idx].isDone {
+            NotificationManager.cancelTodoReminder(id: item.id)
+        } else if let dueDate = items[idx].dueDate {
+            NotificationManager.scheduleTodoReminder(id: item.id, title: item.title, dueDate: dueDate)
+        }
     }
-    
+
     func delete(_ item: TodoItem) {
+        NotificationManager.cancelTodoReminder(id: item.id)
         items.removeAll { $0.id == item.id }
     }
     

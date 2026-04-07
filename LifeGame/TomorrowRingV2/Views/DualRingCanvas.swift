@@ -35,9 +35,24 @@ struct DualRingCanvas: View {
 
     // MARK: - Layout constants
 
-    private var innerLineWidth: CGFloat { mode == .card ? 10 : 18 }
-    private var outerLineWidth: CGFloat { mode == .card ? 12 : 22 }
-    private var ringGap: CGFloat { mode == .card ? 6 : 10 }
+    private var innerLineWidth: CGFloat {
+        switch mode {
+        case .card: return 10
+        case .detail: return AppLayout.isIPad ? 28 : 18
+        }
+    }
+    private var outerLineWidth: CGFloat {
+        switch mode {
+        case .card: return 12
+        case .detail: return AppLayout.isIPad ? 34 : 22
+        }
+    }
+    private var ringGap: CGFloat {
+        switch mode {
+        case .card: return 6
+        case .detail: return AppLayout.isIPad ? 14 : 10
+        }
+    }
     private let segmentGapDegrees: Double = 2.5  // extra visual gap on top of cap inset
     private let floatScale: CGFloat = 1.08
     private let iconSize: CGFloat = 14
@@ -136,8 +151,10 @@ struct DualRingCanvas: View {
         // Dashed gap segments (inset by capInset so gap↔filled spacing = filled↔filled spacing)
         ForEach(Array(gaps.enumerated()), id: \.offset) { _, gap in
             let gapDuration = RingTimeHelpers.duration(from: gap.start, to: gap.end)
-            let insetStart = (gap.start + totalInset) % RingTimeHelpers.totalMinutes
-            let insetEnd = (gap.end - totalInset + RingTimeHelpers.totalMinutes) % RingTimeHelpers.totalMinutes
+            // 完整圓時不做 inset，避免在 0 點產生缺口
+            let isFullCircle = items.isEmpty
+            let insetStart = isFullCircle ? gap.start : (gap.start + totalInset) % RingTimeHelpers.totalMinutes
+            let insetEnd = isFullCircle ? gap.end : (gap.end - totalInset + RingTimeHelpers.totalMinutes) % RingTimeHelpers.totalMinutes
 
             DashedArcOutline(
                 startMinute: insetStart,

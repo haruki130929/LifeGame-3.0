@@ -27,12 +27,16 @@ enum StorageManager {
             var descriptor = FetchDescriptor<KeyValueRecord>(
                 predicate: #Predicate { $0.key == key }
             )
-            descriptor.fetchLimit = 1
-            let existing = try context.fetch(descriptor).first
+            descriptor.sortBy = [SortDescriptor(\.updatedAt, order: .reverse)]
+            let records = try context.fetch(descriptor)
 
-            if let existing {
-                existing.data = data
-                existing.updatedAt = .now
+            if let newest = records.first {
+                newest.data = data
+                newest.updatedAt = .now
+                // 清理 CloudKit 同步造成的重複 record
+                for dup in records.dropFirst() {
+                    context.delete(dup)
+                }
             } else {
                 context.insert(KeyValueRecord(key: key, data: data))
             }
@@ -55,10 +59,23 @@ enum StorageManager {
             var descriptor = FetchDescriptor<KeyValueRecord>(
                 predicate: #Predicate { $0.key == key }
             )
-            descriptor.fetchLimit = 1
-            guard let record = try context.fetch(descriptor).first else {
+            descriptor.sortBy = [SortDescriptor(\.updatedAt, order: .reverse)]
+            let records = try context.fetch(descriptor)
+
+            // 取最新的一筆（處理 unique constraint 生效前的重複資料）
+            guard let record = records.first else {
                 return nil
             }
+
+            // 清理多餘的重複 record
+            if records.count > 1 {
+                for dup in records.dropFirst() {
+                    context.delete(dup)
+                }
+                try context.save()
+                debugLog("Storage: 清理了 \(records.count - 1) 筆重複的 key=\(key)")
+            }
+
             return try JSONDecoder().decode(type, from: record.data)
         } catch {
             debugLog("Storage load failed:", error)

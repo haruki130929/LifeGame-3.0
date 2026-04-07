@@ -20,25 +20,37 @@ final class CalendarSettingsStore: ObservableObject {
     /// 1=週日, 2=週一...7=週六（預設週日）
     @Published var firstWeekday: Int = 1 {
         didSet {
-            StorageManager.save(firstWeekday, forKey: Keys.firstWeekday)
+            if !isReloading { StorageManager.save(firstWeekday, forKey: Keys.firstWeekday) }
         }
     }
 
     /// 是否同步 Apple 內建行事曆
     @Published var syncAppleCalendar: Bool = false {
         didSet {
-            StorageManager.save(syncAppleCalendar, forKey: Keys.syncAppleCalendar)
+            if !isReloading { StorageManager.save(syncAppleCalendar, forKey: Keys.syncAppleCalendar) }
         }
     }
 
     /// 顏色代表行程（色碼 → 固定行程名稱）
     @Published var colorPresets: [EventColorPreset] = [] {
         didSet {
-            StorageManager.save(colorPresets, forKey: Keys.colorPresets)
+            if !isReloading { StorageManager.save(colorPresets, forKey: Keys.colorPresets) }
         }
     }
 
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
+
     init() {
+        firstWeekday = StorageManager.load(Int.self, forKey: Keys.firstWeekday) ?? 1
+        syncAppleCalendar = StorageManager.load(Bool.self, forKey: Keys.syncAppleCalendar) ?? false
+        colorPresets = StorageManager.load([EventColorPreset].self, forKey: Keys.colorPresets) ?? []
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
         firstWeekday = StorageManager.load(Int.self, forKey: Keys.firstWeekday) ?? 1
         syncAppleCalendar = StorageManager.load(Bool.self, forKey: Keys.syncAppleCalendar) ?? false
         colorPresets = StorageManager.load([EventColorPreset].self, forKey: Keys.colorPresets) ?? []

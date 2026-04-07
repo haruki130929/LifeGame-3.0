@@ -8,13 +8,24 @@ final class CalendarStore: ObservableObject {
     private static let storageKey = "calendar_events_v1"
     
     @Published var events: [CalendarEvent] = [] {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
-    
+
     private let eventStore = EKEventStore()
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
     
     init() {
         load()
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let saved: [CalendarEvent] = StorageManager.load([CalendarEvent].self, forKey: Self.storageKey) {
+            events = saved
+        }
     }
     
     func requestAccessIfNeeded() async -> Bool {

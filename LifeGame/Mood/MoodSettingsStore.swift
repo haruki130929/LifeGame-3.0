@@ -10,12 +10,15 @@ final class MoodSettingsStore: ObservableObject {
     }
 
     @Published var minScore: Int = 0 {
-        didSet { StorageManager.save(minScore, forKey: Keys.minScore) }
+        didSet { if !isReloading { StorageManager.save(minScore, forKey: Keys.minScore) } }
     }
 
     @Published var maxScore: Int = 10 {
-        didSet { StorageManager.save(maxScore, forKey: Keys.maxScore) }
+        didSet { if !isReloading { StorageManager.save(maxScore, forKey: Keys.maxScore) } }
     }
+
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
 
     /// Slider / 圖表使用的區間
     var scoreRange: ClosedRange<Double> {
@@ -23,6 +26,14 @@ final class MoodSettingsStore: ObservableObject {
     }
 
     init() {
+        minScore = StorageManager.load(Int.self, forKey: Keys.minScore) ?? 0
+        maxScore = StorageManager.load(Int.self, forKey: Keys.maxScore) ?? 10
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
         minScore = StorageManager.load(Int.self, forKey: Keys.minScore) ?? 0
         maxScore = StorageManager.load(Int.self, forKey: Keys.maxScore) ?? 10
     }

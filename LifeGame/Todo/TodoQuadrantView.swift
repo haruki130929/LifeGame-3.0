@@ -137,6 +137,8 @@ private struct AddTodoToQuadrantSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var title = ""
+    @State private var hasDueDate = false
+    @State private var dueDate = Date()
     @FocusState private var titleFocused: Bool
 
     var body: some View {
@@ -148,6 +150,13 @@ private struct AddTodoToQuadrantSheet: View {
                 } header: {
                     Label(quadrant.title, systemImage: "plus.circle")
                 }
+
+                Section {
+                    Toggle("設定截止日期", isOn: $hasDueDate)
+                    if hasDueDate {
+                        DatePicker("截止時間", selection: $dueDate, in: Date()...)
+                    }
+                }
             }
             .navigationTitle("新增待辦")
             .navigationBarTitleDisplayMode(.inline)
@@ -157,7 +166,7 @@ private struct AddTodoToQuadrantSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("儲存") {
-                        store.add(title: title, quadrant: quadrant)
+                        store.add(title: title, quadrant: quadrant, dueDate: hasDueDate ? dueDate : nil)
                         dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -316,6 +325,10 @@ struct TodoQuadrantBoardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
+    @State private var dueDateEditItem: TodoItem? = nil
+    @State private var editingDueDate = Date()
+    @State private var editingHasDue = false
+
     private func todoRow(_ item: TodoItem) -> some View {
         HStack(spacing: 10) {
             Button {
@@ -328,21 +341,80 @@ struct TodoQuadrantBoardView: View {
             .buttonStyle(.plain)
             .accessibilityLabel(item.isDone ? "標為未完成" : "標為完成")
 
-            Text(item.title)
-                .font(.body)
-                .foregroundStyle(item.isDone ? .secondary : .primary)
-                .strikethrough(item.isDone, color: .secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(item.title)
+                    .font(.body)
+                    .foregroundStyle(item.isDone ? .secondary : .primary)
+                    .strikethrough(item.isDone, color: .secondary)
+
+                if let days = item.daysUntilDue, !item.isDone {
+                    dueDateLabel(days: days, dueDate: item.dueDate!)
+                }
+            }
 
             Spacer()
         }
         .padding(.vertical, 6)
         .contentShape(Rectangle())
         .contextMenu {
+            Button {
+                editingHasDue = item.dueDate != nil
+                editingDueDate = item.dueDate ?? Date()
+                dueDateEditItem = item
+            } label: {
+                Label(item.dueDate == nil ? "設定截止日期" : "修改截止日期", systemImage: "calendar.badge.clock")
+            }
+            if item.dueDate != nil {
+                Button {
+                    store.updateDueDate(nil, for: item)
+                } label: {
+                    Label("移除截止日期", systemImage: "calendar.badge.minus")
+                }
+            }
             Button(role: .destructive) {
                 store.delete(item)
             } label: {
                 Label("刪除", systemImage: "trash")
             }
         }
+        .sheet(item: $dueDateEditItem) { item in
+            NavigationStack {
+                Form {
+                    DatePicker("截止時間", selection: $editingDueDate, in: Date()...)
+                }
+                .navigationTitle("設定截止日期")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("取消") { dueDateEditItem = nil }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("儲存") {
+                            store.updateDueDate(editingDueDate, for: item)
+                            dueDateEditItem = nil
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private func dueDateLabel(days: Int, dueDate: Date) -> some View {
+        let (text, color): (String, Color) = {
+            if days < 0 {
+                return ("已過期", .red)
+            } else if days == 0 {
+                return ("今天 \(dueDate.formatted(date: .omitted, time: .shortened)) 到期", .red)
+            } else if days == 1 {
+                return ("明天到期", .orange)
+            } else if days <= 7 {
+                return ("剩 \(days) 天", .orange)
+            } else {
+                return ("剩 \(days) 天", .secondary)
+            }
+        }()
+        return Text(text)
+            .font(.caption)
+            .foregroundStyle(color)
     }
 }

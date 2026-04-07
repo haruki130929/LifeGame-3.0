@@ -21,25 +21,33 @@ final class TomorrowRingStore: ObservableObject {
     // MARK: - Published State
 
     @Published var plan: RingPlanV2 {
-        didSet { savePlan() }
+        didSet { if !isReloading { savePlan() } }
     }
 
     @Published var classSchedule: ClassScheduleV2 {
-        didSet { saveClassSchedule() }
+        didSet {
+            if !isReloading {
+                saveClassSchedule()
+                reapplyClassSchedule()
+            }
+        }
     }
 
     @Published var weeklyTemplate: WeeklyTemplateV2 {
-        didSet { saveWeeklyTemplate() }
+        didSet { if !isReloading { saveWeeklyTemplate() } }
     }
 
     @Published var showSegmentIcons: Bool {
-        didSet { StorageManager.save(showSegmentIcons, forKey: Keys.showSegmentIcons) }
+        didSet { if !isReloading { StorageManager.save(showSegmentIcons, forKey: Keys.showSegmentIcons) } }
     }
 
     // MARK: - Undo
 
     let planUndoManager = RingUndoManager()
     let actualUndoManager = RingUndoManager()
+
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
 
     // MARK: - Init
 
@@ -53,6 +61,23 @@ final class TomorrowRingStore: ObservableObject {
         self.weeklyTemplate = StorageManager.load(WeeklyTemplateV2.self, forKey: Keys.weeklyTemplate)
             ?? WeeklyTemplateV2()
         self.showSegmentIcons = StorageManager.load(Bool.self, forKey: Keys.showSegmentIcons)
+            ?? true
+
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    // MARK: - Cross-device Sync
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        plan = StorageManager.load(RingPlanV2.self, forKey: Keys.plan)
+            ?? RingPlanV2(date: Date())
+        classSchedule = StorageManager.load(ClassScheduleV2.self, forKey: Keys.classSchedule)
+            ?? ClassScheduleV2()
+        weeklyTemplate = StorageManager.load(WeeklyTemplateV2.self, forKey: Keys.weeklyTemplate)
+            ?? WeeklyTemplateV2()
+        showSegmentIcons = StorageManager.load(Bool.self, forKey: Keys.showSegmentIcons)
             ?? true
     }
 
@@ -157,12 +182,31 @@ final class TomorrowRingStore: ObservableObject {
         let today = dateKey(for: Date())
         let lastLoaded = StorageManager.load(String.self, forKey: Keys.lastLoadedDate)
 
-        guard lastLoaded != today else { return }
+        // 今天的課表有課程，但圓環裡沒有任何課表項目 → 強制重新載入
+        let todayCourses = classSchedule.courses(for: Weekday.today)
+        let hasScheduleInPlan = plan.planItems.contains { $0.source == .classSchedule }
 
+        if lastLoaded == today && (todayCourses.isEmpty || hasScheduleInPlan) {
+            return  // 已載入過且課表已在圓環中
+        }
+
+        applyClassSchedule()
+        StorageManager.save(today, forKey: Keys.lastLoadedDate)
+    }
+
+    /// 強制重新套用今日課表（課表變更後呼叫）
+    func reapplyClassSchedule() {
+        // 先移除舊的課表項目
+        plan.planItems.removeAll { $0.source == .classSchedule }
+        applyClassSchedule()
+        // 更新 lastLoadedDate 避免重複載入
+        StorageManager.save(dateKey(for: Date()), forKey: Keys.lastLoadedDate)
+    }
+
+    private func applyClassSchedule() {
         let day = Weekday.today
         let courses = classSchedule.toRingItems(for: day)
 
-        // Only add courses that don't already exist (by comparing start/end/title)
         for course in courses {
             let alreadyExists = plan.planItems.contains {
                 $0.startMinute == course.startMinute
@@ -170,13 +214,10 @@ final class TomorrowRingStore: ObservableObject {
                 && $0.title == course.title
             }
             if !alreadyExists {
-                // Skip collision check for class schedule — they take priority
                 plan.planItems.append(course)
             }
         }
         plan.planItems.sort { $0.startMinute < $1.startMinute }
-
-        StorageManager.save(today, forKey: Keys.lastLoadedDate)
     }
 
     // MARK: - Auto-Deduct HP/FP

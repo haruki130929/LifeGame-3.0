@@ -5,14 +5,25 @@ import SwiftUI
 @MainActor
 final class WishStore: ObservableObject {
     private static let storageKey = "wish_items_v1"
-    
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
+
     @Published var items: [WishItem] = [] {
-        didSet { save() }
+        didSet { if !isReloading { save() } }
     }
-    
+
     init() {
         load()
         // 不再塞預設資料，讓使用者自行新增
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let loaded: [WishItem] = StorageManager.load([WishItem].self, forKey: Self.storageKey) {
+            items = loaded
+        }
     }
     
     func add(_ item: WishItem) {

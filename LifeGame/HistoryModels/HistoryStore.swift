@@ -7,8 +7,18 @@ import Foundation
 final class HistoryStore: ObservableObject {
     @Published var records: [String: DayRecord] = [:]
     private let key = "history_records_v1"
-    
-    init() { load() }
+    private var syncHelper: StoreSyncHelper?
+
+    init() {
+        load()
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        if let decoded: [String: DayRecord] = StorageManager.load([String: DayRecord].self, forKey: key) {
+            records = decoded
+        }
+    }
     
     func upsert(record: DayRecord) {
         records[record.dateKey] = record

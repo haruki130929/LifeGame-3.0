@@ -6,10 +6,20 @@ import SwiftUI
 final class Key3Store: ObservableObject {
     
     private let storageKey = "Key3.plansData"
-    
+    private var syncHelper: StoreSyncHelper?
+
     @Published private(set) var plans: [String: Key3Plan] = [:]
-    
-    init() { load() }
+
+    init() {
+        load()
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        if let decoded: [String: Key3Plan] = StorageManager.load([String: Key3Plan].self, forKey: storageKey) {
+            plans = decoded
+        }
+    }
     
     func plan(for date: Date) -> Key3Plan? {
         plans[dateKeyString(date)]

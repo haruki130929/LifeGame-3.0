@@ -102,30 +102,36 @@ private struct DailyLogReviewListView: View {
 // MARK: - 單筆完整檢視卡片
 private struct DailyLogFullReviewCard: View {
     let entry: DailyLogEntry
-    
+    @EnvironmentObject private var moduleStore: QuestionModuleStore
+
     // ✅ 照片放大預覽狀態
     @State private var isPreviewPresented = false
     @State private var previewIndex = 0
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             header
-            
+
             Divider().opacity(0.5)
-            
-            basicBlock
-            moodBlock
-            anxietyBlock
-            impulseBlock
-            sleepBlock
-            studyBlock
-            bodyBlock
-            
-            if !entry.specialObservation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                SectionTitle("特別觀察")
-                Text(entry.specialObservation)
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
+
+            reviewSection(for: .basic, hardcoded: basicBlock)
+            // moodBlock 原本合併 moodMental + moodChange，拆開處理
+            if !isCustomized(.moodMental) && !isCustomized(.moodChange) {
+                moodBlock
+            } else {
+                reviewSection(for: .moodMental)
+                reviewSection(for: .moodChange)
+            }
+            reviewSection(for: .anxiety, hardcoded: anxietyBlock)
+            reviewSection(for: .impulse, hardcoded: impulseBlock)
+            reviewSection(for: .sleep, hardcoded: sleepBlock)
+            reviewSection(for: .studyFocus, hardcoded: studyBlock)
+            reviewSection(for: .body, hardcoded: bodyBlock)
+            reviewSection(for: .observation, hardcoded: observationBlock)
+
+            // 自訂模組
+            ForEach(moduleStore.enabledCustomModules) { module in
+                customModuleReviewBlock(module: module)
             }
             
             if !entry.photos.isEmpty {
@@ -322,7 +328,7 @@ private struct DailyLogFullReviewCard: View {
     private var bodyBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
             SectionTitle("身體狀況")
-            
+
             if entry.painAreas.isEmpty {
                 Text("不適：無")
             } else {
@@ -332,7 +338,7 @@ private struct DailyLogFullReviewCard: View {
                 }
                 Text("不適：\(list.joined(separator: "、"))")
             }
-            
+
             Text("注意到身體狀況：\(entry.bodyNoticeTiming.rawValue)")
             if entry.bodyNoticeTiming == .none && !entry.bodyLateReasons.isEmpty {
                 Text("原因：\(join(entry.bodyLateReasons.map{$0.rawValue}, otherText: entry.bodyLateReasons.contains(.other) ? entry.bodyLateOtherText : ""))")
@@ -341,7 +347,112 @@ private struct DailyLogFullReviewCard: View {
         .font(.footnote)
         .foregroundStyle(.secondary)
     }
-    
+
+    @ViewBuilder
+    private var observationBlock: some View {
+        if !entry.specialObservation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            VStack(alignment: .leading, spacing: 6) {
+                SectionTitle("特別觀察")
+                Text(entry.specialObservation)
+            }
+            .font(.footnote)
+            .foregroundStyle(.secondary)
+        }
+    }
+
+    // MARK: - 動態模組回顧
+
+    /// 檢查某個內建模組是否有自訂問題
+    private func isCustomized(_ kind: ModuleKind) -> Bool {
+        guard let module = moduleStore.modules.first(where: { $0.kind == kind }) else { return false }
+        return module.questions != nil && !(module.questions!.isEmpty)
+    }
+
+    /// 根據模組狀態選擇硬編碼或動態顯示
+    @ViewBuilder
+    private func reviewSection(for kind: ModuleKind, hardcoded: some View) -> some View {
+        if isCustomized(kind), let module = moduleStore.modules.first(where: { $0.kind == kind }) {
+            customModuleReviewBlock(module: module)
+        } else {
+            hardcoded
+        }
+    }
+
+    /// 無硬編碼版本（只在自訂時顯示）
+    @ViewBuilder
+    private func reviewSection(for kind: ModuleKind) -> some View {
+        if isCustomized(kind), let module = moduleStore.modules.first(where: { $0.kind == kind }) {
+            customModuleReviewBlock(module: module)
+        }
+    }
+
+    /// 動態渲染模組回顧
+    private func customModuleReviewBlock(module: DailyLogModule) -> some View {
+        let questions = module.displayQuestions
+        return VStack(alignment: .leading, spacing: 6) {
+            SectionTitle(module.displayTitle)
+            ForEach(questions) { q in
+                if let answer = entry.customAnswers.first(where: { $0.questionId == q.id }) {
+                    answerLine(question: q, answer: answer)
+                }
+            }
+        }
+        .font(.footnote)
+        .foregroundStyle(.secondary)
+    }
+
+    /// 渲染單一問題的答案
+    @ViewBuilder
+    private func answerLine(question: QuestionDefinition, answer: CustomAnswer) -> some View {
+        switch question.type {
+        case .slider, .numberInput:
+            if let v = answer.intValue {
+                Text("\(question.title)：\(v)")
+            }
+        case .singleSelect:
+            if let v = answer.stringValue, !v.isEmpty {
+                let otherSuffix = v == "其他" && !(answer.otherText ?? "").isEmpty ? "（\(answer.otherText!)）" : ""
+                Text("\(question.title)：\(v)\(otherSuffix)")
+            }
+        case .multiSelect:
+            if let arr = answer.stringArrayValue, !arr.isEmpty {
+                let text = joinCustom(arr, otherText: answer.otherText ?? "")
+                Text("\(question.title)：\(text)")
+            }
+        case .freeText:
+            if let v = answer.stringValue, !v.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Text("\(question.title)：\(v)")
+            }
+        case .timePicker:
+            if let d = answer.dateValue {
+                Text("\(question.title)：\(d.formatted(date: .omitted, time: .shortened))")
+            }
+        case .nestedMultiSelect:
+            if let nested = answer.nestedValue {
+                ForEach(Array(nested.keys.sorted()), id: \.self) { group in
+                    if let items = nested[group], !items.isEmpty {
+                        let otherText = answer.nestedOtherText?[group] ?? ""
+                        Text("\(group)：\(joinCustom(items, otherText: otherText))")
+                    }
+                }
+            }
+        case .photo:
+            EmptyView()
+        }
+    }
+
+    /// 合併多選文字（處理「其他」）
+    private func joinCustom(_ items: [String], otherText: String) -> String {
+        let trimmed = otherText.trimmingCharacters(in: .whitespacesAndNewlines)
+        var base = items.filter { $0 != "其他" }
+        if items.contains("其他"), !trimmed.isEmpty {
+            base.append("其他：\(trimmed)")
+        } else if items.contains("其他") {
+            base.append("其他")
+        }
+        return base.isEmpty ? "--" : base.joined(separator: "、")
+    }
+
     // MARK: - Helpers
     
     private func timeText(_ t: OptionalLogTime) -> String {

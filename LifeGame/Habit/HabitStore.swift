@@ -11,19 +11,22 @@ final class HabitStore: ObservableObject {
     
     // MARK: - Published
     @Published var habits: [Habit] = [] {
-        didSet { saveHabits() }
+        didSet { if !isReloading { saveHabits() } }
     }
-    
+
     /// habitID -> Set(dateKeyString)
     @Published private(set) var doneMap: [UUID: Set<String>] = [:] {
-        didSet { saveDone() }
+        didSet { if !isReloading { saveDone() } }
     }
+
+    private var syncHelper: StoreSyncHelper?
+    private var isReloading = false
     
     // MARK: - Init
     init() {
         loadHabits()
         loadDone()
-        
+
         // 如果是第一次啟動，給一點預設（想空白也可以把這段刪掉）
         if habits.isEmpty {
             habits = [
@@ -31,6 +34,18 @@ final class HabitStore: ObservableObject {
                 Habit(name: "日文", icon: "character.book.closed", isActive: true),
                 Habit(name: "散步", icon: "figure.walk", isActive: true)
             ]
+        }
+        syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+    }
+
+    func reloadFromStorage() {
+        isReloading = true
+        defer { isReloading = false }
+        if let saved: [Habit] = StorageManager.load([Habit].self, forKey: habitsKey) {
+            habits = saved
+        }
+        if let decoded: [UUID: [String]] = StorageManager.load([UUID: [String]].self, forKey: doneKey) {
+            doneMap = decoded.mapValues { Set($0) }
         }
     }
     
