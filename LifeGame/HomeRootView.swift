@@ -94,28 +94,28 @@ struct HomeRootView: View {
                 fab.route = nil
 
             // 功能頁面專用 route：
-            // 已經在功能頁（navigationPath 不為空）→ 不做事，讓功能頁接手
+            // 已經在功能頁（navigationPath 不為空）→ 不攔截，讓功能頁接手
             // 在首頁 → 先導航到對應功能頁
             case .addRingItem, .editSchedule:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.tomorrowRing) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.tomorrowRing) ; fab.route = nil }
             case .jumpToToday:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.calendar) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.calendar) ; fab.route = nil }
             case .addTodoToQuadrant, .todoEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.todoQuadrant) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.todoQuadrant) ; fab.route = nil }
             case .addWish, .editWishList:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.wish) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.wish) ; fab.route = nil }
             case .addLedgerEntry, .viewLedgerChart:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.ledger) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.ledger) ; fab.route = nil }
             case .monthlyScoreStats:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.monthlyScoreCalendar) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.monthlyScoreCalendar) ; fab.route = nil }
             case .addBagItem, .bagEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.bagRequired) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.bagRequired) ; fab.route = nil }
             case .addMandalaChart, .mandalaEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.mandala) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.mandala) ; fab.route = nil }
             case .addPracticeDiary, .practiceDiaryEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.practiceDiary) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.practiceDiary) ; fab.route = nil }
             case .addQuestionModule, .questionModuleEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.questionModule) }
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.questionModule) ; fab.route = nil }
             case .addQuestion, .questionEditMode:
                 break // handled inside CustomModuleEditorView
             }

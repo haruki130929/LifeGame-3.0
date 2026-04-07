@@ -8,12 +8,25 @@ struct RingDetailPageV2: View {
     @EnvironmentObject private var theme: ThemeStore
 
     @State private var selectedItemID: UUID?
-    @State private var editingItem: RingItemV2?
-    @State private var showAddSheet = false
-    @State private var showClassScheduleEditor = false
     @State private var addingToRing: DualRingCanvas.ActiveRing = .plan
     @State private var prefillStart: Int = 540
     @State private var prefillEnd: Int = 600
+
+    /// 統一管理所有 sheet，避免多個 .sheet() 衝突
+    enum SheetType: Identifiable {
+        case addItem
+        case editItem(RingItemV2)
+        case classSchedule
+
+        var id: String {
+            switch self {
+            case .addItem: return "add"
+            case .editItem(let item): return "edit-\(item.id)"
+            case .classSchedule: return "schedule"
+            }
+        }
+    }
+    @State private var activeSheet: SheetType?
 
     var body: some View {
         GeometryReader { geo in
@@ -56,49 +69,51 @@ struct RingDetailPageV2: View {
         }
 
         // Listen to FAB routes
-        .onChange(of: fab.route) { _, newRoute in
+        .onReceive(fab.$route) { newRoute in
+            guard let newRoute else { return }
             switch newRoute {
             case .addRingItem:
-                fab.route = nil
                 addingToRing = .plan
                 prefillStart = 540
                 prefillEnd = 600
-                showAddSheet = true
+                activeSheet = .addItem
+                DispatchQueue.main.async { fab.route = nil }
             case .editSchedule:
-                fab.route = nil
-                showClassScheduleEditor = true
+                activeSheet = .classSchedule
+                DispatchQueue.main.async { fab.route = nil }
             default:
                 break
             }
         }
 
-        .sheet(isPresented: $showAddSheet) {
-            AddRingItemSheetV2(ring: addingToRing, prefillStart: prefillStart, prefillEnd: prefillEnd) { newItem in
-                switch addingToRing {
-                case .plan:
-                    store.addPlanItem(newItem)
-                case .actual:
-                    store.addActualItem(newItem)
-                }
-            }
-        }
-        .sheet(item: $editingItem) { item in
-            AddRingItemSheetV2(ring: addingToRing, editing: item) { updated in
-                switch addingToRing {
-                case .plan:
-                    store.updatePlanItem(updated)
-                case .actual:
-                    if let idx = store.plan.actualItems.firstIndex(where: { $0.id == updated.id }) {
-                        store.plan.actualItems[idx] = updated
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .addItem:
+                AddRingItemSheetV2(ring: addingToRing, prefillStart: prefillStart, prefillEnd: prefillEnd) { newItem in
+                    switch addingToRing {
+                    case .plan:
+                        store.addPlanItem(newItem)
+                    case .actual:
+                        store.addActualItem(newItem)
                     }
                 }
-            }
-        }
-        .sheet(isPresented: $showClassScheduleEditor) {
-            NavigationStack {
-                ClassScheduleEditorV2()
-                    .environmentObject(store)
-                    .environmentObject(theme)
+            case .editItem(let item):
+                AddRingItemSheetV2(ring: addingToRing, editing: item) { updated in
+                    switch addingToRing {
+                    case .plan:
+                        store.updatePlanItem(updated)
+                    case .actual:
+                        if let idx = store.plan.actualItems.firstIndex(where: { $0.id == updated.id }) {
+                            store.plan.actualItems[idx] = updated
+                        }
+                    }
+                }
+            case .classSchedule:
+                NavigationStack {
+                    ClassScheduleEditorV2()
+                        .environmentObject(store)
+                        .environmentObject(theme)
+                }
             }
         }
     }
@@ -110,7 +125,7 @@ struct RingDetailPageV2: View {
             addingToRing = ring
             prefillStart = gapStart
             prefillEnd = gapEnd
-            showAddSheet = true
+            activeSheet = .addItem
         }
         .padding()
     }
@@ -132,7 +147,7 @@ struct RingDetailPageV2: View {
                     selectedItemID: $selectedItemID,
                     onEdit: { item in
                         addingToRing = .plan
-                        editingItem = item
+                        activeSheet = .editItem(item)
                     },
                     onDelete: { id in
                         store.removePlanItem(id: id)
@@ -163,7 +178,7 @@ struct RingDetailPageV2: View {
                     selectedItemID: $selectedItemID,
                     onEdit: { item in
                         addingToRing = .actual
-                        editingItem = item
+                        activeSheet = .editItem(item)
                     },
                     onDelete: { id in
                         store.removeActualItem(id: id)
