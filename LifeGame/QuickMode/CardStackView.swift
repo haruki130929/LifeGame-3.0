@@ -12,10 +12,12 @@ struct CardStackView: View {
     @EnvironmentObject private var theme: ThemeStore
 
     @State private var remainingPages: [QuickPage] = []
+    @State private var dismissedPages: [QuickPage] = []
     @State private var dragOffset: CGSize = .zero
     @State private var isDraggingHorizontally = false
     @State private var showCompletion = false
     @State private var cardRandomOffsets: [UUID: CardRandomOffset] = [:]
+    @State private var undoingCard: QuickPage?
 
     // 陀螺儀
     @StateObject private var motion = MotionManager()
@@ -36,6 +38,31 @@ struct CardStackView: View {
                     .transition(.scale.combined(with: .opacity))
             } else {
                 cardStack
+            }
+
+            // 左下角返回上一張按鈕
+            if !dismissedPages.isEmpty {
+                VStack {
+                    Spacer()
+                    HStack {
+                        Button {
+                            undoDismiss()
+                        } label: {
+                            Image(systemName: "arrow.uturn.backward")
+                                .font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(.white)
+                                .frame(width: 44, height: 44)
+                                .background(Color(.tertiaryLabel))
+                                .clipShape(Circle())
+                                .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 3)
+                        }
+                        .accessibilityLabel("回到上一張卡片")
+                        .padding(.leading, 20)
+                        .padding(.bottom, 20)
+                        Spacer()
+                    }
+                }
+                .transition(.opacity)
             }
         }
         .onAppear { resetCards() }
@@ -215,7 +242,8 @@ struct CardStackView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
                 if !remainingPages.isEmpty {
-                    remainingPages.removeFirst()
+                    let dismissed = remainingPages.removeFirst()
+                    dismissedPages.append(dismissed)
                 }
                 dragOffset = .zero
 
@@ -231,9 +259,29 @@ struct CardStackView: View {
         }
     }
 
+    private func undoDismiss() {
+        guard let last = dismissedPages.popLast() else { return }
+
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
+            showCompletion = false
+            undoingCard = last
+            remainingPages.insert(last, at: 0)
+
+            let completed = pages.count - remainingPages.count
+            onProgressChanged(completed, pages.count)
+            onTopCardChanged(remainingPages.first)
+        }
+
+        // 清除 undo 動畫狀態
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.35) {
+            undoingCard = nil
+        }
+    }
+
     private func resetCards(to newPages: [QuickPage]? = nil) {
         let p = newPages ?? pages
         remainingPages = p
+        dismissedPages = []
         dragOffset = .zero
         isDraggingHorizontally = false
         showCompletion = false

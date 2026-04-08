@@ -17,6 +17,7 @@ struct QuickModeShellView: View {
 
     @State private var navigationPath = NavigationPath()
     @State private var showSettings = false
+    @State private var showPageConfig = false
     @State private var completedCount = 0
     @State private var topPage: QuickPage?
 
@@ -48,24 +49,39 @@ struct QuickModeShellView: View {
                     .coachAnchor(.quickSwipe)
                 }
 
-                // 右下角設定按鈕（取代 FAB）
+                // 右下角按鈕列
                 VStack {
                     Spacer()
                     HStack {
                         Spacer()
-                        Button {
-                            showSettings = true
-                        } label: {
-                            Image(systemName: "gearshape.fill")
-                                .font(.system(size: 22))
-                                .foregroundStyle(.white)
-                                .frame(width: 52, height: 52)
-                                .background(Color(.tertiaryLabel))
-                                .clipShape(Circle())
-                                .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 3)
-                                .accessibilityLabel("設定")
+                        VStack(spacing: 12) {
+                            Button {
+                                showPageConfig = true
+                            } label: {
+                                Image(systemName: "rectangle.stack.badge.plus")
+                                    .font(.system(size: 18))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 44, height: 44)
+                                    .background(Color(.tertiaryLabel))
+                                    .clipShape(Circle())
+                                    .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 3)
+                            }
+                            .accessibilityLabel("編輯卡片")
+
+                            Button {
+                                showSettings = true
+                            } label: {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.system(size: 22))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 52, height: 52)
+                                    .background(Color(.tertiaryLabel))
+                                    .clipShape(Circle())
+                                    .shadow(color: .black.opacity(0.2), radius: 6, x: 0, y: 3)
+                            }
+                            .accessibilityLabel("設定")
+                            .coachAnchor(.quickSettings)
                         }
-                        .coachAnchor(.quickSettings)
                         .padding(.trailing, 20)
                         .padding(.bottom, 20)
                     }
@@ -104,6 +120,17 @@ struct QuickModeShellView: View {
                 case .moduleEditor:
                     EmptyView()
                 }
+            }
+        }
+        .sheet(isPresented: $showPageConfig) {
+            NavigationStack {
+                QuickPageConfigView()
+                    .navigationBarTitleDisplayMode(.inline)
+                    .toolbar {
+                        ToolbarItem(placement: .topBarTrailing) {
+                            Button("完成") { showPageConfig = false }
+                        }
+                    }
             }
         }
         .sheet(isPresented: $showSettings) {
