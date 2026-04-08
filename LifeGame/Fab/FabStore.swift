@@ -300,7 +300,8 @@ final class FabStore: ObservableObject {
                     self?.route = .addRingItem; self?.collapse()
                 },
                 FabAction(title: "課表", systemImage: "calendar.badge.clock", route: .editSchedule) { [weak self] in
-                    self?.route = .editSchedule; self?.collapse()
+                    self?.route = .editSchedule
+                    // 不呼叫 collapse()，讓 sheet 先呈現，sheet 的 onDismiss 會自然蓋住 FAB
                 }
             ]
         case .bagRequired:

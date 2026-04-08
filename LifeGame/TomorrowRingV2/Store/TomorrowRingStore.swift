@@ -182,16 +182,31 @@ final class TomorrowRingStore: ObservableObject {
         let today = dateKey(for: Date())
         let lastLoaded = StorageManager.load(String.self, forKey: Keys.lastLoadedDate)
 
-        // 今天的課表有課程，但圓環裡沒有任何課表項目 → 強制重新載入
-        let todayCourses = classSchedule.courses(for: Weekday.today)
-        let hasScheduleInPlan = plan.planItems.contains { $0.source == .classSchedule }
+        // 檢查圓環裡的課表是否跟今天實際課表一致
+        let todayCourses = classSchedule.toRingItems(for: Weekday.today)
+        let existingScheduleItems = plan.planItems.filter { $0.source == .classSchedule }
+        let isStale = !scheduleItemsMatch(existing: existingScheduleItems, expected: todayCourses)
 
-        if lastLoaded == today && (todayCourses.isEmpty || hasScheduleInPlan) {
-            return  // 已載入過且課表已在圓環中
+        if lastLoaded != today || isStale {
+            // 新的一天，或舊課表殘留 → 清除後重新載入
+            plan.planItems.removeAll { $0.source == .classSchedule }
+            applyClassSchedule()
+            StorageManager.save(today, forKey: Keys.lastLoadedDate)
+            return
         }
 
-        applyClassSchedule()
-        StorageManager.save(today, forKey: Keys.lastLoadedDate)
+        // 同一天但課表不在圓環中（可能被手動刪除） → 補上
+        if !todayCourses.isEmpty && existingScheduleItems.isEmpty {
+            applyClassSchedule()
+        }
+    }
+
+    /// 檢查圓環裡的課表項目是否跟預期的今日課表一致
+    private func scheduleItemsMatch(existing: [RingItemV2], expected: [RingItemV2]) -> Bool {
+        guard existing.count == expected.count else { return false }
+        let existingSet = Set(existing.map { "\($0.startMinute)-\($0.endMinute)-\($0.title)" })
+        let expectedSet = Set(expected.map { "\($0.startMinute)-\($0.endMinute)-\($0.title)" })
+        return existingSet == expectedSet
     }
 
     /// 強制重新套用今日課表（課表變更後呼叫）
@@ -265,10 +280,12 @@ final class TomorrowRingStore: ObservableObject {
         StorageManager.save(weeklyTemplate, forKey: Keys.weeklyTemplate)
     }
 
+    /// 以凌晨 4 點為日期分界的日期 key
     private func dateKey(for date: Date) -> String {
+        let adjustedDate = Calendar.current.date(byAdding: .hour, value: -4, to: date) ?? date
         let fmt = DateFormatter()
         fmt.dateFormat = "yyyy-MM-dd"
-        return fmt.string(from: date)
+        return fmt.string(from: adjustedDate)
     }
 
     // MARK: - V1 Migration

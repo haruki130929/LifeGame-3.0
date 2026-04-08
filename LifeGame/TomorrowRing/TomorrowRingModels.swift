@@ -55,8 +55,13 @@ enum Weekday: Int, CaseIterable, Codable, Identifiable, Hashable {
         }
     }
 
+    /// 以凌晨 4 點為日期分界的「今天」星期幾
     static var today: Weekday {
-        Weekday(rawValue: Calendar.current.component(.weekday, from: Date())) ?? .monday
+        let cal = Calendar.current
+        let now = Date()
+        // 4 點前算前一天
+        let adjustedDate = cal.date(byAdding: .hour, value: -4, to: now) ?? now
+        return Weekday(rawValue: cal.component(.weekday, from: adjustedDate)) ?? .monday
     }
 }
 

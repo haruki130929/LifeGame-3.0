@@ -6,6 +6,9 @@ struct DailyLogFormView: View {
 
     var body: some View {
         Form {
+            Section {
+                DatePicker("紀錄日期", selection: $entry.date, displayedComponents: .date)
+            }
             ForEach(Array(moduleStore.enabledModules.enumerated()), id: \.element.id) { index, module in
                 moduleSection(for: module, number: index + 1)
             }

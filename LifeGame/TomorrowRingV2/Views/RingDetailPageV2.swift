@@ -73,14 +73,15 @@ struct RingDetailPageV2: View {
             guard let newRoute else { return }
             switch newRoute {
             case .addRingItem:
+                fab.route = nil
                 addingToRing = .plan
                 prefillStart = 540
                 prefillEnd = 600
                 activeSheet = .addItem
-                DispatchQueue.main.async { fab.route = nil }
             case .editSchedule:
+                fab.route = nil
                 activeSheet = .classSchedule
-                DispatchQueue.main.async { fab.route = nil }
+                fab.collapse()
             default:
                 break
             }
