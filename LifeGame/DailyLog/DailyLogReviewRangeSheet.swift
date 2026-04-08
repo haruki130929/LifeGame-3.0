@@ -365,7 +365,7 @@ private struct DailyLogFullReviewCard: View {
     /// 檢查某個內建模組是否有自訂問題
     private func isCustomized(_ kind: ModuleKind) -> Bool {
         guard let module = moduleStore.modules.first(where: { $0.kind == kind }) else { return false }
-        return module.questions != nil && !(module.questions!.isEmpty)
+        return !(module.questions?.isEmpty ?? true)
     }
 
     /// 根據模組狀態選擇硬編碼或動態顯示
@@ -411,7 +411,12 @@ private struct DailyLogFullReviewCard: View {
             }
         case .singleSelect:
             if let v = answer.stringValue, !v.isEmpty {
-                let otherSuffix = v == "其他" && !(answer.otherText ?? "").isEmpty ? "（\(answer.otherText!)）" : ""
+                let otherSuffix: String = {
+                    if v == "其他", let otherText = answer.otherText, !otherText.isEmpty {
+                        return "（\(otherText)）"
+                    }
+                    return ""
+                }()
                 Text("\(question.title)：\(v)\(otherSuffix)")
             }
         case .multiSelect:

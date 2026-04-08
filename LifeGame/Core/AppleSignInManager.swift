@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import AuthenticationServices
 
+@MainActor
 final class AppleSignInManager: ObservableObject {
 
     @Published private(set) var isSignedIn: Bool = false
@@ -76,7 +77,7 @@ final class AppleSignInManager: ObservableObject {
 
         let provider = ASAuthorizationAppleIDProvider()
         provider.getCredentialState(forUserID: userID) { [weak self] state, _ in
-            Task { @MainActor in
+            Task { @MainActor [weak self] in
                 switch state {
                 case .authorized:
                     self?.isSignedIn = true

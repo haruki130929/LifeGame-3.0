@@ -9,9 +9,10 @@ final class DailyLogMigrator {
     init(context: ModelContext, filename: String = "daily_logs_v1.json") {
         self.context = context
         // Documents/daily_logs_v1.json
-        self.fileURL = FileManager.default
-            .urls(for: .documentDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent(filename)
+        let docsURL = FileManager.default
+            .urls(for: .documentDirectory, in: .userDomainMask).first
+            ?? URL.temporaryDirectory
+        self.fileURL = docsURL.appendingPathComponent(filename)
     }
     
     func migrateIfNeeded() {
@@ -58,6 +59,13 @@ final class DailyLogMigrator {
         } catch {
             // 不打旗標：讓下次還能再試
             debugLog("❌ DailyLog migrate failed: \(error)")
+            // 累計失敗次數，超過 3 次通知使用者
+            let failKey = "migration.dailyLogs.failureCount"
+            let failCount = (StorageManager.load(Int.self, forKey: failKey) ?? 0) + 1
+            StorageManager.save(failCount, forKey: failKey)
+            if failCount >= 3 {
+                ErrorManager.shared.showError("每日紀錄遷移多次失敗，請聯繫開發者")
+            }
         }
     }
     

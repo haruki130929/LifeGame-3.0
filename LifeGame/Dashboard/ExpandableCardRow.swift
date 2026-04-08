@@ -24,13 +24,20 @@ struct ExpandableCardRow: View {
                 Divider()
                     .padding(.top, 8)
 
-                NavigationLink(value: cardType.featureID!) {
+                if let featureID = cardType.featureID {
+                    NavigationLink(value: featureID) {
+                        expandedContent
+                            .padding(.top, 8)
+                            .padding(.bottom, 4)
+                    }
+                    .buttonStyle(.plain)
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+                } else {
                     expandedContent
                         .padding(.top, 8)
                         .padding(.bottom, 4)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
                 }
-                .buttonStyle(.plain)
-                .transition(.opacity.combined(with: .move(edge: .top)))
             }
         }
         .padding(14)
@@ -60,13 +67,11 @@ struct ExpandableCardRow: View {
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {
-                if isExpanded {
-                    expandedCardType = nil
-                } else {
-                    expandedCardType = cardType
-                }
+                expandedCardType = isExpanded ? nil : cardType
             }
         }
+        .accessibilityLabel(cardType.title)
+        .accessibilityHint(isExpanded ? "雙擊以收合" : "雙擊以展開")
         // 上下滑動：下拉展開、上推收起
         .simultaneousGesture(
             DragGesture(minimumDistance: 30)

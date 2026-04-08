@@ -20,7 +20,8 @@ enum StorageManager {
             let data = try JSONEncoder().encode(value)
 
             guard let context = mainContext else {
-                debugLog("StorageManager.save: coordinator 尚未初始化，跳過")
+                debugLog("StorageManager.save: coordinator 尚未初始化，跳過 key=\(key)")
+                ErrorManager.shared.showError("儲存系統尚未就緒，資料可能未儲存")
                 return
             }
 
@@ -52,7 +53,7 @@ enum StorageManager {
     static func load<T: Codable>(_ type: T.Type, forKey key: String) -> T? {
         do {
             guard let context = mainContext else {
-                debugLog("StorageManager.load: coordinator 尚未初始化，跳過")
+                debugLog("StorageManager.load: coordinator 尚未初始化，跳過 key=\(key)")
                 return nil
             }
 

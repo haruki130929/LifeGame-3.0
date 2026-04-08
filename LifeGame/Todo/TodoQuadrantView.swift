@@ -347,8 +347,8 @@ struct TodoQuadrantBoardView: View {
                     .foregroundStyle(item.isDone ? .secondary : .primary)
                     .strikethrough(item.isDone, color: .secondary)
 
-                if let days = item.daysUntilDue, !item.isDone {
-                    dueDateLabel(days: days, dueDate: item.dueDate!)
+                if let days = item.daysUntilDue, let dueDate = item.dueDate, !item.isDone {
+                    dueDateLabel(days: days, dueDate: dueDate)
                 }
             }
 

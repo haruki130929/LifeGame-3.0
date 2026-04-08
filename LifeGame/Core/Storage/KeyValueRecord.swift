@@ -3,7 +3,7 @@ import Foundation
 
 @Model
 final class KeyValueRecord {
-    var key: String = ""
+    @Attribute(.unique) var key: String = ""
     var data: Data = Data()
     var updatedAt: Date = Date()
 

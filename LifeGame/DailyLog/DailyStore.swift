@@ -28,11 +28,8 @@ final class DailyLogStore: ObservableObject {
                 let container = try ModelContainer(for: DailyLogRecord.self)
                 return ModelContext(container)
             } catch {
-                debugLog("❌ DailyLogStore: 所有 ModelContainer 配置都失敗: \(error)")
-                // 最後手段：建立純空 in-memory 容器
-                let config = ModelConfiguration(isStoredInMemoryOnly: true)
-                let container = try! ModelContainer(for: DailyLogRecord.self, configurations: config)
-                return ModelContext(container)
+                // 所有初始化都失敗，這是不可恢復的錯誤
+                fatalError("❌ DailyLogStore: 所有 ModelContainer 配置都失敗: \(error)")
             }
         }
     }
@@ -47,7 +44,10 @@ final class DailyLogStore: ObservableObject {
             self.context = Self.makeInMemoryContext()
             self.initError = "儲存系統尚未就緒，資料暫存於記憶體中"
         }
-        load()
+        // 延遲載入，避免在 observer 掛載前觸發 UI 更新
+        Task { @MainActor [weak self] in
+            self?.load()
+        }
     }
     
     func addToday() -> DailyLogEntry {

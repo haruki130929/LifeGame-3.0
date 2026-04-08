@@ -73,13 +73,19 @@ final class FileStore {
         }
 
         let context = try makeContext()
-        let descriptor = FetchDescriptor<KeyValueRecord>(
+        var descriptor = FetchDescriptor<KeyValueRecord>(
             predicate: #Predicate { $0.key == filename }
         )
-        let existing = try context.fetch(descriptor).first
+        descriptor.sortBy = [SortDescriptor(\.updatedAt, order: .reverse)]
+        let records = try context.fetch(descriptor)
 
-        if let existing {
-            existing.data = data
+        if let newest = records.first {
+            newest.data = data
+            newest.updatedAt = .now
+            // 清理 CloudKit 同步造成的重複 record
+            for dup in records.dropFirst() {
+                context.delete(dup)
+            }
         } else {
             context.insert(KeyValueRecord(key: filename, data: data))
         }
