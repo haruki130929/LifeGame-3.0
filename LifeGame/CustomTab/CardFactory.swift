@@ -99,6 +99,16 @@ struct CardFactory: View {
                 }
             }
 
+        case .ganttChart:
+            DashboardCardContainer {
+                VStack(alignment: .leading, spacing: 10) {
+                    CardHeader(title: "甘特圖", icon: "chart.bar.xaxis")
+                    Text("查看行事曆與待辦時間線")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
         case .editCards:
             // editCards 在自訂切頁中不顯示
             EmptyView()

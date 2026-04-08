@@ -137,6 +137,8 @@ private struct AddTodoToQuadrantSheet: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var title = ""
+    @State private var hasStartDate = false
+    @State private var startDate = Date()
     @State private var hasDueDate = false
     @State private var dueDate = Date()
     @FocusState private var titleFocused: Bool
@@ -152,6 +154,10 @@ private struct AddTodoToQuadrantSheet: View {
                 }
 
                 Section {
+                    Toggle("設定開始日期", isOn: $hasStartDate)
+                    if hasStartDate {
+                        DatePicker("開始時間", selection: $startDate)
+                    }
                     Toggle("設定截止日期", isOn: $hasDueDate)
                     if hasDueDate {
                         DatePicker("截止時間", selection: $dueDate, in: Date()...)
@@ -166,7 +172,12 @@ private struct AddTodoToQuadrantSheet: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("儲存") {
-                        store.add(title: title, quadrant: quadrant, dueDate: hasDueDate ? dueDate : nil)
+                        store.add(
+                            title: title,
+                            quadrant: quadrant,
+                            startDate: hasStartDate ? startDate : nil,
+                            dueDate: hasDueDate ? dueDate : nil
+                        )
                         dismiss()
                     }
                     .disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -325,6 +336,8 @@ struct TodoQuadrantBoardView: View {
         .clipShape(RoundedRectangle(cornerRadius: 18))
     }
 
+    @State private var startDateEditItem: TodoItem? = nil
+    @State private var editingStartDate = Date()
     @State private var dueDateEditItem: TodoItem? = nil
     @State private var editingDueDate = Date()
     @State private var editingHasDue = false
@@ -358,6 +371,19 @@ struct TodoQuadrantBoardView: View {
         .contentShape(Rectangle())
         .contextMenu {
             Button {
+                editingStartDate = item.startDate ?? Date()
+                startDateEditItem = item
+            } label: {
+                Label(item.startDate == nil ? "設定開始日期" : "修改開始日期", systemImage: "calendar.badge.plus")
+            }
+            if item.startDate != nil {
+                Button {
+                    store.updateStartDate(nil, for: item)
+                } label: {
+                    Label("移除開始日期", systemImage: "calendar.badge.minus")
+                }
+            }
+            Button {
                 editingHasDue = item.dueDate != nil
                 editingDueDate = item.dueDate ?? Date()
                 dueDateEditItem = item
@@ -375,6 +401,26 @@ struct TodoQuadrantBoardView: View {
                 store.delete(item)
             } label: {
                 Label("刪除", systemImage: "trash")
+            }
+        }
+        .sheet(item: $startDateEditItem) { item in
+            NavigationStack {
+                Form {
+                    DatePicker("開始時間", selection: $editingStartDate)
+                }
+                .navigationTitle("設定開始日期")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .cancellationAction) {
+                        Button("取消") { startDateEditItem = nil }
+                    }
+                    ToolbarItem(placement: .confirmationAction) {
+                        Button("儲存") {
+                            store.updateStartDate(editingStartDate, for: item)
+                            startDateEditItem = nil
+                        }
+                    }
+                }
             }
         }
         .sheet(item: $dueDateEditItem) { item in

@@ -34,14 +34,19 @@ final class TodoQuadrantStore: ObservableObject {
         }
     }
     
-    func add(title: String, quadrant: TodoQuadrant, dueDate: Date? = nil) {
+    func add(title: String, quadrant: TodoQuadrant, startDate: Date? = nil, dueDate: Date? = nil) {
         let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !t.isEmpty else { return }
-        let item = TodoItem(title: t, quadrant: quadrant, dueDate: dueDate)
+        let item = TodoItem(title: t, quadrant: quadrant, startDate: startDate, dueDate: dueDate)
         items.insert(item, at: 0)
         if let dueDate {
             NotificationManager.scheduleTodoReminder(id: item.id, title: t, dueDate: dueDate)
         }
+    }
+
+    func updateStartDate(_ startDate: Date?, for item: TodoItem) {
+        guard let idx = items.firstIndex(where: { $0.id == item.id }) else { return }
+        items[idx].startDate = startDate
     }
 
     func updateDueDate(_ dueDate: Date?, for item: TodoItem) {

@@ -62,6 +62,8 @@ struct HomeRootView: View {
                     QuestionModuleSettingsView()
                 case .moduleEditor:
                     EmptyView() // handled via sheet, not navigation
+                case .ganttChart:
+                    GanttScreen()
                 }
             }
         }

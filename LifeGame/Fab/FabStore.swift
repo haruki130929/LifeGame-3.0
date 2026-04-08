@@ -361,6 +361,8 @@ final class FabStore: ObservableObject {
                     self?.route = .questionEditMode; self?.collapse()
                 }
             ]
+        case .ganttChart:
+            break  // 甘特圖為唯讀，不需要 FAB 動作
         }
 
         return result
@@ -385,6 +387,7 @@ final class FabStore: ObservableObject {
         case .practiceDiary:          return "練習日記"
         case .questionModule:         return "問題模組"
         case .moduleEditor:           return "編輯模組"
+        case .ganttChart:             return "甘特圖"
         }
     }
 
@@ -405,6 +408,7 @@ final class FabStore: ObservableObject {
         case .practiceDiary:          return "pencil.and.list.clipboard"
         case .questionModule:         return "square.grid.2x2"
         case .moduleEditor:           return "pencil.and.list.clipboard"
+        case .ganttChart:             return "chart.bar.xaxis"
         }
     }
 }

@@ -62,6 +62,8 @@ struct QuickCardView: View {
             DiaryView()
         case .finance:
             FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore)
+        case .ganttChart:
+            GanttScreen()
         }
     }
 }

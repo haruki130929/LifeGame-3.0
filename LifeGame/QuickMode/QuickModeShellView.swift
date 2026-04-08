@@ -119,6 +119,8 @@ struct QuickModeShellView: View {
                     QuestionModuleSettingsView()
                 case .moduleEditor:
                     EmptyView()
+                case .ganttChart:
+                    GanttScreen()
                 }
             }
         }

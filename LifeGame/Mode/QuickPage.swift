@@ -13,6 +13,7 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
     case monthlyScore
     case diary
     case finance
+    case ganttChart
 
     var id: String { rawValue }
 
@@ -27,6 +28,7 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
         case .monthlyScore:   return "本月結算"
         case .diary:          return "日記"
         case .finance:        return "財務"
+        case .ganttChart:     return "甘特圖"
         }
     }
 
@@ -41,6 +43,7 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
         case .monthlyScore:   return "calendar.badge.clock"
         case .diary:          return "book"
         case .finance:        return "yensign.circle"
+        case .ganttChart:     return "chart.bar.xaxis"
         }
     }
 
@@ -56,6 +59,7 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
         case .monthlyScore:   return .monthlyScoreCalendar
         case .diary:          return .diary
         case .finance:        return .wish
+        case .ganttChart:     return .ganttChart
         }
     }
 }

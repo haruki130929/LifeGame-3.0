@@ -33,6 +33,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
     var quadrant: TodoQuadrant
     var isDone: Bool = false
     var createdAt: Date = Date()
+    var startDate: Date?
     var dueDate: Date?
 
     /// 距離截止日期的剩餘天數（負數表示已過期）

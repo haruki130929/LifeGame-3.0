@@ -17,7 +17,8 @@ struct SlotCardEditorSheet: View {
     // 可選的卡片類型
     private let availableCardTypes: [CardType] = [
         .calendar, .todoQuadrant,
-        .tomorrowRing, .bagRequired, .monthlyScoreCalendar
+        .tomorrowRing, .bagRequired, .monthlyScoreCalendar,
+        .ganttChart
     ]
 
     var body: some View {

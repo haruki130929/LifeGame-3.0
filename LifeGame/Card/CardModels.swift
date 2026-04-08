@@ -45,7 +45,8 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
     case tomorrowRing
     case bagRequired
     case monthlyScoreCalendar
-    
+    case ganttChart
+
     var id: String { rawValue }
     
     var title: String {
@@ -59,9 +60,10 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
         case .tomorrowRing: return "時間圓環"
         case .bagRequired: return "整理書包"
         case .monthlyScoreCalendar: return "本月結算"
+        case .ganttChart: return "甘特圖"
         }
     }
-    
+
     var icon: String {
         switch self {
         case .quickStart: return "bolt"
@@ -73,9 +75,10 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
         case .tomorrowRing: return "clock"
         case .bagRequired: return "backpack"
         case .monthlyScoreCalendar: return "calendar.badge.clock"
+        case .ganttChart: return "chart.bar.xaxis"
         }
     }
-    
+
     var defaultSize: CardSize {
         switch self {
         case .todayStatus: return .medium
@@ -87,6 +90,7 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
         case .tomorrowRing: return .large
         case .bagRequired: return .medium
         case .monthlyScoreCalendar: return .large
+        case .ganttChart: return .large
         }
     }
 }
@@ -113,6 +117,7 @@ extension CardType {
         case .tomorrowRing:           return .tomorrowRing
         case .bagRequired:            return .bagRequired
         case .monthlyScoreCalendar:   return .monthlyScoreCalendar
+        case .ganttChart:             return .ganttChart
         }
     }
 }

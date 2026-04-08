@@ -45,6 +45,9 @@ struct LGCategoryHubView: View {
             NavigationLink { FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore) } label: {
                 Label("財務", systemImage: "creditcard")
             }
+            NavigationLink { GanttScreen() } label: {
+                Label("甘特圖", systemImage: "chart.bar.xaxis")
+            }
             comingSoonRow("選緘溝通板", systemImage: "bubble.left.and.bubble.right")
 
         case .roles:
