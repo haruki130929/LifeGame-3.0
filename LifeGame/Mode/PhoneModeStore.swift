@@ -20,7 +20,7 @@ final class PhoneModeStore: ObservableObject {
 
     init() {
         self.mode = StorageManager.load(PhoneMode.self, forKey: modeKey) ?? .full
-        self.quickPages = StorageManager.load([QuickPage].self, forKey: pagesKey) ?? Self.defaultPages
+        self.quickPages = Self.loadPagesSafely(forKey: pagesKey)
         syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
     }
 
@@ -30,7 +30,16 @@ final class PhoneModeStore: ObservableObject {
         isReloading = true
         defer { isReloading = false }
         mode = StorageManager.load(PhoneMode.self, forKey: modeKey) ?? .full
-        quickPages = StorageManager.load([QuickPage].self, forKey: pagesKey) ?? Self.defaultPages
+        quickPages = Self.loadPagesSafely(forKey: pagesKey)
+    }
+
+    /// 安全載入 QuickPages — 跳過未知的 QuickFeatureType（向後相容）
+    private static func loadPagesSafely(forKey key: String) -> [QuickPage] {
+        guard let pages = StorageManager.load([SafeQuickPage].self, forKey: key) else {
+            return defaultPages
+        }
+        let valid = pages.compactMap { $0.toQuickPage() }
+        return valid.isEmpty ? defaultPages : valid
     }
 
     // MARK: - 預設頁面

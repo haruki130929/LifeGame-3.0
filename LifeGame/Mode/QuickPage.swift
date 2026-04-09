@@ -78,3 +78,30 @@ struct QuickPage: Identifiable, Codable, Equatable {
         self.order = order
     }
 }
+
+// MARK: - Safe Decoding Wrapper
+
+/// 解碼時跳過未知的 QuickFeatureType（向後相容舊版 app）
+struct SafeQuickPage: Codable {
+    let id: UUID
+    let featureTypeRaw: String
+    let order: Int
+
+    enum CodingKeys: String, CodingKey {
+        case id, featureType, order
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decode(UUID.self, forKey: .id)
+        featureTypeRaw = try container.decode(String.self, forKey: .featureType)
+        order = try container.decode(Int.self, forKey: .order)
+    }
+
+    func encode(to encoder: Encoder) throws {}
+
+    func toQuickPage() -> QuickPage? {
+        guard let type = QuickFeatureType(rawValue: featureTypeRaw) else { return nil }
+        return QuickPage(id: id, featureType: type, order: order)
+    }
+}

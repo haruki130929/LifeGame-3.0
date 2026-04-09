@@ -130,3 +130,37 @@ struct CardItem: Identifiable, Codable, Equatable {
 
     var id: String { type.rawValue }
 }
+
+// MARK: - Safe Array Decoding
+
+extension Array where Element == CardItem {
+    /// 解碼時跳過未知的 CardType（向後相容舊版 app）
+    init(safeDecoding decoder: Decoder) throws {
+        var container = try decoder.unkeyedContainer()
+        var items: [CardItem] = []
+        while !container.isAtEnd {
+            if let item = try? container.decode(CardItem.self) {
+                items.append(item)
+            } else {
+                // 跳過無法解碼的項目（例如新版新增的 enum case）
+                _ = try? container.decode(AnyCodable.self)
+            }
+        }
+        self = items
+    }
+}
+
+/// 用於跳過無法解碼的 JSON 值
+private struct AnyCodable: Codable {
+    init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if container.decodeNil() { return }
+        if let _ = try? container.decode(Bool.self) { return }
+        if let _ = try? container.decode(Int.self) { return }
+        if let _ = try? container.decode(Double.self) { return }
+        if let _ = try? container.decode(String.self) { return }
+        if let _ = try? container.decode([AnyCodable].self) { return }
+        if let _ = try? container.decode([String: AnyCodable].self) { return }
+    }
+    func encode(to encoder: Encoder) throws {}
+}

@@ -13,6 +13,24 @@ final class SlotCardConfigStore: ObservableObject {
         var earlyAfternoon: [CardItem]
         var beforeEnd: [CardItem]
         var bedtime: [CardItem]
+
+        /// 自訂解碼：跳過未知的 CardType（向後相容）
+        init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            beforeLeave    = (try? [CardItem](safeDecoding: container.superDecoder(forKey: .beforeLeave))) ?? []
+            morning        = (try? [CardItem](safeDecoding: container.superDecoder(forKey: .morning))) ?? []
+            earlyAfternoon = (try? [CardItem](safeDecoding: container.superDecoder(forKey: .earlyAfternoon))) ?? []
+            beforeEnd      = (try? [CardItem](safeDecoding: container.superDecoder(forKey: .beforeEnd))) ?? []
+            bedtime        = (try? [CardItem](safeDecoding: container.superDecoder(forKey: .bedtime))) ?? []
+        }
+
+        init(beforeLeave: [CardItem], morning: [CardItem], earlyAfternoon: [CardItem], beforeEnd: [CardItem], bedtime: [CardItem]) {
+            self.beforeLeave = beforeLeave
+            self.morning = morning
+            self.earlyAfternoon = earlyAfternoon
+            self.beforeEnd = beforeEnd
+            self.bedtime = bedtime
+        }
     }
 
     @Published private(set) var config: Config {
