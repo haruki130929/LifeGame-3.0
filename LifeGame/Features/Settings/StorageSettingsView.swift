@@ -113,6 +113,11 @@ struct StorageSettingsView: View {
                 showICloudError = true
                 return
             }
+            // 手動開啟 iCloud，清除手動 local 標記
+            UserDefaults.standard.removeObject(forKey: "lifegame.storage.manuallySetLocal")
+        } else {
+            // 使用者手動選擇 local，標記起來避免自動恢復覆蓋
+            UserDefaults.standard.set(true, forKey: "lifegame.storage.manuallySetLocal")
         }
 
         coordinator.scheduleSwitch(to: newMode)

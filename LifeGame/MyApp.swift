@@ -41,12 +41,16 @@ struct LifeGameApp: App {
         do {
             coord = try StorageCoordinator(configuration: config)
         } catch {
-            debugLog("⚠️ 第一次初始化失敗，重置為本機模式重試：\(error)")
-            // 只清除 pending，不改 currentMode（讓 StorageCoordinator 內部處理回退）
+            debugLog("⚠️ 第一次初始化失敗，暫時使用本機模式重試：\(error)")
+            // 只清除 pending，不永久改變儲存模式（下次啟動仍會嘗試 iCloud）
             config.clearPendingMode()
+            let savedMode = config.currentMode
             config.setMode(.local)
             do {
                 coord = try StorageCoordinator(configuration: config)
+                // 恢復原本的模式設定，讓下次啟動再嘗試
+                config.setMode(savedMode)
+                debugLog("ℹ️ 已暫時降級到本機模式，下次啟動會重新嘗試 \(savedMode)")
             } catch {
                 debugLog("❌ 儲存系統無法初始化：\(error)")
                 errorMessage = error.localizedDescription
@@ -146,6 +150,7 @@ struct LifeGameApp: App {
     private func retryInitialization() {
         let config = StorageConfiguration()
         config.clearPendingMode()
+        let savedMode = config.currentMode
         config.setMode(.local)
 
         do {
@@ -156,6 +161,8 @@ struct LifeGameApp: App {
             self.storageConfig = config
             self.keyValueStore = KeyValueStore { coord.mainContext }
             self.startupError = nil
+            // 恢復原本的模式設定，讓下次啟動再嘗試
+            config.setMode(savedMode)
         } catch {
             self.startupError = error.localizedDescription
         }

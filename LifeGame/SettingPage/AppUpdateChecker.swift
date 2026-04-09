@@ -23,6 +23,11 @@ final class AppUpdateChecker: ObservableObject {
     }
 
     func checkForUpdate() {
+        #if DEBUG
+        // 開發版不檢查 App Store 更新，避免干擾測試
+        hasUpdate = false
+        return
+        #endif
         guard let bundleId = Bundle.main.bundleIdentifier else { return }
         let urlString = "https://itunes.apple.com/lookup?bundleId=\(bundleId)&country=tw"
         guard let url = URL(string: urlString) else { return }

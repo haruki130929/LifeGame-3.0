@@ -81,21 +81,11 @@ final class StorageCoordinator {
                 cloudKitDatabase: .none
             )
         case .iCloud:
-            #if DEBUG
-            // Debug build 不同步 CloudKit，避免開發資料污染正式環境
-            debugLog("⚠️ Debug 模式：iCloud 同步已停用，使用獨立本地儲存")
-            config = ModelConfiguration(
-                "LifeGameCloudDev",
-                schema: schema,
-                cloudKitDatabase: .none
-            )
-            #else
             config = ModelConfiguration(
                 "LifeGameCloud",
                 schema: schema,
                 cloudKitDatabase: .automatic
             )
-            #endif
         }
 
         do {
@@ -289,8 +279,9 @@ final class StorageCoordinator {
                     debugLog("☁️ CloudKit 同步 [\(typeText)] ❌ 失敗：\(error)")
                 } else {
                     debugLog("☁️ CloudKit 同步 [\(typeText)] ✅ 完成")
-                    // 從雲端拉取完成 → 通知各 Store 重新載入
+                    // 從雲端拉取完成 → 去重 + 通知各 Store 重新載入
                     if event.type == .import {
+                        self.deduplicateIfNeeded()
                         NotificationCenter.default.post(name: StorageCoordinator.didReceiveRemoteChange, object: nil)
                     }
                 }

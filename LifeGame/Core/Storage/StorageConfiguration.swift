@@ -39,6 +39,17 @@ final class StorageConfiguration: @unchecked Sendable {
 
         self.currentMode = StorageMode(rawValue: raw) ?? .local
 
+        // 自動恢復：如果目前是 local 但 iCloud 可用，很可能是初始化失敗時被錯誤降級的
+        // 自動切回 iCloud
+        if self.currentMode == .local && FileManager.default.ubiquityIdentityToken != nil {
+            let wasManuallySetLocal = defaults.bool(forKey: "lifegame.storage.manuallySetLocal")
+            if !wasManuallySetLocal {
+                debugLog("☁️ 偵測到非手動的 local 模式，iCloud 可用，自動恢復為 iCloud")
+                self.currentMode = .iCloud
+                defaults.set(StorageMode.iCloud.rawValue, forKey: Keys.storageMode)
+            }
+        }
+
         // 確保 Keychain 永遠有最新的儲存模式（補上舊版本沒存到的情況）
         KeychainHelper.save(currentMode.rawValue, forKey: Keys.keychainStorageMode)
 
