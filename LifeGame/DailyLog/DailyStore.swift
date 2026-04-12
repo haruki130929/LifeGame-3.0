@@ -63,49 +63,6 @@ final class DailyLogStore: ObservableObject {
         return e
     }
 
-    /// 建立 14 天的假數據（用來預覽圖表效果）
-    func createSampleData() {
-        guard entries.isEmpty else { return }
-        let cal = Calendar.current
-
-        for dayOffset in (-13)...0 {
-            let date = cal.date(byAdding: .day, value: dayOffset, to: cal.startOfDay(for: Date()))!
-            var e = DailyLogEntry()
-            e.id = UUID()
-            e.date = date
-
-            // 情緒（隨機波動 3-8）
-            e.overallMoodScore = Int.random(in: 3...8)
-            e.anxietyScore = Int.random(in: 2...7)
-            e.fatigueScore = Int.random(in: 2...6)
-
-            // 睡眠（5.5-9 小時）
-            e.sleepHours = .value(Double.random(in: 5.5...9.0))
-
-            // 起床/就寢
-            let wakeHour = Int.random(in: 6...9)
-            let bedHour = Int.random(in: 21...24)
-            e.wakeTime = .time(cal.date(bySettingHour: wakeHour, minute: Int.random(in: 0...59), second: 0, of: date)!)
-            e.bedTime = .time(cal.date(bySettingHour: bedHour == 24 ? 0 : bedHour, minute: Int.random(in: 0...59), second: 0, of: date)!)
-
-            // 待辦完成度（有些天有，有些沒有）
-            if Bool.random() {
-                let total = Int.random(in: 3...8)
-                e.todoPartialTotal = total
-                e.todoPartialDone = Int.random(in: 1...total)
-            }
-
-            // 身體不適（偶爾有）
-            if Int.random(in: 0...3) == 0 {
-                let area: PainArea = [.headache, .stomachache, .muscleTension].randomElement()!
-                e.painAreas = [area]
-                e.painScoreByArea = [area: Int.random(in: 2...7)]
-            }
-
-            upsert(e)
-        }
-        debugLog("✅ DailyLog 假數據建立完成（14 天）")
-    }
     
     func entry(for date: Date) -> DailyLogEntry? {
         let cal = Calendar.current
