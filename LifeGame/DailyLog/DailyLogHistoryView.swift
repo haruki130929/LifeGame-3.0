@@ -38,6 +38,9 @@ struct DailyLogHistoryView: View {
             FabAction(title: "檢視紀錄", systemImage: "doc.text.magnifyingglass") {
                 showingReview = true
             },
+            FabAction(title: "載入範例數據", systemImage: "chart.line.uptrend.xyaxis") {
+                store.createSampleData()
+            },
             FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { }
         ])
         .sheet(isPresented: $showingAdd) {
