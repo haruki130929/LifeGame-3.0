@@ -14,9 +14,11 @@ struct GanttChartView: View {
 
     @EnvironmentObject private var theme: ThemeStore
 
-    private let rowHeight: CGFloat = 40
-    private let labelWidth: CGFloat = 140
-    private let headerHeight: CGFloat = 32
+    private let rowHeight: CGFloat = 52
+    private let labelWidth: CGFloat = 160
+    private let headerHeight: CGFloat = 40
+    private let barHeight: CGFloat = 30
+    private let handleWidth: CGFloat = 14
 
     /// 可用的圖表區域寬度（由 GeometryReader 動態計算）
     @State private var availableChartWidth: CGFloat = 0
@@ -168,11 +170,11 @@ struct GanttChartView: View {
             } else {
                 Circle()
                     .fill(Color(hex: item.colorHex))
-                    .frame(width: 8, height: 8)
+                    .frame(width: 10, height: 10)
             }
 
             Text(item.title)
-                .font(isParent ? .caption.weight(.semibold) : .caption)
+                .font(isParent ? .subheadline.weight(.semibold) : .subheadline)
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .foregroundStyle(item.isDone ? .secondary : .primary)
@@ -315,10 +317,10 @@ struct GanttChartView: View {
 
         return VStack(spacing: 0) {
             Text(topText)
-                .font(.system(size: 11, weight: isToday ? .bold : .semibold))
+                .font(.system(size: 13, weight: isToday ? .bold : .semibold))
             if !bottomText.isEmpty {
                 Text(bottomText)
-                    .font(.system(size: 9))
+                    .font(.system(size: 11))
             }
         }
         .foregroundStyle(fgColor)
@@ -397,7 +399,7 @@ struct GanttChartView: View {
                             RoundedRectangle(cornerRadius: 4)
                                 .strokeBorder(Color(hex: item.colorHex).opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
                         )
-                        .frame(width: max(bWidth, 2), height: 22)
+                        .frame(width: max(bWidth, 2), height: barHeight)
                         .offset(x: bOffset + (dragState?.taskId == item.id && dragState?.edge == .trailing ? (dragState?.offset ?? 0) : 0))
                 }
 
@@ -409,14 +411,14 @@ struct GanttChartView: View {
 
                     RoundedRectangle(cornerRadius: canDrag ? 0 : 4)
                         .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
-                        .frame(height: 22)
+                        .frame(height: barHeight)
 
                     if canDrag {
                         dragHandle(item: item, edge: .trailing)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 4))
-                .frame(width: max(dragAdjustedWidth, 20), height: 22)
+                .frame(width: max(dragAdjustedWidth, 20), height: barHeight)
                 .offset(x: dragAdjustedStart)
             }
         }
@@ -427,10 +429,10 @@ struct GanttChartView: View {
     private func dragHandle(item: GanttItem, edge: HorizontalEdge) -> some View {
         Rectangle()
             .fill(Color(hex: item.colorHex).opacity(0.95))
-            .frame(width: 10, height: 22)
+            .frame(width: handleWidth, height: barHeight)
             .overlay {
                 Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 7))
+                    .font(.system(size: 9))
                     .foregroundStyle(.white.opacity(0.7))
                     .rotationEffect(.degrees(90))
             }
