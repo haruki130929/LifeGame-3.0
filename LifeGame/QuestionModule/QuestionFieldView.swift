@@ -133,20 +133,54 @@ struct QuestionFieldView: View {
     // MARK: - Number Input
 
     private var numberInputField: some View {
-        HStack {
-            Text(question.title)
-            Spacer()
-            TextField(
-                "數字",
-                value: Binding(
-                    get: { answer?.intValue ?? 0 },
-                    set: { upsertAnswer { $0.intValue = $1 }($0) }
-                ),
-                format: .number
-            )
-            .keyboardType(.numberPad)
-            .multilineTextAlignment(.trailing)
-            .frame(width: 80)
+        let minVal = question.rangeMin ?? 0
+        let maxVal = question.rangeMax ?? 16
+        let useHalfStep = question.title.contains("小時") || question.title.contains("時長")
+
+        return VStack(alignment: .leading, spacing: 8) {
+            if useHalfStep {
+                // 半小時為單位的滾輪選擇器
+                let values: [Double] = {
+                    var result: [Double] = []
+                    for h in minVal...maxVal {
+                        result.append(Double(h))
+                        if h != maxVal { result.append(Double(h) + 0.5) }
+                    }
+                    return result
+                }()
+
+                HStack {
+                    Text(question.title)
+                    Spacer()
+                    Text(String(format: "%.1f", Double(answer?.intValue ?? 7)))
+                        .foregroundStyle(.secondary)
+                }
+
+                Picker("", selection: Binding(
+                    get: { Double(answer?.intValue ?? 7) },
+                    set: { upsertAnswer { $0.intValue = Int($1) }($0) }
+                )) {
+                    ForEach(values, id: \.self) { v in
+                        Text(String(format: "%.1f", v)).tag(v)
+                    }
+                }
+                .pickerStyle(.wheel)
+                .frame(height: 120)
+            } else {
+                // 一般數字用 Stepper
+                HStack {
+                    Text(question.title)
+                    Spacer()
+                    Stepper(
+                        "\(answer?.intValue ?? minVal)",
+                        value: Binding(
+                            get: { answer?.intValue ?? minVal },
+                            set: { upsertAnswer { $0.intValue = $1 }($0) }
+                        ),
+                        in: minVal...maxVal
+                    )
+                }
+            }
         }
     }
 
