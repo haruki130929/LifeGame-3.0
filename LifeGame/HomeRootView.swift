@@ -121,7 +121,7 @@ struct HomeRootView: View {
             case .addQuestion, .questionEditMode:
                 break // handled inside CustomModuleEditorView
             case .addGanttTask, .addMilestone, .toggleBuffer, .ganttBufferPercent, .deleteMilestoneMenu:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.ganttChart) ; fab.route = nil }
+                break // handled inside GanttScreen
             }
         }
         .onChange(of: navigationPath) {
