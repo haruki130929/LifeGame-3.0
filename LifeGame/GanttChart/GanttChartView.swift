@@ -22,14 +22,6 @@ struct GanttChartView: View {
 
     /// 可用的圖表區域寬度（由 GeometryReader 動態計算）
     @State private var availableChartWidth: CGFloat = 0
-    /// 正在拖拉的任務 ID + 邊 + 偏移量
-    @State private var dragState: DragState?
-
-    private struct DragState {
-        let taskId: UUID
-        let edge: HorizontalEdge
-        var offset: CGFloat
-    }
 
     private var totalDays: Int {
         let cal = Calendar.current
@@ -353,25 +345,8 @@ struct GanttChartView: View {
 
     private func ganttBar(_ item: GanttItem) -> some View {
         let isParent = item.source == .parentTask
+        let (offset, width) = barGeometry(start: item.start, end: item.end)
         let canDrag = item.taskRef != nil && !isParent
-
-        // 計算拖拉中的即時位置
-        let dragAdjustedStart: CGFloat
-        let dragAdjustedWidth: CGFloat
-        let (baseOffset, baseWidth) = barGeometry(start: item.start, end: item.end)
-
-        if let ds = dragState, ds.taskId == item.id {
-            if ds.edge == .leading {
-                dragAdjustedStart = baseOffset + ds.offset
-                dragAdjustedWidth = max(baseWidth - ds.offset, 20)
-            } else {
-                dragAdjustedStart = baseOffset
-                dragAdjustedWidth = max(baseWidth + ds.offset, 20)
-            }
-        } else {
-            dragAdjustedStart = baseOffset
-            dragAdjustedWidth = baseWidth
-        }
 
         return ZStack(alignment: .leading) {
             Color.clear
@@ -380,99 +355,36 @@ struct GanttChartView: View {
                 VStack(spacing: 0) {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color.secondary.opacity(0.35))
-                        .frame(width: max(dragAdjustedWidth, 6), height: 8)
+                        .frame(width: max(width, 6), height: 8)
                     HStack {
                         parentEndcap
                         Spacer(minLength: 0)
                         parentEndcap
                     }
-                    .frame(width: max(dragAdjustedWidth, 6))
+                    .frame(width: max(width, 6))
                 }
-                .offset(x: dragAdjustedStart, y: 2)
+                .offset(x: offset, y: 2)
+            } else if canDrag {
+                DraggableGanttBar(
+                    item: item,
+                    baseOffset: offset,
+                    baseWidth: width,
+                    chartWidth: chartWidth,
+                    dayWidth: dayWidth,
+                    barHeight: barHeight,
+                    handleWidth: handleWidth,
+                    dateRange: dateRange,
+                    onResize: onResizeTask
+                )
             } else {
-                // 緩衝條
-                if let bufferEnd = item.bufferEnd {
-                    let (bOffset, bWidth) = barGeometry(start: item.end, end: bufferEnd)
-                    RoundedRectangle(cornerRadius: 4)
-                        .fill(Color(hex: item.colorHex).opacity(0.2))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 4)
-                                .strokeBorder(Color(hex: item.colorHex).opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
-                        )
-                        .frame(width: max(bWidth, 2), height: barHeight)
-                        .offset(x: bOffset + (dragState?.taskId == item.id && dragState?.edge == .trailing ? (dragState?.offset ?? 0) : 0))
-                }
-
-                // 主條 + 拖拉端點
-                HStack(spacing: 0) {
-                    if canDrag {
-                        dragHandle(item: item, edge: .leading)
-                    }
-
-                    RoundedRectangle(cornerRadius: canDrag ? 0 : 4)
-                        .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
-                        .frame(height: barHeight)
-
-                    if canDrag {
-                        dragHandle(item: item, edge: .trailing)
-                    }
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 4))
-                .frame(width: max(dragAdjustedWidth, 20), height: barHeight)
-                .offset(x: dragAdjustedStart)
+                // 非自建任務（行事曆、待辦）不可拖拉
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
+                    .frame(width: max(width, 6), height: barHeight)
+                    .offset(x: offset)
             }
         }
         .frame(width: chartWidth, height: rowHeight)
-    }
-
-    /// 拖拉端點把手 — onChanged 即時更新
-    private func dragHandle(item: GanttItem, edge: HorizontalEdge) -> some View {
-        Rectangle()
-            .fill(Color(hex: item.colorHex).opacity(0.95))
-            .frame(width: handleWidth, height: barHeight)
-            .overlay {
-                Image(systemName: "line.3.horizontal")
-                    .font(.system(size: 9))
-                    .foregroundStyle(.white.opacity(0.7))
-                    .rotationEffect(.degrees(90))
-            }
-            .gesture(
-                DragGesture(minimumDistance: 3)
-                    .onChanged { value in
-                        // 吸附到天的格線
-                        let snapped = round(value.translation.width / dayWidth) * dayWidth
-                        dragState = DragState(
-                            taskId: item.id,
-                            edge: edge,
-                            offset: snapped
-                        )
-                    }
-                    .onEnded { value in
-                        guard let task = item.taskRef else {
-                            dragState = nil
-                            return
-                        }
-                        let totalSeconds = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
-                        let dragSeconds = (Double(value.translation.width) / Double(chartWidth)) * totalSeconds
-                        // 以一天為單位，四捨五入到最近的整天
-                        let dragDays = round(dragSeconds / 86400)
-                        let snappedSeconds = dragDays * 86400
-
-                        var newStart = task.start
-                        var newEnd = task.end
-
-                        if edge == .trailing {
-                            newEnd = newEnd.addingTimeInterval(snappedSeconds)
-                            newEnd = max(newEnd, newStart.addingTimeInterval(86400)) // 最少 1 天
-                        } else {
-                            newStart = newStart.addingTimeInterval(snappedSeconds)
-                            newStart = min(newStart, newEnd.addingTimeInterval(-86400))
-                        }
-
-                        dragState = nil
-                        onResizeTask?(task, newStart, newEnd)
-                    }
-            )
     }
 
     /// 父任務摘要條的端點小三角
@@ -528,5 +440,129 @@ struct GanttChartView: View {
         }
 
         return months
+    }
+}
+
+// MARK: - 獨立拖拉任務條（自帶 @GestureState，不影響整個甘特圖重繪）
+
+private struct DraggableGanttBar: View {
+    let item: GanttItem
+    let baseOffset: CGFloat
+    let baseWidth: CGFloat
+    let chartWidth: CGFloat
+    let dayWidth: CGFloat
+    let barHeight: CGFloat
+    let handleWidth: CGFloat
+    let dateRange: ClosedRange<Date>
+    var onResize: ((GanttTask, Date, Date) -> Void)?
+
+    @GestureState private var leadingDrag: CGFloat = 0
+    @GestureState private var trailingDrag: CGFloat = 0
+
+    private var currentOffset: CGFloat {
+        baseOffset + snapped(leadingDrag)
+    }
+
+    private var currentWidth: CGFloat {
+        max(baseWidth - snapped(leadingDrag) + snapped(trailingDrag), 20)
+    }
+
+    private func snapped(_ value: CGFloat) -> CGFloat {
+        round(value / dayWidth) * dayWidth
+    }
+
+    var body: some View {
+        // 緩衝條
+        if let bufferEnd = item.bufferEnd {
+            let total = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
+            if total > 0 {
+                let bStart = max(item.end.timeIntervalSince(dateRange.lowerBound), 0)
+                let bEnd = min(bufferEnd.timeIntervalSince(dateRange.lowerBound), total)
+                let bOffset = CGFloat(bStart / total) * chartWidth + snapped(trailingDrag)
+                let bWidth = CGFloat((bEnd - bStart) / total) * chartWidth
+
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color(hex: item.colorHex).opacity(0.2))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 4)
+                            .strokeBorder(Color(hex: item.colorHex).opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
+                    )
+                    .frame(width: max(bWidth, 2), height: barHeight)
+                    .offset(x: bOffset)
+            }
+        }
+
+        // 主條 + 把手
+        HStack(spacing: 0) {
+            // 左把手
+            Rectangle()
+                .fill(Color(hex: item.colorHex))
+                .frame(width: handleWidth, height: barHeight)
+                .overlay {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .rotationEffect(.degrees(90))
+                }
+                .gesture(
+                    DragGesture(minimumDistance: 3)
+                        .updating($leadingDrag) { value, state, _ in
+                            state = value.translation.width
+                        }
+                        .onEnded { value in
+                            commitResize(edge: .leading, translation: value.translation.width)
+                        }
+                )
+
+            // 中間
+            Rectangle()
+                .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
+                .frame(height: barHeight)
+
+            // 右把手
+            Rectangle()
+                .fill(Color(hex: item.colorHex))
+                .frame(width: handleWidth, height: barHeight)
+                .overlay {
+                    Image(systemName: "line.3.horizontal")
+                        .font(.system(size: 9))
+                        .foregroundStyle(.white.opacity(0.7))
+                        .rotationEffect(.degrees(90))
+                }
+                .gesture(
+                    DragGesture(minimumDistance: 3)
+                        .updating($trailingDrag) { value, state, _ in
+                            state = value.translation.width
+                        }
+                        .onEnded { value in
+                            commitResize(edge: .trailing, translation: value.translation.width)
+                        }
+                )
+        }
+        .clipShape(RoundedRectangle(cornerRadius: 4))
+        .frame(width: currentWidth, height: barHeight)
+        .offset(x: currentOffset)
+        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.9), value: leadingDrag)
+        .animation(.interactiveSpring(response: 0.2, dampingFraction: 0.9), value: trailingDrag)
+    }
+
+    private func commitResize(edge: HorizontalEdge, translation: CGFloat) {
+        guard let task = item.taskRef else { return }
+        let totalSeconds = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
+        let dragDays = round((Double(translation) / Double(chartWidth)) * totalSeconds / 86400)
+        let snappedSeconds = dragDays * 86400
+
+        var newStart = task.start
+        var newEnd = task.end
+
+        if edge == .trailing {
+            newEnd = newEnd.addingTimeInterval(snappedSeconds)
+            newEnd = max(newEnd, newStart.addingTimeInterval(86400))
+        } else {
+            newStart = newStart.addingTimeInterval(snappedSeconds)
+            newStart = min(newStart, newEnd.addingTimeInterval(-86400))
+        }
+
+        onResize?(task, newStart, newEnd)
     }
 }
