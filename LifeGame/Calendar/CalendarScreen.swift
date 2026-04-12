@@ -49,9 +49,9 @@ struct CalendarScreen: View {
         
         // ✅ 新增行程
         .sheet(isPresented: $showNewEvent) {
-            NewEventSheet { title, start, end, colorHex in
+            NewEventSheet { title, start, end, colorHex, frequency, repeatCount in
                 Task {
-                    await calendarStore.add(title: title, start: start, end: end, colorHex: colorHex)
+                    await calendarStore.add(title: title, start: start, end: end, colorHex: colorHex, frequency: frequency, repeatCount: repeatCount)
                 }
             }
         }

@@ -9,8 +9,10 @@ struct NewEventSheet: View {
     @State private var start: Date = Date()
     @State private var end: Date = Calendar.current.date(byAdding: .hour, value: 1, to: Date()) ?? Date()
     @State private var colorHex: String = "33A6B8"
+    @State private var frequency: RecurringFrequency = .none
+    @State private var repeatCount: Int = 12
 
-    let onSave: (String, Date, Date, String) -> Void
+    let onSave: (String, Date, Date, String, RecurringFrequency, Int) -> Void
 
     var body: some View {
         NavigationStack {
@@ -19,6 +21,22 @@ struct NewEventSheet: View {
                     TextField("標題", text: $title)
                     DatePicker("開始", selection: $start)
                     DatePicker("結束", selection: $end)
+                }
+
+                Section {
+                    Picker("重複", selection: $frequency) {
+                        ForEach(RecurringFrequency.allCases) { freq in
+                            Text(freq.rawValue).tag(freq)
+                        }
+                    }
+
+                    if frequency != .none {
+                        Stepper("重複 \(repeatCount) 次", value: $repeatCount, in: 2...52)
+                    }
+                } footer: {
+                    if frequency != .none {
+                        Text("將自動建立 \(repeatCount) 次\(frequency.rawValue)的重複行程")
+                    }
                 }
 
                 Section("顏色") {
@@ -57,7 +75,7 @@ struct NewEventSheet: View {
                     Button("儲存") {
                         let t = title.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !t.isEmpty else { return }
-                        onSave(t, start, end, colorHex)
+                        onSave(t, start, end, colorHex, frequency, repeatCount)
                         dismiss()
                     }
                 }

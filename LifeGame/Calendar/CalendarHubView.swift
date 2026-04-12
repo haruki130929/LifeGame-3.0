@@ -79,7 +79,11 @@ struct CalendarHubView: View {
             .padding(.bottom, 18)
         }
         .sheet(isPresented: $showingAdd) {
-            AddCalendarEventView(store: store, calendar: settings.calendar)
+            NewEventSheet { title, start, end, colorHex, frequency, repeatCount in
+                Task {
+                    await store.add(title: title, start: start, end: end, colorHex: colorHex, frequency: frequency, repeatCount: repeatCount)
+                }
+            }
         }
         .navigationTitle("行事曆")
         .navigationBarTitleDisplayMode(.inline)
