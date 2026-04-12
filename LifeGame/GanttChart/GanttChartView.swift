@@ -437,10 +437,12 @@ struct GanttChartView: View {
             .gesture(
                 DragGesture(minimumDistance: 3)
                     .onChanged { value in
+                        // 吸附到天的格線
+                        let snapped = round(value.translation.width / dayWidth) * dayWidth
                         dragState = DragState(
                             taskId: item.id,
                             edge: edge,
-                            offset: value.translation.width
+                            offset: snapped
                         )
                     }
                     .onEnded { value in
@@ -450,16 +452,19 @@ struct GanttChartView: View {
                         }
                         let totalSeconds = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
                         let dragSeconds = (Double(value.translation.width) / Double(chartWidth)) * totalSeconds
+                        // 以一天為單位，四捨五入到最近的整天
+                        let dragDays = round(dragSeconds / 86400)
+                        let snappedSeconds = dragDays * 86400
 
                         var newStart = task.start
                         var newEnd = task.end
 
                         if edge == .trailing {
-                            newEnd = newEnd.addingTimeInterval(dragSeconds)
-                            newEnd = max(newEnd, newStart.addingTimeInterval(3600))
+                            newEnd = newEnd.addingTimeInterval(snappedSeconds)
+                            newEnd = max(newEnd, newStart.addingTimeInterval(86400)) // 最少 1 天
                         } else {
-                            newStart = newStart.addingTimeInterval(dragSeconds)
-                            newStart = min(newStart, newEnd.addingTimeInterval(-3600))
+                            newStart = newStart.addingTimeInterval(snappedSeconds)
+                            newStart = min(newStart, newEnd.addingTimeInterval(-86400))
                         }
 
                         dragState = nil
