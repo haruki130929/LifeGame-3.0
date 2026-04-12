@@ -7,20 +7,27 @@ struct DailyLogHistoryView: View {
     @State private var showingReview = false
 
     var body: some View {
-        List {
-            if store.entries.isEmpty {
-                ContentUnavailableView("還沒有紀錄",
-                                       systemImage: "square.and.pencil",
-                                       description: Text("按右下角 ＋ 新增第一篇每日紀錄"))
-            } else {
-                ForEach(store.entries) { entry in
-                    NavigationLink {
-                        DailyLogEditorView(mode: .edit(entry), store: store)
-                    } label: {
-                        DailyLogRow(entry: entry)
+        VStack(spacing: 0) {
+            // 圖表區（至少 2 筆紀錄才顯示）
+            if store.entries.count >= 2 {
+                DailyLogChartsSection(entries: store.entries)
+            }
+
+            List {
+                if store.entries.isEmpty {
+                    ContentUnavailableView("還沒有紀錄",
+                                           systemImage: "square.and.pencil",
+                                           description: Text("按右下角 ＋ 新增第一篇每日紀錄"))
+                } else {
+                    ForEach(store.entries) { entry in
+                        NavigationLink {
+                            DailyLogEditorView(mode: .edit(entry), store: store)
+                        } label: {
+                            DailyLogRow(entry: entry)
+                        }
                     }
+                    .onDelete(perform: store.delete)
                 }
-                .onDelete(perform: store.delete)
             }
         }
         .navigationTitle("每日紀錄")
