@@ -1,30 +1,77 @@
 import SwiftUI
 import Charts
 
+// MARK: - 圖表時間區間
+
+enum ChartRange: String, CaseIterable, Identifiable {
+    case week = "1 週"
+    case twoWeeks = "2 週"
+    case month = "1 月"
+    case threeMonths = "3 月"
+    case all = "全部"
+
+    var id: String { rawValue }
+
+    var days: Int? {
+        switch self {
+        case .week:        return 7
+        case .twoWeeks:    return 14
+        case .month:       return 30
+        case .threeMonths: return 90
+        case .all:         return nil
+        }
+    }
+}
+
 /// 每日紀錄圖表區 — 橫向滑動，每個類別一張卡片
 struct DailyLogChartsSection: View {
     let entries: [DailyLogEntry]
     @EnvironmentObject private var theme: ThemeStore
+    @State private var selectedRange: ChartRange = .twoWeeks
 
-    /// 最近 14 天的資料（按日期排序）
-    private var recentEntries: [DailyLogEntry] {
+    private var filteredEntries: [DailyLogEntry] {
         let sorted = entries.sorted { $0.date < $1.date }
-        return Array(sorted.suffix(14))
+        guard let days = selectedRange.days else { return sorted }
+        let cutoff = Calendar.current.date(byAdding: .day, value: -days, to: Date()) ?? Date()
+        return sorted.filter { $0.date >= cutoff }
     }
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            LazyHStack(spacing: 12) {
-                moodChart
-                sleepChart
-                bodyChart
-                focusChart
-                timeChart
+        VStack(spacing: 6) {
+            // 區間選擇器
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 8) {
+                    ForEach(ChartRange.allCases) { range in
+                        Button {
+                            withAnimation { selectedRange = range }
+                        } label: {
+                            Text(range.rawValue)
+                                .font(.caption.weight(selectedRange == range ? .semibold : .regular))
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(selectedRange == range ? theme.accentColor.opacity(0.2) : Color.secondary.opacity(0.1))
+                                .foregroundStyle(selectedRange == range ? theme.accentColor : .secondary)
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 8)
+
+            // 圖表卡片
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 12) {
+                    moodChart
+                    sleepChart
+                    bodyChart
+                    focusChart
+                    timeChart
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 8)
+            }
         }
-        .frame(height: 230)
+        .frame(height: 270)
     }
 
     // MARK: - 1. 情緒趨勢（心情、焦慮、疲勞）
@@ -32,7 +79,7 @@ struct DailyLogChartsSection: View {
     private var moodChart: some View {
         chartCard(title: "情緒趨勢") {
             Chart {
-                ForEach(recentEntries) { entry in
+                ForEach(filteredEntries) { entry in
                     lineMark(date: entry.date, value: entry.overallMoodScore, series: "心情", color: .orange)
                     lineMark(date: entry.date, value: entry.anxietyScore, series: "焦慮", color: .red)
                     lineMark(date: entry.date, value: entry.fatigueScore, series: "疲勞", color: .purple)
@@ -58,7 +105,7 @@ struct DailyLogChartsSection: View {
     // MARK: - 2. 睡眠趨勢
 
     private var sleepChart: some View {
-        let sleepData = recentEntries.compactMap { entry -> (id: UUID, date: Date, hours: Double)? in
+        let sleepData = filteredEntries.compactMap { entry -> (id: UUID, date: Date, hours: Double)? in
             guard let h = entry.sleepHours.doubleValue else { return nil }
             return (entry.id, entry.date, h)
         }
@@ -89,7 +136,7 @@ struct DailyLogChartsSection: View {
 
     private var bodyChart: some View {
         // 取有疼痛紀錄的資料
-        let painData = recentEntries.flatMap { entry in
+        let painData = filteredEntries.flatMap { entry in
             entry.painScoreByArea.map { (area, score) in
                 (id: UUID(), date: entry.date, area: area.rawValue, score: score)
             }
@@ -134,7 +181,7 @@ struct DailyLogChartsSection: View {
     private var focusChart: some View {
         chartCard(title: "待辦完成度") {
             Chart {
-                ForEach(recentEntries) { entry in
+                ForEach(filteredEntries) { entry in
                     if entry.todoPartialTotal > 0 {
                         BarMark(
                             x: .value("日期", entry.date, unit: .day),
@@ -165,7 +212,7 @@ struct DailyLogChartsSection: View {
     // MARK: - 5. 起床/就寢時間
 
     private var timeChart: some View {
-        let timeData = recentEntries.compactMap { entry -> (id: UUID, date: Date, wake: Double, bed: Double)? in
+        let timeData = filteredEntries.compactMap { entry -> (id: UUID, date: Date, wake: Double, bed: Double)? in
             guard let w = entry.wakeTime.dateValue, let b = entry.bedTime.dateValue else { return nil }
             let cal = Calendar.current
             let wakeHour = Double(cal.component(.hour, from: w)) + Double(cal.component(.minute, from: w)) / 60.0
