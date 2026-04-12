@@ -98,7 +98,9 @@ struct GanttScreen: View {
             BufferSettingsSheet(ganttStore: ganttStore)
         }
         .sheet(item: $editingTask) { task in
-            EditGanttTaskSheet(ganttStore: ganttStore, task: task)
+            EditGanttTaskSheet(ganttStore: ganttStore, task: task) { parentId in
+                addSubtaskParent = IdentifiableUUID(parentId)
+            }
         }
         .sheet(item: $addSubtaskParent) { wrapper in
             AddSubtaskSheet(ganttStore: ganttStore, parentId: wrapper.value)
@@ -208,6 +210,7 @@ private struct AddGanttTaskSheet: View {
 private struct EditGanttTaskSheet: View {
     @ObservedObject var ganttStore: GanttStore
     let task: GanttTask
+    var onAddSubtask: ((UUID) -> Void)? = nil
     @Environment(\.dismiss) private var dismiss
 
     @State private var title: String = ""
@@ -240,6 +243,30 @@ private struct EditGanttTaskSheet: View {
                                 )
                                 .onTapGesture { selectedColor = hex }
                         }
+                    }
+                }
+
+                // 操作區
+                Section {
+                    // 新增子任務（只有頂層任務）
+                    if task.parentId == nil {
+                        Button {
+                            dismiss()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                                onAddSubtask?(task.id)
+                            }
+                        } label: {
+                            Label("新增子任務", systemImage: "plus.circle")
+                        }
+                    }
+
+                    // 標為完成/未完成
+                    Button {
+                        ganttStore.toggleTaskDone(task)
+                        dismiss()
+                    } label: {
+                        Label(task.isDone ? "標為未完成" : "標為完成",
+                              systemImage: task.isDone ? "circle" : "checkmark.circle.fill")
                     }
                 }
 

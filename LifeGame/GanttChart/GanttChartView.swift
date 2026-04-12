@@ -20,6 +20,14 @@ struct GanttChartView: View {
 
     /// 可用的圖表區域寬度（由 GeometryReader 動態計算）
     @State private var availableChartWidth: CGFloat = 0
+    /// 正在拖拉的任務 ID + 邊 + 偏移量
+    @State private var dragState: DragState?
+
+    private struct DragState {
+        let taskId: UUID
+        let edge: HorizontalEdge
+        var offset: CGFloat
+    }
 
     private var totalDays: Int {
         let cal = Calendar.current
@@ -140,34 +148,9 @@ struct GanttChartView: View {
             }
         }
         .frame(height: rowHeight)
-        .contextMenu {
+        .onTapGesture {
             if let task = item.taskRef {
-                Button {
-                    onEditTask?(task)
-                } label: {
-                    Label("編輯", systemImage: "pencil")
-                }
-
-                // 只有頂層任務或父任務可以新增子任務
-                if task.parentId == nil {
-                    Button {
-                        onAddSubtask?(task.id)
-                    } label: {
-                        Label("新增子任務", systemImage: "plus.circle")
-                    }
-                }
-
-                Button {
-                    onToggleDone?(task)
-                } label: {
-                    Label(task.isDone ? "標為未完成" : "標為完成", systemImage: task.isDone ? "circle" : "checkmark.circle")
-                }
-
-                Button(role: .destructive) {
-                    onDeleteTask?(task)
-                } label: {
-                    Label("刪除", systemImage: "trash")
-                }
+                onEditTask?(task)
             }
         }
     }
@@ -368,26 +351,42 @@ struct GanttChartView: View {
 
     private func ganttBar(_ item: GanttItem) -> some View {
         let isParent = item.source == .parentTask
-        let (offset, width) = barGeometry(start: item.start, end: item.end)
         let canDrag = item.taskRef != nil && !isParent
+
+        // 計算拖拉中的即時位置
+        let dragAdjustedStart: CGFloat
+        let dragAdjustedWidth: CGFloat
+        let (baseOffset, baseWidth) = barGeometry(start: item.start, end: item.end)
+
+        if let ds = dragState, ds.taskId == item.id {
+            if ds.edge == .leading {
+                dragAdjustedStart = baseOffset + ds.offset
+                dragAdjustedWidth = max(baseWidth - ds.offset, 20)
+            } else {
+                dragAdjustedStart = baseOffset
+                dragAdjustedWidth = max(baseWidth + ds.offset, 20)
+            }
+        } else {
+            dragAdjustedStart = baseOffset
+            dragAdjustedWidth = baseWidth
+        }
 
         return ZStack(alignment: .leading) {
             Color.clear
 
             if isParent {
-                // 父任務：細灰色摘要條
                 VStack(spacing: 0) {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color.secondary.opacity(0.35))
-                        .frame(width: max(width, 6), height: 8)
+                        .frame(width: max(dragAdjustedWidth, 6), height: 8)
                     HStack {
                         parentEndcap
                         Spacer(minLength: 0)
                         parentEndcap
                     }
-                    .frame(width: max(width, 6))
+                    .frame(width: max(dragAdjustedWidth, 6))
                 }
-                .offset(x: offset, y: 2)
+                .offset(x: dragAdjustedStart, y: 2)
             } else {
                 // 緩衝條
                 if let bufferEnd = item.bufferEnd {
@@ -399,39 +398,34 @@ struct GanttChartView: View {
                                 .strokeBorder(Color(hex: item.colorHex).opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
                         )
                         .frame(width: max(bWidth, 2), height: 22)
-                        .offset(x: bOffset)
+                        .offset(x: bOffset + (dragState?.taskId == item.id && dragState?.edge == .trailing ? (dragState?.offset ?? 0) : 0))
                 }
 
                 // 主條 + 拖拉端點
                 HStack(spacing: 0) {
-                    // 左端拖拉把手
                     if canDrag {
                         dragHandle(item: item, edge: .leading)
                     }
 
-                    // 中間色塊
                     RoundedRectangle(cornerRadius: canDrag ? 0 : 4)
                         .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
                         .frame(height: 22)
 
-                    // 右端拖拉把手
                     if canDrag {
                         dragHandle(item: item, edge: .trailing)
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: 4))
-                .frame(width: max(width, 20), height: 22)
-                .offset(x: offset)
+                .frame(width: max(dragAdjustedWidth, 20), height: 22)
+                .offset(x: dragAdjustedStart)
             }
         }
         .frame(width: chartWidth, height: rowHeight)
     }
 
-    /// 拖拉端點把手
+    /// 拖拉端點把手 — onChanged 即時更新
     private func dragHandle(item: GanttItem, edge: HorizontalEdge) -> some View {
-        let isEnd = edge == .trailing
-
-        return Rectangle()
+        Rectangle()
             .fill(Color(hex: item.colorHex).opacity(0.95))
             .frame(width: 10, height: 22)
             .overlay {
@@ -441,23 +435,34 @@ struct GanttChartView: View {
                     .rotationEffect(.degrees(90))
             }
             .gesture(
-                DragGesture(minimumDistance: 5)
+                DragGesture(minimumDistance: 3)
+                    .onChanged { value in
+                        dragState = DragState(
+                            taskId: item.id,
+                            edge: edge,
+                            offset: value.translation.width
+                        )
+                    }
                     .onEnded { value in
-                        guard let task = item.taskRef else { return }
+                        guard let task = item.taskRef else {
+                            dragState = nil
+                            return
+                        }
                         let totalSeconds = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
                         let dragSeconds = (Double(value.translation.width) / Double(chartWidth)) * totalSeconds
 
                         var newStart = task.start
                         var newEnd = task.end
 
-                        if isEnd {
+                        if edge == .trailing {
                             newEnd = newEnd.addingTimeInterval(dragSeconds)
-                            newEnd = max(newEnd, newStart.addingTimeInterval(3600)) // 最少 1 小時
+                            newEnd = max(newEnd, newStart.addingTimeInterval(3600))
                         } else {
                             newStart = newStart.addingTimeInterval(dragSeconds)
                             newStart = min(newStart, newEnd.addingTimeInterval(-3600))
                         }
 
+                        dragState = nil
                         onResizeTask?(task, newStart, newEnd)
                     }
             )
