@@ -74,6 +74,45 @@ struct WhatsNewView: View {
 
     static func items(for version: String) -> [WhatsNewItem] {
         switch version {
+        case "1.19":
+            return [
+                WhatsNewItem(
+                    icon: "chart.bar.xaxis",
+                    title: "全新甘特圖",
+                    description: "新增甘特圖功能，可建立任務與子任務、設定里程碑與緩衝時間。支援日/週/月切換，拖拉調整時長，序列子任務自動排程。",
+                    color: .blue
+                ),
+                WhatsNewItem(
+                    icon: "arrow.uturn.backward.circle",
+                    title: "簡略模式強化",
+                    description: "快速模式新增「返回上一張」按鈕，刷錯了可以回來。右下角新增卡片編輯按鈕，直接管理要顯示的功能。",
+                    color: .green
+                ),
+                WhatsNewItem(
+                    icon: "calendar.badge.plus",
+                    title: "每週固定行程",
+                    description: "行事曆新增行程時可選「每週固定行程」，自動建立 12 週重複行程，也會同步到 Apple 行事曆。",
+                    color: .orange
+                ),
+                WhatsNewItem(
+                    icon: "arrow.triangle.2.circlepath",
+                    title: "同步 Apple 行事曆",
+                    description: "行事曆設定頁新增同步按鈕，一鍵匯入 Apple 行事曆未來 3 個月的行程。",
+                    color: .cyan
+                ),
+                WhatsNewItem(
+                    icon: "doc.text.magnifyingglass",
+                    title: "檢視每日紀錄",
+                    description: "每日紀錄右下角「＋」新增「檢視紀錄」選項，可選擇日期範圍瀏覽過去的紀錄。",
+                    color: .purple
+                ),
+                WhatsNewItem(
+                    icon: "ladybug.fill",
+                    title: "穩定性提升",
+                    description: "修復多項 CloudKit 同步問題、資料重複、版本相容性問題，整體更穩定。",
+                    color: .red
+                ),
+            ]
         case "1.07":
             return [
                 WhatsNewItem(
