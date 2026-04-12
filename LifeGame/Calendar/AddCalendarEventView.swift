@@ -9,17 +9,26 @@ struct AddCalendarEventView: View {
     @State private var title: String = ""
     @State private var start: Date = .now
     @State private var end: Date = Calendar.current.date(byAdding: .hour, value: 1, to: .now) ?? .now
-    
+    @State private var isWeeklyRecurring: Bool = false
+
     var body: some View {
         NavigationStack {
             Form {
                 Section("事件") {
                     TextField("標題", text: $title)
                 }
-                
+
                 Section("時間") {
                     DatePicker("開始", selection: $start, displayedComponents: [.date, .hourAndMinute])
                     DatePicker("結束", selection: $end, displayedComponents: [.date, .hourAndMinute])
+                }
+
+                Section {
+                    Toggle("每週固定行程", isOn: $isWeeklyRecurring)
+                } footer: {
+                    if isWeeklyRecurring {
+                        Text("將自動建立 12 週的重複行程")
+                    }
                 }
             }
             .navigationTitle("新增事件")
@@ -28,15 +37,15 @@ struct AddCalendarEventView: View {
                 ToolbarItem(placement: .topBarLeading) {
                     Button("取消") { dismiss() }
                 }
-                
+
                 ToolbarItem(placement: .topBarTrailing) {
                     Button("加入") {
                         let trimmed = title.trimmingCharacters(in: .whitespacesAndNewlines)
                         guard !trimmed.isEmpty else { return }
                         guard end >= start else { return }
-                        
+
                         Task {
-                            await store.add(title: trimmed, start: start, end: end)
+                            await store.add(title: trimmed, start: start, end: end, isWeeklyRecurring: isWeeklyRecurring)
                             dismiss()
                         }
                     }

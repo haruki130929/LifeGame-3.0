@@ -6,6 +6,8 @@ struct CalendarEvent: Identifiable, Codable, Equatable {
     var start: Date
     var end: Date
     var colorHex: String = "33A6B8"
+    var isWeeklyRecurring: Bool = false
+    var recurringGroupId: UUID? = nil  // 同一組週期事件共用的 ID
 
     // Apple 行事曆事件的 ID
     var appleEventIdentifier: String? = nil
@@ -16,6 +18,8 @@ struct CalendarEvent: Identifiable, Codable, Equatable {
         start: Date,
         end: Date,
         colorHex: String = "33A6B8",
+        isWeeklyRecurring: Bool = false,
+        recurringGroupId: UUID? = nil,
         appleEventIdentifier: String? = nil
     ) {
         self.id = id
@@ -23,6 +27,8 @@ struct CalendarEvent: Identifiable, Codable, Equatable {
         self.start = start
         self.end = end
         self.colorHex = colorHex
+        self.isWeeklyRecurring = isWeeklyRecurring
+        self.recurringGroupId = recurringGroupId
         self.appleEventIdentifier = appleEventIdentifier
     }
 }
