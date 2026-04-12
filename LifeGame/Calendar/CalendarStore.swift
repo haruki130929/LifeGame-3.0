@@ -37,16 +37,28 @@ final class CalendarStore: ObservableObject {
         }
     }
     
-    func add(title: String, start: Date, end: Date, colorHex: String = "33A6B8", isWeeklyRecurring: Bool = false) async {
+    func add(title: String, start: Date, end: Date, colorHex: String = "33A6B8",
+             frequency: RecurringFrequency = .none, repeatCount: Int = 12) async {
         let granted = await requestAccessIfNeeded()
 
-        if isWeeklyRecurring {
-            // 建立 12 週的週期事件
+        if frequency != .none {
+            // 重複事件
             let groupId = UUID()
             let cal = Calendar.current
             let duration = end.timeIntervalSince(start)
 
-            // Apple 行事曆：建立週期性事件
+            // EKRecurrenceFrequency 對應
+            let ekFrequency: EKRecurrenceFrequency
+            let interval: Int
+            switch frequency {
+            case .daily:    ekFrequency = .daily;  interval = 1
+            case .weekly:   ekFrequency = .weekly; interval = 1
+            case .biweekly: ekFrequency = .weekly; interval = 2
+            case .monthly:  ekFrequency = .monthly; interval = 1
+            case .none:     ekFrequency = .daily;  interval = 1 // 不會執行到
+            }
+
+            // Apple 行事曆
             var appleEventIdentifier: String? = nil
             if granted {
                 do {
@@ -56,9 +68,9 @@ final class CalendarStore: ObservableObject {
                     ekEvent.endDate = end
                     ekEvent.calendar = eventStore.defaultCalendarForNewEvents
                     ekEvent.recurrenceRules = [EKRecurrenceRule(
-                        recurrenceWith: .weekly,
-                        interval: 1,
-                        end: EKRecurrenceEnd(occurrenceCount: 12)
+                        recurrenceWith: ekFrequency,
+                        interval: interval,
+                        end: EKRecurrenceEnd(occurrenceCount: repeatCount)
                     )]
                     try eventStore.save(ekEvent, span: .thisEvent)
                     appleEventIdentifier = ekEvent.eventIdentifier
@@ -67,18 +79,25 @@ final class CalendarStore: ObservableObject {
                 }
             }
 
-            // App 內部：建立 12 筆個別事件
-            for week in 0..<12 {
-                let weekStart = cal.date(byAdding: .weekOfYear, value: week, to: start)!
-                let weekEnd = weekStart.addingTimeInterval(duration)
+            // App 內部：建立個別事件
+            for i in 0..<repeatCount {
+                let offsetStart: Date
+                switch frequency {
+                case .daily:    offsetStart = cal.date(byAdding: .day, value: i, to: start)!
+                case .weekly:   offsetStart = cal.date(byAdding: .weekOfYear, value: i, to: start)!
+                case .biweekly: offsetStart = cal.date(byAdding: .weekOfYear, value: i * 2, to: start)!
+                case .monthly:  offsetStart = cal.date(byAdding: .month, value: i, to: start)!
+                case .none:     offsetStart = start
+                }
+                let offsetEnd = offsetStart.addingTimeInterval(duration)
                 let e = CalendarEvent(
                     title: title,
-                    start: weekStart,
-                    end: weekEnd,
+                    start: offsetStart,
+                    end: offsetEnd,
                     colorHex: colorHex,
                     isWeeklyRecurring: true,
                     recurringGroupId: groupId,
-                    appleEventIdentifier: week == 0 ? appleEventIdentifier : nil
+                    appleEventIdentifier: i == 0 ? appleEventIdentifier : nil
                 )
                 events.insert(e, at: 0)
             }

@@ -1,15 +1,26 @@
 import SwiftUI
 
+enum RecurringFrequency: String, CaseIterable, Identifiable {
+    case none = "不重複"
+    case daily = "每天"
+    case weekly = "每週"
+    case biweekly = "每兩週"
+    case monthly = "每月"
+
+    var id: String { rawValue }
+}
+
 struct AddCalendarEventView: View {
     @ObservedObject var store: CalendarStore
     let calendar: Calendar
-    
+
     @Environment(\.dismiss) private var dismiss
-    
+
     @State private var title: String = ""
     @State private var start: Date = .now
     @State private var end: Date = Calendar.current.date(byAdding: .hour, value: 1, to: .now) ?? .now
-    @State private var isWeeklyRecurring: Bool = false
+    @State private var frequency: RecurringFrequency = .none
+    @State private var repeatCount: Int = 12
 
     var body: some View {
         NavigationStack {
@@ -24,10 +35,18 @@ struct AddCalendarEventView: View {
                 }
 
                 Section {
-                    Toggle("每週固定行程", isOn: $isWeeklyRecurring)
+                    Picker("重複", selection: $frequency) {
+                        ForEach(RecurringFrequency.allCases) { freq in
+                            Text(freq.rawValue).tag(freq)
+                        }
+                    }
+
+                    if frequency != .none {
+                        Stepper("重複 \(repeatCount) 次", value: $repeatCount, in: 2...52)
+                    }
                 } footer: {
-                    if isWeeklyRecurring {
-                        Text("將自動建立 12 週的重複行程")
+                    if frequency != .none {
+                        Text("將自動建立 \(repeatCount) 次\(frequency.rawValue)的重複行程")
                     }
                 }
             }
@@ -45,7 +64,13 @@ struct AddCalendarEventView: View {
                         guard end >= start else { return }
 
                         Task {
-                            await store.add(title: trimmed, start: start, end: end, isWeeklyRecurring: isWeeklyRecurring)
+                            await store.add(
+                                title: trimmed,
+                                start: start,
+                                end: end,
+                                frequency: frequency,
+                                repeatCount: repeatCount
+                            )
                             dismiss()
                         }
                     }
