@@ -52,7 +52,17 @@ struct GanttScreen: View {
                 onEditTask: { task in editingTask = task },
                 onAddSubtask: { parentId in addSubtaskParent = IdentifiableUUID(parentId) },
                 onDeleteTask: { task in ganttStore.deleteTask(task) },
-                onToggleDone: { task in ganttStore.toggleTaskDone(task) }
+                onToggleDone: { task in ganttStore.toggleTaskDone(task) },
+                onResizeTask: { task, newStart, newEnd in
+                    var updated = task
+                    updated.start = newStart
+                    updated.end = newEnd
+                    if task.parentId != nil {
+                        ganttStore.updateSubtaskAndRealign(updated)
+                    } else {
+                        ganttStore.updateTask(updated)
+                    }
+                }
             )
         }
         .navigationTitle("甘特圖")
@@ -283,10 +293,10 @@ private struct AddMilestoneSheet: View {
 
     @State private var title = ""
     @State private var date = Date()
-    @State private var selectedColor = "FF6B6B"
+    @State private var selectedColor = "BE4BDB"
     @FocusState private var titleFocused: Bool
 
-    private let colorOptions = ["FF6B6B", "FFA94D", "51CF66", "339AF0", "CC5DE8"]
+    private let colorOptions = ["BE4BDB", "F59F00", "20C997", "E8590C", "AE3EC9"]
 
     var body: some View {
         NavigationStack {

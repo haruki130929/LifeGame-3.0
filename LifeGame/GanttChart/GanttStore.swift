@@ -149,13 +149,13 @@ final class GanttStore: ObservableObject {
         milestones.append(GanttMilestone(
             title: "設計完成",
             date: a3Start.addingTimeInterval(3 * 86400),
-            colorHex: "FF6B6B"
+            colorHex: "BE4BDB"  // 紫色
         ))
 
         milestones.append(GanttMilestone(
             title: "Beta 上線",
             date: b3Start.addingTimeInterval(3 * 86400),
-            colorHex: "339AF0"
+            colorHex: "F59F00"  // 橘黃色
         ))
 
         // 更新父任務範圍

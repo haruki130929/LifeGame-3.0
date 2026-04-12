@@ -52,5 +52,5 @@ struct GanttMilestone: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
     var title: String
     var date: Date
-    var colorHex: String = "FF6B6B"
+    var colorHex: String = "BE4BDB"  // 預設紫色，避免跟週末藍紅混淆
 }

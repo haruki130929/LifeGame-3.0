@@ -10,6 +10,7 @@ struct GanttChartView: View {
     var onAddSubtask: ((UUID) -> Void)? = nil
     var onDeleteTask: ((GanttTask) -> Void)? = nil
     var onToggleDone: ((GanttTask) -> Void)? = nil
+    var onResizeTask: ((GanttTask, Date, Date) -> Void)? = nil  // (task, newStart, newEnd)
 
     @EnvironmentObject private var theme: ThemeStore
 
@@ -368,6 +369,7 @@ struct GanttChartView: View {
     private func ganttBar(_ item: GanttItem) -> some View {
         let isParent = item.source == .parentTask
         let (offset, width) = barGeometry(start: item.start, end: item.end)
+        let canDrag = item.taskRef != nil && !isParent
 
         return ZStack(alignment: .leading) {
             Color.clear
@@ -378,7 +380,6 @@ struct GanttChartView: View {
                     RoundedRectangle(cornerRadius: 2)
                         .fill(Color.secondary.opacity(0.35))
                         .frame(width: max(width, 6), height: 8)
-                    // 左右端點小三角
                     HStack {
                         parentEndcap
                         Spacer(minLength: 0)
@@ -401,14 +402,65 @@ struct GanttChartView: View {
                         .offset(x: bOffset)
                 }
 
-                // 主條
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
-                    .frame(width: max(width, 6), height: 22)
-                    .offset(x: offset)
+                // 主條 + 拖拉端點
+                HStack(spacing: 0) {
+                    // 左端拖拉把手
+                    if canDrag {
+                        dragHandle(item: item, edge: .leading)
+                    }
+
+                    // 中間色塊
+                    RoundedRectangle(cornerRadius: canDrag ? 0 : 4)
+                        .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
+                        .frame(height: 22)
+
+                    // 右端拖拉把手
+                    if canDrag {
+                        dragHandle(item: item, edge: .trailing)
+                    }
+                }
+                .clipShape(RoundedRectangle(cornerRadius: 4))
+                .frame(width: max(width, 20), height: 22)
+                .offset(x: offset)
             }
         }
         .frame(width: chartWidth, height: rowHeight)
+    }
+
+    /// 拖拉端點把手
+    private func dragHandle(item: GanttItem, edge: HorizontalEdge) -> some View {
+        let isEnd = edge == .trailing
+
+        return Rectangle()
+            .fill(Color(hex: item.colorHex).opacity(0.95))
+            .frame(width: 10, height: 22)
+            .overlay {
+                Image(systemName: "line.3.horizontal")
+                    .font(.system(size: 7))
+                    .foregroundStyle(.white.opacity(0.7))
+                    .rotationEffect(.degrees(90))
+            }
+            .gesture(
+                DragGesture(minimumDistance: 5)
+                    .onEnded { value in
+                        guard let task = item.taskRef else { return }
+                        let totalSeconds = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
+                        let dragSeconds = (Double(value.translation.width) / Double(chartWidth)) * totalSeconds
+
+                        var newStart = task.start
+                        var newEnd = task.end
+
+                        if isEnd {
+                            newEnd = newEnd.addingTimeInterval(dragSeconds)
+                            newEnd = max(newEnd, newStart.addingTimeInterval(3600)) // 最少 1 小時
+                        } else {
+                            newStart = newStart.addingTimeInterval(dragSeconds)
+                            newStart = min(newStart, newEnd.addingTimeInterval(-3600))
+                        }
+
+                        onResizeTask?(task, newStart, newEnd)
+                    }
+            )
     }
 
     /// 父任務摘要條的端點小三角
