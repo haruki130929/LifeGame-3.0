@@ -33,15 +33,16 @@ final class GanttStore: ObservableObject {
         milestones = StorageManager.load([GanttMilestone].self, forKey: milestonesKey) ?? []
         syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
 
-        // 第一次使用時建立範例資料
-        if tasks.isEmpty && milestones.isEmpty {
+        // 資料為空時建立範例資料
+        if tasks.isEmpty {
             createSampleData()
         }
     }
 
     /// 建立範例資料，展示所有功能
     private func createSampleData() {
-        let today = cal.startOfDay(for: Date())
+        // 從三天前開始，確保當前週能看到任務
+        let today = cal.date(byAdding: .day, value: -3, to: cal.startOfDay(for: Date()))!
 
         // ── 父任務 A：App 設計（粉紅色系）──
         let parentA = GanttTask(
