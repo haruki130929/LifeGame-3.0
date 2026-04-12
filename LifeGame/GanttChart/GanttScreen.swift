@@ -110,10 +110,15 @@ struct GanttScreen: View {
     // MARK: - Legend
 
     private var legendRow: some View {
-        HStack(spacing: 10) {
-            legendDot(color: "339AF0", label: "任務")
-            legendDot(color: "33A6B8", label: "行事曆")
-            legendDot(color: "5B8DEF", label: "待辦")
+        let items = ganttStore.buildItems(from: calendarStore, todoStore: todoStore)
+        let hasCustom = items.contains { $0.source == .custom || $0.source == .parentTask }
+        let hasCalendar = items.contains { $0.source == .calendar }
+        let hasTodo = items.contains { $0.source == .todo }
+
+        return HStack(spacing: 10) {
+            if hasCustom { legendDot(color: "339AF0", label: "任務") }
+            if hasCalendar { legendDot(color: "33A6B8", label: "行事曆") }
+            if hasTodo { legendDot(color: "5B8DEF", label: "待辦") }
             Spacer()
             Button { ganttStore.jumpToToday() } label: {
                 Text("今天")
