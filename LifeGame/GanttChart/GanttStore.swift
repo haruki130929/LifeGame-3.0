@@ -375,7 +375,7 @@ final class GanttStore: ObservableObject {
 
     // MARK: - Build Items
 
-    func buildItems(from calendarStore: CalendarStore, todoStore: TodoQuadrantStore) -> [GanttItem] {
+    func buildItems() -> [GanttItem] {
         let range = visibleDateRange
         let bufferRatio = showBuffer ? bufferPercent / 100.0 : 0
         var result: [GanttItem] = []
@@ -394,7 +394,6 @@ final class GanttStore: ObservableObject {
                 ))
             }
 
-            // 子任務
             for child in children {
                 if child.end > range.lowerBound && child.start < range.upperBound {
                     let bufferEnd: Date? = bufferRatio > 0
@@ -406,28 +405,6 @@ final class GanttStore: ObservableObject {
                         bufferEnd: bufferEnd, indentLevel: 1, taskRef: child
                     ))
                 }
-            }
-        }
-
-        // Calendar events
-        for event in calendarStore.events {
-            if event.end > range.lowerBound && event.start < range.upperBound {
-                result.append(GanttItem(
-                    id: event.id, title: event.title, start: event.start, end: event.end,
-                    colorHex: event.colorHex, source: .calendar, isDone: false
-                ))
-            }
-        }
-
-        // Todo items
-        for item in todoStore.items {
-            guard let startDate = item.startDate, let dueDate = item.dueDate else { continue }
-            let effectiveEnd = max(dueDate, cal.date(byAdding: .hour, value: 1, to: startDate)!)
-            if effectiveEnd > range.lowerBound && startDate < range.upperBound {
-                result.append(GanttItem(
-                    id: item.id, title: item.title, start: startDate, end: effectiveEnd,
-                    colorHex: "5B8DEF", source: .todo, isDone: item.isDone
-                ))
             }
         }
 

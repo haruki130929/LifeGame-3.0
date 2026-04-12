@@ -1,8 +1,6 @@
 import SwiftUI
 
 struct GanttScreen: View {
-    @EnvironmentObject private var calendarStore: CalendarStore
-    @EnvironmentObject private var todoStore: TodoQuadrantStore
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var fab: FabStore
 
@@ -33,19 +31,19 @@ struct GanttScreen: View {
                     Image(systemName: "chevron.right")
                         .font(.system(size: 16, weight: .semibold))
                 }
+
+                todayButton
+                    .padding(.leading, 8)
             }
             .padding(.horizontal, 20)
             .padding(.top, 10)
             .padding(.bottom, 6)
 
-            // 圖例
-            legendRow
-
             Divider()
 
             // 甘特圖（內建日/週/月切換器在左上角）
             GanttChartView(
-                items: ganttStore.buildItems(from: calendarStore, todoStore: todoStore),
+                items: ganttStore.buildItems(),
                 milestones: ganttStore.visibleMilestones(),
                 timeScale: $ganttStore.timeScale,
                 dateRange: ganttStore.visibleDateRange,
@@ -107,37 +105,13 @@ struct GanttScreen: View {
         }
     }
 
-    // MARK: - Legend
+    // MARK: - Navigation helpers
 
-    private var legendRow: some View {
-        let items = ganttStore.buildItems(from: calendarStore, todoStore: todoStore)
-        let hasCustom = items.contains { $0.source == .custom || $0.source == .parentTask }
-        let hasCalendar = items.contains { $0.source == .calendar }
-        let hasTodo = items.contains { $0.source == .todo }
-
-        return HStack(spacing: 10) {
-            if hasCustom { legendDot(color: "339AF0", label: "任務") }
-            if hasCalendar { legendDot(color: "33A6B8", label: "行事曆") }
-            if hasTodo { legendDot(color: "5B8DEF", label: "待辦") }
-            Spacer()
-            Button { ganttStore.jumpToToday() } label: {
-                Text("今天")
-                    .font(.caption)
-                    .foregroundStyle(theme.accentColor)
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.bottom, 6)
-    }
-
-    private func legendDot(color: String, label: String) -> some View {
-        HStack(spacing: 4) {
-            RoundedRectangle(cornerRadius: 3)
-                .fill(Color(hex: color))
-                .frame(width: 12, height: 12)
-            Text(label)
+    private var todayButton: some View {
+        Button { ganttStore.jumpToToday() } label: {
+            Text("今天")
                 .font(.caption)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(theme.accentColor)
         }
     }
 }
