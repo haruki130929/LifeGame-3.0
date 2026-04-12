@@ -130,10 +130,11 @@ struct HomeRootView: View {
             }
         }
         .sheet(isPresented: $showAddCalendarEvent) {
-            AddCalendarEventView(
-                store: calendarStore,
-                calendar: Calendar.current
-            )
+            NewEventSheet { title, start, end, colorHex, frequency, repeatCount in
+                Task {
+                    await calendarStore.add(title: title, start: start, end: end, colorHex: colorHex, frequency: frequency, repeatCount: repeatCount)
+                }
+            }
         }
         .sheet(isPresented: $showAddDailyLog) {
             NavigationStack {

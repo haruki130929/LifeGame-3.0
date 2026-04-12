@@ -1,5 +1,19 @@
 import Foundation
 
+// MARK: - RecurringFrequency
+
+enum RecurringFrequency: String, CaseIterable, Identifiable {
+    case none = "不重複"
+    case daily = "每天"
+    case weekly = "每週"
+    case biweekly = "每兩週"
+    case monthly = "每月"
+
+    var id: String { rawValue }
+}
+
+// MARK: - CalendarEvent
+
 struct CalendarEvent: Identifiable, Codable, Equatable {
     var id: UUID = UUID()
     var title: String
