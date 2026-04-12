@@ -93,9 +93,14 @@ struct DailyLogChartsSection: View {
             ])
             .chartLegend(position: .bottom, spacing: 8)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                AxisMarks(values: .stride(by: .day, count: 2)) { value in
                     AxisGridLine()
-                    AxisValueLabel(format: .dateTime.month().day())
+                    AxisValueLabel {
+                        if let date = value.as(Date.self) {
+                            Text(zhDateLabel(date))
+                                .font(.caption2)
+                        }
+                    }
                 }
             }
             .chartYAxis { AxisMarks(position: .leading) }
@@ -123,9 +128,14 @@ struct DailyLogChartsSection: View {
             }
             .chartYScale(domain: 0...12)
             .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                AxisMarks(values: .stride(by: .day, count: 2)) { value in
                     AxisGridLine()
-                    AxisValueLabel(format: .dateTime.month().day())
+                    AxisValueLabel {
+                        if let date = value.as(Date.self) {
+                            Text(zhDateLabel(date))
+                                .font(.caption2)
+                        }
+                    }
                 }
             }
             .chartYAxis { AxisMarks(position: .leading) }
@@ -166,9 +176,14 @@ struct DailyLogChartsSection: View {
                 .chartYScale(domain: 0...10)
                 .chartLegend(position: .bottom, spacing: 8)
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                    AxisMarks(values: .stride(by: .day, count: 2)) { value in
                         AxisGridLine()
-                        AxisValueLabel(format: .dateTime.month().day())
+                        AxisValueLabel {
+                            if let date = value.as(Date.self) {
+                                Text(zhDateLabel(date))
+                                    .font(.caption2)
+                            }
+                        }
                     }
                 }
                 .chartYAxis { AxisMarks(position: .leading) }
@@ -200,9 +215,14 @@ struct DailyLogChartsSection: View {
                 }
             }
             .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                AxisMarks(values: .stride(by: .day, count: 2)) { value in
                     AxisGridLine()
-                    AxisValueLabel(format: .dateTime.month().day())
+                    AxisValueLabel {
+                        if let date = value.as(Date.self) {
+                            Text(zhDateLabel(date))
+                                .font(.caption2)
+                        }
+                    }
                 }
             }
             .chartYAxis { AxisMarks(position: .leading) }
@@ -263,9 +283,14 @@ struct DailyLogChartsSection: View {
                 ])
                 .chartLegend(position: .bottom, spacing: 8)
                 .chartXAxis {
-                    AxisMarks(values: .stride(by: .day, count: 2)) { _ in
+                    AxisMarks(values: .stride(by: .day, count: 2)) { value in
                         AxisGridLine()
-                        AxisValueLabel(format: .dateTime.month().day())
+                        AxisValueLabel {
+                            if let date = value.as(Date.self) {
+                                Text(zhDateLabel(date))
+                                    .font(.caption2)
+                            }
+                        }
                     }
                 }
                 .chartYAxis {
@@ -293,6 +318,13 @@ struct DailyLogChartsSection: View {
         )
         .foregroundStyle(color)
         .interpolationMethod(.catmullRom)
+    }
+
+    private func zhDateLabel(_ date: Date) -> String {
+        let cal = Calendar.current
+        let m = cal.component(.month, from: date)
+        let d = cal.component(.day, from: date)
+        return "\(m)/\(d)"
     }
 
     private func chartCard<Content: View>(title: String, @ViewBuilder content: () -> Content) -> some View {

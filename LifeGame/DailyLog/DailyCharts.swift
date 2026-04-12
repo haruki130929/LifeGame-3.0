@@ -32,7 +32,13 @@ struct DailyMetricLineChart<DataPoint: Identifiable>: View {
             .chartXAxis {
                 AxisMarks(values: .stride(by: .day, count: 2)) { value in
                     AxisGridLine()
-                    AxisValueLabel(format: .dateTime.month().day())
+                    AxisValueLabel {
+                        if let date = value.as(Date.self) {
+                            let cal = Calendar.current
+                            Text("\(cal.component(.month, from: date))/\(cal.component(.day, from: date))")
+                                .font(.caption2)
+                        }
+                    }
                 }
             }
             .chartYAxis {
