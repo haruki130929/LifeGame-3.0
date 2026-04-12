@@ -161,6 +161,48 @@ final class CalendarStore: ObservableObject {
         guard let idx = events.firstIndex(where: { $0.id == event.id }) else { return }
         events[idx] = event
     }
+
+    // MARK: - 同步 Apple 行事曆
+
+    /// 從 Apple 行事曆匯入未來 3 個月的事件
+    @Published var lastSyncDate: Date?
+    @Published var syncedCount: Int = 0
+
+    func syncFromAppleCalendar() async -> Int {
+        let granted = await requestAccessIfNeeded()
+        guard granted else { return 0 }
+
+        let cal = Calendar.current
+        let start = cal.startOfDay(for: Date())
+        let end = cal.date(byAdding: .month, value: 3, to: start)!
+
+        let predicate = eventStore.predicateForEvents(withStart: start, end: end, calendars: nil)
+        let ekEvents = eventStore.events(matching: predicate)
+
+        // 已存在的 Apple 事件 ID，避免重複匯入
+        let existingAppleIds = Set(events.compactMap(\.appleEventIdentifier))
+        var importCount = 0
+
+        for ek in ekEvents {
+            guard let identifier = ek.eventIdentifier,
+                  !existingAppleIds.contains(identifier) else { continue }
+
+            let e = CalendarEvent(
+                title: ek.title ?? "（無標題）",
+                start: ek.startDate,
+                end: ek.endDate,
+                colorHex: "8E8E93",  // 系統灰色，區分手動建立的
+                appleEventIdentifier: identifier
+            )
+            events.append(e)
+            importCount += 1
+        }
+
+        lastSyncDate = Date()
+        syncedCount = importCount
+        debugLog("✅ Apple 行事曆同步完成，匯入 \(importCount) 筆事件")
+        return importCount
+    }
     
     private func save() {
         StorageManager.save(events, forKey: Self.storageKey)

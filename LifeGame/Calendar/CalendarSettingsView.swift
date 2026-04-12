@@ -2,9 +2,12 @@ import SwiftUI
 
 struct CalendarSettingsView: View {
     @ObservedObject var settings: CalendarSettingsStore
+    @EnvironmentObject var calendarStore: CalendarStore
     @State private var showAddPreset = false
     @State private var newPresetHex = "33A6B8"
     @State private var newPresetName = ""
+    @State private var isSyncing = false
+    @State private var syncResult: String?
 
     var body: some View {
         Form {
@@ -18,9 +21,35 @@ struct CalendarSettingsView: View {
             }
 
             Section {
-                Toggle("同步 Apple 行事曆", isOn: $settings.syncAppleCalendar)
+                Button {
+                    isSyncing = true
+                    syncResult = nil
+                    Task {
+                        let count = await calendarStore.syncFromAppleCalendar()
+                        isSyncing = false
+                        syncResult = count > 0 ? "已匯入 \(count) 筆行程" : "沒有新的行程"
+                    }
+                } label: {
+                    HStack {
+                        Label("同步 Apple 行事曆", systemImage: "arrow.triangle.2.circlepath")
+                        Spacer()
+                        if isSyncing {
+                            ProgressView()
+                        }
+                    }
+                }
+                .disabled(isSyncing)
             } footer: {
-                Text("開啟後將顯示 Apple 內建行事曆的行程")
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("從 Apple 行事曆匯入未來 3 個月的行程")
+                    if let result = syncResult {
+                        Text(result)
+                            .foregroundStyle(.green)
+                    }
+                    if let lastSync = calendarStore.lastSyncDate {
+                        Text("上次同步：\(lastSync.formatted(date: .abbreviated, time: .shortened))")
+                    }
+                }
             }
 
             Section {
