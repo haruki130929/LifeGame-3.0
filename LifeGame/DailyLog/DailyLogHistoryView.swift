@@ -4,6 +4,7 @@ struct DailyLogHistoryView: View {
 
     @ObservedObject var store: DailyLogStore
     @State private var showingAdd = false
+    @State private var showingReview = false
 
     var body: some View {
         List {
@@ -27,12 +28,18 @@ struct DailyLogHistoryView: View {
             FabAction(title: "寫新日記", systemImage: "plus") {
                 showingAdd = true
             },
+            FabAction(title: "檢視紀錄", systemImage: "doc.text.magnifyingglass") {
+                showingReview = true
+            },
             FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { }
         ])
         .sheet(isPresented: $showingAdd) {
             NavigationStack {
                 DailyLogEditorView(mode: .add, store: store)
             }
+        }
+        .sheet(isPresented: $showingReview) {
+            DailyLogReviewRangeSheet(allEntries: store.entries)
         }
         .featureTutorial(.dailyLog)
     }

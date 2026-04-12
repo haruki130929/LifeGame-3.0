@@ -1,36 +1,56 @@
 import SwiftUI
 
-/// 甘特圖核心視圖 — 橫向捲動的時間軸 + 橫條 + 里程碑 + 緩衝
+/// 甘特圖核心視圖 — 左側任務列表 + 右側橫向捲動時間軸
 struct GanttChartView: View {
     let items: [GanttItem]
     let milestones: [GanttMilestone]
-    let timeScale: GanttTimeScale
+    @Binding var timeScale: GanttTimeScale
     let dateRange: ClosedRange<Date>
+    var onEditTask: ((GanttTask) -> Void)? = nil
+    var onAddSubtask: ((UUID) -> Void)? = nil
+    var onDeleteTask: ((GanttTask) -> Void)? = nil
+    var onToggleDone: ((GanttTask) -> Void)? = nil
 
     @EnvironmentObject private var theme: ThemeStore
 
-    private let rowHeight: CGFloat = 44
-    private let labelWidth: CGFloat = 100
+    private let rowHeight: CGFloat = 40
+    private let labelWidth: CGFloat = 140
+    private let headerHeight: CGFloat = 32
 
-    private var unitWidth: CGFloat {
+    /// 可用的圖表區域寬度（由 GeometryReader 動態計算）
+    @State private var availableChartWidth: CGFloat = 0
+
+    private var totalDays: Int {
+        let cal = Calendar.current
         switch timeScale {
-        case .day:   return 50
-        case .week:  return 110
-        case .month: return 38
+        case .day:   return 24  // 小時
+        case .week:  return 7
+        case .month:
+            return cal.dateComponents([.day], from: dateRange.lowerBound, to: dateRange.upperBound).day ?? 30
         }
     }
 
-    private var totalWidth: CGFloat {
-        let cal = Calendar.current
+    /// 每個單位的寬度 — 週模式自動平均分配螢幕寬度
+    private var dayWidth: CGFloat {
+        let available = availableChartWidth
         switch timeScale {
-        case .day:
-            return unitWidth * 24
         case .week:
-            return unitWidth * 7
+            return available > 0 ? available / 7 : 100
+        case .day:
+            return available > 0 ? max(available / 24, 50) : 50
         case .month:
-            let days = cal.dateComponents([.day], from: dateRange.lowerBound, to: dateRange.upperBound).day ?? 30
-            return unitWidth * CGFloat(days)
+            let days = CGFloat(totalDays)
+            return available > 0 ? max(available / days, 36) : 36
         }
+    }
+
+    /// 是否需要橫向捲動（內容比可用空間寬時才捲動）
+    private var needsHorizontalScroll: Bool {
+        chartWidth > availableChartWidth && availableChartWidth > 0
+    }
+
+    private var chartWidth: CGFloat {
+        dayWidth * CGFloat(totalDays)
     }
 
     var body: some View {
@@ -38,227 +58,411 @@ struct GanttChartView: View {
             ContentUnavailableView(
                 "沒有資料",
                 systemImage: "chart.bar.xaxis",
-                description: Text("此期間沒有行事曆事件或有時間範圍的待辦事項")
+                description: Text("點擊右下角「＋」新增任務")
             )
         } else {
-            ScrollView(.vertical, showsIndicators: false) {
+            GeometryReader { geo in
+                let chartAreaWidth = geo.size.width - labelWidth - 1 // 1 for divider
                 VStack(spacing: 0) {
-                    timeAxisHeader
+                    // 頂部：左側 picker + 右側整排日期
+                    HStack(spacing: 0) {
+                        Picker("", selection: $timeScale) {
+                            ForEach(GanttTimeScale.allCases, id: \.self) { scale in
+                                Text(scale.rawValue).tag(scale)
+                            }
+                        }
+                        .pickerStyle(.segmented)
+                        .padding(.horizontal, 8)
+                        .frame(width: labelWidth, height: headerHeight)
+
+                        Divider()
+
+                        // 右側日期
+                        if needsHorizontalScroll {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                dateHeader
+                            }
+                            .frame(height: headerHeight)
+                        } else {
+                            dateHeader
+                                .frame(height: headerHeight)
+                        }
+                    }
+                    .frame(height: headerHeight)
+                    .background(Color(.systemBackground))
+
                     Divider()
 
-                    // 里程碑列（如果有的話）
-                    if !milestones.isEmpty {
-                        milestoneRow
-                        Divider().opacity(0.3)
-                    }
-
-                    // 甘特條列表
-                    ForEach(items) { item in
-                        ganttRow(item)
-                        Divider().opacity(0.3)
-                    }
-                }
-            }
-        }
-    }
-
-    // MARK: - Time Axis Header
-
-    private var timeAxisHeader: some View {
-        HStack(spacing: 0) {
-            Color.clear
-                .frame(width: labelWidth, height: 32)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 0) {
-                    ForEach(timeLabels, id: \.offset) { label in
-                        Text(label.text)
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
-                            .frame(width: unitWidth, alignment: .leading)
-                    }
-                }
-                .frame(width: totalWidth, alignment: .leading)
-            }
-        }
-        .background(Color(.systemBackground).opacity(0.9))
-    }
-
-    // MARK: - Milestone Row
-
-    private var milestoneRow: some View {
-        HStack(spacing: 0) {
-            Text("里程碑")
-                .font(.caption.weight(.semibold))
-                .frame(width: labelWidth, alignment: .leading)
-                .padding(.leading, 8)
-                .foregroundStyle(.secondary)
-
-            ScrollView(.horizontal, showsIndicators: false) {
-                ZStack(alignment: .leading) {
-                    gridLines
-                        .frame(width: totalWidth, height: rowHeight)
-
-                    ForEach(milestones) { ms in
-                        let x = xPosition(for: ms.date)
-                        VStack(spacing: 2) {
-                            // 菱形標記
-                            Image(systemName: "diamond.fill")
-                                .font(.system(size: 14))
-                                .foregroundStyle(Color(hex: ms.colorHex))
-                            Text(ms.title)
-                                .font(.system(size: 8))
-                                .foregroundStyle(Color(hex: ms.colorHex))
-                                .lineLimit(1)
+                    // 下方：每一列是「任務名 + 該任務的橫條」
+                    ScrollView(.vertical, showsIndicators: false) {
+                        VStack(spacing: 0) {
+                            ForEach(items) { item in
+                                taskRow(item)
+                            }
                         }
-                        .offset(x: x - 10)
                     }
                 }
-                .frame(width: totalWidth, height: rowHeight)
+                .onAppear { availableChartWidth = chartAreaWidth }
+                .onChange(of: geo.size.width) { _, newWidth in
+                    availableChartWidth = newWidth - labelWidth - 1
+                }
+            }
+        }
+    }
+
+    // MARK: - Task Row (任務名 + 該任務的橫條在同一列)
+
+    private func taskRow(_ item: GanttItem) -> some View {
+        HStack(spacing: 0) {
+            // 左側任務名
+            taskLabel(item)
+
+            Divider()
+
+            // 右側甘特條區域
+            let chartContent = ZStack(alignment: .topLeading) {
+                rowBackground
+                todayLineInRow
+                ForEach(milestones) { ms in
+                    milestoneLineInRow(ms)
+                }
+                ganttBar(item)
+            }
+            .frame(width: chartWidth, height: rowHeight)
+
+            if needsHorizontalScroll {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    chartContent
+                }
+            } else {
+                chartContent
             }
         }
         .frame(height: rowHeight)
+        .contextMenu {
+            if let task = item.taskRef {
+                Button {
+                    onEditTask?(task)
+                } label: {
+                    Label("編輯", systemImage: "pencil")
+                }
+
+                // 只有頂層任務或父任務可以新增子任務
+                if task.parentId == nil {
+                    Button {
+                        onAddSubtask?(task.id)
+                    } label: {
+                        Label("新增子任務", systemImage: "plus.circle")
+                    }
+                }
+
+                Button {
+                    onToggleDone?(task)
+                } label: {
+                    Label(task.isDone ? "標為未完成" : "標為完成", systemImage: task.isDone ? "circle" : "checkmark.circle")
+                }
+
+                Button(role: .destructive) {
+                    onDeleteTask?(task)
+                } label: {
+                    Label("刪除", systemImage: "trash")
+                }
+            }
+        }
     }
 
-    // MARK: - Gantt Row
+    private func taskLabel(_ item: GanttItem) -> some View {
+        let indent = CGFloat(item.indentLevel) * 16
+        let isParent = item.source == .parentTask
 
-    private func ganttRow(_ item: GanttItem) -> some View {
-        HStack(spacing: 0) {
+        return HStack(spacing: 6) {
+            if isParent {
+                // 父任務用摺疊圖示
+                Image(systemName: "chevron.down")
+                    .font(.system(size: 8, weight: .bold))
+                    .foregroundStyle(.secondary)
+            } else {
+                Circle()
+                    .fill(Color(hex: item.colorHex))
+                    .frame(width: 8, height: 8)
+            }
+
             Text(item.title)
-                .font(.caption)
+                .font(isParent ? .caption.weight(.semibold) : .caption)
                 .lineLimit(1)
                 .truncationMode(.tail)
-                .frame(width: labelWidth, alignment: .leading)
-                .padding(.leading, 8)
                 .foregroundStyle(item.isDone ? .secondary : .primary)
                 .strikethrough(item.isDone)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                ZStack(alignment: .leading) {
-                    gridLines
-                        .frame(width: totalWidth, height: rowHeight)
-
-                    // 緩衝條（在主條後面，先畫）
-                    if let bufferEnd = item.bufferEnd {
-                        let (bufferOffset, bufferWidth) = barGeometry(start: item.end, end: bufferEnd)
-                        RoundedRectangle(cornerRadius: 6)
-                            .fill(Color(hex: item.colorHex).opacity(0.25))
-                            .frame(width: max(bufferWidth, 2), height: 24)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 6)
-                                    .strokeBorder(Color(hex: item.colorHex).opacity(0.4), style: StrokeStyle(lineWidth: 1, dash: [4, 3]))
-                            )
-                            .offset(x: bufferOffset)
-                    }
-
-                    // 主甘特條
-                    let (offset, width) = barGeometry(start: item.start, end: item.end)
-                    RoundedRectangle(cornerRadius: 6)
-                        .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
-                        .frame(width: max(width, 4), height: 24)
-                        .overlay(
-                            Text(item.title)
-                                .font(.system(size: 10))
-                                .foregroundStyle(.white)
-                                .lineLimit(1)
-                                .padding(.horizontal, 4),
-                            alignment: .leading
-                        )
-                        .offset(x: offset)
-
-                    // 里程碑標記（疊在甘特條上）
-                    ForEach(milestones) { ms in
-                        let msX = xPosition(for: ms.date)
-                        if msX >= offset && msX <= offset + width + 20 {
-                            Rectangle()
-                                .fill(Color(hex: ms.colorHex))
-                                .frame(width: 1.5, height: rowHeight)
-                                .offset(x: msX)
-                        }
-                    }
-                }
-                .frame(width: totalWidth, height: rowHeight)
-            }
+            Spacer(minLength: 0)
         }
-        .frame(height: rowHeight)
+        .padding(.leading, 10 + indent)
+        .padding(.trailing, 6)
+        .frame(width: labelWidth, height: rowHeight, alignment: .leading)
+        .background(Color(.systemBackground))
+        .overlay(alignment: .bottom) {
+            Divider().opacity(0.3)
+        }
     }
 
-    // MARK: - Grid Lines
+    // MARK: - Row Background (單列的週末底色 + 縱向格線)
 
-    private var gridLines: some View {
-        Canvas { context, size in
-            let count: Int
-            switch timeScale {
-            case .day:   count = 24
-            case .week:  count = 7
-            case .month: count = Int(size.width / unitWidth)
+    private var rowBackground: some View {
+        ZStack(alignment: .topLeading) {
+            // 週末底色
+            if timeScale != .day {
+                HStack(spacing: 0) {
+                    ForEach(0..<totalDays, id: \.self) { i in
+                        weekendTint(index: i)
+                            .frame(width: dayWidth, height: rowHeight)
+                    }
+                }
             }
 
-            for i in 0...count {
-                let x = CGFloat(i) * unitWidth
-                var path = Path()
-                path.move(to: CGPoint(x: x, y: 0))
-                path.addLine(to: CGPoint(x: x, y: size.height))
-                context.stroke(path, with: .color(.secondary.opacity(0.15)), lineWidth: 0.5)
+            // 縱向格線
+            Canvas { context, size in
+                for i in 0...totalDays {
+                    let x = CGFloat(i) * dayWidth
+                    var path = Path()
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: size.height))
+                    context.stroke(path, with: .color(.secondary.opacity(0.08)), lineWidth: 0.5)
+                }
+            }
+            .frame(width: chartWidth, height: rowHeight)
+
+            // 底部分隔線
+            VStack {
+                Spacer()
+                Divider().opacity(0.3)
+            }
+            .frame(width: chartWidth, height: rowHeight)
+        }
+    }
+
+    // MARK: - Today / Milestone lines (single row version)
+
+    private var todayLineInRow: some View {
+        let x = xPosition(for: Date())
+        return Group {
+            if x >= 0 && x <= chartWidth {
+                Rectangle()
+                    .fill(Color.red)
+                    .frame(width: 1.5, height: rowHeight)
+                    .offset(x: x)
             }
         }
+    }
+
+    private func milestoneLineInRow(_ ms: GanttMilestone) -> some View {
+        let x = xPosition(for: ms.date)
+        return Group {
+            if x >= 0 && x <= chartWidth {
+                Rectangle()
+                    .fill(Color(hex: ms.colorHex).opacity(0.5))
+                    .frame(width: 1, height: rowHeight)
+                    .offset(x: x)
+            }
+        }
+    }
+
+    // MARK: - Date Header（單排：日期 + 星期，週末有底色）
+
+    private var dateHeader: some View {
+        HStack(spacing: 0) {
+            ForEach(0..<totalDays, id: \.self) { i in
+                dayCell(index: i)
+            }
+        }
+        .frame(width: chartWidth, height: headerHeight)
+        .background(Color(.systemBackground).opacity(0.95))
+    }
+
+    private func dayCell(index: Int) -> some View {
+        let cal = Calendar.current
+        let isToday: Bool
+        let topText: String
+        let bottomText: String
+        let weekdayKind: WeekdayKind
+
+        if timeScale == .day {
+            topText = "\(index):00"
+            bottomText = ""
+            isToday = false
+            weekdayKind = .weekday
+        } else {
+            let date = cal.date(byAdding: .day, value: index, to: dateRange.lowerBound)!
+            let day = cal.component(.day, from: date)
+            let weekday = cal.component(.weekday, from: date)
+            let fmt = DateFormatter()
+            fmt.locale = Locale(identifier: "zh_TW")
+            fmt.dateFormat = "E"
+            topText = "\(day)"
+            bottomText = fmt.string(from: date)
+            isToday = cal.isDateInToday(date)
+            switch weekday {
+            case 1: weekdayKind = .sunday
+            case 7: weekdayKind = .saturday
+            default: weekdayKind = .weekday
+            }
+        }
+
+        let fgColor: Color
+        if isToday {
+            fgColor = .red
+        } else {
+            switch weekdayKind {
+            case .sunday:   fgColor = Color.red.opacity(0.85)
+            case .saturday: fgColor = Color.blue.opacity(0.85)
+            case .weekday:  fgColor = .secondary
+            }
+        }
+
+        let bgColor: Color
+        if isToday {
+            bgColor = Color.red.opacity(0.10)
+        } else {
+            switch weekdayKind {
+            case .sunday:   bgColor = Color.red.opacity(0.05)
+            case .saturday: bgColor = Color.blue.opacity(0.05)
+            case .weekday:  bgColor = Color.clear
+            }
+        }
+
+        return VStack(spacing: 0) {
+            Text(topText)
+                .font(.system(size: 11, weight: isToday ? .bold : .semibold))
+            if !bottomText.isEmpty {
+                Text(bottomText)
+                    .font(.system(size: 9))
+            }
+        }
+        .foregroundStyle(fgColor)
+        .frame(width: dayWidth, height: headerHeight)
+        .background(bgColor)
+    }
+
+    private enum WeekdayKind {
+        case sunday, saturday, weekday
+    }
+
+    @ViewBuilder
+    private func weekendTint(index: Int) -> some View {
+        let cal = Calendar.current
+        if let date = cal.date(byAdding: .day, value: index, to: dateRange.lowerBound) {
+            let weekday = cal.component(.weekday, from: date)
+            if weekday == 1 {
+                Color.red.opacity(0.04)
+            } else if weekday == 7 {
+                Color.blue.opacity(0.04)
+            } else {
+                Color.clear
+            }
+        } else {
+            Color.clear
+        }
+    }
+
+    // MARK: - Gantt Bar
+
+    private func ganttBar(_ item: GanttItem) -> some View {
+        let isParent = item.source == .parentTask
+        let (offset, width) = barGeometry(start: item.start, end: item.end)
+
+        return ZStack(alignment: .leading) {
+            Color.clear
+
+            if isParent {
+                // 父任務：細灰色摘要條
+                VStack(spacing: 0) {
+                    RoundedRectangle(cornerRadius: 2)
+                        .fill(Color.secondary.opacity(0.35))
+                        .frame(width: max(width, 6), height: 8)
+                    // 左右端點小三角
+                    HStack {
+                        parentEndcap
+                        Spacer(minLength: 0)
+                        parentEndcap
+                    }
+                    .frame(width: max(width, 6))
+                }
+                .offset(x: offset, y: 2)
+            } else {
+                // 緩衝條
+                if let bufferEnd = item.bufferEnd {
+                    let (bOffset, bWidth) = barGeometry(start: item.end, end: bufferEnd)
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(Color(hex: item.colorHex).opacity(0.2))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 4)
+                                .strokeBorder(Color(hex: item.colorHex).opacity(0.35), style: StrokeStyle(lineWidth: 1, dash: [3, 2]))
+                        )
+                        .frame(width: max(bWidth, 2), height: 22)
+                        .offset(x: bOffset)
+                }
+
+                // 主條
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(Color(hex: item.colorHex).opacity(item.isDone ? 0.35 : 0.85))
+                    .frame(width: max(width, 6), height: 22)
+                    .offset(x: offset)
+            }
+        }
+        .frame(width: chartWidth, height: rowHeight)
+    }
+
+    /// 父任務摘要條的端點小三角
+    private var parentEndcap: some View {
+        Image(systemName: "arrowtriangle.down.fill")
+            .font(.system(size: 6))
+            .foregroundStyle(.secondary.opacity(0.5))
     }
 
     // MARK: - Geometry Helpers
 
     private func xPosition(for date: Date) -> CGFloat {
-        let totalSeconds = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
-        guard totalSeconds > 0 else { return 0 }
-        let seconds = date.timeIntervalSince(dateRange.lowerBound)
-        return CGFloat(seconds / totalSeconds) * totalWidth
+        let total = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
+        guard total > 0 else { return 0 }
+        let offset = date.timeIntervalSince(dateRange.lowerBound)
+        return CGFloat(offset / total) * chartWidth
     }
 
     private func barGeometry(start: Date, end: Date) -> (offset: CGFloat, width: CGFloat) {
-        let totalSeconds = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
-        guard totalSeconds > 0 else { return (0, 0) }
+        let total = dateRange.upperBound.timeIntervalSince(dateRange.lowerBound)
+        guard total > 0 else { return (0, 0) }
 
-        let startSeconds = max(start.timeIntervalSince(dateRange.lowerBound), 0)
-        let endSeconds = min(end.timeIntervalSince(dateRange.lowerBound), totalSeconds)
+        let s = max(start.timeIntervalSince(dateRange.lowerBound), 0)
+        let e = min(end.timeIntervalSince(dateRange.lowerBound), total)
 
-        let offset = CGFloat(startSeconds / totalSeconds) * totalWidth
-        let width = CGFloat((endSeconds - startSeconds) / totalSeconds) * totalWidth
-
-        return (offset, width)
+        return (CGFloat(s / total) * chartWidth, CGFloat((e - s) / total) * chartWidth)
     }
 
-    // MARK: - Time Labels
+    // MARK: - Month Helpers
 
-    private struct TimeLabel {
-        let offset: Int
-        let text: String
+    private struct MonthSpan {
+        let label: String
+        let days: Int
     }
 
-    private var timeLabels: [TimeLabel] {
+    private func visibleMonths() -> [MonthSpan] {
         let cal = Calendar.current
-        var labels: [TimeLabel] = []
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "zh_TW")
+        fmt.dateFormat = "yyyy年M月"
 
-        switch timeScale {
-        case .day:
-            for h in 0..<24 {
-                labels.append(TimeLabel(offset: h, text: "\(h):00"))
-            }
-        case .week:
-            let fmt = DateFormatter()
-            fmt.locale = Locale(identifier: "zh_TW")
-            fmt.dateFormat = "E\nM/d"
-            for d in 0..<7 {
-                let date = cal.date(byAdding: .day, value: d, to: dateRange.lowerBound)!
-                labels.append(TimeLabel(offset: d, text: fmt.string(from: date)))
-            }
-        case .month:
-            let days = cal.dateComponents([.day], from: dateRange.lowerBound, to: dateRange.upperBound).day ?? 30
-            for d in 0..<days {
-                let date = cal.date(byAdding: .day, value: d, to: dateRange.lowerBound)!
-                let dayNum = cal.component(.day, from: date)
-                labels.append(TimeLabel(offset: d, text: "\(dayNum)"))
-            }
+        var months: [MonthSpan] = []
+        var current = dateRange.lowerBound
+        let end = dateRange.upperBound
+
+        while current < end {
+            let label = fmt.string(from: current)
+            let monthEnd = cal.date(byAdding: .month, value: 1, to: cal.date(from: cal.dateComponents([.year, .month], from: current))!)!
+            let segmentEnd = min(monthEnd, end)
+            let days = cal.dateComponents([.day], from: current, to: segmentEnd).day ?? 1
+            months.append(MonthSpan(label: label, days: max(days, 1)))
+            current = segmentEnd
         }
 
-        return labels
+        return months
     }
 }

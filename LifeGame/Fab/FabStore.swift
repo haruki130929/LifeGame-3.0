@@ -47,6 +47,12 @@ final class FabStore: ObservableObject {
         // ── 模組編輯器專用 ──
         case addQuestion
         case questionEditMode
+        // ── 甘特圖專用 ──
+        case addGanttTask
+        case addMilestone
+        case toggleBuffer
+        case ganttBufferPercent(Int)
+        case deleteMilestoneMenu
         // ── 功能設定 ──
         case featureSettings(FeatureID)
 
@@ -76,6 +82,11 @@ final class FabStore: ObservableObject {
             case .questionModuleEditMode:   return "questionModuleEditMode"
             case .addQuestion:             return "addQuestion"
             case .questionEditMode:        return "questionEditMode"
+            case .addGanttTask:            return "addGanttTask"
+            case .addMilestone:            return "addMilestone"
+            case .toggleBuffer:            return "toggleBuffer"
+            case .ganttBufferPercent(let p): return "ganttBuffer-\(p)"
+            case .deleteMilestoneMenu:     return "deleteMilestoneMenu"
             case .featureSettings(let f):   return "featureSettings-\(f)"
             }
         }
@@ -362,7 +373,17 @@ final class FabStore: ObservableObject {
                 }
             ]
         case .ganttChart:
-            break  // 甘特圖為唯讀，不需要 FAB 動作
+            result += [
+                FabAction(title: "新增任務", systemImage: "plus.circle", route: .addGanttTask) { [weak self] in
+                    self?.route = .addGanttTask; self?.collapse()
+                },
+                FabAction(title: "新增里程碑", systemImage: "diamond", route: .addMilestone) { [weak self] in
+                    self?.route = .addMilestone; self?.collapse()
+                },
+                FabAction(title: "緩衝設定", systemImage: "clock.badge.questionmark", route: .toggleBuffer) { [weak self] in
+                    self?.route = .toggleBuffer; self?.collapse()
+                }
+            ]
         }
 
         return result

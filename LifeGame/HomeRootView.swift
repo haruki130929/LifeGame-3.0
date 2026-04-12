@@ -120,6 +120,8 @@ struct HomeRootView: View {
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.questionModule) ; fab.route = nil }
             case .addQuestion, .questionEditMode:
                 break // handled inside CustomModuleEditorView
+            case .addGanttTask, .addMilestone, .toggleBuffer, .ganttBufferPercent, .deleteMilestoneMenu:
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.ganttChart) ; fab.route = nil }
             }
         }
         .onChange(of: navigationPath) {
