@@ -13,9 +13,9 @@ struct DailyLogHistoryView: View {
     var body: some View {
         VStack(spacing: 0) {
             // 圖表區（至少 2 筆紀錄才顯示）
-            if store.entries.count >= 2 {
-                DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
-            }
+            DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
+                .frame(height: store.entries.count >= 2 ? 320 : 0)
+                .clipped()
 
             List {
                 if store.entries.isEmpty {

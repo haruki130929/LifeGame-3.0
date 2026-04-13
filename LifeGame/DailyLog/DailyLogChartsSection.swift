@@ -72,7 +72,7 @@ struct DailyLogChartsSection: View {
                 .padding(.vertical, 8)
             }
         }
-        .frame(height: 320)
+        .frame(maxHeight: 320)
     }
 
     // MARK: - 1. 情緒趨勢（心情、焦慮、疲勞）
