@@ -45,10 +45,8 @@ final class DailyLogStore: ObservableObject {
             self.context = Self.makeInMemoryContext()
             self.initError = "儲存系統尚未就緒，資料暫存於記憶體中"
         }
-        // 延遲載入，避免在 observer 掛載前觸發 UI 更新
-        Task { @MainActor [weak self] in
-            self?.load()
-        }
+        // 同步載入，確保 entries 立刻有值（避免空狀態閃爍）
+        loadSync()
         // 監聽 CloudKit 遠端變更，自動重新載入
         syncHelper = StoreSyncHelper { [weak self] in
             self?.load()
@@ -135,6 +133,26 @@ final class DailyLogStore: ObservableObject {
         }
     }
     
+    /// 同步載入（init 用，不做去重，確保 entries 馬上有值）
+    private func loadSync() {
+        do {
+            let descriptor = FetchDescriptor<DailyLogRecord>()
+            let records = try context.fetch(descriptor)
+            var arr: [DailyLogEntry] = records.map { $0.entry }
+            arr.sort { $0.date > $1.date }
+            // 同一天只取第一筆（最新的）
+            var seen = Set<String>()
+            let cal = Calendar.current
+            arr = arr.filter { entry in
+                let key = cal.startOfDay(for: entry.date).description
+                return seen.insert(key).inserted
+            }
+            self.entries = arr
+        } catch {
+            debugLog("DailyLogStore loadSync failed:", error)
+        }
+    }
+
     private func load() {
         guard !isLoading else { return }
         isLoading = true
