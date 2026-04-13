@@ -7,6 +7,8 @@ struct CommunicationBoardView: View {
     @State private var messages: [String] = []
     /// 正在輸入的文字（即時同步到對方）
     @State private var currentInput: String = ""
+    /// 字體大小
+    @State private var fontSize: CGFloat = 24
     /// 匯出 sheet
     @State private var showExport = false
     @State private var exportText = ""
@@ -30,8 +32,24 @@ struct CommunicationBoardView: View {
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                HStack(spacing: 12) {
-                    // 匯出按鈕
+                HStack(spacing: 10) {
+                    // 縮小字體
+                    Button {
+                        if fontSize > 14 { fontSize -= 2 }
+                    } label: {
+                        Image(systemName: "textformat.size.smaller")
+                    }
+                    .disabled(fontSize <= 14)
+
+                    // 放大字體
+                    Button {
+                        if fontSize < 48 { fontSize += 2 }
+                    } label: {
+                        Image(systemName: "textformat.size.larger")
+                    }
+                    .disabled(fontSize >= 48)
+
+                    // 匯出
                     Button {
                         exportConversation()
                     } label: {
@@ -39,7 +57,7 @@ struct CommunicationBoardView: View {
                     }
                     .disabled(messages.isEmpty && currentInput.isEmpty)
 
-                    // 清除全部
+                    // 清除
                     Button {
                         messages = []
                         currentInput = ""
@@ -73,7 +91,7 @@ struct CommunicationBoardView: View {
                                 // 歷史訊息
                                 ForEach(Array(messages.enumerated()), id: \.offset) { index, msg in
                                     Text(msg)
-                                        .font(.system(size: 24, weight: .medium))
+                                        .font(.system(size: fontSize, weight: .medium))
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .id(index)
                                 }
@@ -81,7 +99,7 @@ struct CommunicationBoardView: View {
                                 // 正在輸入的文字（淡色）
                                 if !currentInput.isEmpty {
                                     Text(currentInput)
-                                        .font(.system(size: 24, weight: .medium))
+                                        .font(.system(size: fontSize, weight: .medium))
                                         .foregroundStyle(.secondary)
                                         .frame(maxWidth: .infinity, alignment: .leading)
                                         .id("typing")
