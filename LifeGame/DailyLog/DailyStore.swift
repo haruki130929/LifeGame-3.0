@@ -90,19 +90,25 @@ final class DailyLogStore: ObservableObject {
         }
     }
     
-    /// 刪除所有紀錄（清除假數據用）
-    func deleteAll() {
+    /// 刪除指定日期之後的紀錄
+    func deleteAfter(_ cutoffDate: Date) {
         do {
+            let cal = Calendar.current
+            let cutoff = cal.startOfDay(for: cutoffDate)
             let descriptor = FetchDescriptor<DailyLogRecord>()
             let records = try context.fetch(descriptor)
+            var count = 0
             for record in records {
-                context.delete(record)
+                if record.entry.date >= cutoff {
+                    context.delete(record)
+                    count += 1
+                }
             }
             try context.save()
-            entries = []
-            debugLog("✅ DailyLog 全部清除，共刪除 \(records.count) 筆")
+            load()
+            debugLog("✅ DailyLog 清除 \(cutoff) 之後的紀錄，共刪除 \(count) 筆")
         } catch {
-            debugLog("DailyLogStore deleteAll failed:", error)
+            debugLog("DailyLogStore deleteAfter failed:", error)
         }
     }
 

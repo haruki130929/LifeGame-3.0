@@ -39,7 +39,7 @@ struct DailyLogHistoryView: View {
             FabAction(title: "檢視紀錄", systemImage: "doc.text.magnifyingglass") {
                 showingReview = true
             },
-            FabAction(title: "清除所有紀錄", systemImage: "trash") {
+            FabAction(title: "清除假數據（4/3 之後）", systemImage: "trash") {
                 showDeleteAll = true
             },
             FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { }
@@ -52,9 +52,12 @@ struct DailyLogHistoryView: View {
         .sheet(isPresented: $showingReview) {
             DailyLogReviewRangeSheet(allEntries: store.entries)
         }
-        .confirmationDialog("確定要清除所有每日紀錄嗎？此操作無法復原。", isPresented: $showDeleteAll, titleVisibility: .visible) {
-            Button("清除所有紀錄", role: .destructive) {
-                store.deleteAll()
+        .confirmationDialog("確定要清除 4/3 之後的紀錄嗎？4/2 以前的資料會保留。", isPresented: $showDeleteAll, titleVisibility: .visible) {
+            Button("清除 4/3 之後的紀錄", role: .destructive) {
+                // 2026/4/3
+                let cal = Calendar.current
+                let cutoff = cal.date(from: DateComponents(year: 2026, month: 4, day: 3))!
+                store.deleteAfter(cutoff)
             }
             Button("取消", role: .cancel) {}
         }
