@@ -153,18 +153,15 @@ final class DailyLogStore: ObservableObject {
                 }
             }
 
-            // 同一天有不同 id 的紀錄時，保留 payload 最大的（資料最完整的）
+            // 同一天有不同 id 的紀錄時，保留最後寫入的（最新的）
             let cal = Calendar.current
-            let deduped = records.filter { r in
-                // 只保留沒被刪掉的
-                !r.isDeleted
-            }
+            let deduped = records.filter { !$0.isDeleted }
             let groupedByDay = Dictionary(grouping: deduped) { r in
                 cal.startOfDay(for: r.date)
             }
             for (_, dayRecords) in groupedByDay where dayRecords.count > 1 {
-                let sorted = dayRecords.sorted { $0.payload.count > $1.payload.count }
-                for dup in sorted.dropFirst() {
+                // 保留最後一筆（通常是最新修改的）
+                for dup in dayRecords.dropLast() {
                     context.delete(dup)
                     debugLog("🧹 DailyLog 去重：刪除同一天的重複紀錄 \(dup.date)")
                 }
