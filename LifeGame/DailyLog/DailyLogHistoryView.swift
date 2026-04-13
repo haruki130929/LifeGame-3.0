@@ -3,7 +3,6 @@ import SwiftUI
 struct DailyLogHistoryView: View {
 
     @ObservedObject var store: DailyLogStore
-    @EnvironmentObject private var fab: FabStore
     @State private var showingAdd = false
     @State private var showingReview = false
     @State private var chartRange: ChartRange = .twoWeeks
@@ -14,23 +13,9 @@ struct DailyLogHistoryView: View {
     var body: some View {
         mainContent
             .navigationTitle("每日紀錄")
-            .onAppear {
-                fab.apply(context: .feature(.dailyLog))
-                rebuildGroupsIfNeeded()
-            }
-            .onDisappear {
-                fab.popActions()
-            }
+            .onAppear { rebuildGroupsIfNeeded() }
             .onChange(of: store.entries.count) { _, _ in rebuildGroupsIfNeeded() }
-            .onChange(of: fab.route) { _, newRoute in
-                switch newRoute {
-                case .addDailyLog:
-                    fab.route = nil
-                    showingAdd = true
-                default:
-                    break
-                }
-            }
+            .modifier(DailyLogFabHandler(store: store, showingAdd: $showingAdd))
             .sheet(isPresented: $showingAdd) {
                 NavigationStack {
                     DailyLogEditorView(mode: .add, store: store)
@@ -47,10 +32,10 @@ struct DailyLogHistoryView: View {
     private var mainContent: some View {
         VStack(spacing: 0) {
             // 圖表區
-            DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
-                .frame(height: store.entries.count >= 2 ? 320 : 0)
-                .clipped()
-                .drawingGroup()
+            if store.entries.count >= 2 {
+                DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
+                    .id("charts")  // 固定 identity 防止重建
+            }
 
             List {
                 if store.entries.isEmpty {
@@ -131,6 +116,34 @@ struct DailyLogHistoryView: View {
                 store.delete(at: IndexSet(integer: globalIndex))
             }
         }
+    }
+}
+
+// MARK: - FAB Handler（隔離 FabStore 依賴）
+
+private struct DailyLogFabHandler: ViewModifier {
+    @ObservedObject var store: DailyLogStore
+    @Binding var showingAdd: Bool
+    @EnvironmentObject private var fab: FabStore
+    @State private var didSetup = false
+
+    func body(content: Content) -> some View {
+        content
+            .onAppear {
+                guard !didSetup else { return }
+                didSetup = true
+                fab.apply(context: .feature(.dailyLog))
+            }
+            .onDisappear {
+                didSetup = false
+                fab.popActions()
+            }
+            .onChange(of: fab.route) { _, newRoute in
+                if newRoute == .addDailyLog {
+                    fab.route = nil
+                    showingAdd = true
+                }
+            }
     }
 }
 
