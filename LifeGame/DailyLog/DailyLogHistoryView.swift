@@ -3,52 +3,54 @@ import SwiftUI
 struct DailyLogHistoryView: View {
 
     @ObservedObject var store: DailyLogStore
+    @EnvironmentObject private var fab: FabStore
     @State private var showingAdd = false
     @State private var showingReview = false
     @State private var chartRange: ChartRange = .twoWeeks
-
-    var body: some View {
-        DailyLogHistoryContent(
-            store: store,
-            chartRange: $chartRange
-        )
-        .navigationTitle("每日紀錄")
-        .fabMenu([
-            FabAction(title: "寫新日記", systemImage: "plus") {
-                showingAdd = true
-            },
-            FabAction(title: "檢視紀錄", systemImage: "doc.text.magnifyingglass") {
-                showingReview = true
-            },
-            FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { }
-        ])
-        .sheet(isPresented: $showingAdd) {
-            NavigationStack {
-                DailyLogEditorView(mode: .add, store: store)
-            }
-        }
-        .sheet(isPresented: $showingReview) {
-            DailyLogReviewRangeSheet(allEntries: store.entries)
-        }
-        .featureTutorial(.dailyLog)
-    }
-}
-
-// MARK: - 內容（不依賴 FabStore，避免 FAB 操作觸發重繪）
-
-private struct DailyLogHistoryContent: View {
-    @ObservedObject var store: DailyLogStore
-    @Binding var chartRange: ChartRange
     @State private var collapsedMonths: Set<String> = []
     @State private var cachedGroups: [MonthGroup] = []
     @State private var lastEntryCount: Int = 0
 
     var body: some View {
+        mainContent
+            .navigationTitle("每日紀錄")
+            .onAppear {
+                fab.apply(context: .feature(.dailyLog))
+                rebuildGroupsIfNeeded()
+            }
+            .onDisappear {
+                fab.popActions()
+            }
+            .onChange(of: store.entries.count) { _, _ in rebuildGroupsIfNeeded() }
+            .onChange(of: fab.route) { _, newRoute in
+                switch newRoute {
+                case .addDailyLog:
+                    fab.route = nil
+                    showingAdd = true
+                default:
+                    break
+                }
+            }
+            .sheet(isPresented: $showingAdd) {
+                NavigationStack {
+                    DailyLogEditorView(mode: .add, store: store)
+                }
+            }
+            .sheet(isPresented: $showingReview) {
+                DailyLogReviewRangeSheet(allEntries: store.entries)
+            }
+            .featureTutorial(.dailyLog)
+    }
+
+    // MARK: - 主要內容（拆出來減少 body 複雜度）
+
+    private var mainContent: some View {
         VStack(spacing: 0) {
             // 圖表區
             DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
                 .frame(height: store.entries.count >= 2 ? 320 : 0)
                 .clipped()
+                .drawingGroup()
 
             List {
                 if store.entries.isEmpty {
@@ -98,9 +100,9 @@ private struct DailyLogHistoryContent: View {
                 }
             }
         }
-        .onAppear { rebuildGroupsIfNeeded() }
-        .onChange(of: store.entries.count) { _, _ in rebuildGroupsIfNeeded() }
     }
+
+    // MARK: - Helpers
 
     private func rebuildGroupsIfNeeded() {
         guard store.entries.count != lastEntryCount else { return }
@@ -132,7 +134,7 @@ private struct DailyLogHistoryContent: View {
     }
 }
 
-// MARK: - 列表列（簡潔風格，像弓道筆記）
+// MARK: - 列表列
 
 private struct DailyLogRow: View {
     let entry: DailyLogEntry
@@ -140,7 +142,6 @@ private struct DailyLogRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            // 日期 + 天氣
             HStack {
                 Text(entry.date, format: .dateTime.year().month().day())
                     .font(.headline)
@@ -149,14 +150,12 @@ private struct DailyLogRow: View {
                     .foregroundStyle(.secondary)
             }
 
-            // 分數摘要
             if let summaryText = buildSummary() {
                 Text(summaryText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
-            // 觀察預覽
             let obs = entry.specialObservation.trimmingCharacters(in: .whitespacesAndNewlines)
             if !obs.isEmpty {
                 Text(obs)
