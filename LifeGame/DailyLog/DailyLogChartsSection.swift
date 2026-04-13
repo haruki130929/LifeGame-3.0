@@ -27,6 +27,7 @@ enum ChartRange: String, CaseIterable, Identifiable {
 struct DailyLogChartsSection: View {
     let entries: [DailyLogEntry]
     @EnvironmentObject private var theme: ThemeStore
+    @EnvironmentObject private var moduleStore: QuestionModuleStore
     @State private var selectedRange: ChartRange = .twoWeeks
 
     private var filteredEntries: [DailyLogEntry] {
@@ -80,9 +81,9 @@ struct DailyLogChartsSection: View {
         chartCard(title: "情緒趨勢") {
             Chart {
                 ForEach(filteredEntries) { entry in
-                    lineMark(date: entry.date, value: entry.overallMoodScore, series: "心情", color: .orange)
-                    lineMark(date: entry.date, value: entry.anxietyScore, series: "焦慮", color: .red)
-                    lineMark(date: entry.date, value: entry.fatigueScore, series: "疲勞", color: .purple)
+                    lineMark(date: entry.date, value: moodScore(entry), series: "心情", color: .orange)
+                    lineMark(date: entry.date, value: anxietyScore(entry), series: "焦慮", color: .red)
+                    lineMark(date: entry.date, value: fatigueScore(entry), series: "疲勞", color: .purple)
                 }
             }
             .chartYScale(domain: 0...10)
@@ -111,6 +112,14 @@ struct DailyLogChartsSection: View {
 
     private var sleepChart: some View {
         let sleepData = filteredEntries.compactMap { entry -> (id: UUID, date: Date, hours: Double)? in
+            // 優先從 customAnswers 取睡眠時長
+            if let module = moduleStore.modules.first(where: { $0.kind == .sleep }),
+               let questions = module.questions,
+               let q = questions.first(where: { $0.title.contains("睡眠時長") }),
+               let answer = entry.customAnswers.first(where: { $0.questionId == q.id }),
+               let v = answer.intValue {
+                return (entry.id, entry.date, Double(v))
+            }
             guard let h = entry.sleepHours.doubleValue else { return nil }
             return (entry.id, entry.date, h)
         }
@@ -309,6 +318,31 @@ struct DailyLogChartsSection: View {
     }
 
     // MARK: - Helpers
+
+    /// 從 customAnswers 或原生欄位取 slider/number 值
+    private func customInt(entry: DailyLogEntry, moduleKind: ModuleKind, questionTitle: String, fallback: Int) -> Int {
+        if let module = moduleStore.modules.first(where: { $0.kind == moduleKind }),
+           let questions = module.questions,
+           let q = questions.first(where: { $0.title == questionTitle }),
+           let answer = entry.customAnswers.first(where: { $0.questionId == q.id }),
+           let v = answer.intValue {
+            return v
+        }
+        return fallback
+    }
+
+    /// 情緒分數（優先 customAnswers）
+    private func moodScore(_ entry: DailyLogEntry) -> Int {
+        customInt(entry: entry, moduleKind: .moodMental, questionTitle: "整體情緒分數", fallback: entry.overallMoodScore)
+    }
+
+    private func anxietyScore(_ entry: DailyLogEntry) -> Int {
+        customInt(entry: entry, moduleKind: .moodMental, questionTitle: "焦慮程度", fallback: entry.anxietyScore)
+    }
+
+    private func fatigueScore(_ entry: DailyLogEntry) -> Int {
+        customInt(entry: entry, moduleKind: .body, questionTitle: "今日疲勞程度", fallback: entry.fatigueScore)
+    }
 
     private func lineMark(date: Date, value: Int, series: String, color: Color) -> some ChartContent {
         LineMark(
