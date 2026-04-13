@@ -30,20 +30,22 @@ struct DailyLogHistoryView: View {
     // MARK: - 主要內容（拆出來減少 body 複雜度）
 
     private var mainContent: some View {
-        VStack(spacing: 0) {
-            // 圖表區
-            if store.entries.count >= 2 {
-                DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
-                    .id("charts")  // 固定 identity 防止重建
-            }
+        List {
+            if store.entries.isEmpty {
+                ContentUnavailableView("還沒有紀錄",
+                                       systemImage: "square.and.pencil",
+                                       description: Text("按右下角 ＋ 新增第一篇每日紀錄"))
+            } else {
+                // 圖表區（放進 List 裡，利用 lazy loading）
+                if store.entries.count >= 2 {
+                    Section {
+                        DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
+                    }
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
+                }
 
-            List {
-                if store.entries.isEmpty {
-                    ContentUnavailableView("還沒有紀錄",
-                                           systemImage: "square.and.pencil",
-                                           description: Text("按右下角 ＋ 新增第一篇每日紀錄"))
-                } else {
-                    ForEach(cachedGroups) { group in
+                ForEach(cachedGroups) { group in
                         Section {
                             if !collapsedMonths.contains(group.key) {
                                 ForEach(group.entries) { entry in
@@ -85,7 +87,7 @@ struct DailyLogHistoryView: View {
                 }
             }
         }
-    }
+
 
     // MARK: - Helpers
 
