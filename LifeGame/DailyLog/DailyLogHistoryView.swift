@@ -6,13 +6,46 @@ struct DailyLogHistoryView: View {
     @State private var showingAdd = false
     @State private var showingReview = false
     @State private var chartRange: ChartRange = .twoWeeks
+
+    var body: some View {
+        DailyLogHistoryContent(
+            store: store,
+            chartRange: $chartRange
+        )
+        .navigationTitle("每日紀錄")
+        .fabMenu([
+            FabAction(title: "寫新日記", systemImage: "plus") {
+                showingAdd = true
+            },
+            FabAction(title: "檢視紀錄", systemImage: "doc.text.magnifyingglass") {
+                showingReview = true
+            },
+            FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { }
+        ])
+        .sheet(isPresented: $showingAdd) {
+            NavigationStack {
+                DailyLogEditorView(mode: .add, store: store)
+            }
+        }
+        .sheet(isPresented: $showingReview) {
+            DailyLogReviewRangeSheet(allEntries: store.entries)
+        }
+        .featureTutorial(.dailyLog)
+    }
+}
+
+// MARK: - 內容（不依賴 FabStore，避免 FAB 操作觸發重繪）
+
+private struct DailyLogHistoryContent: View {
+    @ObservedObject var store: DailyLogStore
+    @Binding var chartRange: ChartRange
     @State private var collapsedMonths: Set<String> = []
     @State private var cachedGroups: [MonthGroup] = []
     @State private var lastEntryCount: Int = 0
 
     var body: some View {
         VStack(spacing: 0) {
-            // 圖表區（至少 2 筆紀錄才顯示）
+            // 圖表區
             DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
                 .frame(height: store.entries.count >= 2 ? 320 : 0)
                 .clipped()
@@ -65,25 +98,6 @@ struct DailyLogHistoryView: View {
                 }
             }
         }
-        .navigationTitle("每日紀錄")
-        .fabMenu([
-            FabAction(title: "寫新日記", systemImage: "plus") {
-                showingAdd = true
-            },
-            FabAction(title: "檢視紀錄", systemImage: "doc.text.magnifyingglass") {
-                showingReview = true
-            },
-            FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { }
-        ])
-        .sheet(isPresented: $showingAdd) {
-            NavigationStack {
-                DailyLogEditorView(mode: .add, store: store)
-            }
-        }
-        .sheet(isPresented: $showingReview) {
-            DailyLogReviewRangeSheet(allEntries: store.entries)
-        }
-        .featureTutorial(.dailyLog)
         .onAppear { rebuildGroupsIfNeeded() }
         .onChange(of: store.entries.count) { _, _ in rebuildGroupsIfNeeded() }
     }
@@ -135,14 +149,14 @@ private struct DailyLogRow: View {
                     .foregroundStyle(.secondary)
             }
 
-            // 分數摘要 — 依模組是否自訂來決定顯示方式
+            // 分數摘要
             if let summaryText = buildSummary() {
                 Text(summaryText)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
-            // 觀察預覽（如有）
+            // 觀察預覽
             let obs = entry.specialObservation.trimmingCharacters(in: .whitespacesAndNewlines)
             if !obs.isEmpty {
                 Text(obs)
@@ -154,7 +168,6 @@ private struct DailyLogRow: View {
         .padding(.vertical, 4)
     }
 
-    /// 天氣：優先從 customAnswers 取（自訂模組），沒有才用原生欄位
     private var displayWeather: String {
         if let basicModule = moduleStore.modules.first(where: { $0.kind == .basic }),
            let questions = basicModule.questions,
@@ -166,14 +179,11 @@ private struct DailyLogRow: View {
         return entry.weather.rawValue
     }
 
-    /// 建立摘要文字：從 dedicated fields 或 customAnswers 取值
     private func buildSummary() -> String? {
         var parts: [String] = []
 
-        // 情緒分數（moodMental 模組）
         if let module = moduleStore.modules.first(where: { $0.kind == .moodMental }),
            let questions = module.questions, !questions.isEmpty {
-            // 自訂模組 → 從 customAnswers 取前兩個 slider/number 值
             for q in questions where q.type == .slider || q.type == .numberInput {
                 if let a = entry.customAnswers.first(where: { $0.questionId == q.id }),
                    let v = a.intValue {
@@ -182,12 +192,10 @@ private struct DailyLogRow: View {
                 if parts.count >= 2 { break }
             }
         } else {
-            // 未自訂 → 用 dedicated fields
             parts.append("情緒 \(entry.overallMoodScore)")
             parts.append("焦慮 \(entry.anxietyScore)")
         }
 
-        // 疲勞分數（body 模組）
         if let module = moduleStore.modules.first(where: { $0.kind == .body }),
            let questions = module.questions, !questions.isEmpty {
             for q in questions where q.type == .slider || q.type == .numberInput {
