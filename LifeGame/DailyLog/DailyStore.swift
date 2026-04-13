@@ -144,38 +144,53 @@ final class DailyLogStore: ObservableObject {
             let descriptor = FetchDescriptor<DailyLogRecord>()
             let records = try context.fetch(descriptor)
 
-            // 去重：同一天只保留最新的（用 payload 大小或 date 判斷）
-            // 同一個 id 有多筆時，刪掉多餘的
-            let groupedById = Dictionary(grouping: records, by: \.id)
-            for (_, dups) in groupedById where dups.count > 1 {
-                for dup in dups.dropFirst() {
-                    context.delete(dup)
-                }
+            // 去重（在背景做，不影響 UI）
+            let needsDedup = deduplicateRecords(records)
+
+            let finalRecords: [DailyLogRecord]
+            if needsDedup {
+                try context.save()
+                finalRecords = try context.fetch(descriptor)
+            } else {
+                finalRecords = records
             }
 
-            // 同一天有不同 id 的紀錄時，保留最後寫入的（最新的）
-            let cal = Calendar.current
-            let deduped = records.filter { !$0.isDeleted }
-            let groupedByDay = Dictionary(grouping: deduped) { r in
-                cal.startOfDay(for: r.date)
-            }
-            for (_, dayRecords) in groupedByDay where dayRecords.count > 1 {
-                // 保留最後一筆（通常是最新修改的）
-                for dup in dayRecords.dropLast() {
-                    context.delete(dup)
-                    debugLog("🧹 DailyLog 去重：刪除同一天的重複紀錄 \(dup.date)")
-                }
-            }
-
-            try context.save()
-
-            let remaining = try context.fetch(descriptor)
-            var arr: [DailyLogEntry] = remaining.map { $0.entry }
+            var arr: [DailyLogEntry] = finalRecords.map { $0.entry }
             arr.sort { $0.date > $1.date }
             self.entries = arr
         } catch {
             debugLog("DailyLogStore load failed:", error)
-            self.entries = []
         }
+    }
+
+    /// 去重，回傳是否有刪除任何 record
+    @discardableResult
+    private func deduplicateRecords(_ records: [DailyLogRecord]) -> Bool {
+        var deleted = false
+
+        // 同一個 id 有多筆時，刪掉多餘的
+        let groupedById = Dictionary(grouping: records, by: \.id)
+        for (_, dups) in groupedById where dups.count > 1 {
+            for dup in dups.dropFirst() {
+                context.delete(dup)
+                deleted = true
+            }
+        }
+
+        // 同一天有不同 id 的紀錄時，保留最後一筆
+        let cal = Calendar.current
+        let remaining = records.filter { !$0.isDeleted }
+        let groupedByDay = Dictionary(grouping: remaining) { r in
+            cal.startOfDay(for: r.date)
+        }
+        for (_, dayRecords) in groupedByDay where dayRecords.count > 1 {
+            for dup in dayRecords.dropLast() {
+                context.delete(dup)
+                deleted = true
+                debugLog("🧹 DailyLog 去重：刪除同一天的重複紀錄 \(dup.date)")
+            }
+        }
+
+        return deleted
     }
 }
