@@ -139,12 +139,41 @@ final class DailyLogStore: ObservableObject {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-        
+
         do {
             let descriptor = FetchDescriptor<DailyLogRecord>()
             let records = try context.fetch(descriptor)
-            
-            var arr: [DailyLogEntry] = records.map { $0.entry } // ✅ 需要 DailyLogRecord.entry
+
+            // 去重：同一天只保留最新的（用 payload 大小或 date 判斷）
+            // 同一個 id 有多筆時，刪掉多餘的
+            let groupedById = Dictionary(grouping: records, by: \.id)
+            for (_, dups) in groupedById where dups.count > 1 {
+                for dup in dups.dropFirst() {
+                    context.delete(dup)
+                }
+            }
+
+            // 同一天有不同 id 的紀錄時，保留 payload 最大的（資料最完整的）
+            let cal = Calendar.current
+            let deduped = records.filter { r in
+                // 只保留沒被刪掉的
+                !r.isDeleted
+            }
+            let groupedByDay = Dictionary(grouping: deduped) { r in
+                cal.startOfDay(for: r.date)
+            }
+            for (_, dayRecords) in groupedByDay where dayRecords.count > 1 {
+                let sorted = dayRecords.sorted { $0.payload.count > $1.payload.count }
+                for dup in sorted.dropFirst() {
+                    context.delete(dup)
+                    debugLog("🧹 DailyLog 去重：刪除同一天的重複紀錄 \(dup.date)")
+                }
+            }
+
+            try context.save()
+
+            let remaining = try context.fetch(descriptor)
+            var arr: [DailyLogEntry] = remaining.map { $0.entry }
             arr.sort { $0.date > $1.date }
             self.entries = arr
         } catch {
