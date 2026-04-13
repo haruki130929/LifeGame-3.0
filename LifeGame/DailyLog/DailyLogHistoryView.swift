@@ -65,7 +65,7 @@ private struct DailyLogRow: View {
                 Text(entry.date, format: .dateTime.year().month().day())
                     .font(.headline)
                 Spacer()
-                Text(entry.weather.rawValue)
+                Text(displayWeather)
                     .foregroundStyle(.secondary)
             }
 
@@ -86,6 +86,18 @@ private struct DailyLogRow: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    /// 天氣：優先從 customAnswers 取（自訂模組），沒有才用原生欄位
+    private var displayWeather: String {
+        if let basicModule = moduleStore.modules.first(where: { $0.kind == .basic }),
+           let questions = basicModule.questions,
+           let weatherQ = questions.first(where: { $0.title == "天氣" }),
+           let answer = entry.customAnswers.first(where: { $0.questionId == weatherQ.id }),
+           let value = answer.stringValue, !value.isEmpty {
+            return value
+        }
+        return entry.weather.rawValue
     }
 
     /// 建立摘要文字：從 dedicated fields 或 customAnswers 取值
