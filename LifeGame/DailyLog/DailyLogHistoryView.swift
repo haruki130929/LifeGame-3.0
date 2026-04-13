@@ -6,6 +6,27 @@ struct DailyLogHistoryView: View {
     @State private var showingAdd = false
     @State private var showingReview = false
     @State private var chartRange: ChartRange = .twoWeeks
+    @State private var collapsedMonths: Set<String> = []
+
+    /// 按月份分組（最新的月份在前）
+    private var groupedByMonth: [(key: String, entries: [DailyLogEntry])] {
+        let cal = Calendar.current
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "zh_TW")
+        fmt.dateFormat = "yyyy年M月"
+
+        let grouped = Dictionary(grouping: store.entries) { entry in
+            fmt.string(from: entry.date)
+        }
+
+        return grouped
+            .map { (key: $0.key, entries: $0.value.sorted { $0.date > $1.date }) }
+            .sorted { a, b in
+                // 最新月份排前面
+                guard let da = a.entries.first?.date, let db = b.entries.first?.date else { return false }
+                return da > db
+            }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -20,14 +41,45 @@ struct DailyLogHistoryView: View {
                                            systemImage: "square.and.pencil",
                                            description: Text("按右下角 ＋ 新增第一篇每日紀錄"))
                 } else {
-                    ForEach(store.entries) { entry in
-                        NavigationLink {
-                            DailyLogEditorView(mode: .edit(entry), store: store)
-                        } label: {
-                            DailyLogRow(entry: entry)
+                    ForEach(groupedByMonth, id: \.key) { group in
+                        Section {
+                            if !collapsedMonths.contains(group.key) {
+                                ForEach(group.entries) { entry in
+                                    NavigationLink {
+                                        DailyLogEditorView(mode: .edit(entry), store: store)
+                                    } label: {
+                                        DailyLogRow(entry: entry)
+                                    }
+                                }
+                                .onDelete { offsets in
+                                    deleteEntries(offsets, in: group.entries)
+                                }
+                            }
+                        } header: {
+                            Button {
+                                withAnimation {
+                                    if collapsedMonths.contains(group.key) {
+                                        collapsedMonths.remove(group.key)
+                                    } else {
+                                        collapsedMonths.insert(group.key)
+                                    }
+                                }
+                            } label: {
+                                HStack {
+                                    Text(group.key)
+                                        .font(.subheadline.weight(.semibold))
+                                    Text("\(group.entries.count) 筆")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Spacer()
+                                    Image(systemName: collapsedMonths.contains(group.key) ? "chevron.right" : "chevron.down")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+                            .buttonStyle(.plain)
                         }
                     }
-                    .onDelete(perform: store.delete)
                 }
             }
         }
@@ -50,6 +102,15 @@ struct DailyLogHistoryView: View {
             DailyLogReviewRangeSheet(allEntries: store.entries)
         }
         .featureTutorial(.dailyLog)
+    }
+
+    private func deleteEntries(_ offsets: IndexSet, in groupEntries: [DailyLogEntry]) {
+        let idsToDelete = offsets.map { groupEntries[$0].id }
+        for id in idsToDelete {
+            if let globalIndex = store.entries.firstIndex(where: { $0.id == id }) {
+                store.delete(at: IndexSet(integer: globalIndex))
+            }
+        }
     }
 }
 

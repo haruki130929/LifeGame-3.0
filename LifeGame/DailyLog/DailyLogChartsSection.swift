@@ -72,7 +72,7 @@ struct DailyLogChartsSection: View {
                 .padding(.vertical, 8)
             }
         }
-        .frame(height: 270)
+        .frame(height: 320)
     }
 
     // MARK: - 1. 情緒趨勢（心情、焦慮、疲勞）
@@ -164,7 +164,7 @@ struct DailyLogChartsSection: View {
         return chartCard(title: "身體不適") {
             if painData.isEmpty {
                 ContentUnavailableView("沒有不適紀錄", systemImage: "heart.fill", description: nil)
-                    .frame(height: 150)
+                    .frame(height: 200)
             } else {
                 Chart {
                     ForEach(painData, id: \.id) { item in
@@ -218,7 +218,7 @@ struct DailyLogChartsSection: View {
         return chartCard(title: "待辦完成度") {
             if focusData.isEmpty {
                 ContentUnavailableView("沒有紀錄", systemImage: "checklist", description: nil)
-                    .frame(height: 150)
+                    .frame(height: 200)
             } else {
                 Chart {
                     ForEach(focusData, id: \.id) { item in
@@ -299,7 +299,7 @@ struct DailyLogChartsSection: View {
         return chartCard(title: "起床 / 就寢時間") {
             if timeData.isEmpty {
                 ContentUnavailableView("沒有時間紀錄", systemImage: "clock", description: nil)
-                    .frame(height: 150)
+                    .frame(height: 200)
             } else {
                 Chart {
                     ForEach(timeData, id: \.id) { item in
@@ -414,10 +414,10 @@ struct DailyLogChartsSection: View {
                 .font(.subheadline.weight(.semibold))
 
             content()
-                .frame(height: 150)
+                .frame(height: 200)
         }
         .padding(14)
-        .frame(width: 300)
+        .frame(width: 340)
         .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 14))
     }
