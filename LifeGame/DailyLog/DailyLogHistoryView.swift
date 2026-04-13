@@ -5,12 +5,13 @@ struct DailyLogHistoryView: View {
     @ObservedObject var store: DailyLogStore
     @State private var showingAdd = false
     @State private var showingReview = false
+    @State private var chartRange: ChartRange = .twoWeeks
 
     var body: some View {
         VStack(spacing: 0) {
             // 圖表區（至少 2 筆紀錄才顯示）
             if store.entries.count >= 2 {
-                DailyLogChartsSection(entries: store.entries)
+                DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
             }
 
             List {

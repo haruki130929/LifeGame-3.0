@@ -26,9 +26,9 @@ enum ChartRange: String, CaseIterable, Identifiable {
 /// 每日紀錄圖表區 — 橫向滑動，每個類別一張卡片
 struct DailyLogChartsSection: View {
     let entries: [DailyLogEntry]
+    @Binding var selectedRange: ChartRange
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var moduleStore: QuestionModuleStore
-    @State private var selectedRange: ChartRange = .twoWeeks
 
     private var filteredEntries: [DailyLogEntry] {
         let sorted = entries.sorted { $0.date < $1.date }
