@@ -3,6 +3,7 @@ import SwiftUI
 struct DailyLogHistoryView: View {
 
     @ObservedObject var store: DailyLogStore
+    @EnvironmentObject private var fab: FabStore
     @State private var showingAdd = false
     @State private var showingReview = false
     @State private var chartRange: ChartRange = .twoWeeks
@@ -11,41 +12,19 @@ struct DailyLogHistoryView: View {
     @State private var lastEntryCount: Int = 0
 
     var body: some View {
-        mainContent
-            .navigationTitle("每日紀錄")
-            .onAppear { rebuildGroupsIfNeeded() }
-            .onChange(of: store.entries.count) { _, _ in rebuildGroupsIfNeeded() }
-            .modifier(DailyLogFabHandler(store: store, showingAdd: $showingAdd))
-            .sheet(isPresented: $showingAdd) {
-                NavigationStack {
-                    DailyLogEditorView(mode: .add, store: store)
-                }
+        VStack(spacing: 0) {
+            // 圖表區
+            if store.entries.count >= 2 {
+                DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
             }
-            .sheet(isPresented: $showingReview) {
-                DailyLogReviewRangeSheet(allEntries: store.entries)
-            }
-            .featureTutorial(.dailyLog)
-    }
 
-    // MARK: - 主要內容（拆出來減少 body 複雜度）
-
-    private var mainContent: some View {
-        List {
-            if store.entries.isEmpty {
-                ContentUnavailableView("還沒有紀錄",
-                                       systemImage: "square.and.pencil",
-                                       description: Text("按右下角 ＋ 新增第一篇每日紀錄"))
-            } else {
-                // 圖表區（放進 List 裡，利用 lazy loading）
-                if store.entries.count >= 2 {
-                    Section {
-                        DailyLogChartsSection(entries: store.entries, selectedRange: $chartRange)
-                    }
-                    .listRowInsets(EdgeInsets())
-                    .listRowBackground(Color.clear)
-                }
-
-                ForEach(cachedGroups) { group in
+            List {
+                if store.entries.isEmpty {
+                    ContentUnavailableView("還沒有紀錄",
+                                           systemImage: "square.and.pencil",
+                                           description: Text("按右下角 ＋ 新增第一篇每日紀錄"))
+                } else {
+                    ForEach(cachedGroups) { group in
                         Section {
                             if !collapsedMonths.contains(group.key) {
                                 ForEach(group.entries) { entry in
@@ -87,7 +66,29 @@ struct DailyLogHistoryView: View {
                 }
             }
         }
-
+        .navigationTitle("每日紀錄")
+        .onAppear {
+            fab.apply(context: .feature(.dailyLog))
+            rebuildGroupsIfNeeded()
+        }
+        .onDisappear { fab.popActions() }
+        .onChange(of: store.entries.count) { _, _ in rebuildGroupsIfNeeded() }
+        .onChange(of: fab.route) { _, newRoute in
+            if newRoute == .addDailyLog {
+                fab.route = nil
+                showingAdd = true
+            }
+        }
+        .sheet(isPresented: $showingAdd) {
+            NavigationStack {
+                DailyLogEditorView(mode: .add, store: store)
+            }
+        }
+        .sheet(isPresented: $showingReview) {
+            DailyLogReviewRangeSheet(allEntries: store.entries)
+        }
+        .featureTutorial(.dailyLog)
+    }
 
     // MARK: - Helpers
 
@@ -118,34 +119,6 @@ struct DailyLogHistoryView: View {
                 store.delete(at: IndexSet(integer: globalIndex))
             }
         }
-    }
-}
-
-// MARK: - FAB Handler（隔離 FabStore 依賴）
-
-private struct DailyLogFabHandler: ViewModifier {
-    @ObservedObject var store: DailyLogStore
-    @Binding var showingAdd: Bool
-    @EnvironmentObject private var fab: FabStore
-    @State private var didSetup = false
-
-    func body(content: Content) -> some View {
-        content
-            .onAppear {
-                guard !didSetup else { return }
-                didSetup = true
-                fab.apply(context: .feature(.dailyLog))
-            }
-            .onDisappear {
-                didSetup = false
-                fab.popActions()
-            }
-            .onChange(of: fab.route) { _, newRoute in
-                if newRoute == .addDailyLog {
-                    fab.route = nil
-                    showingAdd = true
-                }
-            }
     }
 }
 
