@@ -64,6 +64,9 @@ final class TomorrowRingStore: ObservableObject {
             ?? true
 
         syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+
+        // 啟動時套用課表，確保卡片馬上顯示課表內容
+        applyClassScheduleIfNeeded()
     }
 
     // MARK: - Cross-device Sync
