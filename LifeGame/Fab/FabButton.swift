@@ -362,9 +362,9 @@ private struct FabButtoniPad: View {
                 withAnimation(.spring(response: 0.22, dampingFraction: 0.80)) {
                     btnRotation = 0
                     btnScale = 1.0
+                    showMenuItems = false
+                    showSubItems = false
                 }
-                showMenuItems = false
-                showSubItems = false
             }
         }
     }
@@ -501,7 +501,7 @@ private struct FabButtoniPad: View {
         Task { @MainActor in
             withAnimation(.easeOut(duration: 0.05)) { btnScale = 0.72 }
             try? await Task.sleep(nanoseconds: 80_000_000)
-            fab.isExpanded = true
+            withAnimation(.none) { fab.isExpanded = true }
             showMenuItems = false
             withAnimation(.spring(response: 0.32, dampingFraction: 0.55)) {
                 btnRotation = 135; btnScale = 1.28
@@ -526,7 +526,7 @@ private struct FabButtoniPad: View {
             try? await Task.sleep(nanoseconds: waitForItems)
             withAnimation(.easeOut(duration: 0.05)) { btnScale = 0.72 }
             try? await Task.sleep(nanoseconds: 80_000_000)
-            fab.isExpanded = false
+            withAnimation(.none) { fab.isExpanded = false }
             withAnimation(.spring(response: 0.22, dampingFraction: 0.80)) {
                 btnRotation = 0; btnScale = 1.18
             }
