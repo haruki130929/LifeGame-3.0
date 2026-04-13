@@ -48,7 +48,9 @@ struct LGCategoryHubView: View {
             NavigationLink { GanttScreen() } label: {
                 Label("甘特圖", systemImage: "chart.bar.xaxis")
             }
-            comingSoonRow("選緘溝通板", systemImage: "bubble.left.and.bubble.right")
+            NavigationLink { CommunicationBoardView() } label: {
+                Label("選緘溝通板", systemImage: "bubble.left.and.bubble.right")
+            }
 
         case .roles:
             comingSoonRow("能力五角圖", systemImage: "pentagon")
