@@ -90,6 +90,22 @@ final class DailyLogStore: ObservableObject {
         }
     }
     
+    /// 刪除所有紀錄（清除假數據用）
+    func deleteAll() {
+        do {
+            let descriptor = FetchDescriptor<DailyLogRecord>()
+            let records = try context.fetch(descriptor)
+            for record in records {
+                context.delete(record)
+            }
+            try context.save()
+            entries = []
+            debugLog("✅ DailyLog 全部清除，共刪除 \(records.count) 筆")
+        } catch {
+            debugLog("DailyLogStore deleteAll failed:", error)
+        }
+    }
+
     func delete(at offsets: IndexSet) {
         do {
             let items = offsets.compactMap { idx in

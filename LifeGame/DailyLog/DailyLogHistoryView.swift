@@ -5,6 +5,7 @@ struct DailyLogHistoryView: View {
     @ObservedObject var store: DailyLogStore
     @State private var showingAdd = false
     @State private var showingReview = false
+    @State private var showDeleteAll = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -38,6 +39,9 @@ struct DailyLogHistoryView: View {
             FabAction(title: "檢視紀錄", systemImage: "doc.text.magnifyingglass") {
                 showingReview = true
             },
+            FabAction(title: "清除所有紀錄", systemImage: "trash") {
+                showDeleteAll = true
+            },
             FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { }
         ])
         .sheet(isPresented: $showingAdd) {
@@ -47,6 +51,12 @@ struct DailyLogHistoryView: View {
         }
         .sheet(isPresented: $showingReview) {
             DailyLogReviewRangeSheet(allEntries: store.entries)
+        }
+        .confirmationDialog("確定要清除所有每日紀錄嗎？此操作無法復原。", isPresented: $showDeleteAll, titleVisibility: .visible) {
+            Button("清除所有紀錄", role: .destructive) {
+                store.deleteAll()
+            }
+            Button("取消", role: .cancel) {}
         }
         .featureTutorial(.dailyLog)
     }
