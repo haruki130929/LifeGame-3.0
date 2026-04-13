@@ -203,38 +203,60 @@ struct DailyLogChartsSection: View {
     // MARK: - 4. 專注與完成度
 
     private var focusChart: some View {
-        chartCard(title: "待辦完成度") {
-            Chart {
-                ForEach(filteredEntries) { entry in
-                    if entry.todoPartialTotal > 0 {
-                        BarMark(
-                            x: .value("日期", entry.date, unit: .day),
-                            y: .value("完成", entry.todoPartialDone)
-                        )
-                        .foregroundStyle(Color.green.opacity(0.7))
-                        .cornerRadius(4)
+        // 從 customAnswers 取待辦完成狀態
+        let focusData = filteredEntries.compactMap { entry -> (id: UUID, date: Date, label: String)? in
+            if let module = moduleStore.modules.first(where: { $0.kind == .studyFocus }),
+               let questions = module.questions,
+               let q = questions.first(where: { $0.title.contains("完成") }),
+               let answer = entry.customAnswers.first(where: { $0.questionId == q.id }),
+               let v = answer.stringValue, !v.isEmpty {
+                return (entry.id, entry.date, v)
+            }
+            return nil
+        }
 
+        return chartCard(title: "待辦完成度") {
+            if focusData.isEmpty {
+                ContentUnavailableView("沒有紀錄", systemImage: "checklist", description: nil)
+                    .frame(height: 150)
+            } else {
+                Chart {
+                    ForEach(focusData, id: \.id) { item in
+                        let score: Int = {
+                            if item.label.contains("全部完成") { return 3 }
+                            if item.label.contains("部分") { return 2 }
+                            return 1
+                        }()
                         BarMark(
-                            x: .value("日期", entry.date, unit: .day),
-                            y: .value("未完成", entry.todoPartialTotal - entry.todoPartialDone)
+                            x: .value("日期", item.date, unit: .day),
+                            y: .value("完成度", score)
                         )
-                        .foregroundStyle(Color.gray.opacity(0.3))
+                        .foregroundStyle(score == 3 ? Color.green.opacity(0.7) : score == 2 ? Color.orange.opacity(0.7) : Color.red.opacity(0.5))
                         .cornerRadius(4)
                     }
                 }
-            }
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: 2)) { value in
-                    AxisGridLine()
-                    AxisValueLabel {
-                        if let date = value.as(Date.self) {
-                            Text(zhDateLabel(date))
-                                .font(.caption2)
+                .chartYScale(domain: 0...3)
+                .chartYAxis {
+                    AxisMarks(position: .leading, values: [1, 2, 3]) { value in
+                        AxisValueLabel {
+                            if let v = value.as(Int.self) {
+                                Text(v == 3 ? "全部" : v == 2 ? "部分" : "未完成")
+                                    .font(.caption2)
+                            }
+                        }
+                    }
+                }
+                .chartXAxis {
+                    AxisMarks(values: .stride(by: .day, count: 2)) { value in
+                        AxisGridLine()
+                        AxisValueLabel {
+                            if let date = value.as(Date.self) {
+                                Text(zhDateLabel(date)).font(.caption2)
+                            }
                         }
                     }
                 }
             }
-            .chartYAxis { AxisMarks(position: .leading) }
         }
     }
 
@@ -242,11 +264,36 @@ struct DailyLogChartsSection: View {
 
     private var timeChart: some View {
         let timeData = filteredEntries.compactMap { entry -> (id: UUID, date: Date, wake: Double, bed: Double)? in
-            guard let w = entry.wakeTime.dateValue, let b = entry.bedTime.dateValue else { return nil }
             let cal = Calendar.current
-            let wakeHour = Double(cal.component(.hour, from: w)) + Double(cal.component(.minute, from: w)) / 60.0
-            let bedHour = Double(cal.component(.hour, from: b)) + Double(cal.component(.minute, from: b)) / 60.0
-            return (entry.id, entry.date, wakeHour, bedHour)
+
+            // 優先從 customAnswers 取時間
+            var wakeHour: Double?
+            var bedHour: Double?
+
+            if let module = moduleStore.modules.first(where: { $0.kind == .basic }),
+               let questions = module.questions {
+                if let wq = questions.first(where: { $0.title.contains("起床") }),
+                   let wa = entry.customAnswers.first(where: { $0.questionId == wq.id }),
+                   let wd = wa.dateValue {
+                    wakeHour = Double(cal.component(.hour, from: wd)) + Double(cal.component(.minute, from: wd)) / 60.0
+                }
+                if let bq = questions.first(where: { $0.title.contains("上床") }),
+                   let ba = entry.customAnswers.first(where: { $0.questionId == bq.id }),
+                   let bd = ba.dateValue {
+                    bedHour = Double(cal.component(.hour, from: bd)) + Double(cal.component(.minute, from: bd)) / 60.0
+                }
+            }
+
+            // fallback 到原生欄位
+            if wakeHour == nil, let w = entry.wakeTime.dateValue {
+                wakeHour = Double(cal.component(.hour, from: w)) + Double(cal.component(.minute, from: w)) / 60.0
+            }
+            if bedHour == nil, let b = entry.bedTime.dateValue {
+                bedHour = Double(cal.component(.hour, from: b)) + Double(cal.component(.minute, from: b)) / 60.0
+            }
+
+            guard let wake = wakeHour, let bed = bedHour else { return nil }
+            return (entry.id, entry.date, wake, bed)
         }
 
         return chartCard(title: "起床 / 就寢時間") {
