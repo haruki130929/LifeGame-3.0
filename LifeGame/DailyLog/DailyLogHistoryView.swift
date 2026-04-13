@@ -7,26 +7,8 @@ struct DailyLogHistoryView: View {
     @State private var showingReview = false
     @State private var chartRange: ChartRange = .twoWeeks
     @State private var collapsedMonths: Set<String> = []
-
-    /// 按月份分組（最新的月份在前）
-    private var groupedByMonth: [(key: String, entries: [DailyLogEntry])] {
-        let cal = Calendar.current
-        let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "zh_TW")
-        fmt.dateFormat = "yyyy年M月"
-
-        let grouped = Dictionary(grouping: store.entries) { entry in
-            fmt.string(from: entry.date)
-        }
-
-        return grouped
-            .map { (key: $0.key, entries: $0.value.sorted { $0.date > $1.date }) }
-            .sorted { a, b in
-                // 最新月份排前面
-                guard let da = a.entries.first?.date, let db = b.entries.first?.date else { return false }
-                return da > db
-            }
-    }
+    @State private var cachedGroups: [MonthGroup] = []
+    @State private var lastEntryCount: Int = 0
 
     var body: some View {
         VStack(spacing: 0) {
@@ -41,7 +23,7 @@ struct DailyLogHistoryView: View {
                                            systemImage: "square.and.pencil",
                                            description: Text("按右下角 ＋ 新增第一篇每日紀錄"))
                 } else {
-                    ForEach(groupedByMonth, id: \.key) { group in
+                    ForEach(cachedGroups) { group in
                         Section {
                             if !collapsedMonths.contains(group.key) {
                                 ForEach(group.entries) { entry in
@@ -102,6 +84,28 @@ struct DailyLogHistoryView: View {
             DailyLogReviewRangeSheet(allEntries: store.entries)
         }
         .featureTutorial(.dailyLog)
+        .onAppear { rebuildGroupsIfNeeded() }
+        .onChange(of: store.entries.count) { _, _ in rebuildGroupsIfNeeded() }
+    }
+
+    private func rebuildGroupsIfNeeded() {
+        guard store.entries.count != lastEntryCount else { return }
+        lastEntryCount = store.entries.count
+
+        let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "zh_TW")
+        fmt.dateFormat = "yyyy年M月"
+
+        let grouped = Dictionary(grouping: store.entries) { entry in
+            fmt.string(from: entry.date)
+        }
+
+        cachedGroups = grouped
+            .map { MonthGroup(key: $0.key, entries: $0.value.sorted { $0.date > $1.date }) }
+            .sorted { a, b in
+                guard let da = a.entries.first?.date, let db = b.entries.first?.date else { return false }
+                return da > db
+            }
     }
 
     private func deleteEntries(_ offsets: IndexSet, in groupEntries: [DailyLogEntry]) {
@@ -199,4 +203,12 @@ private struct DailyLogRow: View {
 
         return parts.isEmpty ? nil : parts.joined(separator: "｜")
     }
+}
+
+// MARK: - Month Group
+
+private struct MonthGroup: Identifiable {
+    let key: String
+    let entries: [DailyLogEntry]
+    var id: String { key }
 }
