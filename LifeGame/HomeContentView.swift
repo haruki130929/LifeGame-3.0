@@ -15,6 +15,7 @@ struct HomeContentView: View {
     @EnvironmentObject private var customTabStore: CustomTabStore
     @EnvironmentObject private var coachMarkStore: CoachMarkStore
     @EnvironmentObject private var tomorrowRingStore: TomorrowRingStore
+    @EnvironmentObject private var updateChecker: AppUpdateChecker
 
 
     @State private var selectedTab: TabSelection = .tab(UUID())
@@ -83,6 +84,14 @@ struct HomeContentView: View {
                         withAnimation(DrawerPanel.panelSpring) {
                             isDrawerOpen.toggle()
                             if isDrawerOpen { isContentOpen = false }
+                        }
+                    }
+                    .overlay(alignment: .topTrailing) {
+                        if updateChecker.hasUpdate {
+                            Circle()
+                                .fill(.red)
+                                .frame(width: 10, height: 10)
+                                .offset(x: 2, y: -2)
                         }
                     }
                     .opacity(isContentOpen ? 0.5 : 1)
