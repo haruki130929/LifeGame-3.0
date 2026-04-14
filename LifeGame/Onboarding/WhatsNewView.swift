@@ -74,6 +74,39 @@ struct WhatsNewView: View {
 
     static func items(for version: String) -> [WhatsNewItem] {
         switch version {
+        case "1.20":
+            return [
+                WhatsNewItem(
+                    icon: "bubble.left.and.bubble.right",
+                    title: "選緘溝通板",
+                    description: "面對面溝通工具：畫面上下分半，上方翻轉 180° 讓對方閱讀，你在下方即時打字。支援對話歷史、匯出紀錄、字體大小調整。",
+                    color: .cyan
+                ),
+                WhatsNewItem(
+                    icon: "chart.xyaxis.line",
+                    title: "每日紀錄圖表",
+                    description: "情緒趨勢、睡眠時數、身體不適、待辦完成度、起床就寢時間，5 張圖表一目了然。可選 1 週到 3 個月的時間區間。",
+                    color: .orange
+                ),
+                WhatsNewItem(
+                    icon: "calendar.badge.plus",
+                    title: "行事曆重複行程",
+                    description: "新增行程時可設定重複頻率：每天、每週、每兩週、每月，自訂重複次數。",
+                    color: .green
+                ),
+                WhatsNewItem(
+                    icon: "clock.badge.checkmark",
+                    title: "時間圓環即時顯示課表",
+                    description: "修復開啟 App 時卡片不顯示課表的問題，現在一開啟就能看到今天的課表。",
+                    color: .purple
+                ),
+                WhatsNewItem(
+                    icon: "ladybug.fill",
+                    title: "穩定性大幅提升",
+                    description: "修復右下角按鈕導致畫面閃爍、天氣與圖表數據顯示錯誤、跨裝置同步等多項問題。",
+                    color: .red
+                ),
+            ]
         case "1.19":
             return [
                 WhatsNewItem(
