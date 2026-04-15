@@ -55,8 +55,4 @@ final class MoodSettingsStore: ObservableObject {
         wakeUpTime = StorageManager.load(Date.self, forKey: Keys.wakeUpTime)
     }
 
-    /// 標記現在起床了
-    func markWakeUp() {
-        wakeUpTime = Date()
-    }
 }

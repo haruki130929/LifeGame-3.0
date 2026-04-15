@@ -73,28 +73,90 @@ struct MoodThermometerScreen: View {
 
     // MARK: - 起床時間標記
 
+    @State private var showWakeTimePicker = false
+    @State private var selectedWakeTime: Double = 8.0
+
     private var wakeUpBar: some View {
         HStack {
+            Image(systemName: "sun.max.fill")
+                .foregroundStyle(.orange)
+
             if let wake = moodSettings.wakeUpTime, Calendar.current.isDateInToday(wake) {
-                Image(systemName: "sun.max.fill")
-                    .foregroundStyle(.orange)
                 Text("今日起床：\(wake.formatted(date: .omitted, time: .shortened))")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+
+                Button {
+                    if let w = moodSettings.wakeUpTime {
+                        let cal = Calendar.current
+                        selectedWakeTime = Double(cal.component(.hour, from: w)) + (cal.component(.minute, from: w) >= 30 ? 0.5 : 0)
+                    }
+                    showWakeTimePicker = true
+                } label: {
+                    Text("修改")
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
             } else {
                 Button {
-                    moodSettings.markWakeUp()
+                    selectedWakeTime = 8.0
+                    showWakeTimePicker = true
                 } label: {
-                    Label("標記起床時間", systemImage: "sun.max")
+                    Text("設定起床時間")
                         .font(.subheadline.weight(.medium))
-                        .padding(.horizontal, 14)
-                        .padding(.vertical, 8)
-                        .background(.orange.opacity(0.15))
                         .foregroundStyle(.orange)
-                        .clipShape(Capsule())
                 }
             }
+
             Spacer()
+        }
+        .sheet(isPresented: $showWakeTimePicker) {
+            wakeTimePicker
+                .presentationDetents([.height(280)])
+        }
+    }
+
+    private var wakeTimePicker: some View {
+        let values: [Double] = {
+            var result: [Double] = []
+            for h in 0...23 {
+                result.append(Double(h))
+                result.append(Double(h) + 0.5)
+            }
+            return result
+        }()
+
+        return VStack(spacing: 16) {
+            Text("選擇起床時間")
+                .font(.headline)
+                .padding(.top, 20)
+
+            Picker("", selection: $selectedWakeTime) {
+                ForEach(values, id: \.self) { v in
+                    let hour = Int(v)
+                    let min = v.truncatingRemainder(dividingBy: 1) >= 0.5 ? "30" : "00"
+                    Text("\(hour):\(min)").tag(v)
+                }
+            }
+            .pickerStyle(.wheel)
+            .frame(height: 150)
+
+            Button {
+                let cal = Calendar.current
+                let today = cal.startOfDay(for: Date())
+                let hour = Int(selectedWakeTime)
+                let minute = selectedWakeTime.truncatingRemainder(dividingBy: 1) >= 0.5 ? 30 : 0
+                moodSettings.wakeUpTime = cal.date(bySettingHour: hour, minute: minute, second: 0, of: today)
+                showWakeTimePicker = false
+            } label: {
+                Text("確定")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 12)
+            }
+            .buttonStyle(.borderedProminent)
+            .padding(.horizontal, 24)
+            .padding(.bottom, 16)
         }
     }
 
