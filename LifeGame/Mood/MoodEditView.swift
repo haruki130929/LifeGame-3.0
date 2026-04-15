@@ -5,6 +5,8 @@ struct MoodEditView: View {
     @EnvironmentObject private var moodSettings: MoodSettingsStore
     @Environment(\.dismiss) private var dismiss
 
+    /// 選擇要編輯的日期
+    @State private var editDate: Date = Date()
     /// 每行的暫存分數
     @State private var scoreDrafts: [Date: Double] = [:]
     @State private var focusDrafts: [Date: Double] = [:]
@@ -13,6 +15,17 @@ struct MoodEditView: View {
     var body: some View {
         NavigationStack {
             List {
+                // 日期選擇
+                Section {
+                    DatePicker("選擇日期", selection: $editDate, in: ...Date(), displayedComponents: .date)
+                        .onChange(of: editDate) { _, _ in
+                            scoreDrafts = [:]
+                            focusDrafts = [:]
+                            fatigueDrafts = [:]
+                            loadDrafts()
+                        }
+                }
+
                 ForEach(entries, id: \.hour) { entry in
                     VStack(alignment: .leading, spacing: 8) {
                         Text(hourLabel(entry.hour))
@@ -54,7 +67,7 @@ struct MoodEditView: View {
                     }
                 }
             }
-            .navigationTitle("編輯今日紀錄")
+            .navigationTitle("編輯心情紀錄")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -108,17 +121,19 @@ struct MoodEditView: View {
 
     private func displayRange() -> (start: Date, end: Date) {
         let calendar = Calendar.current
-        let now = Date()
         let startHour = moodSettings.chartStartHour
-        let startOfDay = calendar.startOfDay(for: now)
-        let todayStart = calendar.date(byAdding: .hour, value: startHour, to: startOfDay)!
+        let startOfDay = calendar.startOfDay(for: editDate)
+        let dayStart = calendar.date(byAdding: .hour, value: startHour, to: startOfDay)!
+        let dayEnd = calendar.date(byAdding: .hour, value: 24, to: dayStart)!
 
-        let start: Date = (now < todayStart)
-            ? calendar.date(byAdding: .day, value: -1, to: todayStart)!
-            : todayStart
+        // 如果是今天，只顯示到當前小時
+        if calendar.isDateInToday(editDate) {
+            let currentHour = calendar.dateInterval(of: .hour, for: Date())?.start ?? Date()
+            return (dayStart, max(dayStart, currentHour))
+        }
 
-        let currentHour = calendar.dateInterval(of: .hour, for: now)?.start ?? now
-        return (start, max(start, currentHour))
+        // 過去的日期顯示完整 24 小時
+        return (dayStart, dayEnd)
     }
 
     private func loadDrafts() {

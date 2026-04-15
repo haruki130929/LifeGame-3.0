@@ -21,7 +21,7 @@ enum MoodTimePeriod: String, CaseIterable, Hashable {
 
     var chartTitle: String {
         switch self {
-        case .day:   return "今天心情折線圖（8:00 起算）"
+        case .day:   return "今日心情溫度計"
         case .week:  return "近 7 天每小時平均心情"
         case .month: return "近 30 天每小時平均心情"
         }
