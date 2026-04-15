@@ -7,6 +7,7 @@ final class MoodSettingsStore: ObservableObject {
     private enum Keys {
         static let minScore = "mood_min_score"
         static let maxScore = "mood_max_score"
+        static let wakeUpTime = "mood_wakeup_time"
     }
 
     @Published var minScore: Int = 0 {
@@ -15,6 +16,20 @@ final class MoodSettingsStore: ObservableObject {
 
     @Published var maxScore: Int = 10 {
         didSet { if !isReloading { StorageManager.save(maxScore, forKey: Keys.maxScore) } }
+    }
+
+    /// 今天的起床時間（nil = 使用預設 8:00）
+    @Published var wakeUpTime: Date? {
+        didSet { if !isReloading { StorageManager.save(wakeUpTime, forKey: Keys.wakeUpTime) } }
+    }
+
+    /// 圖表起始小時
+    var chartStartHour: Int {
+        guard let wake = wakeUpTime else { return 8 }
+        let cal = Calendar.current
+        // 只有今天的起床時間才生效
+        guard cal.isDateInToday(wake) else { return 8 }
+        return cal.component(.hour, from: wake)
     }
 
     private var syncHelper: StoreSyncHelper?
@@ -28,6 +43,7 @@ final class MoodSettingsStore: ObservableObject {
     init() {
         minScore = StorageManager.load(Int.self, forKey: Keys.minScore) ?? 0
         maxScore = StorageManager.load(Int.self, forKey: Keys.maxScore) ?? 10
+        wakeUpTime = StorageManager.load(Date.self, forKey: Keys.wakeUpTime)
         syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
     }
 
@@ -36,5 +52,11 @@ final class MoodSettingsStore: ObservableObject {
         defer { isReloading = false }
         minScore = StorageManager.load(Int.self, forKey: Keys.minScore) ?? 0
         maxScore = StorageManager.load(Int.self, forKey: Keys.maxScore) ?? 10
+        wakeUpTime = StorageManager.load(Date.self, forKey: Keys.wakeUpTime)
+    }
+
+    /// 標記現在起床了
+    func markWakeUp() {
+        wakeUpTime = Date()
     }
 }

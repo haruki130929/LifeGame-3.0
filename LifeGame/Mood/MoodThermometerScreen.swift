@@ -5,6 +5,7 @@ struct MoodThermometerScreen: View {
     @EnvironmentObject private var history: MoodHistoryStore
     @EnvironmentObject private var fab: FabStore
 
+    @EnvironmentObject private var moodSettings: MoodSettingsStore
     @State private var selectedPeriod: MoodTimePeriod = .day
     @State private var showHourlyLimitAlert = false
     @State private var showRecordedToast = false
@@ -20,8 +21,11 @@ struct MoodThermometerScreen: View {
                     title: { $0.title }
                 )
 
-                // 圖表（橫軸永遠是 8:00~隔天 8:00 的時間軸）
-                let displayRange = todayRangeStartingAt8()
+                // 起床時間標記
+                wakeUpBar
+
+                // 圖表（橫軸從起床時間開始）
+                let displayRange = todayRangeFromWakeUp()
                 let chartPoints = buildChartPoints(
                     period: selectedPeriod,
                     displayRange: displayRange
@@ -67,6 +71,33 @@ struct MoodThermometerScreen: View {
         .featureTutorial(.moodThermometer)
     }
 
+    // MARK: - 起床時間標記
+
+    private var wakeUpBar: some View {
+        HStack {
+            if let wake = moodSettings.wakeUpTime, Calendar.current.isDateInToday(wake) {
+                Image(systemName: "sun.max.fill")
+                    .foregroundStyle(.orange)
+                Text("今日起床：\(wake.formatted(date: .omitted, time: .shortened))")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+            } else {
+                Button {
+                    moodSettings.markWakeUp()
+                } label: {
+                    Label("標記起床時間", systemImage: "sun.max")
+                        .font(.subheadline.weight(.medium))
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 8)
+                        .background(.orange.opacity(0.15))
+                        .foregroundStyle(.orange)
+                        .clipShape(Capsule())
+                }
+            }
+            Spacer()
+        }
+    }
+
     // MARK: - 建立圖表資料點
 
     /// 根據選擇的時段，產生要顯示在圖表上的資料點
@@ -110,9 +141,10 @@ struct MoodThermometerScreen: View {
         for (hour, scores) in buckets {
             let avg = scores.reduce(0, +) / Double(scores.count)
 
-            // 8~23 點 → 今天；0~7 點 → 隔天（因為時間軸是 8:00 起算）
+            // chartStartHour~23 點 → 今天；0~(chartStartHour-1) 點 → 隔天
+            let startH = moodSettings.chartStartHour
             let baseDate: Date
-            if hour >= 8 {
+            if hour >= startH {
                 baseDate = dayStart
             } else {
                 baseDate = calendar.date(byAdding: .day, value: 1, to: dayStart)!
@@ -126,15 +158,16 @@ struct MoodThermometerScreen: View {
 
     // MARK: - 日期範圍
 
-    /// 「今天 8:00」到「隔天 8:00」— 圖表顯示範圍（永遠固定）
-    private func todayRangeStartingAt8(now: Date = Date()) -> (start: Date, end: Date) {
+    /// 圖表顯示範圍：從起床時間（或預設 8:00）到 24 小時後
+    private func todayRangeFromWakeUp(now: Date = Date()) -> (start: Date, end: Date) {
         let calendar = Calendar.current
+        let hour = moodSettings.chartStartHour
         let startOfDay = calendar.startOfDay(for: now)
-        let today8 = calendar.date(byAdding: .hour, value: 8, to: startOfDay)!
+        let todayStart = calendar.date(byAdding: .hour, value: hour, to: startOfDay)!
 
-        let start: Date = (now < today8)
-            ? calendar.date(byAdding: .day, value: -1, to: today8)!
-            : today8
+        let start: Date = (now < todayStart)
+            ? calendar.date(byAdding: .day, value: -1, to: todayStart)!
+            : todayStart
         let end = calendar.date(byAdding: .hour, value: 24, to: start)!
         return (start, end)
     }
