@@ -3,6 +3,7 @@ import SwiftUI
 struct FloatingIconButton: View {
     let systemName: String
     var size: CGFloat = 52
+    var showBadge: Bool = false
     let action: () -> Void
 
     @EnvironmentObject private var theme: ThemeStore
@@ -22,6 +23,14 @@ struct FloatingIconButton: View {
             Image(systemName: systemName)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(fg)
+                .overlay(alignment: .topTrailing) {
+                    if showBadge {
+                        Circle()
+                            .fill(.red)
+                            .frame(width: 9, height: 9)
+                            .offset(x: 3, y: -3)
+                    }
+                }
                 .frame(width: size, height: size)
                 .background(bg)
                 .clipShape(Circle())

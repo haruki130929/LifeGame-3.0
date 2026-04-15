@@ -80,18 +80,10 @@ struct HomeContentView: View {
                         .padding(.bottom, panelBottomReserved)
                     }
                     
-                    FloatingIconButton(systemName: "line.3.horizontal", size: LayoutTokens.floatButtonSize) {
+                    FloatingIconButton(systemName: "line.3.horizontal", size: LayoutTokens.floatButtonSize, showBadge: updateChecker.hasUpdate) {
                         withAnimation(DrawerPanel.panelSpring) {
                             isDrawerOpen.toggle()
                             if isDrawerOpen { isContentOpen = false }
-                        }
-                    }
-                    .overlay(alignment: .topTrailing) {
-                        if updateChecker.hasUpdate {
-                            Circle()
-                                .fill(.red)
-                                .frame(width: 10, height: 10)
-                                .offset(x: 2, y: -2)
                         }
                     }
                     .opacity(isContentOpen ? 0.5 : 1)
