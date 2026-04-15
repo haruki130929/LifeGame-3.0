@@ -23,14 +23,6 @@ final class MoodSettingsStore: ObservableObject {
         didSet { if !isReloading { StorageManager.save(wakeUpTime, forKey: Keys.wakeUpTime) } }
     }
 
-    /// 圖表起始小時
-    var chartStartHour: Int {
-        guard let wake = wakeUpTime else { return 8 }
-        let cal = Calendar.current
-        // 只有今天的起床時間才生效
-        guard cal.isDateInToday(wake) else { return 8 }
-        return cal.component(.hour, from: wake)
-    }
 
     private var syncHelper: StoreSyncHelper?
     private var isReloading = false

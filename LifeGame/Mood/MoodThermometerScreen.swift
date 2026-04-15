@@ -24,8 +24,8 @@ struct MoodThermometerScreen: View {
                 // 起床時間標記
                 wakeUpBar
 
-                // 圖表（橫軸從起床時間開始）
-                let displayRange = todayRangeFromWakeUp()
+                // 圖表（橫軸固定 8:00 起算）
+                let displayRange = todayRangeStartingAt8()
                 let chartPoints = buildChartPoints(
                     period: selectedPeriod,
                     displayRange: displayRange
@@ -35,7 +35,8 @@ struct MoodThermometerScreen: View {
                     points: chartPoints,
                     rangeStart: displayRange.start,
                     rangeEnd: displayRange.end,
-                    period: selectedPeriod
+                    period: selectedPeriod,
+                    wakeUpTime: todayWakeUpTime
                 )
 
                 MoodThermometerCard(mood: mood)
@@ -203,10 +204,9 @@ struct MoodThermometerScreen: View {
         for (hour, scores) in buckets {
             let avg = scores.reduce(0, +) / Double(scores.count)
 
-            // chartStartHour~23 點 → 今天；0~(chartStartHour-1) 點 → 隔天
-            let startH = moodSettings.chartStartHour
+            // 8~23 點 → 今天；0~7 點 → 隔天（因為時間軸是 8:00 起算）
             let baseDate: Date
-            if hour >= startH {
+            if hour >= 8 {
                 baseDate = dayStart
             } else {
                 baseDate = calendar.date(byAdding: .day, value: 1, to: dayStart)!
@@ -220,18 +220,24 @@ struct MoodThermometerScreen: View {
 
     // MARK: - 日期範圍
 
-    /// 圖表顯示範圍：從起床時間（或預設 8:00）到 24 小時後
-    private func todayRangeFromWakeUp(now: Date = Date()) -> (start: Date, end: Date) {
+    /// 圖表顯示範圍：固定 8:00 起算
+    private func todayRangeStartingAt8(now: Date = Date()) -> (start: Date, end: Date) {
         let calendar = Calendar.current
-        let hour = moodSettings.chartStartHour
         let startOfDay = calendar.startOfDay(for: now)
-        let todayStart = calendar.date(byAdding: .hour, value: hour, to: startOfDay)!
+        let today8 = calendar.date(byAdding: .hour, value: 8, to: startOfDay)!
 
-        let start: Date = (now < todayStart)
-            ? calendar.date(byAdding: .day, value: -1, to: todayStart)!
-            : todayStart
+        let start: Date = (now < today8)
+            ? calendar.date(byAdding: .day, value: -1, to: today8)!
+            : today8
         let end = calendar.date(byAdding: .hour, value: 24, to: start)!
         return (start, end)
+    }
+
+    /// 今日起床時間（用於圖表上的標記線）
+    private var todayWakeUpTime: Date? {
+        guard let wake = moodSettings.wakeUpTime,
+              Calendar.current.isDateInToday(wake) else { return nil }
+        return wake
     }
 
     /// 過去 N 天的資料來源範圍

@@ -6,6 +6,7 @@ struct MoodThermometerChartView: View {
     let rangeStart: Date
     let rangeEnd: Date
     var period: MoodTimePeriod = .day
+    var wakeUpTime: Date? = nil
 
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var moodSettings: MoodSettingsStore
@@ -38,20 +39,34 @@ struct MoodThermometerChartView: View {
             Text(period.chartTitle)
                 .font(.headline)
 
-            Chart(chartEntries) { entry in
-                LineMark(
-                    x: .value("時間", entry.timestamp),
-                    y: .value("分數", entry.value),
-                    series: .value("類別", entry.category)
-                )
-                .interpolationMethod(.catmullRom)
-                .foregroundStyle(by: .value("類別", entry.category))
+            Chart {
+                ForEach(chartEntries) { entry in
+                    LineMark(
+                        x: .value("時間", entry.timestamp),
+                        y: .value("分數", entry.value),
+                        series: .value("類別", entry.category)
+                    )
+                    .interpolationMethod(.catmullRom)
+                    .foregroundStyle(by: .value("類別", entry.category))
 
-                PointMark(
-                    x: .value("時間", entry.timestamp),
-                    y: .value("分數", entry.value)
-                )
-                .foregroundStyle(by: .value("類別", entry.category))
+                    PointMark(
+                        x: .value("時間", entry.timestamp),
+                        y: .value("分數", entry.value)
+                    )
+                    .foregroundStyle(by: .value("類別", entry.category))
+                }
+
+                // 起床時間標記線
+                if let wake = wakeUpTime {
+                    RuleMark(x: .value("起床", wake))
+                        .foregroundStyle(.orange.opacity(0.4))
+                        .lineStyle(StrokeStyle(lineWidth: 1.5, dash: [5, 3]))
+                        .annotation(position: .top, alignment: .leading) {
+                            Text("起床")
+                                .font(.caption2)
+                                .foregroundStyle(.orange.opacity(0.6))
+                        }
+                }
             }
             .chartForegroundStyleScale([
                 "情緒": Color.orange,

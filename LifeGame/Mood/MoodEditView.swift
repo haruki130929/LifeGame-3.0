@@ -11,6 +11,7 @@ struct MoodEditView: View {
     @State private var scoreDrafts: [Date: Double] = [:]
     @State private var focusDrafts: [Date: Double] = [:]
     @State private var fatigueDrafts: [Date: Double] = [:]
+    @State private var sleepHours: Set<Date> = []
 
     var body: some View {
         NavigationStack {
@@ -27,35 +28,52 @@ struct MoodEditView: View {
                 }
 
                 ForEach(entries, id: \.hour) { entry in
+                    let isAsleep = sleepHours.contains(entry.hour)
+
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(hourLabel(entry.hour))
-                            .font(.subheadline.monospacedDigit().bold())
+                        HStack {
+                            Text(hourLabel(entry.hour))
+                                .font(.subheadline.monospacedDigit().bold())
+                            Spacer()
+                            Button {
+                                toggleSleep(entry.hour)
+                            } label: {
+                                Text(isAsleep ? "尚未起床" : "標記未起床")
+                                    .font(.caption)
+                                    .padding(.horizontal, 8)
+                                    .padding(.vertical, 4)
+                                    .background(isAsleep ? Color.secondary.opacity(0.2) : Color.clear)
+                                    .clipShape(Capsule())
+                                    .foregroundStyle(isAsleep ? .secondary : .tertiary)
+                            }
+                        }
 
-                        let defaultScore = Double(moodSettings.minScore + moodSettings.maxScore) / 2
+                        if isAsleep {
+                            Text("💤 睡眠中")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        } else {
+                            let defaultScore = Double(moodSettings.minScore + moodSettings.maxScore) / 2
 
-                        // 情緒
-                        sliderRow(
-                            label: "情緒",
-                            value: binding(for: entry, drafts: $scoreDrafts, keyPath: \.score, default: defaultScore),
-                            range: moodSettings.scoreRange
-                        )
-
-                        // 專注力
-                        sliderRow(
-                            label: "專注力",
-                            value: binding(for: entry, drafts: $focusDrafts, keyPath: \.focus, default: defaultScore),
-                            range: moodSettings.scoreRange
-                        )
-
-                        // 疲勞度
-                        sliderRow(
-                            label: "疲勞度",
-                            value: binding(for: entry, drafts: $fatigueDrafts, keyPath: \.fatigue, default: defaultScore),
-                            range: moodSettings.scoreRange
-                        )
+                            sliderRow(
+                                label: "情緒",
+                                value: binding(for: entry, drafts: $scoreDrafts, keyPath: \.score, default: defaultScore),
+                                range: moodSettings.scoreRange
+                            )
+                            sliderRow(
+                                label: "專注力",
+                                value: binding(for: entry, drafts: $focusDrafts, keyPath: \.focus, default: defaultScore),
+                                range: moodSettings.scoreRange
+                            )
+                            sliderRow(
+                                label: "疲勞度",
+                                value: binding(for: entry, drafts: $fatigueDrafts, keyPath: \.fatigue, default: defaultScore),
+                                range: moodSettings.scoreRange
+                            )
+                        }
                     }
                     .padding(.vertical, 4)
-                    .listRowBackground(entry.point != nil ? Color.accentColor.opacity(0.08) : Color.clear)
+                    .listRowBackground(isAsleep ? Color.secondary.opacity(0.04) : entry.point != nil ? Color.accentColor.opacity(0.08) : Color.clear)
                     .swipeActions(edge: .trailing) {
                         if let point = entry.point {
                             Button(role: .destructive) {
@@ -121,9 +139,8 @@ struct MoodEditView: View {
 
     private func displayRange() -> (start: Date, end: Date) {
         let calendar = Calendar.current
-        let startHour = moodSettings.chartStartHour
         let startOfDay = calendar.startOfDay(for: editDate)
-        let dayStart = calendar.date(byAdding: .hour, value: startHour, to: startOfDay)!
+        let dayStart = calendar.date(byAdding: .hour, value: 8, to: startOfDay)!
         let dayEnd = calendar.date(byAdding: .hour, value: 24, to: dayStart)!
 
         // 如果是今天，只顯示到當前小時
@@ -137,22 +154,50 @@ struct MoodEditView: View {
     }
 
     private func loadDrafts() {
-        for entry in entries {
+        sleepHours = []
+        let currentEntries = entries
+        let firstDataIndex = currentEntries.firstIndex(where: { $0.point != nil })
+
+        for (index, entry) in currentEntries.enumerated() {
             if let point = entry.point {
                 scoreDrafts[entry.hour] = point.score
                 focusDrafts[entry.hour] = point.focus ?? 5
                 fatigueDrafts[entry.hour] = point.fatigue ?? 5
+            } else if let first = firstDataIndex, index < first {
+                // 第一筆資料之前的空白小時，標記為睡眠
+                sleepHours.insert(entry.hour)
             }
+        }
+    }
+
+    private func toggleSleep(_ hour: Date) {
+        if sleepHours.contains(hour) {
+            sleepHours.remove(hour)
+        } else {
+            sleepHours.insert(hour)
+            // 清掉該小時的 drafts
+            scoreDrafts.removeValue(forKey: hour)
+            focusDrafts.removeValue(forKey: hour)
+            fatigueDrafts.removeValue(forKey: hour)
         }
     }
 
     private func save() {
         let allHours = Set(scoreDrafts.keys).union(focusDrafts.keys).union(fatigueDrafts.keys)
         for hour in allHours {
+            // 跳過標記為睡眠的小時
+            guard !sleepHours.contains(hour) else { continue }
             let score = scoreDrafts[hour] ?? 5
             let focus = focusDrafts[hour]
             let fatigue = fatigueDrafts[hour]
             history.addOrUpdate(score: score, focus: focus, fatigue: fatigue, forHour: hour)
+        }
+
+        // 刪除標記為睡眠的已有紀錄
+        for hour in sleepHours {
+            if let entry = entries.first(where: { $0.hour == hour }), let point = entry.point {
+                history.delete(id: point.id)
+            }
         }
     }
 
