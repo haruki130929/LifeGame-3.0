@@ -85,6 +85,13 @@ final class MoodHistoryStore: ObservableObject {
         save()
     }
 
+    /// 刪除所有記錄
+    func deleteAll() {
+        points.removeAll()
+        save()
+        debugLog("✅ MoodHistory 全部清除")
+    }
+
     /// 刪除指定記錄
     func delete(id: UUID) {
         points.removeAll { $0.id == id }

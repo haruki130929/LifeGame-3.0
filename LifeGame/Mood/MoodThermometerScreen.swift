@@ -9,6 +9,7 @@ struct MoodThermometerScreen: View {
     @State private var selectedPeriod: MoodTimePeriod = .day
     @State private var showHourlyLimitAlert = false
     @State private var showRecordedToast = false
+    @State private var showDeleteAll = false
 
     var body: some View {
         ScrollView {
@@ -70,6 +71,21 @@ struct MoodThermometerScreen: View {
             fab.popActions()
         }
         .featureTutorial(.moodThermometer)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(role: .destructive) {
+                    showDeleteAll = true
+                } label: {
+                    Image(systemName: "trash")
+                }
+            }
+        }
+        .confirmationDialog("確定要刪除所有心情溫度計的資料嗎？此操作無法復原。", isPresented: $showDeleteAll, titleVisibility: .visible) {
+            Button("刪除所有資料", role: .destructive) {
+                history.deleteAll()
+            }
+            Button("取消", role: .cancel) {}
+        }
     }
 
     // MARK: - 起床時間標記
