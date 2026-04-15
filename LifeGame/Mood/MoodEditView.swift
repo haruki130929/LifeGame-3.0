@@ -43,6 +43,15 @@ struct MoodEditView: View {
                     }
                     .padding(.vertical, 4)
                     .listRowBackground(entry.point != nil ? Color.accentColor.opacity(0.08) : Color.clear)
+                    .swipeActions(edge: .trailing) {
+                        if let point = entry.point {
+                            Button(role: .destructive) {
+                                history.delete(id: point.id)
+                            } label: {
+                                Label("刪除", systemImage: "trash")
+                            }
+                        }
+                    }
                 }
             }
             .navigationTitle("編輯今日紀錄")
@@ -100,16 +109,16 @@ struct MoodEditView: View {
     private func displayRange() -> (start: Date, end: Date) {
         let calendar = Calendar.current
         let now = Date()
+        let startHour = moodSettings.chartStartHour
         let startOfDay = calendar.startOfDay(for: now)
-        let today8 = calendar.date(byAdding: .hour, value: 8, to: startOfDay)!
+        let todayStart = calendar.date(byAdding: .hour, value: startHour, to: startOfDay)!
 
-        let start: Date = (now < today8)
-            ? calendar.date(byAdding: .day, value: -1, to: today8)!
-            : today8
+        let start: Date = (now < todayStart)
+            ? calendar.date(byAdding: .day, value: -1, to: todayStart)!
+            : todayStart
 
         let currentHour = calendar.dateInterval(of: .hour, for: now)?.start ?? now
-        let previousHour = calendar.date(byAdding: .hour, value: -1, to: currentHour) ?? currentHour
-        return (start, max(start, previousHour))
+        return (start, max(start, currentHour))
     }
 
     private func loadDrafts() {

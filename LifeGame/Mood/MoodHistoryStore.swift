@@ -85,6 +85,12 @@ final class MoodHistoryStore: ObservableObject {
         save()
     }
 
+    /// 刪除指定記錄
+    func delete(id: UUID) {
+        points.removeAll { $0.id == id }
+        save()
+    }
+
     /// 同一小時有記錄就更新，沒有就新增
     @discardableResult
     func addOrUpdate(score: Double, focus: Double? = nil, fatigue: Double? = nil, forHour date: Date) -> Bool {
