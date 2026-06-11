@@ -174,6 +174,7 @@ struct Bag_BackpackChecklistView: View {
             seedIfNeeded()
             fab.apply(context: .feature(.bagRequired))
         }
+        .onDisappear { fab.popActions() }
         .onChange(of: fab.route) {
             guard let route = fab.route else { return }
             switch route {

@@ -118,6 +118,8 @@ struct HomeRootView: View {
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.practiceDiary) ; fab.route = nil }
             case .addQuestionModule, .questionModuleEditMode:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.questionModule) ; fab.route = nil }
+            case .reviewDailyLog, .exportDailyLog:
+                if navigationPath.isEmpty { navigationPath.append(FeatureID.dailyLog) ; fab.route = nil }
             case .addQuestion, .questionEditMode:
                 break // handled inside CustomModuleEditorView
             case .addGanttTask, .addMilestone, .toggleBuffer, .ganttBufferPercent, .deleteMilestoneMenu:

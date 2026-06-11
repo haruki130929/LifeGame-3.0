@@ -2,6 +2,7 @@ import SwiftUI
 
 struct DiaryView: View {
     @StateObject private var store = DiaryStore()
+    @EnvironmentObject private var fab: FabStore
     @State private var showingAdd = false
 
     var body: some View {
@@ -14,6 +15,7 @@ struct DiaryView: View {
                 ForEach(store.entries) { entry in
                     NavigationLink {
                         DiaryEditorView(mode: .edit(entry), store: store)
+                            .hidesFab()
                     } label: {
                         VStack(alignment: .leading, spacing: 6) {
                             Text(entry.date, format: .dateTime.year().month().day())
@@ -48,6 +50,10 @@ struct DiaryView: View {
         .fabMenu([
             FabAction(title: "新增日記", systemImage: "plus") {
                 showingAdd = true
+            },
+            FabAction(title: "設定", systemImage: "gearshape") {
+                fab.route = .featureSettings(.diary)
+                fab.collapse()
             }
         ])
         .sheet(isPresented: $showingAdd) {

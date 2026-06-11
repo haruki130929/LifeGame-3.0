@@ -23,6 +23,8 @@ final class FabStore: ObservableObject {
         case todoEditMode
         // ── 每日紀錄專用 ──
         case addDailyLog
+        case reviewDailyLog
+        case exportDailyLog
         // ── 財務專用 ──
         case addWish
         case editWishList
@@ -66,6 +68,8 @@ final class FabStore: ObservableObject {
             case .addTodoToQuadrant(let q): return "addTodo-\(q.rawValue)"
             case .todoEditMode:             return "todoEditMode"
             case .addDailyLog:              return "addDailyLog"
+            case .reviewDailyLog:           return "reviewDailyLog"
+            case .exportDailyLog:           return "exportDailyLog"
             case .addWish:                  return "addWish"
             case .editWishList:             return "editWishList"
             case .addLedgerEntry:           return "addLedgerEntry"
@@ -284,8 +288,11 @@ final class FabStore: ObservableObject {
                 FabAction(title: "新增日記", systemImage: "plus.circle", route: .addDailyLog) { [weak self] in
                     self?.route = .addDailyLog; self?.collapse()
                 },
-                FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(.dailyLog)) { [weak self] in
-                    self?.route = .featureSettings(.dailyLog); self?.collapse()
+                FabAction(title: "檢視紀錄", systemImage: "calendar.day.timeline.left", route: .reviewDailyLog) { [weak self] in
+                    self?.route = .reviewDailyLog; self?.collapse()
+                },
+                FabAction(title: "匯出資料", systemImage: "square.and.arrow.up", route: .exportDailyLog) { [weak self] in
+                    self?.route = .exportDailyLog; self?.collapse()
                 }
             ]
         case .todoQuadrant:

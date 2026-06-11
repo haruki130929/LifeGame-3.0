@@ -60,6 +60,7 @@ struct CustomModuleEditorView: View {
                                 questions[idx] = updated
                             }
                         }
+                        .hidesFab()
                     } label: {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(question.title)

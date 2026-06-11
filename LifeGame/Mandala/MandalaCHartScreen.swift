@@ -21,6 +21,7 @@ struct MandalaChartScreen: View {
         .onAppear {
             fab.apply(context: .feature(.mandala))
         }
+        .onDisappear { fab.popActions() }
         .onChange(of: fab.route) {
             guard let route = fab.route else { return }
             switch route {

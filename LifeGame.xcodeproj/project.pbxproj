@@ -6,17 +6,13 @@
 	objectVersion = 77;
 	objects = {
 
-/* Begin PBXBuildFile section */
-		EB07640B2F6BF53C000462AB /* LifeGamerWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = EB0764012F6BF53A000462AB /* LifeGamerWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-/* End PBXBuildFile section */
-
 /* Begin PBXContainerItemProxy section */
-		EB0764092F6BF53C000462AB /* PBXContainerItemProxy */ = {
+		EB05F3C92FD2B77600D2B5A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = EB7D27552F5DAA2500E67CBE /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = EB0764002F6BF53A000462AB;
-			remoteInfo = "LifeGamerWatch Watch App";
+			remoteGlobalIDString = EB7D275C2F5DAA2500E67CBE;
+			remoteInfo = LifeGame;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -27,7 +23,6 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				EB07640B2F6BF53C000462AB /* LifeGamerWatch Watch App.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -35,20 +30,11 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		EB0764012F6BF53A000462AB /* LifeGamerWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LifeGamerWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		EB7D275D2F5DAA2500E67CBE /* LifeGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifeGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB05F3C52FD2B77600D2B5A5 /* LifeGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LifeGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB9AEE642FD802FD004FDDF8 /* LifeGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifeGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		EB07641B2F6BF723000462AB /* Exceptions for "LifeGame" folder in "LifeGamerWatch Watch App" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Core/Stat.swift,
-				Mood/MoodModels.swift,
-				Todo/TodoModels.swift,
-			);
-			target = EB0764002F6BF53A000462AB /* LifeGamerWatch Watch App */;
-		};
 		EB8E77142F5EA22C007C6BE7 /* Exceptions for "LifeGame" folder in "LifeGame" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -59,6 +45,11 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		EB05F3C62FD2B77600D2B5A5 /* LifeGameTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = LifeGameTests;
+			sourceTree = "<group>";
+		};
 		EB0764022F6BF53A000462AB /* LifeGamerWatch Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = "LifeGamerWatch Watch App";
@@ -68,7 +59,6 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				EB8E77142F5EA22C007C6BE7 /* Exceptions for "LifeGame" folder in "LifeGame" target */,
-				EB07641B2F6BF723000462AB /* Exceptions for "LifeGame" folder in "LifeGamerWatch Watch App" target */,
 			);
 			path = LifeGame;
 			sourceTree = "<group>";
@@ -76,7 +66,7 @@
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		EB0763FE2F6BF53A000462AB /* Frameworks */ = {
+		EB05F3C22FD2B77600D2B5A5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -98,43 +88,37 @@
 			children = (
 				EB7D275F2F5DAA2500E67CBE /* LifeGame */,
 				EB0764022F6BF53A000462AB /* LifeGamerWatch Watch App */,
-				EB7D275E2F5DAA2500E67CBE /* Products */,
+				EB05F3C52FD2B77600D2B5A5 /* LifeGameTests.xctest */,
+				EB05F3C62FD2B77600D2B5A5 /* LifeGameTests */,
+				EB9AEE642FD802FD004FDDF8 /* LifeGame.app */,
 			);
-			sourceTree = "<group>";
-		};
-		EB7D275E2F5DAA2500E67CBE /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				EB7D275D2F5DAA2500E67CBE /* LifeGame.app */,
-				EB0764012F6BF53A000462AB /* LifeGamerWatch Watch App.app */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		EB0764002F6BF53A000462AB /* LifeGamerWatch Watch App */ = {
+		EB05F3C42FD2B77600D2B5A5 /* LifeGameTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = EB07640F2F6BF53C000462AB /* Build configuration list for PBXNativeTarget "LifeGamerWatch Watch App" */;
+			buildConfigurationList = EB05F3CB2FD2B77600D2B5A5 /* Build configuration list for PBXNativeTarget "LifeGameTests" */;
 			buildPhases = (
-				EB0763FD2F6BF53A000462AB /* Sources */,
-				EB0763FE2F6BF53A000462AB /* Frameworks */,
-				EB0763FF2F6BF53A000462AB /* Resources */,
+				EB05F3C12FD2B77600D2B5A5 /* Sources */,
+				EB05F3C22FD2B77600D2B5A5 /* Frameworks */,
+				EB05F3C32FD2B77600D2B5A5 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EB05F3CA2FD2B77600D2B5A5 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				EB0764022F6BF53A000462AB /* LifeGamerWatch Watch App */,
+				EB05F3C62FD2B77600D2B5A5 /* LifeGameTests */,
 			);
-			name = "LifeGamerWatch Watch App";
+			name = LifeGameTests;
 			packageProductDependencies = (
 			);
-			productName = "LifeGamerWatch Watch App";
-			productReference = EB0764012F6BF53A000462AB /* LifeGamerWatch Watch App.app */;
-			productType = "com.apple.product-type.application";
+			productName = LifeGameTests;
+			productReference = EB05F3C52FD2B77600D2B5A5 /* LifeGameTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 		EB7D275C2F5DAA2500E67CBE /* LifeGame */ = {
 			isa = PBXNativeTarget;
@@ -148,7 +132,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				EB07640A2F6BF53C000462AB /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EB7D275F2F5DAA2500E67CBE /* LifeGame */,
@@ -157,7 +140,7 @@
 			packageProductDependencies = (
 			);
 			productName = LifeGame;
-			productReference = EB7D275D2F5DAA2500E67CBE /* LifeGame.app */;
+			productReference = EB9AEE642FD802FD004FDDF8 /* LifeGame.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -170,8 +153,9 @@
 				LastSwiftUpdateCheck = 2630;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
-					EB0764002F6BF53A000462AB = {
+					EB05F3C42FD2B77600D2B5A5 = {
 						CreatedOnToolsVersion = 26.3;
+						TestTargetID = EB7D275C2F5DAA2500E67CBE;
 					};
 					EB7D275C2F5DAA2500E67CBE = {
 						CreatedOnToolsVersion = 26.1.1;
@@ -188,18 +172,18 @@
 			mainGroup = EB7D27542F5DAA2500E67CBE;
 			minimizedProjectReferenceProxies = 1;
 			preferredProjectObjectVersion = 77;
-			productRefGroup = EB7D275E2F5DAA2500E67CBE /* Products */;
+			productRefGroup = EB7D27542F5DAA2500E67CBE;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				EB7D275C2F5DAA2500E67CBE /* LifeGame */,
-				EB0764002F6BF53A000462AB /* LifeGamerWatch Watch App */,
+				EB05F3C42FD2B77600D2B5A5 /* LifeGameTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
-		EB0763FF2F6BF53A000462AB /* Resources */ = {
+		EB05F3C32FD2B77600D2B5A5 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -216,7 +200,7 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		EB0763FD2F6BF53A000462AB /* Sources */ = {
+		EB05F3C12FD2B77600D2B5A5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -233,77 +217,53 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		EB07640A2F6BF53C000462AB /* PBXTargetDependency */ = {
+		EB05F3CA2FD2B77600D2B5A5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = EB0764002F6BF53A000462AB /* LifeGamerWatch Watch App */;
-			targetProxy = EB0764092F6BF53C000462AB /* PBXContainerItemProxy */;
+			target = EB7D275C2F5DAA2500E67CBE /* LifeGame */;
+			targetProxy = EB05F3C92FD2B77600D2B5A5 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-		EB07640D2F6BF53C000462AB /* Debug */ = {
+		EB05F3CC2FD2B77600D2B5A5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7QVWAH8C25;
-				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = LifeGamerWatch;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.haruki.lifegame;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.lifegame.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = "---.LifeGameTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LifeGame.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LifeGame";
 			};
 			name = Debug;
 		};
-		EB07640E2F6BF53C000462AB /* Release */ = {
+		EB05F3CD2FD2B77600D2B5A5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 7QVWAH8C25;
-				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_CFBundleDisplayName = LifeGamerWatch;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.haruki.lifegame;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-				);
+				IPHONEOS_DEPLOYMENT_TARGET = 26.2;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.lifegame.watchkitapp;
+				PRODUCT_BUNDLE_IDENTIFIER = "---.LifeGameTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = watchos;
-				SKIP_INSTALL = YES;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
-				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 4;
-				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LifeGame.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LifeGame";
 			};
 			name = Release;
 		};
@@ -506,11 +466,11 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		EB07640F2F6BF53C000462AB /* Build configuration list for PBXNativeTarget "LifeGamerWatch Watch App" */ = {
+		EB05F3CB2FD2B77600D2B5A5 /* Build configuration list for PBXNativeTarget "LifeGameTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				EB07640D2F6BF53C000462AB /* Debug */,
-				EB07640E2F6BF53C000462AB /* Release */,
+				EB05F3CC2FD2B77600D2B5A5 /* Debug */,
+				EB05F3CD2FD2B77600D2B5A5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

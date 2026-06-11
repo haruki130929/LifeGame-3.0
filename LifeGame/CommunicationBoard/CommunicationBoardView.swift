@@ -12,6 +12,8 @@ struct CommunicationBoardView: View {
     /// 匯出 sheet
     @State private var showExport = false
     @State private var exportText = ""
+    /// 輸入框是否聚焦（＝我正在打字）→ 對面方向顯示提示
+    @FocusState private var isInputFocused: Bool
 
     var body: some View {
         GeometryReader { geo in
@@ -79,46 +81,72 @@ struct CommunicationBoardView: View {
         ZStack {
             Color(.systemBackground)
 
-            Group {
-                if messages.isEmpty && currentInput.isEmpty {
-                    Text("等待輸入...")
-                        .font(.title3)
-                        .foregroundStyle(.tertiary)
-                } else {
-                    ScrollViewReader { proxy in
-                        ScrollView {
-                            VStack(alignment: .leading, spacing: 12) {
-                                // 歷史訊息
-                                ForEach(Array(messages.enumerated()), id: \.offset) { index, msg in
-                                    Text(msg)
-                                        .font(.system(size: fontSize, weight: .medium))
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .id(index)
-                                }
+            VStack(spacing: 0) {
+                // 「我正在打字」提示：只在我聚焦輸入框時出現，給對面的人看
+                if isInputFocused {
+                    typingIndicator
+                        .transition(.opacity)
+                }
 
-                                // 正在輸入的文字（淡色）
-                                if !currentInput.isEmpty {
-                                    Text(currentInput)
-                                        .font(.system(size: fontSize, weight: .medium))
-                                        .foregroundStyle(.secondary)
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .id("typing")
+                Group {
+                    if messages.isEmpty && currentInput.isEmpty {
+                        Text("等待輸入...")
+                            .font(.title3)
+                            .foregroundStyle(.tertiary)
+                    } else {
+                        ScrollViewReader { proxy in
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    // 歷史訊息
+                                    ForEach(Array(messages.enumerated()), id: \.offset) { index, msg in
+                                        Text(msg)
+                                            .font(.system(size: fontSize, weight: .medium))
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .id(index)
+                                    }
+
+                                    // 正在輸入的文字（淡色）
+                                    if !currentInput.isEmpty {
+                                        Text(currentInput)
+                                            .font(.system(size: fontSize, weight: .medium))
+                                            .foregroundStyle(.secondary)
+                                            .frame(maxWidth: .infinity, alignment: .leading)
+                                            .id("typing")
+                                    }
                                 }
+                                .padding(20)
                             }
-                            .padding(20)
-                        }
-                        .onChange(of: currentInput) { _, _ in
-                            withAnimation { proxy.scrollTo("typing", anchor: .bottom) }
-                        }
-                        .onChange(of: messages.count) { _, _ in
-                            withAnimation { proxy.scrollTo(messages.count - 1, anchor: .bottom) }
+                            .onChange(of: currentInput) { _, _ in
+                                withAnimation { proxy.scrollTo("typing", anchor: .bottom) }
+                            }
+                            .onChange(of: messages.count) { _, _ in
+                                withAnimation { proxy.scrollTo(messages.count - 1, anchor: .bottom) }
+                            }
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             .rotationEffect(.degrees(180))
+            .animation(.easeInOut(duration: 0.2), value: isInputFocused)
         }
         .frame(height: height)
+        .contentShape(Rectangle())
+        .onTapGesture { isInputFocused = false }   // 點對面區 → 取消輸入狀態
+    }
+
+    /// 「我正在打字」提示列（已在 otherSide 的旋轉群組內，會自動朝對面方向）
+    private var typingIndicator: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "ellipsis.bubble")
+            Text("我正在打字…")
+                .font(.system(size: max(16, fontSize * 0.7), weight: .semibold))
+        }
+        .foregroundStyle(theme.accentColor)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(theme.accentColor.opacity(0.12))
     }
 
     // MARK: - 下半（自己操作的）
@@ -143,6 +171,8 @@ struct CommunicationBoardView: View {
                     }
                     .frame(maxHeight: 80)
                     .background(Color(.secondarySystemBackground))
+                    .contentShape(Rectangle())
+                    .onTapGesture { isInputFocused = false }   // 點歷史區 → 取消輸入狀態
                     .onChange(of: messages.count) { _, _ in
                         withAnimation { proxy.scrollTo("my-\(messages.count - 1)", anchor: .bottom) }
                     }
@@ -154,6 +184,7 @@ struct CommunicationBoardView: View {
             // 輸入區（像備忘錄，多行輸入）
             TextEditor(text: $currentInput)
                 .font(.body)
+                .focused($isInputFocused)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 8)
                 .frame(minHeight: 60)

@@ -28,6 +28,7 @@ struct PracticeEntryListView: View {
                                 diary: diary,
                                 store: store
                             )
+                            .hidesFab()
                         } label: {
                             entryRow(entry)
                         }
@@ -44,6 +45,7 @@ struct PracticeEntryListView: View {
                 HStack(spacing: 12) {
                     NavigationLink {
                         PracticeChartView(diary: diary, store: store)
+                            .hidesFab()
                     } label: {
                         Image(systemName: "chart.bar.xaxis")
                     }

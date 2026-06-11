@@ -38,6 +38,7 @@ struct FinanceHubView: View {
         .padding()
         .navigationTitle("財務")
         .onAppear { applyFabContext() }
+        .onDisappear { fab.popActions() }
         .onChange(of: tab) { _, _ in
             wishEditMode = .inactive
             applyFabContext()

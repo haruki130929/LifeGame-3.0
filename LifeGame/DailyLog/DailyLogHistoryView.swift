@@ -4,12 +4,17 @@ struct DailyLogHistoryView: View {
 
     @ObservedObject var store: DailyLogStore
     @EnvironmentObject private var fab: FabStore
-    @State private var showingAdd = false
-    @State private var showingReview = false
+    @State private var activeSheet: ActiveSheet?
     @State private var chartRange: ChartRange = .twoWeeks
     @State private var collapsedMonths: Set<String> = []
     @State private var cachedGroups: [MonthGroup] = []
     @State private var lastEntryCount: Int = 0
+
+    /// 統一用單一 sheet（避免多個 .sheet 疊在同一 view 互相閃爍）
+    private enum ActiveSheet: Int, Identifiable {
+        case add, review, export
+        var id: Int { rawValue }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -74,18 +79,31 @@ struct DailyLogHistoryView: View {
         .onDisappear { fab.popActions() }
         .onChange(of: store.entries.count) { _, _ in rebuildGroupsIfNeeded() }
         .onChange(of: fab.route) { _, newRoute in
-            if newRoute == .addDailyLog {
+            switch newRoute {
+            case .addDailyLog:
                 fab.route = nil
-                showingAdd = true
+                activeSheet = .add
+            case .reviewDailyLog:
+                fab.route = nil
+                activeSheet = .review
+            case .exportDailyLog:
+                fab.route = nil
+                activeSheet = .export
+            default:
+                break
             }
         }
-        .sheet(isPresented: $showingAdd) {
-            NavigationStack {
-                DailyLogEditorView(mode: .add, store: store)
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .add:
+                NavigationStack {
+                    DailyLogEditorView(mode: .add, store: store)
+                }
+            case .review:
+                DailyLogReviewRangeSheet(allEntries: store.entries)
+            case .export:
+                DailyLogExportSheet(allEntries: store.entries)
             }
-        }
-        .sheet(isPresented: $showingReview) {
-            DailyLogReviewRangeSheet(allEntries: store.entries)
         }
         .featureTutorial(.dailyLog)
     }

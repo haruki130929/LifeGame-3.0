@@ -39,7 +39,9 @@ final class DailyLogStore: ObservableObject {
         if let context {
             self.context = context
         } else if let coord = StorageManager.coordinator {
-            self.context = ModelContext(coord.modelContainer)
+            // 使用共享的 mainContext：CloudKit 遠端 import 會自動 merge 進 mainContext，
+            // 自建獨立 ModelContext 不會收到遠端變更（造成每日紀錄無法跨裝置同步）
+            self.context = coord.mainContext
         } else {
             debugLog("⚠️ DailyLogStore: StorageCoordinator 尚未初始化，使用 in-memory 容器")
             self.context = Self.makeInMemoryContext()

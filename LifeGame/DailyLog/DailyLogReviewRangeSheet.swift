@@ -100,8 +100,10 @@ private struct DailyLogReviewListView: View {
 }
 
 // MARK: - 單筆完整檢視卡片
-private struct DailyLogFullReviewCard: View {
+struct DailyLogFullReviewCard: View {
     let entry: DailyLogEntry
+    /// 匯出 PDF 用：照片改用不滑動的換行格狀排列（ScrollView 在離螢幕渲染時抓不到內容）
+    var forExport: Bool = false
     @EnvironmentObject private var moduleStore: QuestionModuleStore
 
     // ✅ 照片放大預覽狀態
@@ -136,39 +138,43 @@ private struct DailyLogFullReviewCard: View {
             
             if !entry.photos.isEmpty {
                 SectionTitle("照片（\(entry.photos.count)）")
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 10) {
-                        ForEach(Array(entry.photos.enumerated()), id: \.element.id) { index, p in
-                            VStack(alignment: .leading, spacing: 6) {
-                                if let uiImage = UIImage(data: p.imageData) {
-                                    ZStack(alignment: .bottomTrailing) {
-                                        Image(uiImage: uiImage)
-                                            .resizable()
-                                            .scaledToFill()
-                                            .frame(width: 160, height: 110)
-                                            .clipped()
-                                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                                        
-                                        // ✅ 放大提示圖示
-                                        Image(systemName: "arrow.up.left.and.arrow.down.right")
+                if forExport {
+                    exportPhotosGrid
+                } else {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 10) {
+                            ForEach(Array(entry.photos.enumerated()), id: \.element.id) { index, p in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    if let uiImage = UIImage(data: p.imageData) {
+                                        ZStack(alignment: .bottomTrailing) {
+                                            Image(uiImage: uiImage)
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 160, height: 110)
+                                                .clipped()
+                                                .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                                            // ✅ 放大提示圖示
+                                            Image(systemName: "arrow.up.left.and.arrow.down.right")
+                                                .font(.caption)
+                                                .foregroundStyle(.white)
+                                                .padding(5)
+                                                .background(.black.opacity(0.35))
+                                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                                .padding(6)
+                                        }
+                                        // ✅ 點擊放大
+                                        .onTapGesture {
+                                            previewIndex = index
+                                            isPreviewPresented = true
+                                        }
+                                    }
+                                    if !p.caption.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                                        Text(p.caption)
                                             .font(.caption)
-                                            .foregroundStyle(.white)
-                                            .padding(5)
-                                            .background(.black.opacity(0.35))
-                                            .clipShape(RoundedRectangle(cornerRadius: 6))
-                                            .padding(6)
+                                            .foregroundStyle(.secondary)
+                                            .frame(width: 160, alignment: .leading)
                                     }
-                                    // ✅ 點擊放大
-                                    .onTapGesture {
-                                        previewIndex = index
-                                        isPreviewPresented = true
-                                    }
-                                }
-                                if !p.caption.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    Text(p.caption)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .frame(width: 160, alignment: .leading)
                                 }
                             }
                         }
@@ -188,6 +194,44 @@ private struct DailyLogFullReviewCard: View {
         }
     }
     
+    // MARK: - 匯出用照片排列（不滑動、自動換行，3 張一列）
+
+    private var exportPhotosGrid: some View {
+        let columns = 3
+        let rows: [[DailyLogPhoto]] = stride(from: 0, to: entry.photos.count, by: columns).map { start in
+            Array(entry.photos[start..<min(start + columns, entry.photos.count)])
+        }
+        return VStack(alignment: .leading, spacing: 10) {
+            ForEach(Array(rows.enumerated()), id: \.offset) { _, row in
+                HStack(alignment: .top, spacing: 10) {
+                    ForEach(row) { p in
+                        exportPhotoCell(p)
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func exportPhotoCell(_ p: DailyLogPhoto) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            if let uiImage = UIImage(data: p.imageData) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: 160, height: 110)
+                    .clipped()
+                    .clipShape(RoundedRectangle(cornerRadius: 12))
+            }
+            if !p.caption.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                Text(p.caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 160, alignment: .leading)
+            }
+        }
+    }
+
     private var header: some View {
         HStack {
             Text(entry.date, format: .dateTime.year().month().day())

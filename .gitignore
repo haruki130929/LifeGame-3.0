@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode 使用者個人狀態（不該進版控）
+xcuserdata/
+*.xcuserstate
+
+# 建置產物
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# 備份壓縮檔
+*.zip
+
+# Claude Code
+.claude/

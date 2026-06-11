@@ -4,6 +4,8 @@ import SwiftUI
 /// 這樣 FAB 狀態變化不會觸發下層內容重繪
 struct FabFloatingLayer: View {
     @EnvironmentObject private var fab: FabStore
+    /// 慣用手：左撇子時把整個 FAB 圖層鏡像到左下角（位置與展開選單一起翻轉）
+    @AppStorage(FabHandedness.storageKey) private var handedness: FabHandedness = .right
 
     var body: some View {
         if !fab.isHidden {
@@ -18,6 +20,8 @@ struct FabFloatingLayer: View {
             }
             .ignoresSafeArea()
             .transition(.opacity)
+            // 右撇子＝原本的 .leftToRight（右下角）；左撇子＝鏡像成 .rightToLeft（左下角）
+            .environment(\.layoutDirection, handedness == .left ? .rightToLeft : .leftToRight)
         }
     }
 }

@@ -21,6 +21,7 @@ struct PracticeDiaryListView: View {
                     ForEach(store.diaries) { diary in
                         NavigationLink {
                             PracticeEntryListView(diary: diary, store: store)
+                                .hidesFab()
                         } label: {
                             diaryRow(diary)
                         }

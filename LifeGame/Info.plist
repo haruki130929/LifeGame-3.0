@@ -4,6 +4,10 @@
 <dict>
 	<key>CFBundleDisplayName</key>
 	<string>LifeGamer</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>LifeGamer 需要存取你的行事曆，以便將事件同步到系統行事曆。</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>LifeGamer 需要存取你的相簿，讓你為日記和角色加入照片。</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>
