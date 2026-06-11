@@ -9,12 +9,12 @@ final class DailyLogStore: ObservableObject {
     @Published private(set) var entries: [DailyLogEntry] = []
     @Published private(set) var initError: String?
 
-    private let context: ModelContext
+    private let context: ModelContext?
     private var isLoading = false
     private var syncHelper: StoreSyncHelper?
 
     /// 建立 in-memory fallback 容器（StorageCoordinator 不可用時）
-    private static func makeInMemoryContext() -> ModelContext {
+    private static func makeInMemoryContext() -> ModelContext? {
         // in-memory 容器幾乎不可能失敗，但仍做防護
         do {
             let container = try ModelContainer(
@@ -29,8 +29,9 @@ final class DailyLogStore: ObservableObject {
                 let container = try ModelContainer(for: DailyLogRecord.self)
                 return ModelContext(container)
             } catch {
-                // 所有初始化都失敗，這是不可恢復的錯誤
-                fatalError("❌ DailyLogStore: 所有 ModelContainer 配置都失敗: \(error)")
+                // 所有初始化都失敗：降級為「無儲存」模式，但不讓 App 崩潰（原本是 fatalError）
+                debugLog("❌ DailyLogStore: 所有 ModelContainer 配置都失敗，每日紀錄將暫時無法使用: \(error)")
+                return nil
             }
         }
     }
@@ -44,8 +45,11 @@ final class DailyLogStore: ObservableObject {
             self.context = coord.mainContext
         } else {
             debugLog("⚠️ DailyLogStore: StorageCoordinator 尚未初始化，使用 in-memory 容器")
-            self.context = Self.makeInMemoryContext()
-            self.initError = "儲存系統尚未就緒，資料暫存於記憶體中"
+            let fallback = Self.makeInMemoryContext()
+            self.context = fallback
+            self.initError = fallback == nil
+                ? "儲存系統無法初始化，每日紀錄暫時無法使用"
+                : "儲存系統尚未就緒，資料暫存於記憶體中"
         }
         // 同步載入，確保 entries 立刻有值（避免空狀態閃爍）
         loadSync()
@@ -70,18 +74,26 @@ final class DailyLogStore: ObservableObject {
     }
     
     func upsert(_ entry: DailyLogEntry) {
+        guard let context else {
+            ErrorManager.shared.showError(initError ?? "儲存系統尚未就緒")
+            return
+        }
         do {
+            // 先編碼一次：失敗會丟出 → 進 catch 通知使用者，且不會把既有資料覆蓋成空白
+            let payload = try JSONEncoder().encode(entry)
+
             let descriptor = FetchDescriptor<DailyLogRecord>(
                 predicate: #Predicate { $0.id == entry.id }
             )
-            let existing = try context.fetch(descriptor).first
-            
-            if let existing {
-                existing.update(entry: entry)   // ✅ 對上 DailyLogRecord 相容層
+
+            if let existing = try context.fetch(descriptor).first {
+                existing.id = entry.id
+                existing.date = entry.date
+                existing.payload = payload
             } else {
-                context.insert(DailyLogRecord(entry: entry))
+                context.insert(DailyLogRecord(id: entry.id, date: entry.date, payload: payload))
             }
-            
+
             try context.save()
             load()
         } catch {
@@ -92,6 +104,7 @@ final class DailyLogStore: ObservableObject {
     
     /// 刪除指定日期之後的紀錄
     func deleteAfter(_ cutoffDate: Date) {
+        guard let context else { return }
         do {
             let cal = Calendar.current
             let cutoff = cal.startOfDay(for: cutoffDate)
@@ -113,6 +126,7 @@ final class DailyLogStore: ObservableObject {
     }
 
     func delete(at offsets: IndexSet) {
+        guard let context else { return }
         do {
             let items = offsets.compactMap { idx in
                 entries.indices.contains(idx) ? entries[idx] : nil
@@ -137,6 +151,7 @@ final class DailyLogStore: ObservableObject {
     
     /// 同步載入（init 用，不做去重，確保 entries 馬上有值）
     private func loadSync() {
+        guard let context else { return }
         do {
             let descriptor = FetchDescriptor<DailyLogRecord>()
             let records = try context.fetch(descriptor)
@@ -157,6 +172,7 @@ final class DailyLogStore: ObservableObject {
 
     private func load() {
         guard !isLoading else { return }
+        guard let context else { return }
         isLoading = true
         defer { isLoading = false }
 
@@ -165,7 +181,7 @@ final class DailyLogStore: ObservableObject {
             let records = try context.fetch(descriptor)
 
             // 去重（在背景做，不影響 UI）
-            let needsDedup = deduplicateRecords(records)
+            let needsDedup = deduplicateRecords(records, context: context)
 
             let finalRecords: [DailyLogRecord]
             if needsDedup {
@@ -185,7 +201,7 @@ final class DailyLogStore: ObservableObject {
 
     /// 去重，回傳是否有刪除任何 record
     @discardableResult
-    private func deduplicateRecords(_ records: [DailyLogRecord]) -> Bool {
+    private func deduplicateRecords(_ records: [DailyLogRecord], context: ModelContext) -> Bool {
         var deleted = false
 
         // 同一個 id 有多筆時，刪掉多餘的

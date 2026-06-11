@@ -15,7 +15,9 @@ final class DailyLogRecord {
 
     // 既有：entry -> record
     convenience init(entry: DailyLogEntry) {
-        self.init(id: entry.id, date: entry.date, payload: Self.encodeEntry(entry))
+        // 編碼失敗時退回空資料（已記錄錯誤，避免完全無聲無息）
+        let data = Self.encodeEntry(entry) ?? Data()
+        self.init(id: entry.id, date: entry.date, payload: data)
     }
 
     // ✅ 相容層：外部如果寫 DailyLogRecord(from: entry)
@@ -38,9 +40,14 @@ final class DailyLogRecord {
     }
 
     func update(from entry: DailyLogEntry) {
+        // 編碼成功才覆蓋；失敗則保留原本內容，避免把既有資料洗成空白
+        guard let data = Self.encodeEntry(entry) else {
+            debugLog("⚠️ DailyLogRecord.update 編碼失敗，保留原本內容不覆蓋（id=\(entry.id)）")
+            return
+        }
         id = entry.id
         date = entry.date
-        payload = Self.encodeEntry(entry)
+        payload = data
     }
 
     // ✅ 相容層：外部如果寫 record.update(entry: xxx)
@@ -50,11 +57,21 @@ final class DailyLogRecord {
 
     // MARK: - Nonisolated helpers（避免 Swift 6 concurrency 警告）
 
-    private nonisolated static func encodeEntry(_ entry: DailyLogEntry) -> Data {
-        (try? JSONEncoder().encode(entry)) ?? Data()
+    private nonisolated static func encodeEntry(_ entry: DailyLogEntry) -> Data? {
+        do {
+            return try JSONEncoder().encode(entry)
+        } catch {
+            debugLog("❌ DailyLogRecord 編碼失敗：\(error)")
+            return nil
+        }
     }
 
     private nonisolated static func decodeEntry(from data: Data) -> DailyLogEntry? {
-        try? JSONDecoder().decode(DailyLogEntry.self, from: data)
+        do {
+            return try JSONDecoder().decode(DailyLogEntry.self, from: data)
+        } catch {
+            debugLog("❌ DailyLogRecord 解碼失敗（payload \(data.count) bytes）：\(error)")
+            return nil
+        }
     }
 }
