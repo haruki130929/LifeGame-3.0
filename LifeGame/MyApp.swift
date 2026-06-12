@@ -31,6 +31,9 @@ struct LifeGameApp: App {
         StorageCoordinator.registerModelType(DailyLogRecord.self)
         StorageCoordinator.registerModelType(BagItemModel.self)
 
+        // 1b. 註冊各集合型 store 的同步合併策略（須在任何去重/載入之前）
+        SyncMergeRegistration.registerAll()
+
         // 2. 讀取儲存模式偏好
         let config = StorageConfiguration()
 

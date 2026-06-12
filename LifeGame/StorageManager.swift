@@ -63,21 +63,23 @@ enum StorageManager {
             descriptor.sortBy = [SortDescriptor(\.updatedAt, order: .reverse)]
             let records = try context.fetch(descriptor)
 
-            // 取最新的一筆（處理 unique constraint 生效前的重複資料）
-            guard let record = records.first else {
+            guard let newest = records.first else {
                 return nil
             }
 
-            // 清理多餘的重複 record
+            // 收斂多筆（CloudKit 衝突）：有註冊 merger → 合併，否則取最新（LWW）
+            let resolved = KeyValueMergeRegistry.resolvedData(forKey: key, records: records) ?? newest.data
             if records.count > 1 {
+                newest.data = resolved
+                newest.updatedAt = .now
                 for dup in records.dropFirst() {
                     context.delete(dup)
                 }
                 try context.save()
-                debugLog("Storage: 清理了 \(records.count - 1) 筆重複的 key=\(key)")
+                debugLog("Storage: key=\(key) 收斂 \(records.count) 筆 → 1\(KeyValueMergeRegistry.hasMerger(for: key) ? "（已合併）" : "（取最新）")")
             }
 
-            return try JSONDecoder().decode(type, from: record.data)
+            return try JSONDecoder().decode(type, from: resolved)
         } catch {
             debugLog("Storage load failed:", error)
             return nil

@@ -161,10 +161,15 @@ final class StorageCoordinator {
             let grouped = Dictionary(grouping: allKV, by: \.key)
             for (key, records) in grouped where records.count > 1 {
                 let sorted = records.sorted { $0.updatedAt > $1.updatedAt }
+                guard let newest = sorted.first else { continue }
+                // 集合型 → 合併保留兩台的資料；其餘 → 取最新（LWW）
+                let resolved = KeyValueMergeRegistry.resolvedData(forKey: key, records: records) ?? newest.data
+                newest.data = resolved
+                newest.updatedAt = .now
                 for dup in sorted.dropFirst() {
                     context.delete(dup)
                 }
-                debugLog("🧹 清理重複 KeyValueRecord: key=\(key), 刪除 \(sorted.count - 1) 筆")
+                debugLog("🧹 KeyValueRecord 收斂: key=\(key), \(records.count) 筆 → 1\(KeyValueMergeRegistry.hasMerger(for: key) ? "（合併）" : "（取最新）")")
             }
         } catch {
             debugLog("⚠️ KeyValueRecord 去重失敗: \(error)")
@@ -234,6 +239,17 @@ final class StorageCoordinator {
             debugLog("☁️ CloudKit 帳號狀態：\(statusText)")
             if let error {
                 debugLog("☁️ CloudKit 帳號錯誤：\(error)")
+            }
+
+            // 已選 iCloud 模式但帳號不可用 → 主動提示使用者「資料其實沒在同步」
+            let warning: String?
+            switch status {
+            case .noAccount:  warning = "尚未登入 iCloud，資料暫時不會跨裝置同步"
+            case .restricted: warning = "iCloud 受到限制，資料暫時不會跨裝置同步"
+            default:          warning = nil
+            }
+            if let warning {
+                Task { @MainActor in ErrorManager.shared.showError(warning) }
             }
         }
 
