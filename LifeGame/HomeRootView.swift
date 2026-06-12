@@ -64,6 +64,8 @@ struct HomeRootView: View {
                     EmptyView() // handled via sheet, not navigation
                 case .ganttChart:
                     GanttScreen()
+                case .copingNotes:
+                    CopingNotesView()
                 }
             }
         }

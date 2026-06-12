@@ -29,6 +29,7 @@ struct CardFactory: View {
     @State private var showTodoQuadrantScreen = false
     @State private var showBagScreen = false
     @State private var showMonthlyScoreScreen = false
+    @State private var showCopingNotes = false
 
     private let cal = Calendar.current
     private let rangeProvider = CalendarRangeProvider()
@@ -107,6 +108,21 @@ struct CardFactory: View {
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+            }
+
+        case .copingNotes:
+            DashboardCardContainer {
+                VStack(alignment: .leading, spacing: 10) {
+                    CardHeader(title: "動力筆記", icon: "lightbulb.fill")
+                    Text("選擇你的狀況，找應對方法")
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture { showCopingNotes = true }
+            .navigationDestination(isPresented: $showCopingNotes) {
+                CopingNotesView()
             }
 
         case .editCards:

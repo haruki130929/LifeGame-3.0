@@ -18,7 +18,7 @@ struct SlotCardEditorSheet: View {
     private let availableCardTypes: [CardType] = [
         .calendar, .todoQuadrant,
         .tomorrowRing, .bagRequired, .monthlyScoreCalendar,
-        .ganttChart
+        .ganttChart, .copingNotes
     ]
 
     var body: some View {

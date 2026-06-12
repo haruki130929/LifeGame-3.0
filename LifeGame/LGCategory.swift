@@ -70,7 +70,9 @@ struct LGCategoryHubView: View {
             comingSoonRow("近況檢視（折線圖）", systemImage: "chart.line.uptrend.xyaxis")
 
         case .help:
-            comingSoonRow("動力筆記", systemImage: "note.text")
+            NavigationLink { CopingNotesView() } label: {
+                Label("動力筆記", systemImage: "lightbulb.fill")
+            }
             comingSoonRow("在意清單", systemImage: "checklist")
 
         case .diary:

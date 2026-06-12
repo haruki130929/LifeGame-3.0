@@ -391,6 +391,8 @@ final class FabStore: ObservableObject {
                     self?.route = .toggleBuffer; self?.collapse()
                 }
             ]
+        case .copingNotes:
+            break   // 純瀏覽，無特別 FAB 動作（仍會自動帶「設定」）
         }
 
         return result
@@ -416,6 +418,7 @@ final class FabStore: ObservableObject {
         case .questionModule:         return "問題模組"
         case .moduleEditor:           return "編輯模組"
         case .ganttChart:             return "甘特圖"
+        case .copingNotes:            return "動力筆記"
         }
     }
 
@@ -437,6 +440,7 @@ final class FabStore: ObservableObject {
         case .questionModule:         return "square.grid.2x2"
         case .moduleEditor:           return "pencil.and.list.clipboard"
         case .ganttChart:             return "chart.bar.xaxis"
+        case .copingNotes:            return "lightbulb.fill"
         }
     }
 }

@@ -46,6 +46,7 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
     case bagRequired
     case monthlyScoreCalendar
     case ganttChart
+    case copingNotes
 
     var id: String { rawValue }
     
@@ -61,6 +62,7 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
         case .bagRequired: return "整理書包"
         case .monthlyScoreCalendar: return "本月結算"
         case .ganttChart: return "甘特圖"
+        case .copingNotes: return "動力筆記"
         }
     }
 
@@ -76,6 +78,7 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
         case .bagRequired: return "backpack"
         case .monthlyScoreCalendar: return "calendar.badge.clock"
         case .ganttChart: return "chart.bar.xaxis"
+        case .copingNotes: return "lightbulb.fill"
         }
     }
 
@@ -91,6 +94,7 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
         case .bagRequired: return .medium
         case .monthlyScoreCalendar: return .large
         case .ganttChart: return .large
+        case .copingNotes: return .medium
         }
     }
 }
@@ -118,6 +122,7 @@ extension CardType {
         case .bagRequired:            return .bagRequired
         case .monthlyScoreCalendar:   return .monthlyScoreCalendar
         case .ganttChart:             return .ganttChart
+        case .copingNotes:            return .copingNotes
         }
     }
 }

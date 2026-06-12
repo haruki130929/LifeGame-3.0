@@ -88,7 +88,7 @@ final class SlotCardConfigStore: ObservableObject {
         }
 
         return Config(
-            beforeLeave:    d([.bagRequired, .todoQuadrant, .tomorrowRing, .calendar]),
+            beforeLeave:    d([.bagRequired, .todoQuadrant, .tomorrowRing, .calendar, .copingNotes]),
             morning:        d([.todoQuadrant, .tomorrowRing, .calendar]),
             earlyAfternoon: d([.todoQuadrant, .tomorrowRing, .calendar]),
             beforeEnd:      d([.todoQuadrant, .tomorrowRing, .calendar]),

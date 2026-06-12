@@ -121,6 +121,8 @@ struct QuickModeShellView: View {
                     EmptyView()
                 case .ganttChart:
                     GanttScreen()
+                case .copingNotes:
+                    CopingNotesView()
                 }
             }
         }
