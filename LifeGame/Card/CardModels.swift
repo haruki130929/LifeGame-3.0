@@ -9,11 +9,11 @@ enum CardSize: String, Codable, CaseIterable {
     func span(maxColumns: Int) -> Int {
         switch self {
         case .small:
-            return 1
+            return 1            // 一格、較矮
         case .medium:
-            return min(2, maxColumns)
+            return 1            // 一格（≈ 原本的卡片尺寸）
         case .large:
-            return maxColumns
+            return 1            // 一格、但較高（直式）→ 不再撐滿整排變橫扁
         }
     }
     

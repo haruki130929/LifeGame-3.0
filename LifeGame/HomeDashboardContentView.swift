@@ -5,6 +5,8 @@ struct HomeDashboardContentView: View {
 
     let selectedTab: TabSelection
     let currentSlot: TimeSlot
+    /// 面板可用寬度（由上層同步傳入，給 iPad 的 SpanCardGrid 算欄寬用）
+    var availableWidth: CGFloat = 0
 
     @EnvironmentObject private var customTabStore: CustomTabStore
     @EnvironmentObject private var timeSlotNameStore: TimeSlotNameStore
@@ -32,24 +34,20 @@ struct HomeDashboardContentView: View {
                     .padding(.vertical, 8)
                     .padding(.top, 4)
 
-                // 根據目前時段取出該時段的卡片類型
-                let slotItems = slotCardStore.items(for: currentSlot)
-                let slotCards = slotItems
-                    .map { $0.type }
-                    .filter { $0 != .editCards && $0 != .todayStatus && $0 != .quickStart && $0 != .dailyLog }
+                // 根據目前時段取出該時段的卡片（保留尺寸）
+                let displayItems = slotCardStore.items(for: currentSlot)
+                    .filter { $0.type != .editCards && $0.type != .todayStatus && $0.type != .quickStart && $0.type != .dailyLog }
+                let slotCards = displayItems.map { $0.type }
 
                 if slotCards.isEmpty {
                     emptySlotPlaceholder
                 } else if AppLayout.isIPad {
-                    // iPad：卡片 Grid 佈局
-                    LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 300), spacing: 16)],
-                        spacing: 16
-                    ) {
-                        ForEach(slotCards, id: \.self) { cardType in
-                            CardFactory(cardType: cardType, ringSelectedID: $ringSelectedID)
-                        }
-                    }
+                    // iPad：依每張卡片尺寸跨欄排版（欄寬用同步傳入的面板寬度，扣掉左右 padding 20）
+                    SpanCardGrid(
+                        items: displayItems,
+                        availableWidth: max(0, availableWidth - 40),
+                        ringSelectedID: $ringSelectedID
+                    )
                 } else {
                     // iPhone：手風琴文字列
                     VStack(spacing: 12) {

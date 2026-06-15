@@ -105,6 +105,7 @@ struct HomeMainPanelView: View {
             HomeDashboardContentView(
                 selectedTab: selectedTab,
                 currentSlot: currentSlot,
+                availableWidth: containerWidth,
                 slotCardStore: slotCardStore,
                 tabHeight: tabH
             )

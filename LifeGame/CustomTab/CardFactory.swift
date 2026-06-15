@@ -4,10 +4,12 @@ import SwiftUI
 /// 所有依賴透過 @EnvironmentObject 取得
 struct CardFactory: View {
     let cardType: CardType
+    var size: CardSize = .medium
     @Binding var ringSelectedID: UUID?
 
-    init(cardType: CardType, ringSelectedID: Binding<UUID?> = .constant(nil)) {
+    init(cardType: CardType, size: CardSize = .medium, ringSelectedID: Binding<UUID?> = .constant(nil)) {
         self.cardType = cardType
+        self.size = size
         self._ringSelectedID = ringSelectedID
     }
 
@@ -42,7 +44,7 @@ struct CardFactory: View {
         switch cardType {
         case .calendar:
             CalendarCard(
-                size: .medium,
+                size: size,
                 monthDate: monthDate,
                 ranges: rangeProvider.ranges(from: calendarStore.events, in: monthDate),
                 onPrevMonth: { monthOffset -= 1 },
@@ -72,13 +74,13 @@ struct CardFactory: View {
             EmptyView()  // 已移除卡片，保留 case 避免已存儲資料解碼失敗
 
         case .tomorrowRing:
-            RingCardV2(size: .large, onTap: { showTomorrowRingDetail = true })
+            RingCardV2(size: size, onTap: { showTomorrowRingDetail = true })
                 .navigationDestination(isPresented: $showTomorrowRingDetail) {
                     RingDetailPageV2()
                 }
 
         case .bagRequired:
-            BagRequiredCardLarge(size: .medium)
+            BagRequiredCardLarge(size: size)
                 .onTapGesture { showBagScreen = true }
                 .navigationDestination(isPresented: $showBagScreen) {
                     Bag_BackpackChecklistView()

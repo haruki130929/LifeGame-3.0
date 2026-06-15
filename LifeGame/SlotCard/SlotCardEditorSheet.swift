@@ -11,7 +11,7 @@ struct SlotCardEditorSheet: View {
     @EnvironmentObject private var customTabStore: CustomTabStore
     @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedCardTypes: [CardType] = []
+    @State private var selectedItems: [CardItem] = []
     @State private var showDeleteConfirmation = false
 
     // 可選的卡片類型
@@ -42,7 +42,7 @@ struct SlotCardEditorSheet: View {
                 }
             }
             .onAppear {
-                selectedCardTypes = slotCardStore.items(for: slot).map { $0.type }
+                selectedItems = slotCardStore.items(for: slot)
             }
         }
     }
@@ -58,12 +58,12 @@ struct SlotCardEditorSheet: View {
     }
 
     private func cardToggleRow(_ cardType: CardType) -> some View {
-        let isOn = selectedCardTypes.contains(cardType)
+        let isOn = selectedItems.contains { $0.type == cardType }
         return Button {
             if isOn {
-                selectedCardTypes.removeAll { $0 == cardType }
+                selectedItems.removeAll { $0.type == cardType }
             } else {
-                selectedCardTypes.append(cardType)
+                selectedItems.append(CardItem(type: cardType, size: cardType.defaultSize))
             }
         } label: {
             HStack {
@@ -85,16 +85,42 @@ struct SlotCardEditorSheet: View {
 
     @ViewBuilder
     private var cardOrderSection: some View {
-        if !selectedCardTypes.isEmpty {
-            Section("卡片順序（可拖曳排序）") {
-                ForEach(selectedCardTypes, id: \.self) { cardType in
-                    Label(cardType.title, systemImage: cardType.icon)
+        if !selectedItems.isEmpty {
+            Section {
+                ForEach(selectedItems) { item in
+                    HStack {
+                        Label(item.type.title, systemImage: item.type.icon)
+                        Spacer()
+                        Picker("", selection: sizeBinding(for: item)) {
+                            Text("小").tag(CardSize.small)
+                            Text("中").tag(CardSize.medium)
+                            Text("大").tag(CardSize.large)
+                        }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                        .frame(width: 150)
+                    }
                 }
                 .onMove { from, to in
-                    selectedCardTypes.move(fromOffsets: from, toOffset: to)
+                    selectedItems.move(fromOffsets: from, toOffset: to)
                 }
+            } header: {
+                Text("卡片大小與順序（可拖曳排序）")
+            } footer: {
+                Text("大＝整排、中＝半排、小＝一格（僅 iPad 版面）")
             }
         }
+    }
+
+    private func sizeBinding(for item: CardItem) -> Binding<CardSize> {
+        Binding(
+            get: { selectedItems.first { $0.id == item.id }?.size ?? .medium },
+            set: { newSize in
+                if let idx = selectedItems.firstIndex(where: { $0.id == item.id }) {
+                    selectedItems[idx].size = newSize
+                }
+            }
+        )
     }
 
     // MARK: - 刪除切頁
@@ -129,8 +155,7 @@ struct SlotCardEditorSheet: View {
     // MARK: - Save
 
     private func saveAndDismiss() {
-        let items = selectedCardTypes.map { CardItem(type: $0, size: $0.defaultSize) }
-        slotCardStore.setItems(items, for: slot)
+        slotCardStore.setItems(selectedItems, for: slot)
         dismiss()
     }
 }

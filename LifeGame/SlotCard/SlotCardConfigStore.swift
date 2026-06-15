@@ -47,17 +47,10 @@ final class SlotCardConfigStore: ObservableObject {
         let initialConfig: Config
 
         if let decoded: Config = StorageManager.load(Config.self, forKey: key) {
-            // 已有 v4 資料 → 直接用（保留使用者自訂的卡片配置）
-            var fixed = decoded
-            fixed.beforeLeave    = Self.forceCalendarLarge(fixed.beforeLeave)
-            fixed.morning        = Self.forceCalendarLarge(fixed.morning)
-            fixed.earlyAfternoon = Self.forceCalendarLarge(fixed.earlyAfternoon)
-            fixed.beforeEnd      = Self.forceCalendarLarge(fixed.beforeEnd)
-            fixed.bedtime        = Self.forceCalendarLarge(fixed.bedtime)
-            initialConfig = fixed
-
+            // 已有資料 → 直接用，完整保留使用者自訂的卡片配置「與尺寸」
+            initialConfig = decoded
         } else {
-            // v3、v2 或全新安裝 → 一律使用新預設值
+            // 全新安裝 → 使用預設值
             initialConfig = Self.makeDefaults()
         }
 
@@ -115,16 +108,6 @@ final class SlotCardConfigStore: ObservableObject {
         case .earlyAfternoon: config.earlyAfternoon = items
         case .beforeEnd:      config.beforeEnd = items
         case .bedtime:        config.bedtime = items
-        }
-    }
-
-    // MARK: - Helpers
-
-    private static func forceCalendarLarge(_ items: [CardItem]) -> [CardItem] {
-        items.map { item in
-            var copy = item
-            if copy.type == .calendar { copy.size = .large }
-            return copy
         }
     }
 
