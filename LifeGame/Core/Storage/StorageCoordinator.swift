@@ -32,6 +32,7 @@ final class StorageCoordinator {
         self.schema = Schema(Self.registeredModelTypes)
 
         Self.ensureStoreDirectoryExists()
+        Self.migrateStoresIntoGroupIfNeeded()   // ⚠️ 必須在開任何 ModelContainer「之前」
 
         let pendingMode = configuration.pendingMode
         let currentMode = configuration.currentMode
@@ -77,14 +78,17 @@ final class StorageCoordinator {
             config = ModelConfiguration(
                 "LifeGameLocal",
                 schema: schema,
-                url: localStoreURL,
+                url: groupLocalStoreURL,
                 cloudKitDatabase: .none
             )
         case .iCloud:
+            // 明確指定 App Group 容器內的 url（Widget 才讀得到），
+            // 並 pin 正式 CloudKit 容器（取代 .automatic，避免容器綁定歧義）
             config = ModelConfiguration(
                 "LifeGameCloud",
                 schema: schema,
-                cloudKitDatabase: .automatic
+                url: groupCloudStoreURL,
+                cloudKitDatabase: .private("iCloud.com.haruki.lifegame2")
             )
         }
 
@@ -98,19 +102,73 @@ final class StorageCoordinator {
 
     // MARK: - Store URLs
 
-    private static var storeDirectory: URL {
+    /// 舊版 store 位置（app 私有目錄）— 僅作為一次性搬遷的「來源」
+    private static var legacyStoreDirectory: URL {
         URL.applicationSupportDirectory.appendingPathComponent("LifeGame", isDirectory: true)
     }
+    private static var legacyLocalStoreURL: URL {
+        legacyStoreDirectory.appendingPathComponent("Local.store")
+    }
 
-    private static var localStoreURL: URL {
-        storeDirectory.appendingPathComponent("Local.store")
+    /// 新版 store 位置（App Group 共享容器）— Widget 也讀得到。
+    /// 若 App Group entitlement 缺失，fallback 回舊位置（app 仍可運作，只是無法分享給 Widget）。
+    private static var groupStoreDirectory: URL {
+        guard let base = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: SharedConstants.appGroupID
+        ) else {
+            debugLog("⚠️ App Group 容器不可用，store fallback 回 app 私有目錄（Widget 將讀不到資料）")
+            return legacyStoreDirectory
+        }
+        return base.appendingPathComponent("LifeGame", isDirectory: true)
+    }
+    private static var groupLocalStoreURL: URL {
+        groupStoreDirectory.appendingPathComponent("Local.store")
+    }
+    private static var groupCloudStoreURL: URL {
+        groupStoreDirectory.appendingPathComponent("Cloud.store")
     }
 
     private static func ensureStoreDirectoryExists() {
-        let dir = storeDirectory
+        let dir = groupStoreDirectory
         if !FileManager.default.fileExists(atPath: dir.path) {
             try? FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         }
+    }
+
+    // MARK: - 一次性搬遷：把舊 store 複製進 App Group 容器
+    //
+    // 規則：① 只「複製」不刪除（舊檔留作備援，v1 不清掉）
+    //      ② .store / -wal / -shm 三個一起複製，否則會丟失未 flush 的寫入
+    //      ③ 必須在開任何 ModelContainer「之前」執行，否則 SwiftData 會先在新位置
+    //         建一個空 store，搬遷就來不及（會看起來像整包資料不見）
+    //      ④ 目的地已存在就跳過（可重入、不蓋掉較新的資料）
+    private static let migrationFlagKey = "lifegame.storage.didMigrateToAppGroup.v1"
+
+    private static func migrateStoresIntoGroupIfNeeded() {
+        let flags = UserDefaults.standard
+        guard !flags.bool(forKey: migrationFlagKey) else { return }
+
+        let fm = FileManager.default
+        let src = legacyLocalStoreURL
+        let dest = groupLocalStoreURL
+
+        // 來源存在、且 App Group 容器確實可用（dest 不等於 src）、且目的地還沒有 → 才複製
+        if dest.path != src.path,
+           fm.fileExists(atPath: src.path),
+           !fm.fileExists(atPath: dest.path) {
+            for suffix in ["", "-wal", "-shm"] {
+                let s = URL(fileURLWithPath: src.path + suffix)
+                let d = URL(fileURLWithPath: dest.path + suffix)
+                if fm.fileExists(atPath: s.path) {
+                    try? fm.copyItem(at: s, to: d)
+                }
+            }
+            debugLog("📦 已將本機 store 複製進 App Group 容器（舊檔保留作備援）")
+        }
+        // 註：iCloud 模式的 store 沒有可控的固定路徑，不嘗試搬。改 url 後
+        // CloudKit 會把資料重新下載到新位置（資料在雲端、本機鏡像可丟）。
+
+        flags.set(true, forKey: migrationFlagKey)
     }
 
     // MARK: - Mode switching（只記錄偏好，重啟後生效）
