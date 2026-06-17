@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		EB6A19952FE2A423001F1724 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB6A19942FE2A423001F1724 /* WidgetKit.framework */; };
+		EB6A19972FE2A423001F1724 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB6A19962FE2A423001F1724 /* SwiftUI.framework */; };
+		EB6A19A42FE2A424001F1724 /* LifeGameWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EB6A19922FE2A423001F1724 /* LifeGameWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		EB05F3C92FD2B77600D2B5A5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -13,6 +19,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = EB7D275C2F5DAA2500E67CBE;
 			remoteInfo = LifeGame;
+		};
+		EB6A19A22FE2A424001F1724 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EB7D27552F5DAA2500E67CBE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EB6A19912FE2A423001F1724;
+			remoteInfo = LifeGameWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -27,14 +40,36 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EB6A19A52FE2A424001F1724 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				EB6A19A42FE2A424001F1724 /* LifeGameWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		EB05F3C52FD2B77600D2B5A5 /* LifeGameTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = LifeGameTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB6A19922FE2A423001F1724 /* LifeGameWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LifeGameWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EB6A19942FE2A423001F1724 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		EB6A19962FE2A423001F1724 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		EB6A19AA2FE2A49C001F1724 /* LifeGameWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LifeGameWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
 		EB9AEE642FD802FD004FDDF8 /* LifeGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifeGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		EB6A19A92FE2A424001F1724 /* Exceptions for "LifeGameWidget" folder in "LifeGameWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = EB6A19912FE2A423001F1724 /* LifeGameWidgetExtension */;
+		};
 		EB8E77142F5EA22C007C6BE7 /* Exceptions for "LifeGame" folder in "LifeGame" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -55,6 +90,14 @@
 			path = "LifeGamerWatch Watch App";
 			sourceTree = "<group>";
 		};
+		EB6A19982FE2A423001F1724 /* LifeGameWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				EB6A19A92FE2A424001F1724 /* Exceptions for "LifeGameWidget" folder in "LifeGameWidgetExtension" target */,
+			);
+			path = LifeGameWidget;
+			sourceTree = "<group>";
+		};
 		EB7D275F2F5DAA2500E67CBE /* LifeGame */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -73,6 +116,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EB6A198F2FE2A423001F1724 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				EB6A19972FE2A423001F1724 /* SwiftUI.framework in Frameworks */,
+				EB6A19952FE2A423001F1724 /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EB7D275A2F5DAA2500E67CBE /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -83,14 +135,27 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		EB6A19932FE2A423001F1724 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				EB6A19942FE2A423001F1724 /* WidgetKit.framework */,
+				EB6A19962FE2A423001F1724 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		EB7D27542F5DAA2500E67CBE = {
 			isa = PBXGroup;
 			children = (
+				EB6A19AA2FE2A49C001F1724 /* LifeGameWidgetExtensionDebug.entitlements */,
 				EB7D275F2F5DAA2500E67CBE /* LifeGame */,
 				EB0764022F6BF53A000462AB /* LifeGamerWatch Watch App */,
 				EB05F3C52FD2B77600D2B5A5 /* LifeGameTests.xctest */,
 				EB05F3C62FD2B77600D2B5A5 /* LifeGameTests */,
 				EB9AEE642FD802FD004FDDF8 /* LifeGame.app */,
+				EB6A19922FE2A423001F1724 /* LifeGameWidgetExtension.appex */,
+				EB6A19982FE2A423001F1724 /* LifeGameWidget */,
+				EB6A19932FE2A423001F1724 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -120,6 +185,28 @@
 			productReference = EB05F3C52FD2B77600D2B5A5 /* LifeGameTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		EB6A19912FE2A423001F1724 /* LifeGameWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EB6A19A82FE2A424001F1724 /* Build configuration list for PBXNativeTarget "LifeGameWidgetExtension" */;
+			buildPhases = (
+				EB6A198E2FE2A423001F1724 /* Sources */,
+				EB6A198F2FE2A423001F1724 /* Frameworks */,
+				EB6A19902FE2A423001F1724 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EB6A19982FE2A423001F1724 /* LifeGameWidget */,
+			);
+			name = LifeGameWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = LifeGameWidgetExtension;
+			productReference = EB6A19922FE2A423001F1724 /* LifeGameWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		EB7D275C2F5DAA2500E67CBE /* LifeGame */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = EB7D27682F5DAA2700E67CBE /* Build configuration list for PBXNativeTarget "LifeGame" */;
@@ -128,10 +215,12 @@
 				EB7D275A2F5DAA2500E67CBE /* Frameworks */,
 				EB7D275B2F5DAA2500E67CBE /* Resources */,
 				EB07640C2F6BF53C000462AB /* Embed Watch Content */,
+				EB6A19A52FE2A424001F1724 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				EB6A19A32FE2A424001F1724 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EB7D275F2F5DAA2500E67CBE /* LifeGame */,
@@ -150,12 +239,15 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2630;
+				LastSwiftUpdateCheck = 2650;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					EB05F3C42FD2B77600D2B5A5 = {
 						CreatedOnToolsVersion = 26.3;
 						TestTargetID = EB7D275C2F5DAA2500E67CBE;
+					};
+					EB6A19912FE2A423001F1724 = {
+						CreatedOnToolsVersion = 26.5;
 					};
 					EB7D275C2F5DAA2500E67CBE = {
 						CreatedOnToolsVersion = 26.1.1;
@@ -178,12 +270,20 @@
 			targets = (
 				EB7D275C2F5DAA2500E67CBE /* LifeGame */,
 				EB05F3C42FD2B77600D2B5A5 /* LifeGameTests */,
+				EB6A19912FE2A423001F1724 /* LifeGameWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		EB05F3C32FD2B77600D2B5A5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EB6A19902FE2A423001F1724 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -207,6 +307,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EB6A198E2FE2A423001F1724 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		EB7D27592F5DAA2500E67CBE /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -221,6 +328,11 @@
 			isa = PBXTargetDependency;
 			target = EB7D275C2F5DAA2500E67CBE /* LifeGame */;
 			targetProxy = EB05F3C92FD2B77600D2B5A5 /* PBXContainerItemProxy */;
+		};
+		EB6A19A32FE2A424001F1724 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = EB6A19912FE2A423001F1724 /* LifeGameWidgetExtension */;
+			targetProxy = EB6A19A22FE2A424001F1724 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -264,6 +376,70 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/LifeGame.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/LifeGame";
+			};
+			name = Release;
+		};
+		EB6A19A62FE2A424001F1724 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = LifeGameWidgetExtensionDebug.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7QVWAH8C25;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LifeGameWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LifeGameWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.lifegame.LifeGameWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		EB6A19A72FE2A424001F1724 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7QVWAH8C25;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = LifeGameWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = LifeGameWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.5;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.lifegame.LifeGameWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -471,6 +647,15 @@
 			buildConfigurations = (
 				EB05F3CC2FD2B77600D2B5A5 /* Debug */,
 				EB05F3CD2FD2B77600D2B5A5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EB6A19A82FE2A424001F1724 /* Build configuration list for PBXNativeTarget "LifeGameWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EB6A19A62FE2A424001F1724 /* Debug */,
+				EB6A19A72FE2A424001F1724 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

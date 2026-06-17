@@ -1,4 +1,7 @@
 import Foundation
+#if canImport(WidgetKit)
+import WidgetKit
+#endif
 
 // MARK: - 共享 Codable 型別（iOS ↔ watchOS 共用）
 
@@ -18,6 +21,13 @@ enum WatchSyncHelper {
 
     private static var defaults: UserDefaults { SharedConstants.sharedDefaults }
 
+    /// 通知桌面 Widget 刷新（任一共享資料變動後呼叫）
+    private static func reloadWidgets() {
+        #if canImport(WidgetKit)
+        WidgetCenter.shared.reloadAllTimelines()
+        #endif
+    }
+
     // MARK: - Stats (HP / FP / MP)
 
     static func syncStats(hp: Stat, fp: Stat, mp: Stat) {
@@ -29,6 +39,7 @@ enum WatchSyncHelper {
         do {
             let data = try JSONEncoder().encode(payload)
             defaults.set(data, forKey: SharedConstants.Keys.stats)
+            reloadWidgets()
         } catch {
             debugLog("⚠️ WatchSync: Stats 編碼失敗 - \(error.localizedDescription)")
         }
@@ -40,6 +51,7 @@ enum WatchSyncHelper {
         do {
             let data = try JSONEncoder().encode(entries)
             defaults.set(data, forKey: SharedConstants.Keys.mood)
+            reloadWidgets()
         } catch {
             debugLog("⚠️ WatchSync: Mood 編碼失敗 - \(error.localizedDescription)")
         }
@@ -51,6 +63,7 @@ enum WatchSyncHelper {
         do {
             let data = try JSONEncoder().encode(items)
             defaults.set(data, forKey: SharedConstants.Keys.todos)
+            reloadWidgets()
         } catch {
             debugLog("⚠️ WatchSync: Todos 編碼失敗 - \(error.localizedDescription)")
         }

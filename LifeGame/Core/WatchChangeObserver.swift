@@ -60,8 +60,13 @@ final class WatchChangeObserver: ObservableObject {
             return
         }
 
-        debugLog("📱 偵測到 Watch 待辦更新（\(items.count) 筆）")
+        debugLog("📱 偵測到 Widget/Watch 待辦更新（\(items.count) 筆）")
+        // ① 直接把 isDone 併進 storage（不依賴任何 store 實例是否存活）
+        TodoQuadrantStore.applyDoneFlags(from: items)
+        // ② 通知記憶體中的 store 實例（即時 UI 更新）
         onTodoItemsFromWatch?(items)
+        // ③ 通知所有 store 從 storage 重載（涵蓋雙實例 / 冷啟動沒有 willEnterForeground 的情況）
+        NotificationCenter.default.post(name: StorageCoordinator.didReceiveRemoteChange, object: nil)
         lastTodosReadTime = watchUpdatedAt
     }
 }

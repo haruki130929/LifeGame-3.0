@@ -109,13 +109,35 @@ final class TodoQuadrantStore: ObservableObject {
     }
 
     private func load() {
+        // 載入時設 isReloading → 不觸發 didSet 的 save()。
+        // 否則冷啟動會把舊資料寫回 shared.todos，蓋掉 Widget/Watch 剛寫進去、還沒合併的變更。
+        isReloading = true
+        defer { isReloading = false }
         if let saved: [TodoItem] = StorageManager.load([TodoItem].self, forKey: storageKey) {
             items = saved
         } else {
             items = []
         }
-        
         // 不再塞預設資料，讓使用者自行新增
+    }
+
+    /// 把外部（Widget / Watch）傳來的 isDone 直接併進「儲存層」，
+    /// 不依賴任何 store 實例是否存活 —— 給 WatchChangeObserver 在 .active / 冷啟動時呼叫。
+    @MainActor
+    static func applyDoneFlags(from external: [TodoItem]) {
+        let key = "todo_quadrant_v1"
+        guard var stored: [TodoItem] = StorageManager.load([TodoItem].self, forKey: key) else { return }
+        var changed = false
+        for ext in external {
+            if let idx = stored.firstIndex(where: { $0.id == ext.id }), stored[idx].isDone != ext.isDone {
+                stored[idx].isDone = ext.isDone
+                changed = true
+            }
+        }
+        if changed {
+            StorageManager.save(stored, forKey: key)
+            debugLog("✅ 已把外部 isDone 併入 storage（\(external.count) 筆）")
+        }
     }
     
     private func save() {
