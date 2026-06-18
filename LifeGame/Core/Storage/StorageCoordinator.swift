@@ -13,6 +13,7 @@ final class StorageCoordinator {
     private let configuration: StorageConfiguration
     private let migrationManager = MigrationManager()
     private let schema: Schema
+    private var importReconcileWork: DispatchWorkItem?
 
     // MARK: - Model type registry
 
@@ -354,9 +355,10 @@ final class StorageCoordinator {
                 } else {
                     debugLog("☁️ CloudKit 同步 [\(typeText)] ✅ 完成")
                     // 從雲端拉取完成 → 去重 + 通知各 Store 重新載入
+                    // coalesce：重新同步時 import 事件會連續湧入，這裡只在「最後一個 import
+                    // 之後 2 秒」跑一次，避免每個事件都整表去重 + 全店重載造成卡頓。
                     if event.type == .import {
-                        self.deduplicateIfNeeded()
-                        NotificationCenter.default.post(name: StorageCoordinator.didReceiveRemoteChange, object: nil)
+                        self.scheduleImportReconcile()
                     }
                 }
             } else {
@@ -364,5 +366,21 @@ final class StorageCoordinator {
             }
         }
         debugLog("☁️ 已開始監聽 CloudKit 同步事件")
+    }
+
+    // MARK: - Import 事件節流
+
+    /// 把連續湧入的 import 事件「去重 + 通知重載」coalesce 成最後一次之後 2 秒跑一次。
+    private func scheduleImportReconcile() {
+        importReconcileWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            Task { @MainActor in
+                guard let self else { return }
+                self.deduplicateIfNeeded()
+                NotificationCenter.default.post(name: StorageCoordinator.didReceiveRemoteChange, object: nil)
+            }
+        }
+        importReconcileWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: work)
     }
 }
