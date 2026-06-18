@@ -34,6 +34,7 @@ struct SettingsView: View {
             notificationSection
             dailyLogSection
             featureSection
+            widgetSection
             appearanceSection
             accountSection
             storageSection
@@ -177,6 +178,17 @@ private extension SettingsView {
                 MandalaSettingsView()
             } label: {
                 Label(L10n.Title.mandala, systemImage: "square.grid.3x3")
+            }
+        }
+    }
+
+    // MARK: 桌面工具（獨立一欄）
+    var widgetSection: some View {
+        Section {
+            NavigationLink {
+                WidgetSettingsView()
+            } label: {
+                Label("桌面工具", systemImage: "square.grid.2x2")
             }
         }
     }

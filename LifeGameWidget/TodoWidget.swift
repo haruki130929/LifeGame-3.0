@@ -24,13 +24,20 @@ enum WTodoQuadrant: Int, Codable {
     case notImportantNotUrgent = 2
     case urgentNotImportant = 3
 
-    /// 排序優先度（數字小＝優先顯示）
-    var priority: Int {
+    var title: String {
         switch self {
-        case .importantUrgent:       return 0
-        case .importantNotUrgent:    return 1
-        case .urgentNotImportant:    return 2
-        case .notImportantNotUrgent: return 3
+        case .importantNotUrgent:    return "重要不緊急"
+        case .importantUrgent:       return "重要又緊急"
+        case .notImportantNotUrgent: return "不重要不緊急"
+        case .urgentNotImportant:    return "緊急不重要"
+        }
+    }
+    var icon: String {
+        switch self {
+        case .importantNotUrgent:    return "star.circle"
+        case .importantUrgent:       return "exclamationmark.circle"
+        case .notImportantNotUrgent: return "minus.circle"
+        case .urgentNotImportant:    return "bolt.circle"
         }
     }
 }
@@ -51,8 +58,15 @@ enum WidgetTodoBridge {
     static let appGroupID = "group.com.haruki.lifegame"
     static let todosKey = "shared.todos"
     static let updatedAtKey = "shared.watchTodosUpdatedAt"
+    static let quadrantKey = "widget.todoQuadrant"
 
     private static var defaults: UserDefaults? { UserDefaults(suiteName: appGroupID) }
+
+    /// App 設定頁選的象限（沒設過 → 預設「重要又緊急」）
+    static func selectedQuadrant() -> WTodoQuadrant {
+        guard let d = defaults, d.object(forKey: quadrantKey) != nil else { return .importantUrgent }
+        return WTodoQuadrant(rawValue: d.integer(forKey: quadrantKey)) ?? .importantUrgent
+    }
 
     static func loadTodos() -> [WTodoItem] {
         guard let d = defaults,
@@ -100,12 +114,13 @@ struct ToggleTodoDoneIntent: AppIntent {
 
 struct TodoEntry: TimelineEntry {
     let date: Date
-    let todos: [WTodoItem]   // 已過濾：只留未完成、依象限優先度排序
+    let quadrant: WTodoQuadrant
+    let todos: [WTodoItem]   // 已過濾：只留該象限、未完成
 }
 
 struct TodoProvider: TimelineProvider {
     func placeholder(in context: Context) -> TodoEntry {
-        TodoEntry(date: Date(), todos: Self.sample)
+        TodoEntry(date: Date(), quadrant: .importantUrgent, todos: Self.sample)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (TodoEntry) -> Void) {
@@ -120,11 +135,12 @@ struct TodoProvider: TimelineProvider {
     }
 
     private func makeEntry() -> TodoEntry {
-        // 只取「重要又緊急」象限、未完成的待辦
+        // 取「App 設定頁選的象限」裡未完成的待辦
+        let quadrant = WidgetTodoBridge.selectedQuadrant()
         let items = WidgetTodoBridge.loadTodos()
-            .filter { !$0.isDone && $0.quadrant == .importantUrgent }
+            .filter { !$0.isDone && $0.quadrant == quadrant }
             .sorted { $0.createdAt > $1.createdAt }
-        return TodoEntry(date: Date(), todos: Array(items.prefix(8)))
+        return TodoEntry(date: Date(), quadrant: quadrant, todos: Array(items.prefix(8)))
     }
 
     static let sample: [WTodoItem] = [
@@ -150,8 +166,8 @@ struct TodoWidgetEntryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack(spacing: 5) {
-                Image(systemName: "exclamationmark.circle")
-                Text("重要又緊急").bold()
+                Image(systemName: entry.quadrant.icon)
+                Text(entry.quadrant.title).bold()
                 Spacer()
             }
             .font(.caption)
@@ -198,9 +214,10 @@ struct TodoWidget: Widget {
         StaticConfiguration(kind: kind, provider: TodoProvider()) { entry in
             TodoWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
+                .widgetAppearance()
         }
-        .configurationDisplayName("重要又緊急")
-        .description("點一下打勾完成「重要又緊急」的待辦")
+        .configurationDisplayName("待辦")
+        .description("點一下打勾完成待辦（在 App 設定頁選象限）")
         .supportedFamilies([.systemSmall, .systemMedium, .systemLarge])
     }
 }
@@ -208,5 +225,5 @@ struct TodoWidget: Widget {
 #Preview(as: .systemMedium) {
     TodoWidget()
 } timeline: {
-    TodoEntry(date: .now, todos: TodoProvider.sample)
+    TodoEntry(date: .now, quadrant: .importantUrgent, todos: TodoProvider.sample)
 }

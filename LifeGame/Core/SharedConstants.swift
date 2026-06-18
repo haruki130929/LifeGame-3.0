@@ -24,5 +24,10 @@ enum SharedConstants {
         // Watch → iOS 變更時間戳
         static let watchMoodUpdatedAt = "shared.watchMoodUpdatedAt"
         static let watchTodosUpdatedAt = "shared.watchTodosUpdatedAt"
+
+        // Widget 設定：待辦 widget 顯示哪個象限（TodoQuadrant rawValue）
+        static let widgetTodoQuadrant = "widget.todoQuadrant"
+        // Widget 設定：外觀（0=跟隨系統, 1=淺色, 2=深色）
+        static let widgetAppearance = "widget.appearance"
     }
 }

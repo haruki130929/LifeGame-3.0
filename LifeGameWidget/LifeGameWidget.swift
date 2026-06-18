@@ -106,6 +106,7 @@ struct LifeGameWidget: Widget {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             LifeGameWidgetEntryView(entry: entry)
                 .containerBackground(.fill.tertiary, for: .widget)
+                .widgetAppearance()
         }
         .configurationDisplayName("今日狀態")
         .description("顯示今天的 HP / FP / MP")
