@@ -8,6 +8,9 @@ struct CalendarSettingsView: View {
     @State private var newPresetName = ""
     @State private var isSyncing = false
     @State private var syncResult: String?
+    @State private var resultIsError = false
+    @State private var importRange: CalendarImportRange = .past3MNext1Y
+    @AppStorage(CalendarStore.autoSyncKey) private var autoSyncEnabled = false
 
     var body: some View {
         Form {
@@ -21,17 +24,24 @@ struct CalendarSettingsView: View {
             }
 
             Section {
-                Button {
-                    isSyncing = true
-                    syncResult = nil
-                    Task {
-                        let count = await calendarStore.syncFromAppleCalendar()
-                        isSyncing = false
-                        syncResult = count > 0 ? "已匯入 \(count) 筆行程" : "沒有新的行程"
+                Toggle(isOn: $autoSyncEnabled) {
+                    Label("自動同步", systemImage: "arrow.triangle.2.circlepath.circle")
+                }
+                .onChange(of: autoSyncEnabled) { _, on in
+                    if on { runImport() }   // 開啟時立刻同步一次（含權限請求）
+                }
+
+                Picker(selection: $importRange) {
+                    ForEach(CalendarImportRange.allCases) { r in
+                        Text(r.rawValue).tag(r)
                     }
                 } label: {
+                    Label("匯入範圍", systemImage: "calendar.badge.clock")
+                }
+
+                Button(action: runImport) {
                     HStack {
-                        Label("同步 Apple 行事曆", systemImage: "arrow.triangle.2.circlepath")
+                        Label("立即同步 Apple 行事曆", systemImage: "arrow.triangle.2.circlepath")
                         Spacer()
                         if isSyncing {
                             ProgressView()
@@ -39,12 +49,14 @@ struct CalendarSettingsView: View {
                     }
                 }
                 .disabled(isSyncing)
+            } header: {
+                Text("Apple 行事曆")
             } footer: {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("從 Apple 行事曆匯入未來 3 個月的行程")
+                    Text("開啟「自動同步」後，App 回到前景或行事曆有變動時會自動匯入新行程，不用手動按。重複的不會再匯入。")
                     if let result = syncResult {
                         Text(result)
-                            .foregroundStyle(.green)
+                            .foregroundStyle(resultIsError ? .orange : .green)
                     }
                     if let lastSync = calendarStore.lastSyncDate {
                         Text("上次同步：\(lastSync.formatted(date: .abbreviated, time: .shortened))")
@@ -111,6 +123,48 @@ struct CalendarSettingsView: View {
                     }
                 }
             }
+        }
+    }
+
+    private func runImport() {
+        isSyncing = true
+        syncResult = nil
+        let (start, end) = importRange.bounds()
+        Task {
+            let count = await calendarStore.syncFromAppleCalendar(start: start, end: end)
+            isSyncing = false
+            if count < 0 {
+                resultIsError = true
+                syncResult = "需要行事曆權限：請到「設定 → LifeGame → 行事曆」開啟"
+            } else {
+                resultIsError = false
+                syncResult = count > 0 ? "已匯入 \(count) 筆行程" : "沒有新的行程"
+            }
+        }
+    }
+}
+
+// MARK: - 匯入範圍
+
+enum CalendarImportRange: String, CaseIterable, Identifiable {
+    case next3M       = "未來 3 個月"
+    case next1Y       = "未來 1 年"
+    case past3MNext1Y = "過去 3 個月 ～ 未來 1 年"
+    case past1YNext1Y = "過去 1 年 ～ 未來 1 年"
+
+    var id: String { rawValue }
+
+    func bounds() -> (start: Date, end: Date) {
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        func add(_ comp: Calendar.Component, _ value: Int) -> Date {
+            cal.date(byAdding: comp, value: value, to: today) ?? today
+        }
+        switch self {
+        case .next3M:       return (today, add(.month, 3))
+        case .next1Y:       return (today, add(.year, 1))
+        case .past3MNext1Y: return (add(.month, -3), add(.year, 1))
+        case .past1YNext1Y: return (add(.year, -1), add(.year, 1))
         }
     }
 }

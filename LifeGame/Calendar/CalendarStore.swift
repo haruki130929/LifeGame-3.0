@@ -2,6 +2,7 @@ import Foundation
 import Combine
 import EventKit
 import SwiftUI
+import UIKit
 
 @MainActor
 final class CalendarStore: ObservableObject {
@@ -18,6 +19,7 @@ final class CalendarStore: ObservableObject {
     init() {
         load()
         syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
+        setupAppleCalendarAutoSync()
     }
 
     func reloadFromStorage() {
@@ -183,46 +185,94 @@ final class CalendarStore: ObservableObject {
 
     // MARK: - 同步 Apple 行事曆
 
-    /// 從 Apple 行事曆匯入未來 3 個月的事件
+    /// 從 Apple 行事曆匯入指定範圍的事件
     @Published var lastSyncDate: Date?
     @Published var syncedCount: Int = 0
 
-    func syncFromAppleCalendar() async -> Int {
-        let granted = await requestAccessIfNeeded()
-        guard granted else { return 0 }
+    /// 去重用的複合鍵：同一個重複行程的多個日期共用同一個 eventIdentifier，
+    /// 用「ID + 開始時間」才能把每個日期當成獨立事件，避免漏匯。
+    private static func occurrenceKey(_ id: String, _ start: Date) -> String {
+        "\(id)|\(Int(start.timeIntervalSince1970))"
+    }
 
-        let cal = Calendar.current
-        let start = cal.startOfDay(for: Date())
-        let end = cal.date(byAdding: .month, value: 3, to: start)!
+    /// 匯入指定 [start, end] 範圍的 Apple 行事曆事件。
+    /// 回傳匯入筆數；**回傳 -1 代表權限被拒**。
+    func syncFromAppleCalendar(start: Date, end: Date) async -> Int {
+        let granted = await requestAccessIfNeeded()
+        guard granted else { return -1 }
 
         let predicate = eventStore.predicateForEvents(withStart: start, end: end, calendars: nil)
         let ekEvents = eventStore.events(matching: predicate)
 
-        // 已存在的 Apple 事件 ID，避免重複匯入
-        let existingAppleIds = Set(events.compactMap(\.appleEventIdentifier))
-        var importCount = 0
+        // 已存在的事件（ID + 開始時間），避免重複匯入；逐筆加入避免同批重複
+        var seen = Set(events.compactMap { e -> String? in
+            guard let id = e.appleEventIdentifier else { return nil }
+            return Self.occurrenceKey(id, e.start)
+        })
 
+        var newEvents: [CalendarEvent] = []
         for ek in ekEvents {
-            guard let identifier = ek.eventIdentifier,
-                  !existingAppleIds.contains(identifier) else { continue }
-
-            let e = CalendarEvent(
+            guard let identifier = ek.eventIdentifier, let ekStart = ek.startDate else { continue }
+            let key = Self.occurrenceKey(identifier, ekStart)
+            guard !seen.contains(key) else { continue }
+            seen.insert(key)
+            newEvents.append(CalendarEvent(
                 title: ek.title ?? "（無標題）",
-                start: ek.startDate,
-                end: ek.endDate,
+                start: ekStart,
+                end: ek.endDate ?? ekStart,
                 colorHex: "8E8E93",  // 系統灰色，區分手動建立的
                 appleEventIdentifier: identifier
-            )
-            events.append(e)
-            importCount += 1
+            ))
         }
+        if !newEvents.isEmpty { events.append(contentsOf: newEvents) }  // 一次寫入，避免逐筆存檔
+        let importCount = newEvents.count
 
         lastSyncDate = Date()
         syncedCount = importCount
-        debugLog("✅ Apple 行事曆同步完成，匯入 \(importCount) 筆事件")
+        debugLog("✅ Apple 行事曆同步完成，匯入 \(importCount) 筆事件（範圍 \(start)～\(end)）")
         return importCount
     }
     
+    // MARK: - 自動同步 Apple 行事曆
+
+    static let autoSyncKey = "calendar.autoSyncAppleEnabled"
+    private static let lastAutoSyncKey = "calendar.lastAutoAppleSync"
+
+    private func setupAppleCalendarAutoSync() {
+        // 系統行事曆有變動 → 立即同步
+        NotificationCenter.default.addObserver(
+            forName: .EKEventStoreChanged, object: eventStore, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.autoSyncIfEnabled(force: true) }
+        }
+        // App 回到前景 → 同步（有節流）
+        NotificationCenter.default.addObserver(
+            forName: UIApplication.willEnterForegroundNotification, object: nil, queue: .main
+        ) { [weak self] _ in
+            Task { @MainActor in self?.autoSyncIfEnabled() }
+        }
+        autoSyncIfEnabled()   // 啟動時也試一次
+    }
+
+    /// 已開啟自動同步、且已有完整權限時，匯入近期 Apple 行事曆（**不會跳權限提示**）。
+    func autoSyncIfEnabled(force: Bool = false) {
+        guard UserDefaults.standard.bool(forKey: Self.autoSyncKey) else { return }
+        guard EKEventStore.authorizationStatus(for: .event) == .fullAccess else { return }
+
+        // 節流：前景觸發 30 分鐘內不重複；行事曆變動（force）略過節流
+        if !force {
+            let last = UserDefaults.standard.double(forKey: Self.lastAutoSyncKey)
+            if Date().timeIntervalSince1970 - last < 1800 { return }
+        }
+        UserDefaults.standard.set(Date().timeIntervalSince1970, forKey: Self.lastAutoSyncKey)
+
+        let cal = Calendar.current
+        let today = cal.startOfDay(for: Date())
+        let start = cal.date(byAdding: .month, value: -1, to: today) ?? today
+        let end = cal.date(byAdding: .month, value: 3, to: today) ?? today
+        Task { _ = await syncFromAppleCalendar(start: start, end: end) }
+    }
+
     private func save() {
         StorageManager.save(events, forKey: Self.storageKey)
     }

@@ -102,7 +102,7 @@ struct HomeRootView: View {
             // 在首頁 → 先導航到對應功能頁
             case .addRingItem, .editSchedule:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.tomorrowRing) ; fab.route = nil }
-            case .jumpToToday:
+            case .jumpToToday, .syncAppleCalendar:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.calendar) ; fab.route = nil }
             case .addTodoToQuadrant, .todoEditMode:
                 if navigationPath.isEmpty { navigationPath.append(FeatureID.todoQuadrant) ; fab.route = nil }

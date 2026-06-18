@@ -11,7 +11,10 @@ struct CalendarScreen: View {
 
     @State private var showNewEvent: Bool = false
     @State private var editingEvent: CalendarEvent? = nil
-    
+    @State private var isSyncing = false
+    @State private var syncAlert: String?
+    @AppStorage(CalendarStore.autoSyncKey) private var autoSyncEnabled = false
+
     private let cal = Calendar.current
     
     private var monthDate: Date {
@@ -46,7 +49,30 @@ struct CalendarScreen: View {
         }
         .navigationTitle("行事曆")
         .navigationBarTitleDisplayMode(.inline)
-        
+
+        // ✅ 右上角同步按鈕（只在開啟自動同步時顯示）
+        .toolbar {
+            if autoSyncEnabled {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: runSync) {
+                        if isSyncing {
+                            ProgressView()
+                        } else {
+                            Image(systemName: "arrow.triangle.2.circlepath")
+                        }
+                    }
+                    .disabled(isSyncing)
+                    .accessibilityLabel("同步 Apple 行事曆")
+                }
+            }
+        }
+        .alert(syncAlert ?? "", isPresented: Binding(
+            get: { syncAlert != nil },
+            set: { if !$0 { syncAlert = nil } }
+        )) {
+            Button("好", role: .cancel) {}
+        }
+
         // ✅ 新增行程
         .sheet(isPresented: $showNewEvent) {
             NewEventSheet { title, start, end, colorHex, frequency, repeatCount in
@@ -68,6 +94,9 @@ struct CalendarScreen: View {
             case .addCalendarEvent:
                 fab.route = nil
                 showNewEvent = true
+            case .syncAppleCalendar:
+                fab.route = nil
+                runSync()
             default:
                 break
             }
@@ -85,6 +114,24 @@ struct CalendarScreen: View {
         }
     }
     
+    // MARK: - 同步 Apple 行事曆（近期：過去 1 個月 ～ 未來 3 個月）
+    private func runSync() {
+        guard !isSyncing else { return }
+        isSyncing = true
+        let today = cal.startOfDay(for: Date())
+        let start = cal.date(byAdding: .month, value: -1, to: today) ?? today
+        let end = cal.date(byAdding: .month, value: 3, to: today) ?? today
+        Task {
+            let count = await calendarStore.syncFromAppleCalendar(start: start, end: end)
+            isSyncing = false
+            if count < 0 {
+                syncAlert = "需要行事曆權限，請到「設定 → LifeGame → 行事曆」開啟"
+            } else {
+                syncAlert = count > 0 ? "已同步，新增 \(count) 筆行程" : "已是最新，沒有新行程"
+            }
+        }
+    }
+
     // MARK: - Ranges (月行程條)
     private var rangesForMonth: [CalendarRange] {
         CalendarRangeProvider().ranges(from: calendarStore.events, in: monthDate)

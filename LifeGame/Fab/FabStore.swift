@@ -13,6 +13,7 @@ struct FabAction: Identifiable {
 final class FabStore: ObservableObject {
     enum Route: Identifiable, Equatable {
         case addCalendarEvent
+        case syncAppleCalendar
         case jumpToToday
         case navigate(FeatureID)
         // ── 時間圓環專用 ──
@@ -61,6 +62,7 @@ final class FabStore: ObservableObject {
         var id: String {
             switch self {
             case .addCalendarEvent:         return "addCalendarEvent"
+            case .syncAppleCalendar:        return "syncAppleCalendar"
             case .jumpToToday:              return "jumpToToday"
             case .navigate(let f):          return "navigate-\(f)"
             case .addRingItem:              return "addRingItem"
@@ -253,6 +255,14 @@ final class FabStore: ObservableObject {
                     self?.route = .addCalendarEvent; self?.collapse()
                 }
             ]
+            // 只在使用者已開啟「自動同步」時，才在「新增行程」下面提供同步選項
+            if UserDefaults.standard.bool(forKey: CalendarStore.autoSyncKey) {
+                result += [
+                    FabAction(title: "同步 Apple 行事曆", systemImage: "arrow.triangle.2.circlepath", route: .syncAppleCalendar) { [weak self] in
+                        self?.route = .syncAppleCalendar; self?.collapse()
+                    }
+                ]
+            }
         case .diary:
             result += [
                 FabAction(title: "新增日記", systemImage: "square.and.pencil", route: .navigate(.diary)) { [weak self] in
