@@ -168,35 +168,6 @@ enum NotificationManager {
             }
         }
     }
-    /// 測試用：N 秒後跳一個「待辦完成」互動通知（複用 todoDue 分類 → 通知上會有「完成」按鈕）。
-    static func scheduleTodoCompletionTest(todoID: String, title: String, after seconds: TimeInterval = 5) {
-        requestPermissionIfNeeded { granted in
-            guard granted else {
-                debugLog("❌ scheduleTodoCompletionTest: 無通知權限")
-                return
-            }
-            let content = UNMutableNotificationContent()
-            content.title = "待辦提醒（測試）"
-            content.body = "「\(title)」做完了嗎？"
-            content.sound = .default
-            content.categoryIdentifier = Category.todoDue          // → 通知上出現「完成」按鈕
-            content.userInfo = ["todoID": todoID]                  // → 按完成時定位這筆待辦
-
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, seconds), repeats: false)
-            let req = UNNotificationRequest(
-                identifier: "todo_test_\(UUID().uuidString)",
-                content: content,
-                trigger: trigger
-            )
-            UNUserNotificationCenter.current().add(req) { err in
-                if let err {
-                    debugLog("❌ scheduleTodoCompletionTest error:", err)
-                } else {
-                    debugLog("✅ 測試通知已排程（\(Int(seconds)) 秒後）")
-                }
-            }
-        }
-    }
 
     static let hourlyMoodReminderID = "hourly_mood_reminder"
     
