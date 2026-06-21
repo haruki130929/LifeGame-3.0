@@ -46,8 +46,13 @@ final class WatchChangeObserver: ObservableObject {
             return
         }
 
-        debugLog("📱 偵測到 Watch 心情更新（\(entries.count) 筆）")
+        debugLog("📱 偵測到 Widget/Watch 心情更新（\(entries.count) 筆）")
+        // ① 直接把心情併進 storage（不依賴任何 store 實例是否存活）
+        MoodHistoryStore.applyEntries(from: entries)
+        // ② 通知記憶體中的 store 實例（即時 UI 更新）
         onMoodEntriesFromWatch?(entries)
+        // ③ 通知所有 store 從 storage 重載（涵蓋冷啟動 / 實例尚未建立的情況）
+        NotificationCenter.default.post(name: StorageCoordinator.didReceiveRemoteChange, object: nil)
         lastMoodReadTime = watchUpdatedAt
     }
 

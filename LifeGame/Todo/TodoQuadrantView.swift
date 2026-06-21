@@ -209,6 +209,36 @@ struct TodoQuadrantBoardView: View {
         ScrollView {
             VStack(spacing: 12) {
 
+                // MARK: - 測試按鈕（驗證可互動通知；測完可刪這整段 Button）
+                Button {
+                    store.add(title: "🧪 測試待辦", quadrant: .importantUrgent)
+                    if let item = store.items.first(where: { $0.title == "🧪 測試待辦" && !$0.isDone }) {
+                        NotificationManager.scheduleTodoCompletionTest(todoID: item.id.uuidString, title: item.title, after: 5)
+                    }
+                } label: {
+                    Label("測試：5 秒後跳「完成」互動通知", systemImage: "bell.badge")
+                        .font(.subheadline.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(theme.accentColor.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+
+                // MARK: - 測試按鈕②（驗證待辦靈動島；測完可刪這整段 Button）
+                Button {
+                    let now = Date()
+                    store.add(title: "🧪 測試：交報告", quadrant: .importantUrgent, dueDate: now.addingTimeInterval(3600))
+                    store.add(title: "🧪 測試：回訊息", quadrant: .importantUrgent, dueDate: now.addingTimeInterval(7200))
+                    TodoLiveActivityController.start()
+                } label: {
+                    Label("測試：啟動待辦靈動島（建 2 筆待辦）", systemImage: "bolt.horizontal.circle")
+                        .font(.subheadline.bold())
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 10)
+                        .background(Color.orange.opacity(0.15), in: RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
+
                 // 展開模式的返回按鈕
                 if expandedQuadrant != nil {
                     HStack {

@@ -213,7 +213,6 @@ struct TodoWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: TodoProvider()) { entry in
             TodoWidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
                 .widgetAppearance()
         }
         .configurationDisplayName("待辦")

@@ -40,6 +40,8 @@ enum WatchSyncHelper {
             let data = try JSONEncoder().encode(payload)
             defaults.set(data, forKey: SharedConstants.Keys.stats)
             reloadWidgets()
+            // 若使用者開了「今日狀態」即時動態，一併更新（內部會判斷是否開啟）
+            LiveActivityController.update(hp: hp, fp: fp, mp: mp)
         } catch {
             debugLog("⚠️ WatchSync: Stats 編碼失敗 - \(error.localizedDescription)")
         }
@@ -64,6 +66,8 @@ enum WatchSyncHelper {
             let data = try JSONEncoder().encode(items)
             defaults.set(data, forKey: SharedConstants.Keys.todos)
             reloadWidgets()
+            // 若使用者開了「待辦」即時動態，一併更新島上顯示的那筆（內部會判斷是否開啟）
+            TodoLiveActivityController.update()
         } catch {
             debugLog("⚠️ WatchSync: Todos 編碼失敗 - \(error.localizedDescription)")
         }

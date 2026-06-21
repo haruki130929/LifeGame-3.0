@@ -70,6 +70,13 @@
 			);
 			target = EB6A19912FE2A423001F1724 /* LifeGameWidgetExtension */;
 		};
+		EB6A1C3C2FE6E8D3001F1724 /* Exceptions for "LifeGameWidget" folder in "LifeGame" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				TodayStatusAttributes.swift,
+			);
+			target = EB7D275C2F5DAA2500E67CBE /* LifeGame */;
+		};
 		EB8E77142F5EA22C007C6BE7 /* Exceptions for "LifeGame" folder in "LifeGame" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -93,6 +100,7 @@
 		EB6A19982FE2A423001F1724 /* LifeGameWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
+				EB6A1C3C2FE6E8D3001F1724 /* Exceptions for "LifeGameWidget" folder in "LifeGame" target */,
 				EB6A19A92FE2A424001F1724 /* Exceptions for "LifeGameWidget" folder in "LifeGameWidgetExtension" target */,
 			);
 			path = LifeGameWidget;

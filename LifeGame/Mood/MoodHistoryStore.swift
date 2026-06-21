@@ -175,6 +175,46 @@ final class MoodHistoryStore: ObservableObject {
         }
     }
 
+    /// 把外部（Widget／Watch／通知）傳來的心情直接併進「儲存層」，
+    /// 不依賴任何 MoodHistoryStore 實例是否存活 —— 給 WatchChangeObserver 呼叫。
+    /// 與 TodoQuadrantStore.applyDoneFlags 對稱：避免「實例還沒建好就消耗掉時間戳、導致心情遺失」。
+    @MainActor
+    static func applyEntries(from entries: [MoodEntry]) {
+        let key = "mood_history_points_v1"
+        var stored: [MoodPoint] = StorageManager.load([MoodPoint].self, forKey: key) ?? []
+
+        let calendar = Calendar.current
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd HH"
+        var changed = false
+
+        for entry in entries {
+            guard let date = fmt.date(from: entry.hourKey),
+                  let hourStart = calendar.dateInterval(of: .hour, for: date)?.start else { continue }
+            let score = Double(entry.value)
+
+            if let idx = stored.firstIndex(where: {
+                calendar.dateInterval(of: .hour, for: $0.timestamp)?.start == hourStart
+            }) {
+                if stored[idx].score != score {
+                    let old = stored[idx]
+                    stored[idx] = MoodPoint(id: old.id, timestamp: old.timestamp, score: score,
+                                            focus: old.focus, fatigue: old.fatigue)
+                    changed = true
+                }
+            } else {
+                stored.append(MoodPoint(timestamp: date, score: score))
+                changed = true
+            }
+        }
+
+        if changed {
+            stored.sort { $0.timestamp < $1.timestamp }
+            StorageManager.save(stored, forKey: key)
+            debugLog("✅ 已把外部心情併入 storage（\(entries.count) 筆）")
+        }
+    }
+
     // MARK: - Persistence (StorageManager → SwiftData)
 
     private func save() {

@@ -105,7 +105,6 @@ struct LifeGameWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: kind, provider: Provider()) { entry in
             LifeGameWidgetEntryView(entry: entry)
-                .containerBackground(.fill.tertiary, for: .widget)
                 .widgetAppearance()
         }
         .configurationDisplayName("今日狀態")

@@ -5,7 +5,52 @@ enum NotificationManager {
     
     // MARK: - IDs
     static let settleReminderID = "daily_settle_reminder"
-    
+
+    // MARK: - Categories & Actions（互動通知）
+
+    enum Category {
+        static let todoDue = "todo_due_category"
+        static let hourlyMood = "hourly_mood_category"
+    }
+    enum Action {
+        static let completeTodo = "complete_todo"
+        static let logMood = "log_mood"
+    }
+
+    /// 註冊互動通知的分類與動作按鈕。App 啟動時呼叫一次即可
+    /// （setNotificationCategories 會整批覆寫，不要在每次排程時呼叫）。
+    static func setupNotificationCategories() {
+        // 待辦到期 → 一顆「完成」按鈕，背景處理、不開 App
+        let complete = UNNotificationAction(
+            identifier: Action.completeTodo,
+            title: "完成",
+            options: []
+        )
+        let todoCategory = UNNotificationCategory(
+            identifier: Category.todoDue,
+            actions: [complete],
+            intentIdentifiers: [],
+            options: []
+        )
+
+        // 心情提醒 → 直接在通知裡輸入 0–10，背景記錄、不開 App
+        let logMood = UNTextInputNotificationAction(
+            identifier: Action.logMood,
+            title: "記錄心情",
+            options: [],
+            textInputButtonTitle: "記錄",
+            textInputPlaceholder: "0–10"
+        )
+        let moodCategory = UNNotificationCategory(
+            identifier: Category.hourlyMood,
+            actions: [logMood],
+            intentIdentifiers: [],
+            options: []
+        )
+
+        UNUserNotificationCenter.current().setNotificationCategories([todoCategory, moodCategory])
+    }
+
     // MARK: - Permission
     /// 需要時才詢問權限，並把結果回傳
     static func requestPermissionIfNeeded(completion: @escaping (Bool) -> Void) {
@@ -123,6 +168,36 @@ enum NotificationManager {
             }
         }
     }
+    /// 測試用：N 秒後跳一個「待辦完成」互動通知（複用 todoDue 分類 → 通知上會有「完成」按鈕）。
+    static func scheduleTodoCompletionTest(todoID: String, title: String, after seconds: TimeInterval = 5) {
+        requestPermissionIfNeeded { granted in
+            guard granted else {
+                debugLog("❌ scheduleTodoCompletionTest: 無通知權限")
+                return
+            }
+            let content = UNMutableNotificationContent()
+            content.title = "待辦提醒（測試）"
+            content.body = "「\(title)」做完了嗎？"
+            content.sound = .default
+            content.categoryIdentifier = Category.todoDue          // → 通知上出現「完成」按鈕
+            content.userInfo = ["todoID": todoID]                  // → 按完成時定位這筆待辦
+
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, seconds), repeats: false)
+            let req = UNNotificationRequest(
+                identifier: "todo_test_\(UUID().uuidString)",
+                content: content,
+                trigger: trigger
+            )
+            UNUserNotificationCenter.current().add(req) { err in
+                if let err {
+                    debugLog("❌ scheduleTodoCompletionTest error:", err)
+                } else {
+                    debugLog("✅ 測試通知已排程（\(Int(seconds)) 秒後）")
+                }
+            }
+        }
+    }
+
     static let hourlyMoodReminderID = "hourly_mood_reminder"
     
     static func scheduleHourlyMoodReminder(minute: Int = 0) {
@@ -133,7 +208,8 @@ enum NotificationManager {
         content.title = "心情溫度計提醒"
         content.body = "補記上一小時的心情（0～10）"
         content.sound = .default
-        
+        content.categoryIdentifier = Category.hourlyMood   // → 通知內可直接輸入 0–10
+
         var comps = DateComponents()
         comps.minute = minute   // 例如 00：整點；05：每小時 05 分
         comps.second = 0
@@ -169,6 +245,8 @@ enum NotificationManager {
         content.title = "待辦到期"
         content.body = title
         content.sound = .default
+        content.categoryIdentifier = Category.todoDue          // → 通知上出現「完成」按鈕
+        content.userInfo = ["todoID": id.uuidString]           // → 動作處理器用來定位待辦
 
         let comps = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: dueDate)
         let trigger = UNCalendarNotificationTrigger(dateMatching: comps, repeats: false)

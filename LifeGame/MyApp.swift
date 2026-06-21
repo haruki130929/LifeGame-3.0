@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import UserNotifications
 
 @main
 struct LifeGameApp: App {
@@ -73,6 +74,11 @@ struct LifeGameApp: App {
         _storageConfig = State(initialValue: config)
         _keyValueStore = State(initialValue: kvStore)
         _startupError = State(initialValue: errorMessage)
+
+        // 互動通知：掛上 delegate 並註冊動作分類（待辦「完成」、心情輸入 0–10）。
+        // 註：先前 delegate 從未被指派，所以前景顯示與動作回呼都不會觸發 —— 一併修正。
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+        NotificationManager.setupNotificationCategories()
     }
 
     @State private var onboardingCompleted = OnboardingTracker.isCompleted
@@ -126,6 +132,8 @@ struct LifeGameApp: App {
                         .onChange(of: scenePhase) { _, phase in
                             if phase == .active {
                                 WatchChangeObserver.shared.checkForWatchChanges()
+                                LiveActivityController.reconcile()
+                                TodoLiveActivityController.reconcile()
                             }
                         }
                 } else {

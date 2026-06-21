@@ -6,10 +6,18 @@ struct WidgetSettingsView: View {
 
     @State private var todoQuadrant: TodoQuadrant = .importantUrgent
     @State private var appearance: WidgetAppearanceOption = .system
+    @State private var liveActivityOn: Bool = false
+    @State private var todoLiveActivityOn: Bool = false
 
     private var sharedDefaults: UserDefaults { SharedConstants.sharedDefaults }
     private let quadrantKey = SharedConstants.Keys.widgetTodoQuadrant
     private let appearanceKey = SharedConstants.Keys.widgetAppearance
+
+    init() {
+        // 種入目前的開關狀態，避免 onAppear 時 false→true 誤觸 onChange 而重複 start()
+        _liveActivityOn = State(initialValue: LiveActivityController.isEnabled)
+        _todoLiveActivityOn = State(initialValue: TodoLiveActivityController.isEnabled)
+    }
 
     var body: some View {
         Form {
@@ -26,6 +34,20 @@ struct WidgetSettingsView: View {
                 Text("外觀")
             } footer: {
                 Text("「跟隨系統」會跟著手機的深色／淺色；也可以把桌面工具固定成淺色或深色。")
+            }
+
+            // MARK: 即時動態（Live Activity）
+            Section {
+                Toggle(isOn: $liveActivityOn) {
+                    Label("在鎖定畫面顯示今日狀態", systemImage: "bolt.horizontal.circle")
+                }
+                Toggle(isOn: $todoLiveActivityOn) {
+                    Label("在靈動島／鎖定畫面顯示待辦", systemImage: "checklist")
+                }
+            } header: {
+                Text("即時動態")
+            } footer: {
+                Text("「今日狀態」即時顯示 HP／FP／MP;「待辦」會顯示最近要到期的一筆，靈動島長按展開、或鎖定畫面可直接按「完成」打勾、自動換下一筆。跨日後系統會自動淡出。第一次開啟時系統可能會詢問是否允許「即時動態」。")
             }
 
             // MARK: 待辦小工具
@@ -82,6 +104,12 @@ struct WidgetSettingsView: View {
             sharedDefaults.set(newValue.rawValue, forKey: appearanceKey)
             WidgetCenter.shared.reloadAllTimelines()
         }
+        .onChange(of: liveActivityOn) { _, on in
+            if on { LiveActivityController.start() } else { LiveActivityController.stop() }
+        }
+        .onChange(of: todoLiveActivityOn) { _, on in
+            if on { TodoLiveActivityController.start() } else { TodoLiveActivityController.stop() }
+        }
     }
 
     // MARK: - Rows
@@ -119,6 +147,7 @@ struct WidgetSettingsView: View {
         if sharedDefaults.object(forKey: appearanceKey) != nil {
             appearance = WidgetAppearanceOption(rawValue: sharedDefaults.integer(forKey: appearanceKey)) ?? .system
         }
+        // liveActivityOn 已在 init() 種入，不在這裡指派以免誤觸 onChange
     }
 }
 
