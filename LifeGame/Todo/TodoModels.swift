@@ -35,6 +35,7 @@ struct TodoItem: Identifiable, Codable, Equatable {
     var createdAt: Date = Date()
     var startDate: Date?
     var dueDate: Date?
+    var completedAt: Date?      // 打勾完成的時間（用於「完成一週後自動消失」；舊資料為 nil 不會被自動清除）
 
     /// 距離截止日期的剩餘天數（負數表示已過期）
     var daysUntilDue: Int? {

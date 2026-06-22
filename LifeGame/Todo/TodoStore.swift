@@ -6,6 +6,9 @@ import SwiftUI
 final class TodoQuadrantStore: ObservableObject {
     
     private let storageKey = "todo_quadrant_v1"
+
+    /// 已完成待辦的保留時間：完成滿這麼久後自動消失
+    private static let completedRetention: TimeInterval = 7 * 24 * 3600   // 一週
     
     @Published var items: [TodoItem] = [] {
         didSet { if !isReloading { save() } }
@@ -26,12 +29,14 @@ final class TodoQuadrantStore: ObservableObject {
 
     func reloadFromStorage() {
         isReloading = true
-        defer { isReloading = false }
         if let saved: [TodoItem] = StorageManager.load([TodoItem].self, forKey: storageKey) {
             items = saved
         } else {
             items = []
         }
+        isReloading = false
+        // 此時已過 .active 的合併階段，可安全地刪除過期完成項並存檔（會同步到 shared.todos / Widget / Live Activity）
+        purgeOldCompletedIfNeeded()
     }
     
     func add(title: String, quadrant: TodoQuadrant, startDate: Date? = nil, dueDate: Date? = nil) {
@@ -62,6 +67,7 @@ final class TodoQuadrantStore: ObservableObject {
     func toggleDone(_ item: TodoItem) {
         guard let idx = items.firstIndex(where: { $0.id == item.id }) else { return }
         items[idx].isDone.toggle()
+        items[idx].completedAt = items[idx].isDone ? Date() : nil
         if items[idx].isDone {
             NotificationManager.cancelTodoReminder(id: item.id)
         } else if let dueDate = items[idx].dueDate {
@@ -97,6 +103,7 @@ final class TodoQuadrantStore: ObservableObject {
             if let idx = items.firstIndex(where: { $0.id == watchItem.id }) {
                 if items[idx].isDone != watchItem.isDone {
                     items[idx].isDone = watchItem.isDone
+                    items[idx].completedAt = watchItem.isDone ? Date() : nil
                     changed = true
                 }
             }
@@ -118,6 +125,10 @@ final class TodoQuadrantStore: ObservableObject {
         } else {
             items = []
         }
+        // 冷啟動：先在記憶體隱藏「完成超過一週」的（isReloading=true → 不觸發 save，避免蓋掉未合併的外部變更）。
+        // 真正的刪除＋存檔留到回前景 reloadFromStorage() 時做。
+        let cutoff = Date().addingTimeInterval(-Self.completedRetention)
+        items.removeAll { $0.isDone && ($0.completedAt.map { $0 < cutoff } ?? false) }
         // 不再塞預設資料，讓使用者自行新增
     }
 
@@ -131,6 +142,7 @@ final class TodoQuadrantStore: ObservableObject {
         for ext in external {
             if let idx = stored.firstIndex(where: { $0.id == ext.id }), stored[idx].isDone != ext.isDone {
                 stored[idx].isDone = ext.isDone
+                stored[idx].completedAt = ext.isDone ? Date() : nil
                 changed = true
             }
         }
@@ -140,6 +152,20 @@ final class TodoQuadrantStore: ObservableObject {
         }
     }
     
+    /// 移除「完成超過一週」的待辦並存檔（completedAt 為 nil 的舊資料不動）。
+    /// 只在合併之後、isReloading == false 時呼叫 —— 移除會觸發 didSet → save() → 同步 shared.todos。
+    private func purgeOldCompletedIfNeeded() {
+        let cutoff = Date().addingTimeInterval(-Self.completedRetention)
+        let expired = items.filter { $0.isDone && ($0.completedAt.map { $0 < cutoff } ?? false) }
+        guard !expired.isEmpty else { return }
+        for item in expired {
+            NotificationManager.cancelTodoReminder(id: item.id)
+        }
+        let expiredIDs = Set(expired.map { $0.id })
+        items.removeAll { expiredIDs.contains($0.id) }   // didSet → save() → WatchSyncHelper.syncTodos
+        debugLog("🧹 清除完成超過一週的待辦：\(expired.count) 筆")
+    }
+
     private func save() {
         StorageManager.save(items, forKey: storageKey)
         WatchSyncHelper.syncTodos(items)
