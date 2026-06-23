@@ -160,7 +160,8 @@ private struct AddTodoToQuadrantSheet: View {
                     }
                     Toggle("設定截止日期", isOn: $hasDueDate)
                     if hasDueDate {
-                        DatePicker("截止時間", selection: $dueDate, in: Date()...)
+                        DatePicker("截止日期", selection: $dueDate, in: Date()..., displayedComponents: .date)
+                        DatePicker("截止時間", selection: $dueDate, in: Date()..., displayedComponents: .hourAndMinute)
                     }
                 }
             }
@@ -426,7 +427,8 @@ struct TodoQuadrantBoardView: View {
         .sheet(item: $dueDateEditItem) { item in
             NavigationStack {
                 Form {
-                    DatePicker("截止時間", selection: $editingDueDate, in: Date()...)
+                    DatePicker("截止日期", selection: $editingDueDate, in: Date()..., displayedComponents: .date)
+                    DatePicker("截止時間", selection: $editingDueDate, in: Date()..., displayedComponents: .hourAndMinute)
                 }
                 .navigationTitle("設定截止日期")
                 .navigationBarTitleDisplayMode(.inline)
