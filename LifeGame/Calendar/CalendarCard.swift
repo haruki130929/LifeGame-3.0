@@ -7,6 +7,7 @@ struct CalendarCard: View {
     let onPrevMonth: () -> Void
     let onNextMonth: () -> Void
     let urgentImportantTasks: [UrgentImportantTask]
+    var showsEventTitles: Bool = false   // true：功能頁用 Apple 風格（每天列出彩色行程名稱）
 
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
@@ -15,6 +16,7 @@ struct CalendarCard: View {
     private var cal: Calendar { calendarSettings.calendar }
     private let rowGap: CGFloat = 6
     private let barInsetX: CGFloat = 2
+    private var eventFontScale: CGFloat { CGFloat(calendarSettings.eventFontScale) }   // 功能頁行程字級倍率
     
     var body: some View {
         let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
@@ -99,8 +101,97 @@ struct CalendarCard: View {
         }
     }
     
-    // MARK: - Grid（底：行程條 / 中：日期 / 上：today 紅圈）
+    // MARK: - Grid（依 showsEventTitles 切換）
+    @ViewBuilder
     private var monthGrid: some View {
+        if showsEventTitles { appleMonthGrid } else { compactMonthGrid }
+    }
+
+    // MARK: - Apple 風格月曆（功能頁：每天列出彩色行程名稱）
+    private var appleMonthGrid: some View {
+        let cells = monthCells
+        let weeks = stride(from: 0, to: cells.count, by: 7).map { Array(cells[$0 ..< min($0 + 7, cells.count)]) }
+        return VStack(spacing: 0) {
+            ForEach(Array(weeks.enumerated()), id: \.offset) { _, week in
+                HStack(spacing: 0) {
+                    ForEach(Array(week.enumerated()), id: \.offset) { _, cell in
+                        appleDayCell(cell)
+                            .frame(maxWidth: .infinity, alignment: .topLeading)
+                    }
+                }
+                .frame(height: 118 * eventFontScale)
+                Divider().opacity(0.2)
+            }
+        }
+    }
+
+    private func appleDayCell(_ cell: CalendarDayCell) -> some View {
+        Group {
+            if let date = cell.date {
+                let events = dayEvents(on: date)
+                Button { selected = date } label: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        HStack(spacing: 0) {
+                            Spacer(minLength: 0)
+                            appleDayNumber(date, isInMonth: cell.isInCurrentMonth)
+                        }
+                        ForEach(Array(events.prefix(3).enumerated()), id: \.offset) { _, ev in
+                            appleEventLabel(ev)
+                        }
+                        if events.count > 3 {
+                            Text("+\(events.count - 3)")
+                                .font(.system(size: 12 * eventFontScale))
+                                .foregroundStyle(.secondary)
+                                .padding(.leading, 4)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 3)
+                    .padding(.top, 3)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                }
+                .buttonStyle(.plain)
+                .help(helpText(for: date))
+            } else {
+                Color.clear
+            }
+        }
+    }
+
+    private func appleDayNumber(_ date: Date, isInMonth: Bool) -> some View {
+        let isToday = cal.isDateInToday(date)
+        return Text("\(cal.component(.day, from: date))")
+            .font(.system(size: 16 * eventFontScale, weight: .semibold))
+            .foregroundStyle(isToday ? .white : (isInMonth ? .primary : .secondary))
+            .frame(width: 27 * eventFontScale, height: 27 * eventFontScale)
+            .background { if isToday { Circle().fill(theme.accentColor) } }
+    }
+
+    private func appleEventLabel(_ ev: (color: Color, title: String)) -> some View {
+        HStack(spacing: 4) {
+            Circle().fill(ev.color).frame(width: 7 * eventFontScale, height: 7 * eventFontScale)
+            Text(ev.title)
+                .font(.system(size: 13 * eventFontScale))
+                .lineLimit(1)
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 5)
+        .padding(.vertical, 3)
+        .background(ev.color.opacity(0.18), in: RoundedRectangle(cornerRadius: 4))
+    }
+
+    private func dayEvents(on date: Date) -> [(color: Color, title: String)] {
+        let day = cal.startOfDay(for: date)
+        return ranges.compactMap { r in
+            let rs = cal.startOfDay(for: r.start)
+            let re = cal.startOfDay(for: r.end)
+            guard day >= rs && day <= re, !r.title.isEmpty else { return nil }
+            return (r.color, r.title)
+        }
+    }
+
+    // MARK: - 緊湊月曆（小卡：行程條 + 日期）
+    private var compactMonthGrid: some View {
         let days = monthCells
         let cellH = calendarDayCellHeight
         
@@ -198,6 +289,7 @@ struct CalendarCard: View {
                     }
                 }
                 .buttonStyle(.plain)
+                .help(helpText(for: date))   // 游標停留時顯示當天行程名稱（iPad 觸控板／滑鼠）
             } else {
                 Color.clear
             }
@@ -336,7 +428,18 @@ struct CalendarCard: View {
         let s = max(r.start, monthStart)
         let e = min(r.end, monthEnd)
         guard s < e else { return nil }
-        return CalendarRange(start: s, end: e, color: r.color, eventId: r.eventId)
+        return CalendarRange(start: s, end: e, color: r.color, eventId: r.eventId, title: r.title)
+    }
+
+    /// 該日所有行程名稱（給游標停留的 tooltip 用）
+    private func helpText(for date: Date) -> String {
+        let day = cal.startOfDay(for: date)
+        let titles = ranges.compactMap { r -> String? in
+            let rs = cal.startOfDay(for: r.start)
+            let re = cal.startOfDay(for: r.end)
+            return (day >= rs && day <= re && !r.title.isEmpty) ? r.title : nil
+        }
+        return titles.joined(separator: "、")
     }
     
     private var selectedDayNumber: Int { cal.component(.day, from: selected) }

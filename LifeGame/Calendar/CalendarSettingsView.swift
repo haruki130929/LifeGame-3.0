@@ -19,8 +19,35 @@ struct CalendarSettingsView: View {
                     Text("週日").tag(1)
                     Text("週一").tag(2)
                 }
+
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack {
+                        Label("行程字級", systemImage: "textformat.size")
+                        Spacer()
+                        Text("\(Int(settings.eventFontScale * 100))%")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Slider(value: $settings.eventFontScale, in: 1.0...1.8, step: 0.05)
+                    // 即時範例
+                    HStack(spacing: 4) {
+                        Circle()
+                            .fill(Color(hex: "7F77DD") ?? .purple)
+                            .frame(width: CGFloat(settings.eventFontScale) * 7,
+                                   height: CGFloat(settings.eventFontScale) * 7)
+                        Text("範例行程")
+                            .font(.system(size: CGFloat(settings.eventFontScale) * 13))
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 5)
+                    .padding(.vertical, 3)
+                    .background((Color(hex: "7F77DD") ?? .purple).opacity(0.18),
+                                in: RoundedRectangle(cornerRadius: 4))
+                }
             } header: {
                 Text("顯示")
+            } footer: {
+                Text("「行程字級」會調整功能頁月曆上每天行程名稱的大小。")
             }
 
             Section {

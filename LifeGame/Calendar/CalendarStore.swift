@@ -99,7 +99,8 @@ final class CalendarStore: ObservableObject {
                     colorHex: colorHex,
                     isWeeklyRecurring: true,
                     recurringGroupId: groupId,
-                    appleEventIdentifier: i == 0 ? appleEventIdentifier : nil
+                    appleEventIdentifier: i == 0 ? appleEventIdentifier : nil,
+                    isFromAppleCalendar: false   // 手動建立：保留使用者選的顏色，不被 Apple 顏色覆蓋
                 )
                 events.insert(e, at: 0)
             }
@@ -125,7 +126,8 @@ final class CalendarStore: ObservableObject {
                 start: start,
                 end: end,
                 colorHex: colorHex,
-                appleEventIdentifier: appleEventIdentifier
+                appleEventIdentifier: appleEventIdentifier,
+                isFromAppleCalendar: false   // 手動建立：保留使用者選的顏色，不被 Apple 顏色覆蓋
             )
             events.insert(e, at: 0)
         }
@@ -195,6 +197,20 @@ final class CalendarStore: ObservableObject {
         "\(id)|\(Int(start.timeIntervalSince1970))"
     }
 
+    /// 把 Apple 行事曆的顏色（CGColor）轉成 "RRGGBB" 十六進位字串
+    private static func hexString(from cgColor: CGColor) -> String? {
+        let ui = UIColor(cgColor: cgColor)
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        if !ui.getRed(&r, green: &g, blue: &b, alpha: &a) {
+            // 少數灰階色空間：用白點補上
+            var w: CGFloat = 0
+            guard ui.getWhite(&w, alpha: &a) else { return nil }
+            r = w; g = w; b = w
+        }
+        func channel(_ v: CGFloat) -> Int { Int((max(0, min(1, v)) * 255).rounded()) }
+        return String(format: "%02X%02X%02X", channel(r), channel(g), channel(b))
+    }
+
     /// 匯入指定 [start, end] 範圍的 Apple 行事曆事件。
     /// 回傳匯入筆數；**回傳 -1 代表權限被拒**。
     func syncFromAppleCalendar(start: Date, end: Date) async -> Int {
@@ -211,20 +227,48 @@ final class CalendarStore: ObservableObject {
         })
 
         var newEvents: [CalendarEvent] = []
+        var colorByKey: [String: String] = [:]   // occurrenceKey → Apple 行事曆目前的顏色
         for ek in ekEvents {
             guard let identifier = ek.eventIdentifier, let ekStart = ek.startDate else { continue }
             let key = Self.occurrenceKey(identifier, ekStart)
+            // 用 Apple 行事曆（該事件所屬日曆）的顏色上色；取不到才退回系統灰
+            let hex = ek.calendar?.cgColor.flatMap { Self.hexString(from: $0) } ?? "8E8E93"
+            colorByKey[key] = hex
             guard !seen.contains(key) else { continue }
             seen.insert(key)
             newEvents.append(CalendarEvent(
                 title: ek.title ?? "（無標題）",
                 start: ekStart,
                 end: ek.endDate ?? ekStart,
-                colorHex: "8E8E93",  // 系統灰色，區分手動建立的
-                appleEventIdentifier: identifier
+                colorHex: hex,
+                appleEventIdentifier: identifier,
+                isFromAppleCalendar: true
             ))
         }
-        if !newEvents.isEmpty { events.append(contentsOf: newEvents) }  // 一次寫入，避免逐筆存檔
+
+        // 既有的「Apple 匯入」事件：跟著 Apple 行事曆「目前的顏色」更新
+        //（含 Apple 端改過色、以及舊版用系統灰匯入的）。手動建立的事件不動，保留自選顏色。
+        var working = events
+        var changed = false
+        for idx in working.indices {
+            // 在 Apple 行事曆裡（有 appleEventIdentifier）、且不是「明確標記為手動」的，就跟著 Apple 顏色更新。
+            // 舊版匯入的事件旗標是 nil（nil != false 成立）→ 也會被納入並順手補標記。
+            let isImported = working[idx].appleEventIdentifier != nil && working[idx].isFromAppleCalendar != false
+            guard isImported, let appleID = working[idx].appleEventIdentifier else { continue }
+            let key = Self.occurrenceKey(appleID, working[idx].start)
+            guard let hex = colorByKey[key] else { continue }   // 不在本次同步範圍的略過
+            if working[idx].colorHex != hex {
+                working[idx].colorHex = hex
+                changed = true
+            }
+            if working[idx].isFromAppleCalendar != true {
+                working[idx].isFromAppleCalendar = true   // 順手標記，之後就走旗標
+                changed = true
+            }
+        }
+        if !newEvents.isEmpty { working.append(contentsOf: newEvents); changed = true }
+        if changed { events = working }   // 一次寫入，避免逐筆存檔
+
         let importCount = newEvents.count
 
         lastSyncDate = Date()

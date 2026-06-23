@@ -8,6 +8,7 @@ struct CalendarRange: Identifiable {
     let end: Date
     let color: Color
     var eventId: UUID? = nil
+    var title: String = ""
 }
 
 struct RangeSegment: Identifiable {
@@ -38,7 +39,7 @@ struct CalendarRangeProvider {
             guard s < e else { return nil }
 
             let barColor = Color(hex: event.colorHex)?.opacity(0.85) ?? Color.cyan.opacity(0.70)
-            return CalendarRange(start: s, end: e, color: barColor, eventId: event.id)
+            return CalendarRange(start: s, end: e, color: barColor, eventId: event.id, title: event.title)
         }
     }
 }

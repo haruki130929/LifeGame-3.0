@@ -26,6 +26,10 @@ struct CalendarEvent: Identifiable, Codable, Equatable {
     // Apple 行事曆事件的 ID
     var appleEventIdentifier: String? = nil
 
+    /// 是否由 Apple 行事曆匯入。true 才會在同步時跟著 Apple 顏色更新；
+    /// 手動建立的事件保留使用者自選的顏色。（optional：舊資料缺這個 key 也能解碼）
+    var isFromAppleCalendar: Bool? = nil
+
     init(
         id: UUID = UUID(),
         title: String,
@@ -34,7 +38,8 @@ struct CalendarEvent: Identifiable, Codable, Equatable {
         colorHex: String = "33A6B8",
         isWeeklyRecurring: Bool = false,
         recurringGroupId: UUID? = nil,
-        appleEventIdentifier: String? = nil
+        appleEventIdentifier: String? = nil,
+        isFromAppleCalendar: Bool? = nil
     ) {
         self.id = id
         self.title = title
@@ -44,5 +49,6 @@ struct CalendarEvent: Identifiable, Codable, Equatable {
         self.isWeeklyRecurring = isWeeklyRecurring
         self.recurringGroupId = recurringGroupId
         self.appleEventIdentifier = appleEventIdentifier
+        self.isFromAppleCalendar = isFromAppleCalendar
     }
 }

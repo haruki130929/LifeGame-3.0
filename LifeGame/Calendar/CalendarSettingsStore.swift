@@ -15,6 +15,7 @@ final class CalendarSettingsStore: ObservableObject {
         static let firstWeekday = "calendar_firstWeekday"
         static let syncAppleCalendar = "calendar_syncAppleCalendar"
         static let colorPresets = "calendar_colorPresets"
+        static let eventFontScale = "calendar_eventFontScale"
     }
 
     /// 1=週日, 2=週一...7=週六（預設週日）
@@ -38,6 +39,13 @@ final class CalendarSettingsStore: ObservableObject {
         }
     }
 
+    /// 功能頁月曆上「行程名稱」的字級倍率（1.0 ~ 1.8）
+    @Published var eventFontScale: Double = 1.25 {
+        didSet {
+            if !isReloading { StorageManager.save(eventFontScale, forKey: Keys.eventFontScale) }
+        }
+    }
+
     private var syncHelper: StoreSyncHelper?
     private var isReloading = false
 
@@ -45,6 +53,7 @@ final class CalendarSettingsStore: ObservableObject {
         firstWeekday = StorageManager.load(Int.self, forKey: Keys.firstWeekday) ?? 1
         syncAppleCalendar = StorageManager.load(Bool.self, forKey: Keys.syncAppleCalendar) ?? false
         colorPresets = StorageManager.load([EventColorPreset].self, forKey: Keys.colorPresets) ?? []
+        eventFontScale = StorageManager.load(Double.self, forKey: Keys.eventFontScale) ?? 1.25
         syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }
     }
 
@@ -54,6 +63,7 @@ final class CalendarSettingsStore: ObservableObject {
         firstWeekday = StorageManager.load(Int.self, forKey: Keys.firstWeekday) ?? 1
         syncAppleCalendar = StorageManager.load(Bool.self, forKey: Keys.syncAppleCalendar) ?? false
         colorPresets = StorageManager.load([EventColorPreset].self, forKey: Keys.colorPresets) ?? []
+        eventFontScale = StorageManager.load(Double.self, forKey: Keys.eventFontScale) ?? 1.25
     }
 
     var calendar: Calendar {
