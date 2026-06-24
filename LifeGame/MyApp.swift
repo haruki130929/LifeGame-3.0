@@ -19,6 +19,8 @@ struct LifeGameApp: App {
     @StateObject private var phoneModeStore = PhoneModeStore()
     @StateObject private var coachMarkStore = CoachMarkStore()
     @StateObject private var slotNameStore = TimeSlotNameStore()
+    @StateObject private var slotTimeStore = TimeSlotTimeStore()
+    @StateObject private var homeNavigator = HomeNavigator()
     @StateObject private var appleSignIn = AppleSignInManager()
     @State private var tutorialTracker = FeatureTutorialTracker()
 
@@ -105,6 +107,8 @@ struct LifeGameApp: App {
                         .environmentObject(phoneModeStore)
                         .environmentObject(coachMarkStore)
                         .environmentObject(slotNameStore)
+                        .environmentObject(slotTimeStore)
+                        .environmentObject(homeNavigator)
                         .environmentObject(appleSignIn)
                         .environment(tutorialTracker)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
@@ -143,6 +147,7 @@ struct LifeGameApp: App {
                         .environmentObject(theme)
                         .environmentObject(phoneModeStore)
                         .environmentObject(slotNameStore)
+                        .environmentObject(slotTimeStore)
                         .environmentObject(appleSignIn)
                         .environment(tutorialTracker)
                         .preferredColorScheme(theme.appearance.preferredColorScheme)

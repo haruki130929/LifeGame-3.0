@@ -21,6 +21,7 @@ enum FeatureID: String, Hashable, Identifiable {
     case moduleEditor
     case ganttChart
     case copingNotes
+    case communicationBoard
 }
 
 enum FabContext {

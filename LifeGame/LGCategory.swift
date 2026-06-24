@@ -24,10 +24,7 @@ enum LGCategory: String, CaseIterable, Identifiable {
 // MARK: - Hub
 struct LGCategoryHubView: View {
     let category: LGCategory
-    let wishStore: WishStore
-    let ledgerStore: LedgerStore
-    let dailyLogStore: DailyLogStore
-    let closeDrawer: () -> Void
+    @EnvironmentObject private var navigator: HomeNavigator
 
     var body: some View {
         List {
@@ -36,21 +33,16 @@ struct LGCategoryHubView: View {
             }
         }
         .navigationTitle(category.rawValue)
-        .onAppear { closeDrawer() }
     }
 
+    /// 點功能 → 讓該功能頁成為堆疊唯一一層（取代目前的分類頁），
+    /// 這樣在功能頁按系統返回鈕會直接回到主頁面，而不是退回這個分類頁。
     @ViewBuilder private var contentLinks: some View {
         switch category {
         case .tools:
-            NavigationLink { FinanceHubView(wishStore: wishStore, ledgerStore: ledgerStore) } label: {
-                Label("財務", systemImage: "creditcard")
-            }
-            NavigationLink { GanttScreen() } label: {
-                Label("甘特圖", systemImage: "chart.bar.xaxis")
-            }
-            NavigationLink { CommunicationBoardView() } label: {
-                Label("選緘溝通板", systemImage: "bubble.left.and.bubble.right")
-            }
+            featureLink(.wish, "財務", systemImage: "creditcard")
+            featureLink(.ganttChart, "甘特圖", systemImage: "chart.bar.xaxis")
+            featureLink(.communicationBoard, "選緘溝通板", systemImage: "bubble.left.and.bubble.right")
 
         case .roles:
             comingSoonRow("能力五角圖", systemImage: "pentagon")
@@ -58,31 +50,36 @@ struct LGCategoryHubView: View {
             comingSoonRow("裝備系統", systemImage: "backpack")
 
         case .growth:
-            NavigationLink { DailyLogHistoryView(store: dailyLogStore) } label: {
-                Label("每日紀錄", systemImage: "square.and.pencil")
-            }
-            NavigationLink { MoodThermometerScreen() } label: {
-                Label("心情溫度計", systemImage: "heart.text.square")
-            }
-            NavigationLink { MandalaChartScreen() } label: {
-                Label("曼陀羅圖表", systemImage: "square.grid.3x3")
-            }
+            featureLink(.dailyLog, "每日紀錄", systemImage: "square.and.pencil")
+            featureLink(.moodThermometer, "心情溫度計", systemImage: "heart.text.square")
+            featureLink(.mandala, "曼陀羅圖表", systemImage: "square.grid.3x3")
             comingSoonRow("近況檢視（折線圖）", systemImage: "chart.line.uptrend.xyaxis")
 
         case .help:
-            NavigationLink { CopingNotesView() } label: {
-                Label("動力筆記", systemImage: "lightbulb.fill")
-            }
+            featureLink(.copingNotes, "動力筆記", systemImage: "lightbulb.fill")
             comingSoonRow("在意清單", systemImage: "checklist")
 
         case .diary:
-            NavigationLink { DiaryView() } label: {
-                Label("日記", systemImage: "book")
-            }
-            NavigationLink { PracticeDiaryListView() } label: {
-                Label("練習日記", systemImage: "pencil.and.list.clipboard")
-            }
+            featureLink(.diary, "日記", systemImage: "book")
+            featureLink(.practiceDiary, "練習日記", systemImage: "pencil.and.list.clipboard")
         }
+    }
+
+    /// 功能列：外觀同 NavigationLink（含右側 chevron），但點擊改用 navigator.go(to:)
+    private func featureLink(_ feature: FeatureID, _ title: String, systemImage: String) -> some View {
+        Button {
+            navigator.go(to: feature)
+        } label: {
+            HStack {
+                Label(title, systemImage: systemImage)
+                Spacer()
+                Image(systemName: "chevron.forward")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(.tertiary)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
     }
 
     /// 尚未實作的功能 — 顯示為灰色不可點擊，帶「即將推出」標籤

@@ -3,7 +3,8 @@ import SwiftUI
 struct HomeDrawerView: View {
     let currentSlot: TimeSlot
     let onSelectSlot: (TimeSlot) -> Void
-    
+    let onSelectCategory: (LGCategory) -> Void
+
     let dailyLogStore: DailyLogStore
     let wishStore: WishStore
     let ledgerStore: LedgerStore
@@ -94,14 +95,8 @@ struct HomeDrawerView: View {
     }
     
     private func categoryLink(_ category: LGCategory, label: String, systemImage: String) -> some View {
-        NavigationLink {
-            LGCategoryHubView(
-                category: category,
-                wishStore: wishStore,
-                ledgerStore: ledgerStore,
-                dailyLogStore: dailyLogStore,
-                closeDrawer: { } // Drawer 關閉由 Host 控制
-            )
+        Button {
+            onSelectCategory(category)
         } label: {
             HStack {
                 Image(systemName: systemImage)

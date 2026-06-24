@@ -18,10 +18,10 @@ struct HomeRootView: View {
     @State private var showAddDailyLog = false
     @State private var showMoodEdit = false
     @State private var featureSettingsTarget: FeatureID?
-    @State private var navigationPath = NavigationPath()
+    @EnvironmentObject private var navigator: HomeNavigator
 
     var body: some View {
-        NavigationStack(path: $navigationPath) {
+        NavigationStack(path: $navigator.path) {
             HomeContentView(
                 game: game,
                 moodStore: moodStore,
@@ -29,6 +29,7 @@ struct HomeRootView: View {
                 dailyLogStore: dailyLogStore
             )
             .navigationDestination(for: FeatureID.self) { feature in
+                Group {
                 switch feature {
                 case .calendar:
                     CalendarScreen()
@@ -66,7 +67,16 @@ struct HomeRootView: View {
                     GanttScreen()
                 case .copingNotes:
                     CopingNotesView()
+                case .communicationBoard:
+                    CommunicationBoardView()
                 }
+                }
+                .appStyleBackButton()
+            }
+            // 選單分類頁走 value-based，push 進 navigator.path
+            .navigationDestination(for: LGCategory.self) { category in
+                LGCategoryHubView(category: category)
+                    .appStyleBackButton()
             }
         }
         .fabFloatingOverlay()
@@ -88,8 +98,8 @@ struct HomeRootView: View {
 
             case .navigate(let feature):
                 // 防止重複導航：只在根頁面時才 push
-                if navigationPath.isEmpty {
-                    navigationPath.append(feature)
+                if navigator.path.isEmpty {
+                    navigator.path.append(feature)
                 }
                 fab.route = nil
 
@@ -98,38 +108,38 @@ struct HomeRootView: View {
                 fab.route = nil
 
             // 功能頁面專用 route：
-            // 已經在功能頁（navigationPath 不為空）→ 不攔截，讓功能頁接手
+            // 已經在功能頁（navigator.path 不為空）→ 不攔截，讓功能頁接手
             // 在首頁 → 先導航到對應功能頁
             case .addRingItem, .editSchedule:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.tomorrowRing) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.tomorrowRing) ; fab.route = nil }
             case .jumpToToday, .syncAppleCalendar:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.calendar) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.calendar) ; fab.route = nil }
             case .addTodoToQuadrant, .todoEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.todoQuadrant) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.todoQuadrant) ; fab.route = nil }
             case .addWish, .editWishList:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.wish) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.wish) ; fab.route = nil }
             case .addLedgerEntry, .viewLedgerChart:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.ledger) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.ledger) ; fab.route = nil }
             case .monthlyScoreStats:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.monthlyScoreCalendar) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.monthlyScoreCalendar) ; fab.route = nil }
             case .addBagItem, .bagEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.bagRequired) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.bagRequired) ; fab.route = nil }
             case .addMandalaChart, .mandalaEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.mandala) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.mandala) ; fab.route = nil }
             case .addPracticeDiary, .practiceDiaryEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.practiceDiary) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.practiceDiary) ; fab.route = nil }
             case .addQuestionModule, .questionModuleEditMode:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.questionModule) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.questionModule) ; fab.route = nil }
             case .reviewDailyLog, .exportDailyLog:
-                if navigationPath.isEmpty { navigationPath.append(FeatureID.dailyLog) ; fab.route = nil }
+                if navigator.path.isEmpty { navigator.path.append(FeatureID.dailyLog) ; fab.route = nil }
             case .addQuestion, .questionEditMode:
                 break // handled inside CustomModuleEditorView
             case .addGanttTask, .addMilestone, .toggleBuffer, .ganttBufferPercent, .deleteMilestoneMenu:
                 break // handled inside GanttScreen
             }
         }
-        .onChange(of: navigationPath) {
-            if navigationPath.isEmpty {
+        .onChange(of: navigator.path) {
+            if navigator.path.isEmpty {
                 fab.popToRoot()
             }
         }

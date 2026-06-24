@@ -113,6 +113,12 @@ private extension SettingsView {
             } label: {
                 Label("我的身份", systemImage: slotNameStore.role == .student ? "graduationcap.fill" : "briefcase.fill")
             }
+
+            NavigationLink {
+                TimeSlotTimeSettingsView()
+            } label: {
+                Label("時段時間", systemImage: "clock")
+            }
         }
     }
 

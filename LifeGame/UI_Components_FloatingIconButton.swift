@@ -7,6 +7,7 @@ struct FloatingIconButton: View {
     let action: () -> Void
 
     @EnvironmentObject private var theme: ThemeStore
+    @State private var pressScale: CGFloat = 1.0
 
     private var bg: Color {
         theme.isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.08)
@@ -19,7 +20,17 @@ struct FloatingIconButton: View {
     }
 
     var body: some View {
-        Button(action: action) {
+        Button {
+            // 簡單的縮小再放大回饋
+            withAnimation(.easeOut(duration: 0.09)) {
+                pressScale = 0.8
+            } completion: {
+                withAnimation(.easeOut(duration: 0.18)) {
+                    pressScale = 1.0
+                }
+            }
+            action()
+        } label: {
             Image(systemName: systemName)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundStyle(fg)
@@ -38,5 +49,6 @@ struct FloatingIconButton: View {
                 .shadow(color: .black.opacity(theme.isDark ? 0.25 : 0.12), radius: 10, x: 0, y: 6)
         }
         .buttonStyle(.plain)
+        .scaleEffect(pressScale)
     }
 }

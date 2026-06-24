@@ -4,7 +4,8 @@ import SwiftUI
 struct HomeDrawerHost: View {
     @Binding var isOpen: Bool
     let onSelectSlot: (TimeSlot) -> Void
-    
+    let onSelectCategory: (LGCategory) -> Void
+
     // Drawer 內容需要用到的依賴
     @EnvironmentObject private var theme: ThemeStore
     let dailyLogStore: DailyLogStore
@@ -31,6 +32,10 @@ struct HomeDrawerHost: View {
                     onSelectSlot: { slot in
                         onSelectSlot(slot)
                         withAnimation(.easeInOut) { isOpen = false }
+                    },
+                    onSelectCategory: { category in
+                        withAnimation(.easeInOut) { isOpen = false }
+                        onSelectCategory(category)
                     },
                     dailyLogStore: dailyLogStore,
                     wishStore: wishStore,

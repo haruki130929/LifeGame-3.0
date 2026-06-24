@@ -16,10 +16,14 @@ struct HomeContentView: View {
     @EnvironmentObject private var coachMarkStore: CoachMarkStore
     @EnvironmentObject private var tomorrowRingStore: TomorrowRingStore
     @EnvironmentObject private var updateChecker: AppUpdateChecker
+    @EnvironmentObject private var slotTimeStore: TimeSlotTimeStore
+    @EnvironmentObject private var navigator: HomeNavigator
 
 
     @State private var selectedTab: TabSelection = .tab(UUID())
-    @State private var currentSlot: TimeSlot = .beforeLeave
+    @State private var currentSlot: TimeSlot = .current()
+    /// 打開 App 時只自動選一次時段，之後不覆蓋使用者手動切換
+    @State private var didAutoSelectSlot = false
     @State private var showSlotCardEditor = false
     
     @State private var isDrawerOpen = false
@@ -104,9 +108,11 @@ struct HomeContentView: View {
                     .coachAnchor(.rightPanel)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .padding(.top, topButtonsY)
-                    .padding(.trailing, safeTrailing + LayoutTokens.floatSideGap)
+                    .padding(.trailing, sideInset)
                 }
             }
+            // 把整個內容往左挪一點（右側多留邊距，避免右上角按鈕貼邊）
+            .padding(.trailing, 20)
             .allowsHitTesting(!isOverlayPresented)
             // iPhone 邊緣滑動手勢：右滑開 drawer、左滑開右面板
             .gesture(
@@ -135,6 +141,11 @@ struct HomeContentView: View {
         .toolbar(.hidden, for: .navigationBar)
         
         .onAppear {
+            // 打開 App 時自動切到目前時間所屬的時段（只做一次，不覆蓋手動切換）
+            if !didAutoSelectSlot {
+                currentSlot = slotTimeStore.currentSlot()
+                didAutoSelectSlot = true
+            }
             // 初始化選中第一個切頁
             if let first = customTabStore.tabs.first {
                 selectedTab = .tab(first.id)
@@ -192,6 +203,9 @@ struct HomeContentView: View {
                 isOpen: $isDrawerOpen,
                 onSelectSlot: { slot in
                     currentSlot = slot
+                },
+                onSelectCategory: { category in
+                    navigator.path.append(category)
                 },
                 dailyLogStore: dailyLogStore,
                 wishStore: wishStore,

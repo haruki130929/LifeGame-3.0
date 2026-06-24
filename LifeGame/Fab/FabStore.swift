@@ -403,6 +403,8 @@ final class FabStore: ObservableObject {
             ]
         case .copingNotes:
             break   // 純瀏覽，無特別 FAB 動作（仍會自動帶「設定」）
+        case .communicationBoard:
+            break   // 純瀏覽，無特別 FAB 動作
         }
 
         return result
@@ -429,6 +431,7 @@ final class FabStore: ObservableObject {
         case .moduleEditor:           return "編輯模組"
         case .ganttChart:             return "甘特圖"
         case .copingNotes:            return "動力筆記"
+        case .communicationBoard:     return "選緘溝通板"
         }
     }
 
@@ -451,6 +454,7 @@ final class FabStore: ObservableObject {
         case .moduleEditor:           return "pencil.and.list.clipboard"
         case .ganttChart:             return "chart.bar.xaxis"
         case .copingNotes:            return "lightbulb.fill"
+        case .communicationBoard:     return "bubble.left.and.bubble.right"
         }
     }
 }

@@ -123,6 +123,8 @@ struct QuickModeShellView: View {
                     GanttScreen()
                 case .copingNotes:
                     CopingNotesView()
+                case .communicationBoard:
+                    CommunicationBoardView()
                 }
             }
         }
