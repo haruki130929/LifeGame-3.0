@@ -33,8 +33,8 @@ private struct FabButtoniPhone: View {
     private let edgeScrollMargin: CGFloat = 0.2
     private let scrollRate: CGFloat = 0.03
 
-    private var fabCircleBg: Color {
-        theme.isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.08)
+    private var fabCircleBg: AnyShapeStyle {
+        theme.floatingButtonFill
     }
     private var fabForeground: Color {
         theme.isDark ? .white.opacity(0.95) : Color(.label)
@@ -327,8 +327,8 @@ private struct FabButtoniPad: View {
     private let fabCircleSize: CGFloat = 60
     private let itemDelay: Double = 0.04
 
-    private var fabCircleBg: Color {
-        theme.isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.08)
+    private var fabCircleBg: AnyShapeStyle {
+        theme.floatingButtonFill
     }
     private var pillBg: Color {
         theme.isDark ? Color.white.opacity(0.12) : Color.black.opacity(0.06)

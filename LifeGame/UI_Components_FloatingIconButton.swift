@@ -9,8 +9,8 @@ struct FloatingIconButton: View {
     @EnvironmentObject private var theme: ThemeStore
     @State private var pressScale: CGFloat = 1.0
 
-    private var bg: Color {
-        theme.isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.08)
+    private var bg: AnyShapeStyle {
+        theme.floatingButtonFill
     }
     private var strokeColor: Color {
         theme.isDark ? Color.white.opacity(0.10) : Color.black.opacity(0.08)
@@ -21,11 +21,11 @@ struct FloatingIconButton: View {
 
     var body: some View {
         Button {
-            // 簡單的縮小再放大回饋
-            withAnimation(.easeOut(duration: 0.09)) {
-                pressScale = 0.8
+            // 縮小再彈回的點擊回饋（縮更小 + 彈性回彈，讓動畫更明顯）
+            withAnimation(.easeOut(duration: 0.08)) {
+                pressScale = 0.7
             } completion: {
-                withAnimation(.easeOut(duration: 0.18)) {
+                withAnimation(.spring(response: 0.42, dampingFraction: 0.3)) {
                     pressScale = 1.0
                 }
             }

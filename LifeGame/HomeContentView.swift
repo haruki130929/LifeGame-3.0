@@ -56,10 +56,14 @@ struct HomeContentView: View {
                 let topButtonsY = safeTop + LayoutTokens.floatTopGap
                 let leftTopButtonWidth = LayoutTokens.leftTopButtonReservedWidth
                 
+                // 頁籤列會用 .offset(y: -tabH) 往上凸出面板本體，預留空間時必須把這段
+                // 高度也算進去，否則頁籤會升到跟左上/右上按鈕同高，造成「面板頂住按鈕」的錯視。
+                let panelTabHeight = LayoutTokens.tabHeight(forContainerWidth: w - sideInset * 2)
                 let panelTopReserved =
                 safeTop
                 + LayoutTokens.floatTopGap
                 + LayoutTokens.floatButtonSize
+                + panelTabHeight
                 + LayoutTokens.panelTopClearance
                 
                 let extraBottom = AppLayout.clamp(h * 0.008, 0, 8)
@@ -84,23 +88,13 @@ struct HomeContentView: View {
                         .padding(.bottom, panelBottomReserved)
                     }
                     
-                    FloatingIconButton(systemName: "line.3.horizontal", size: LayoutTokens.floatButtonSize, showBadge: updateChecker.hasUpdate) {
-                        withAnimation(DrawerPanel.panelSpring) {
-                            isDrawerOpen.toggle()
-                            if isDrawerOpen { isContentOpen = false }
-                        }
-                    }
-                    .opacity(isContentOpen ? 0.5 : 1)
-                    .disabled(isContentOpen)
-                    .coachAnchor(.drawerButton)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                    .padding(.top, topButtonsY)
-                    .padding(.leading, safeLeading + (leftTopButtonWidth - LayoutTokens.floatButtonSize) / 2)
-
                     FloatingIconButton(systemName: "arrow.right", size: LayoutTokens.floatButtonSize) {
-                        withAnimation(DrawerPanel.panelSpring) {
-                            isContentOpen.toggle()
-                            if isContentOpen { isDrawerOpen = false }
+                        // 先讓按鈕的點擊動畫播一下，再滑出面板
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.15) {
+                            withAnimation(DrawerPanel.panelSpring) {
+                                isContentOpen.toggle()
+                                if isContentOpen { isDrawerOpen = false }
+                            }
                         }
                     }
                     .opacity((isDrawerOpen || isContentOpen) ? 0.5 : 1)
@@ -227,6 +221,29 @@ struct HomeContentView: View {
                     }
                 }
             )
+        }
+
+        // 左上角選單鈕：疊在抽屜上層，讓抽屜滑出時還看得到橫槓往右飛走的動畫
+        .overlay(alignment: .topLeading) {
+            GeometryReader { proxy in
+                MenuHamburgerButton(
+                    size: LayoutTokens.floatButtonSize,
+                    showBadge: updateChecker.hasUpdate,
+                    isDrawerOpen: isDrawerOpen,
+                    onTap: {
+                        withAnimation(DrawerPanel.panelSpring) {
+                            isDrawerOpen.toggle()
+                            if isDrawerOpen { isContentOpen = false }
+                        }
+                    }
+                )
+                .opacity(isContentOpen ? 0.5 : 1)
+                .disabled(isContentOpen)
+                .allowsHitTesting(!isContentOpen && !isDrawerOpen)
+                .coachAnchor(.drawerButton)
+                .padding(.top, proxy.safeAreaInsets.top + LayoutTokens.floatTopGap)
+                .padding(.leading, proxy.safeAreaInsets.leading + (LayoutTokens.leftTopButtonReservedWidth - LayoutTokens.floatButtonSize) / 2)
+            }
         }
 
         .navigationDestination(isPresented: $showSlotCardEditor) {

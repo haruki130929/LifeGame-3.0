@@ -14,7 +14,9 @@ struct AppearanceSettingsView: View {
     @State private var draftCustomHex: String = ""
     
     @State private var draftAppearance: ThemeStore.AppAppearance = .system
-    
+
+    @State private var draftCardSurface: ThemeStore.CardSurfaceStyle = .glass
+
     // MARK: - Derived
     private var trimmedHex: String {
         draftCustomHex.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -83,6 +85,21 @@ struct AppearanceSettingsView: View {
                 .pickerStyle(.segmented)
                 .tint(previewAccent)
             }
+
+            // MARK: 卡片
+            Section {
+                Picker("卡片材質", selection: $draftCardSurface) {
+                    ForEach(ThemeStore.CardSurfaceStyle.allCases) { s in
+                        Text(s.title).tag(s)
+                    }
+                }
+                .pickerStyle(.segmented)
+                .tint(previewAccent)
+            } header: {
+                Text("卡片")
+            } footer: {
+                Text("卡片底樣式（主面板維持實心）。毛玻璃與玻璃在背景豐富時最明顯。")
+            }
         }
         .navigationTitle("外觀")
         .onAppear {
@@ -95,6 +112,7 @@ struct AppearanceSettingsView: View {
             draftUseCustomAccent = theme.useCustomAccent
             draftCustomHex = theme.customAccentHex
             draftAppearance = theme.appearance
+            draftCardSurface = theme.cardSurfaceStyle
         }
         .toolbar {
             ToolbarItem(placement: .cancellationAction) {
@@ -111,7 +129,8 @@ struct AppearanceSettingsView: View {
         theme.setFontScale(draftFontScale)
         theme.setBackgroundStyle(draftBackgroundStyle)
         theme.setAppearance(draftAppearance)
-        
+        theme.setCardSurfaceStyle(draftCardSurface)
+
         if draftUseCustomAccent {
             // 自訂色：只有在有效時才真的開（canSave 已擋掉）
             theme.setCustomAccentHex(trimmedHex)

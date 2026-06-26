@@ -44,6 +44,12 @@ enum LayoutTokens {
     static let tabSlant: CGFloat = 15
     static let tabCorner: CGFloat = 5
 
+    /// 頁籤列高度：HomeMainPanelView 渲染與 HomeContentView 預留上方空間共用，
+    /// 確保「面板往下挪的量」與「頁籤往上凸出的量」一致，避免頁籤升到左上/右上按鈕同高。
+    static func tabHeight(forContainerWidth containerWidth: CGFloat) -> CGFloat {
+        AppLayout.clamp(containerWidth * 0.075, tabHeightMin, tabHeightMax)
+    }
+
     // FAB
     static let fabSideGap: CGFloat = AppLayout.isIPad ? 16 : 20
     static let fabBottomGap: CGFloat = AppLayout.isIPad ? 16 : 20
@@ -53,7 +59,7 @@ enum LayoutTokens {
 enum DrawerPanel {
     static let overlayDimOpacity: CGFloat = 0.25
     static let drawerHiddenExtra: CGFloat = 20
-    static let drawerAnimDuration: CGFloat = 0.22
+    static let drawerAnimDuration: CGFloat = 0.4
     static let panelSpring = Animation.spring(response: 0.28, dampingFraction: 0.9)
 
     static func drawerWidth(for screenWidth: CGFloat) -> CGFloat {

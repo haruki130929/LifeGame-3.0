@@ -6,15 +6,11 @@ struct ExpandableCardRow: View {
     @Binding var expandedCardType: CardType?
     @Binding var ringSelectedID: UUID?
 
-    @EnvironmentObject private var theme: ThemeStore
-
     private var isExpanded: Bool {
         expandedCardType == cardType
     }
 
     var body: some View {
-        let shape = RoundedRectangle(cornerRadius: 18, style: .continuous)
-
         VStack(spacing: 0) {
             // MARK: - Header（始終可見）
             headerRow
@@ -42,28 +38,7 @@ struct ExpandableCardRow: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background {
-            if theme.isDark {
-                shape.fill(.thinMaterial)
-            } else {
-                shape.fill(Color.white)
-            }
-        }
-        .clipShape(shape)
-        .overlay(
-            shape.strokeBorder(
-                theme.isDark
-                    ? Color.white.opacity(0.06)
-                    : Color.black.opacity(0.10),
-                lineWidth: 1
-            )
-        )
-        .shadow(
-            color: theme.isDark ? .black.opacity(0.3) : .black.opacity(0.08),
-            radius: theme.isDark ? 10 : 8,
-            x: 0,
-            y: theme.isDark ? 6 : 3
-        )
+        .cardSurface()
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation(.spring(response: 0.35, dampingFraction: 0.82)) {

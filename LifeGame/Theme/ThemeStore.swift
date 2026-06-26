@@ -73,6 +73,21 @@ final class ThemeStore: ObservableObject {
             }
         }
     }
+
+    /// 卡片底樣式：實心 / 毛玻璃(Material)
+    enum CardSurfaceStyle: Int, CaseIterable, Identifiable {
+        case solid = 0
+        case glass = 1
+
+        var id: Int { rawValue }
+
+        var title: String {
+            switch self {
+            case .solid: return "實心"
+            case .glass: return "毛玻璃"
+            }
+        }
+    }
     
     // MARK: - Persist Keys
     
@@ -83,6 +98,7 @@ final class ThemeStore: ObservableObject {
         static let customAccentHex = "theme.customAccentHex"
         static let useCustomAccent = "theme.useCustomAccent"
         static let appearance = "theme.appearance"
+        static let cardSurfaceStyle = "theme.cardSurfaceStyle"
     }
     
     // MARK: - Published
@@ -93,7 +109,9 @@ final class ThemeStore: ObservableObject {
     @Published var customAccentHex: String
     @Published var useCustomAccent: Bool
     @Published var appearance: AppAppearance
-    
+    /// 卡片底樣式（實心／毛玻璃／玻璃），預設毛玻璃
+    @Published var cardSurfaceStyle: CardSurfaceStyle
+
     /// 用於在必要時強制刷新根視圖（保險用）
     @Published var refreshID: UUID = UUID()
 
@@ -135,6 +153,9 @@ final class ThemeStore: ObservableObject {
         let appRaw: Int = Self.loadValue(Int.self, key: Keys.appearance) ?? AppAppearance.system.rawValue
         self.appearance = AppAppearance(rawValue: appRaw) ?? .system
 
+        let cardRaw: Int = Self.loadValue(Int.self, key: Keys.cardSurfaceStyle) ?? CardSurfaceStyle.glass.rawValue
+        self.cardSurfaceStyle = CardSurfaceStyle(rawValue: cardRaw) ?? .glass
+
         // 一次性回填：確保舊版存的設定也備份到 Keychain
         backfillToKeychainIfNeeded()
 
@@ -158,6 +179,9 @@ final class ThemeStore: ObservableObject {
 
         let appRaw: Int = Self.loadValue(Int.self, key: Keys.appearance) ?? AppAppearance.system.rawValue
         appearance = AppAppearance(rawValue: appRaw) ?? .system
+
+        let cardRaw: Int = Self.loadValue(Int.self, key: Keys.cardSurfaceStyle) ?? CardSurfaceStyle.glass.rawValue
+        cardSurfaceStyle = CardSurfaceStyle(rawValue: cardRaw) ?? .glass
     }
 
     /// 把目前的本地設定回填到 Keychain（只在 Keychain 為空時執行）
@@ -169,6 +193,7 @@ final class ThemeStore: ObservableObject {
         ThemeKeychain.save(customAccentHex, forKey: Keys.customAccentHex)
         ThemeKeychain.save(useCustomAccent, forKey: Keys.useCustomAccent)
         ThemeKeychain.save(appearance.rawValue, forKey: Keys.appearance)
+        ThemeKeychain.save(cardSurfaceStyle.rawValue, forKey: Keys.cardSurfaceStyle)
     }
     
     // MARK: - Computed
@@ -191,7 +216,16 @@ final class ThemeStore: ObservableObject {
         }
         return accentPreset.color
     }
-    
+
+    /// 浮動按鈕（左上選單、右上箭頭、FAB）底樣式：
+    /// 毛玻璃模式用材質，否則維持原本半透明色。主面板永遠實心，不受此影響。
+    var floatingButtonFill: AnyShapeStyle {
+        if cardSurfaceStyle == .glass {
+            return AnyShapeStyle(.ultraThinMaterial)
+        }
+        return AnyShapeStyle(isDark ? Color.white.opacity(0.14) : Color.black.opacity(0.08))
+    }
+
     // MARK: - Mutations (Save)
     
     func setFontScale(_ scale: Double) {
@@ -230,6 +264,11 @@ final class ThemeStore: ObservableObject {
     func setAppearance(_ a: AppAppearance) {
         appearance = a
         Self.saveValue(a.rawValue, key: Keys.appearance)
+    }
+
+    func setCardSurfaceStyle(_ style: CardSurfaceStyle) {
+        cardSurfaceStyle = style
+        Self.saveValue(style.rawValue, key: Keys.cardSurfaceStyle)
     }
     
     func bumpRefresh() {
