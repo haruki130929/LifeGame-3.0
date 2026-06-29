@@ -6,6 +6,8 @@
 //  按「完成」會在背景把待辦打勾，並自動換成下一筆（邏輯在 CompleteTodoFromLiveActivityIntent）。
 //
 
+// Live Activity UI：Mac Catalyst 不支援 ActivityKit，整檔在 Catalyst 上排除編譯。
+#if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
 import ActivityKit
 import WidgetKit
 import SwiftUI
@@ -113,3 +115,4 @@ private struct TodoLockView: View {
         }
     }
 }
+#endif

@@ -26,6 +26,7 @@ enum SyncMergeRegistration {
         r.register("question_modules_v1",    merge: r.arrayMerge(DailyLogModule.self))
         r.register("quick_pages_v1",         merge: r.arrayMerge(QuickPage.self))
         r.register("practice_diaries_v1",    merge: r.arrayMerge(PracticeDiary.self))
+        r.register("aquarium_v1",            merge: r.arrayMerge(AquariumTask.self))
 
         // MARK: - 字典型（[String: V]，union of keys）
         r.register("history_records_v1",       merge: r.dictMerge(DayRecord.self))

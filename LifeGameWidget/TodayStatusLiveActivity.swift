@@ -6,6 +6,8 @@
 //  資料來自 App 端透過 ActivityKit 推送的 TodayStatusAttributes.ContentState。
 //
 
+// Live Activity UI：Mac Catalyst 不支援 ActivityKit，整檔在 Catalyst 上排除編譯。
+#if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
 import ActivityKit
 import WidgetKit
 import SwiftUI
@@ -111,3 +113,4 @@ private struct LockScreenView: View {
         return Swift.min(1, Swift.max(0, Double(value) / Double(max)))
     }
 }
+#endif

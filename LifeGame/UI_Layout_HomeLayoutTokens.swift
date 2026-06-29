@@ -7,8 +7,27 @@ enum AppLayout {
         min(max(v, lo), hi)
     }
 
-    /// 裝置是否為 iPad（靜態常數，啟動時決定一次）
-    static let isIPad: Bool = UIDevice.current.userInterfaceIdiom == .pad
+    /// 是否在 Mac 上以 Mac Catalyst 執行（在 Mac 視窗中跑的 iPad App）
+    static let isMacCatalyst: Bool = {
+        #if targetEnvironment(macCatalyst)
+        return true
+        #else
+        return false
+        #endif
+    }()
+
+    /// 是否採用「大版面（iPad / Mac）」而非 iPhone 版面（靜態常數，啟動時決定一次）。
+    ///
+    /// Mac Catalyst 一律視為 iPad-class：Mac 上 `userInterfaceIdiom` 為 `.mac`，若不特別處理會
+    /// 掉進 iPhone 分支（拖曳式 FAB 環、陀螺儀滑卡 quick mode、邊緣滑動手勢），對滑鼠操作很不友善。
+    /// 把 Catalyst 當 iPad，可讓 Mac 取得 iPad 版面寬度、點按式 FAB 膠囊選單與 full mode。
+    static let isIPad: Bool = {
+        #if targetEnvironment(macCatalyst)
+        return true
+        #else
+        return UIDevice.current.userInterfaceIdiom == .pad
+        #endif
+    }()
 
     /// iPad 元件高度縮放倍率（卡片、圓環、圖表統一使用）
     static let heightScale: CGFloat = isIPad ? 1.15 : 1.0

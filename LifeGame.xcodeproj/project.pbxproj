@@ -10,6 +10,7 @@
 		EB6A19952FE2A423001F1724 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB6A19942FE2A423001F1724 /* WidgetKit.framework */; };
 		EB6A19972FE2A423001F1724 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = EB6A19962FE2A423001F1724 /* SwiftUI.framework */; };
 		EB6A19A42FE2A424001F1724 /* LifeGameWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = EB6A19922FE2A423001F1724 /* LifeGameWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		EBDBFF422FF15A34009D9148 /* LGWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = EBDBFF382FF15A33009D9148 /* LGWatch Watch App.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,6 +28,13 @@
 			remoteGlobalIDString = EB6A19912FE2A423001F1724;
 			remoteInfo = LifeGameWidgetExtension;
 		};
+		EBDBFF402FF15A34009D9148 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = EB7D27552F5DAA2500E67CBE /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = EBDBFF372FF15A33009D9148;
+			remoteInfo = "LGWatch Watch App";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -36,6 +44,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
+				EBDBFF422FF15A34009D9148 /* LGWatch Watch App.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -60,6 +69,7 @@
 		EB6A19962FE2A423001F1724 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		EB6A19AA2FE2A49C001F1724 /* LifeGameWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LifeGameWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
 		EB9AEE642FD802FD004FDDF8 /* LifeGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifeGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		EBDBFF382FF15A33009D9148 /* LGWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LGWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -92,11 +102,6 @@
 			path = LifeGameTests;
 			sourceTree = "<group>";
 		};
-		EB0764022F6BF53A000462AB /* LifeGamerWatch Watch App */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "LifeGamerWatch Watch App";
-			sourceTree = "<group>";
-		};
 		EB6A19982FE2A423001F1724 /* LifeGameWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
@@ -112,6 +117,11 @@
 				EB8E77142F5EA22C007C6BE7 /* Exceptions for "LifeGame" folder in "LifeGame" target */,
 			);
 			path = LifeGame;
+			sourceTree = "<group>";
+		};
+		EBDBFF392FF15A33009D9148 /* LGWatch Watch App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = "LGWatch Watch App";
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -140,6 +150,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EBDBFF352FF15A33009D9148 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -157,13 +174,14 @@
 			children = (
 				EB6A19AA2FE2A49C001F1724 /* LifeGameWidgetExtensionDebug.entitlements */,
 				EB7D275F2F5DAA2500E67CBE /* LifeGame */,
-				EB0764022F6BF53A000462AB /* LifeGamerWatch Watch App */,
 				EB05F3C52FD2B77600D2B5A5 /* LifeGameTests.xctest */,
 				EB05F3C62FD2B77600D2B5A5 /* LifeGameTests */,
 				EB9AEE642FD802FD004FDDF8 /* LifeGame.app */,
 				EB6A19922FE2A423001F1724 /* LifeGameWidgetExtension.appex */,
 				EB6A19982FE2A423001F1724 /* LifeGameWidget */,
+				EBDBFF392FF15A33009D9148 /* LGWatch Watch App */,
 				EB6A19932FE2A423001F1724 /* Frameworks */,
+				EBDBFF382FF15A33009D9148 /* LGWatch Watch App.app */,
 			);
 			sourceTree = "<group>";
 		};
@@ -229,6 +247,7 @@
 			);
 			dependencies = (
 				EB6A19A32FE2A424001F1724 /* PBXTargetDependency */,
+				EBDBFF412FF15A34009D9148 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				EB7D275F2F5DAA2500E67CBE /* LifeGame */,
@@ -240,6 +259,28 @@
 			productReference = EB9AEE642FD802FD004FDDF8 /* LifeGame.app */;
 			productType = "com.apple.product-type.application";
 		};
+		EBDBFF372FF15A33009D9148 /* LGWatch Watch App */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EBDBFF452FF15A34009D9148 /* Build configuration list for PBXNativeTarget "LGWatch Watch App" */;
+			buildPhases = (
+				EBDBFF342FF15A33009D9148 /* Sources */,
+				EBDBFF352FF15A33009D9148 /* Frameworks */,
+				EBDBFF362FF15A33009D9148 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EBDBFF392FF15A33009D9148 /* LGWatch Watch App */,
+			);
+			name = "LGWatch Watch App";
+			packageProductDependencies = (
+			);
+			productName = "LGWatch Watch App";
+			productReference = EBDBFF382FF15A33009D9148 /* LGWatch Watch App.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -247,7 +288,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 2650;
+				LastSwiftUpdateCheck = 2660;
 				LastUpgradeCheck = 2610;
 				TargetAttributes = {
 					EB05F3C42FD2B77600D2B5A5 = {
@@ -259,6 +300,9 @@
 					};
 					EB7D275C2F5DAA2500E67CBE = {
 						CreatedOnToolsVersion = 26.1.1;
+					};
+					EBDBFF372FF15A33009D9148 = {
+						CreatedOnToolsVersion = 26.6;
 					};
 				};
 			};
@@ -279,6 +323,7 @@
 				EB7D275C2F5DAA2500E67CBE /* LifeGame */,
 				EB05F3C42FD2B77600D2B5A5 /* LifeGameTests */,
 				EB6A19912FE2A423001F1724 /* LifeGameWidgetExtension */,
+				EBDBFF372FF15A33009D9148 /* LGWatch Watch App */,
 			);
 		};
 /* End PBXProject section */
@@ -299,6 +344,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		EB7D275B2F5DAA2500E67CBE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EBDBFF362FF15A33009D9148 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -329,6 +381,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		EBDBFF342FF15A33009D9148 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -341,6 +400,12 @@
 			isa = PBXTargetDependency;
 			target = EB6A19912FE2A423001F1724 /* LifeGameWidgetExtension */;
 			targetProxy = EB6A19A22FE2A424001F1724 /* PBXContainerItemProxy */;
+		};
+		EBDBFF412FF15A34009D9148 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = EBDBFF372FF15A33009D9148 /* LGWatch Watch App */;
+			targetProxy = EBDBFF402FF15A34009D9148 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -412,6 +477,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -443,6 +510,8 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
@@ -581,7 +650,11 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 10;
 				DEVELOPMENT_TEAM = 7QVWAH8C25;
+				ENABLE_APP_SANDBOX = YES;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_OUTGOING_NETWORK_CONNECTIONS = YES;
 				ENABLE_PREVIEWS = YES;
+				ENABLE_RESOURCE_ACCESS_PHOTO_LIBRARY = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LifeGame/Info.plist;
 				INFOPLIST_KEY_NSCalendarsFullAccessUsageDescription = "LifeGame 需要存取你的行事曆，以便新增和管理事件";
@@ -600,7 +673,11 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.lifegame;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				REGISTER_APP_GROUPS = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -638,12 +715,82 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.lifegame;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		EBDBFF432FF15A34009D9148 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7QVWAH8C25;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = LGWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.haruki.lifegame;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.lifegame.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
+			};
+			name = Debug;
+		};
+		EBDBFF442FF15A34009D9148 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 7QVWAH8C25;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = LGWatch;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.haruki.lifegame;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.haruki.lifegame.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 26.2;
 			};
 			name = Release;
 		};
@@ -682,6 +829,15 @@
 			buildConfigurations = (
 				EB7D27692F5DAA2700E67CBE /* Debug */,
 				EB7D276A2F5DAA2700E67CBE /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		EBDBFF452FF15A34009D9148 /* Build configuration list for PBXNativeTarget "LGWatch Watch App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBDBFF432FF15A34009D9148 /* Debug */,
+				EBDBFF442FF15A34009D9148 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

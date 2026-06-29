@@ -56,6 +56,9 @@ final class FabStore: ObservableObject {
         case toggleBuffer
         case ganttBufferPercent(Int)
         case deleteMilestoneMenu
+        // ── 待辦水族箱專用 ──
+        case openAquarium
+        case addAquariumFish(FishType)
         // ── 功能設定 ──
         case featureSettings(FeatureID)
 
@@ -93,6 +96,8 @@ final class FabStore: ObservableObject {
             case .toggleBuffer:            return "toggleBuffer"
             case .ganttBufferPercent(let p): return "ganttBuffer-\(p)"
             case .deleteMilestoneMenu:     return "deleteMilestoneMenu"
+            case .openAquarium:             return "openAquarium"
+            case .addAquariumFish(let t):   return "addAquariumFish-\(t.rawValue)"
             case .featureSettings(let f):   return "featureSettings-\(f)"
             }
         }
@@ -205,7 +210,7 @@ final class FabStore: ObservableObject {
     // MARK: - Home Actions（從 SlotCard 卡片 → FAB 選單項目）
 
     private func makeHomeActions(features: [FeatureID]) -> [FabAction] {
-        features.map { feature in
+        var actions = features.map { feature in
             FabAction(
                 title: title(for: feature),
                 systemImage: icon(for: feature)
@@ -216,6 +221,34 @@ final class FabStore: ObservableObject {
                 } else {
                     self.selectFeature(feature)
                 }
+            }
+        }
+        // 待辦水族箱：常駐一個「水族箱」動作（不依賴卡片設定），點開後可打開水缸或新增各類型的魚
+        actions.append(aquariumHomeAction())
+        return actions
+    }
+
+    /// 待辦水族箱的 FAB 動作：展開子選單（打開水缸 + 新增三種魚）
+    private func aquariumHomeAction() -> FabAction {
+        FabAction(title: "水族箱", systemImage: "fish") { [weak self] in
+            guard let self else { return }
+            self.selectedFeature = nil
+            self.subActions = [
+                FabAction(title: "打開水缸", systemImage: "rectangle.portrait", route: .openAquarium) { [weak self] in
+                    self?.route = .openAquarium; self?.collapse()
+                },
+                FabAction(title: "新增社交魚", systemImage: "circle", route: .addAquariumFish(.social)) { [weak self] in
+                    self?.route = .addAquariumFish(.social); self?.collapse()
+                },
+                FabAction(title: "新增體力魚", systemImage: "square", route: .addAquariumFish(.physical)) { [weak self] in
+                    self?.route = .addAquariumFish(.physical); self?.collapse()
+                },
+                FabAction(title: "新增腦力魚", systemImage: "triangle", route: .addAquariumFish(.mental)) { [weak self] in
+                    self?.route = .addAquariumFish(.mental); self?.collapse()
+                }
+            ]
+            withAnimation(.spring(response: 0.28, dampingFraction: 0.78)) {
+                self.showSubMenu = true
             }
         }
     }

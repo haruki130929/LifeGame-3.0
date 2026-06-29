@@ -7,7 +7,7 @@
 //
 
 import Foundation
-#if canImport(ActivityKit)
+#if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
 import ActivityKit
 #endif
 
@@ -31,7 +31,7 @@ enum LiveActivityController {
     /// 設定頁開關「開」時呼叫：記住偏好並啟動活動（需在前景）。
     static func start() {
         isEnabled = true
-        #if canImport(ActivityKit)
+        #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             debugLog("⚠️ 使用者未允許即時動態（系統設定）")
             return
@@ -60,7 +60,7 @@ enum LiveActivityController {
     /// 設定頁開關「關」時呼叫：記住偏好並結束所有活動。
     static func stop() {
         isEnabled = false
-        #if canImport(ActivityKit)
+        #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
         Task {
             for activity in Activity<TodayStatusAttributes>.activities {
                 await activity.end(nil, dismissalPolicy: .immediate)
@@ -72,7 +72,7 @@ enum LiveActivityController {
 
     /// stats 變動時由 WatchSyncHelper.syncStats 呼叫：開著才更新內容。
     static func update(hp: Stat, fp: Stat, mp: Stat) {
-        #if canImport(ActivityKit)
+        #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
         guard isEnabled else { return }
         pushState(TodayStatusAttributes.ContentState(
             hp: hp.current, hpMax: hp.max,
@@ -85,7 +85,7 @@ enum LiveActivityController {
     /// App 回前景時呼叫：若「開著」卻沒有進行中的活動（全新安裝尚無快照、被系統清掉、
     /// 過了 staleDate 被淡出移除），就重新釘上；已有的話補一次最新數值。
     static func reconcile() {
-        #if canImport(ActivityKit)
+        #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
         guard isEnabled else { return }
         guard ActivityAuthorizationInfo().areActivitiesEnabled else { return }
         if Activity<TodayStatusAttributes>.activities.isEmpty {
@@ -98,7 +98,7 @@ enum LiveActivityController {
 
     // MARK: - Helpers
 
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     /// 用目前 shared.stats 的快照更新（啟動後立即補一次）。
     private static func refresh() {
         guard let state = currentState() else { return }
@@ -142,7 +142,7 @@ enum TodoLiveActivityController {
     /// 設定頁開關「開」：記住偏好並啟動（顯示最近要到期的未完成待辦）。
     static func start() {
         isEnabled = true
-        #if canImport(ActivityKit)
+        #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
         guard ActivityAuthorizationInfo().areActivitiesEnabled else {
             debugLog("⚠️ 使用者未允許即時動態（系統設定）")
             return
@@ -167,7 +167,7 @@ enum TodoLiveActivityController {
     /// 設定頁開關「關」：記住偏好並結束所有活動。
     static func stop() {
         isEnabled = false
-        #if canImport(ActivityKit)
+        #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
         Task {
             for activity in Activity<TodoActivityAttributes>.activities {
                 await activity.end(nil, dismissalPolicy: .immediate)
@@ -179,7 +179,7 @@ enum TodoLiveActivityController {
 
     /// 待辦變動時呼叫（WatchSyncHelper.syncTodos）：開著才更新成最新的「該顯示那筆」。
     static func update() {
-        #if canImport(ActivityKit)
+        #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
         guard isEnabled else { return }
         Task {
             if let state = TodoLiveActivityShared.currentState() {
@@ -204,13 +204,13 @@ enum TodoLiveActivityController {
 
     /// App 回前景時呼叫：補釘 / 換最新一筆 / 沒待辦就結束。
     static func reconcile() {
-        #if canImport(ActivityKit)
+        #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
         guard isEnabled else { return }
         update()
         #endif
     }
 
-    #if canImport(ActivityKit)
+    #if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
     private static func refresh() {
         guard let state = TodoLiveActivityShared.currentState() else { return }
         Task {

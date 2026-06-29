@@ -1,9 +1,10 @@
 import SwiftUI
+import PhotosUI
 
 struct CharacterProfileView: View {
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var character: CharacterStore
-    @State private var showImagePicker = false
+    @State private var avatarPickerItem: PhotosPickerItem? = nil
 
     var body: some View {
         Group {
@@ -15,13 +16,16 @@ struct CharacterProfileView: View {
         }
         .navigationTitle("角色設定")
         .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showImagePicker) {
-            ImagePicker(image: Binding(
-                get: { character.avatarImage },
-                set: { newImage in
-                    character.setAvatar(newImage)
+        .onChange(of: avatarPickerItem) { _, newItem in
+            guard let newItem else { return }
+            Task {
+                if let data = try? await newItem.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    character.setAvatar(image)
                 }
-            ), onDone: {})
+                // 載入後清空，讓使用者可重複選同一張
+                avatarPickerItem = nil
+            }
         }
     }
 
@@ -56,9 +60,7 @@ struct CharacterProfileView: View {
         VStack(spacing: 16) {
             Spacer()
 
-            Button {
-                showImagePicker = true
-            } label: {
+            PhotosPicker(selection: $avatarPickerItem, matching: .images) {
                 ZStack {
                     if let img = character.avatarImage {
                         Image(uiImage: img)
@@ -165,45 +167,5 @@ struct CharacterProfileView: View {
                 character.setAbilities(updated)
             }
         )
-    }
-}
-
-// MARK: - Image Picker
-
-struct ImagePicker: UIViewControllerRepresentable {
-    @Binding var image: UIImage?
-    var onDone: () -> Void
-    @Environment(\.dismiss) private var dismiss
-
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.delegate = context.coordinator
-        picker.allowsEditing = true
-        return picker
-    }
-
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-
-    func makeCoordinator() -> Coordinator { Coordinator(self) }
-
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: ImagePicker
-
-        init(_ parent: ImagePicker) { self.parent = parent }
-
-        func imagePickerController(_ picker: UIImagePickerController,
-                                   didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-            if let edited = info[.editedImage] as? UIImage {
-                parent.image = edited
-            } else if let original = info[.originalImage] as? UIImage {
-                parent.image = original
-            }
-            parent.onDone()
-            parent.dismiss()
-        }
-
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            parent.dismiss()
-        }
     }
 }

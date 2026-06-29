@@ -13,10 +13,14 @@ struct HomeRootView: View {
     @EnvironmentObject private var ledgerStore: LedgerStore
     @EnvironmentObject private var moodHistory: MoodHistoryStore
     @EnvironmentObject private var moodSettings: MoodSettingsStore
+    @EnvironmentObject private var aquarium: AquariumStore
+    @EnvironmentObject private var theme: ThemeStore
 
     @State private var showAddCalendarEvent = false
     @State private var showAddDailyLog = false
     @State private var showMoodEdit = false
+    @State private var showAquariumComposer = false
+    @State private var aquariumComposerType: FishType = .social
     @State private var featureSettingsTarget: FeatureID?
     @EnvironmentObject private var navigator: HomeNavigator
 
@@ -80,6 +84,7 @@ struct HomeRootView: View {
             }
         }
         .fabFloatingOverlay()
+        .aquariumFloatingOverlay()
         .onChange(of: fab.route) {
             guard let newRoute = fab.route else { return }
 
@@ -105,6 +110,18 @@ struct HomeRootView: View {
 
             case .featureSettings(let feature):
                 featureSettingsTarget = feature
+                fab.route = nil
+
+            // ── 待辦水族箱 ──
+            case .openAquarium:
+                withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
+                    aquarium.isExpanded = true
+                }
+                fab.route = nil
+
+            case .addAquariumFish(let type):
+                aquariumComposerType = type
+                showAquariumComposer = true
                 fab.route = nil
 
             // 功能頁面專用 route：
@@ -164,6 +181,11 @@ struct HomeRootView: View {
             MoodEditView()
                 .environmentObject(moodHistory)
                 .environmentObject(moodSettings)
+        }
+        .sheet(isPresented: $showAquariumComposer) {
+            AquariumComposerView(initialType: aquariumComposerType)
+                .environmentObject(aquarium)
+                .environmentObject(theme)
         }
     }
 }

@@ -1,5 +1,4 @@
 import SwiftUI
-import UIKit
 
 struct DailyLogExportSheet: View {
     let allEntries: [DailyLogEntry]
@@ -23,7 +22,7 @@ struct DailyLogExportSheet: View {
     @State private var appliedEnd: Date? = nil
 
     @State private var isGenerating = false
-    @State private var shareItem: ShareItem? = nil
+    @State private var shareURL: URL? = nil
     @State private var errorMessage: String? = nil
 
     private var isConfirmed: Bool { appliedStart != nil && appliedEnd != nil }
@@ -65,6 +64,7 @@ struct DailyLogExportSheet: View {
                             }
                         }
                         .pickerStyle(.segmented)
+                        .onChange(of: format) { _, _ in shareURL = nil }
 
                         Text(format == .pdf
                              ? "排版完整、含照片，適合列印或分享給他人。"
@@ -82,11 +82,17 @@ struct DailyLogExportSheet: View {
                                     ProgressView()
                                     Text("產生中…")
                                 } else {
-                                    Label("產生並分享", systemImage: "square.and.arrow.up")
+                                    Label("產生檔案", systemImage: "doc.badge.plus")
                                 }
                             }
                         }
                         .disabled(confirmedEntries.isEmpty || isGenerating)
+
+                        if let shareURL {
+                            ShareLink(item: shareURL) {
+                                Label("分享 / 儲存檔案", systemImage: "square.and.arrow.up")
+                            }
+                        }
                     }
                 }
 
@@ -105,9 +111,6 @@ struct DailyLogExportSheet: View {
                     Button("關閉") { dismiss() }
                 }
             }
-            .sheet(item: $shareItem) { item in
-                ActivityShareSheet(items: [item.url])
-            }
         }
     }
 
@@ -124,6 +127,7 @@ struct DailyLogExportSheet: View {
         appliedStart = nil
         appliedEnd = nil
         errorMessage = nil
+        shareURL = nil
     }
 
     // MARK: - 產生
@@ -156,7 +160,7 @@ struct DailyLogExportSheet: View {
                     }
                     url = try write(data: data, ext: "pdf", stamp: stamp)
                 }
-                shareItem = ShareItem(url: url)
+                shareURL = url
             } catch {
                 errorMessage = "檔案寫入失敗：\(error.localizedDescription)"
             }
@@ -204,23 +208,4 @@ struct DailyLogExportSheet: View {
         fmt.dateFormat = "yyyyMMdd"
         return "\(fmt.string(from: s))-\(fmt.string(from: e))"
     }
-}
-
-// MARK: - 分享項目
-
-private struct ShareItem: Identifiable {
-    let id = UUID()
-    let url: URL
-}
-
-// MARK: - UIActivityViewController 包裝
-
-private struct ActivityShareSheet: UIViewControllerRepresentable {
-    let items: [Any]
-
-    func makeUIViewController(context: Context) -> UIActivityViewController {
-        UIActivityViewController(activityItems: items, applicationActivities: nil)
-    }
-
-    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }

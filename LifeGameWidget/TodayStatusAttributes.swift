@@ -12,6 +12,10 @@
 //
 
 import Foundation
+
+// Live Activities 在 Mac Catalyst 不支援（ActivityKit 的型別被標為 unavailable），
+// 整段在 Catalyst 上排除編譯。canImport 在 Catalyst 仍為 true，故必須加 macCatalyst 條件。
+#if canImport(ActivityKit) && !targetEnvironment(macCatalyst)
 import ActivityKit
 import AppIntents
 #if canImport(WidgetKit)
@@ -145,3 +149,4 @@ struct CompleteTodoFromLiveActivityIntent: LiveActivityIntent {
         return .result()
     }
 }
+#endif
