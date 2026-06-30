@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// 浮動的待辦水族箱面板：收合時是小把手，展開是水缸（魚游動 + 失衡提示 + 新增）。
+/// 浮動的任務水族箱面板：收合時是小把手，展開是水缸（魚游動 + 失衡提示 + 新增）。
 struct AquariumPanelView: View {
     @EnvironmentObject private var aquarium: AquariumStore
     @EnvironmentObject private var theme: ThemeStore
@@ -17,10 +17,10 @@ struct AquariumPanelView: View {
         Group {
             if aquarium.isExpanded {
                 expandedPanel
-                    .transition(.move(edge: .leading).combined(with: .opacity))
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             } else {
                 collapsedHandle
-                    .transition(.move(edge: .leading).combined(with: .opacity))
+                    .transition(.move(edge: .trailing).combined(with: .opacity))
             }
         }
         .onChange(of: aquarium.tasks) { _, newTasks in
@@ -35,13 +35,13 @@ struct AquariumPanelView: View {
             setExpanded(true)
         } label: {
             HStack(spacing: 6) {
+                Image(systemName: "chevron.left")
+                    .font(.caption2)
                 Image(systemName: "fish")
                 if !aquarium.tasks.isEmpty {
                     Text("\(aquarium.tasks.count)")
                         .font(.caption.weight(.semibold))
                 }
-                Image(systemName: "chevron.right")
-                    .font(.caption2)
             }
             .padding(.vertical, 10)
             .padding(.horizontal, 14)
@@ -71,13 +71,7 @@ struct AquariumPanelView: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Button { setExpanded(false) } label: {
-                Image(systemName: "chevron.down")
-                    .font(.headline)
-            }
-            .buttonStyle(.plain)
-
-            Text("待辦水族箱")
+            Text("任務水族箱")
                 .font(.subheadline.weight(.semibold))
 
             Spacer()
@@ -92,6 +86,12 @@ struct AquariumPanelView: View {
             } label: {
                 Image(systemName: "plus.circle.fill")
                     .font(.title3)
+            }
+            .buttonStyle(.plain)
+
+            Button { setExpanded(false) } label: {
+                Image(systemName: "chevron.right")
+                    .font(.headline)
             }
             .buttonStyle(.plain)
         }

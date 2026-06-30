@@ -56,7 +56,7 @@ final class FabStore: ObservableObject {
         case toggleBuffer
         case ganttBufferPercent(Int)
         case deleteMilestoneMenu
-        // ── 待辦水族箱專用 ──
+        // ── 任務水族箱專用 ──
         case openAquarium
         case addAquariumFish(FishType)
         // ── 功能設定 ──
@@ -223,12 +223,12 @@ final class FabStore: ObservableObject {
                 }
             }
         }
-        // 待辦水族箱：常駐一個「水族箱」動作（不依賴卡片設定），點開後可打開水缸或新增各類型的魚
+        // 任務水族箱：常駐一個「水族箱」動作（不依賴卡片設定），點開後可打開水缸或新增各類型的魚
         actions.append(aquariumHomeAction())
         return actions
     }
 
-    /// 待辦水族箱的 FAB 動作：展開子選單（打開水缸 + 新增三種魚）
+    /// 任務水族箱的 FAB 動作：展開子選單（打開水缸 + 新增三種魚）
     private func aquariumHomeAction() -> FabAction {
         FabAction(title: "水族箱", systemImage: "fish") { [weak self] in
             guard let self else { return }

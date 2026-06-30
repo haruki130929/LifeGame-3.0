@@ -84,7 +84,6 @@ struct HomeRootView: View {
             }
         }
         .fabFloatingOverlay()
-        .aquariumFloatingOverlay()
         .onChange(of: fab.route) {
             guard let newRoute = fab.route else { return }
 
@@ -112,7 +111,7 @@ struct HomeRootView: View {
                 featureSettingsTarget = feature
                 fab.route = nil
 
-            // ── 待辦水族箱 ──
+            // ── 任務水族箱 ──
             case .openAquarium:
                 withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
                     aquarium.isExpanded = true

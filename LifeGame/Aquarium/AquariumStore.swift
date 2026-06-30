@@ -2,7 +2,7 @@ import Foundation
 import Combine
 import SwiftUI
 
-/// 待辦水族箱的資料層 —— 完全沿用 TodoQuadrantStore 的儲存／同步骨架。
+/// 任務水族箱的資料層 —— 完全沿用 TodoQuadrantStore 的儲存／同步骨架。
 /// 任務（魚）持久化並透過 CloudKit 跨裝置同步；面板的展開狀態僅本機畫面用，不同步。
 @MainActor
 final class AquariumStore: ObservableObject {

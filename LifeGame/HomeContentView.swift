@@ -103,6 +103,12 @@ struct HomeContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
                     .padding(.top, topButtonsY)
                     .padding(.trailing, sideInset)
+
+                    // 任務水族箱：與「→」按鈕同一個 GeometryReader，擺在它正下方同一欄
+                    AquariumPanelView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+                        .padding(.top, topButtonsY + LayoutTokens.floatButtonSize + 12)
+                        .padding(.trailing, sideInset)
                 }
             }
             // 把整個內容往左挪一點（右側多留邊距，避免右上角按鈕貼邊）

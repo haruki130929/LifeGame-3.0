@@ -1,6 +1,6 @@
 import Foundation
 
-/// 待辦水族箱的任務類型 —— 三種形狀的魚
+/// 任務水族箱的任務類型 —— 三種形狀的魚
 /// 圓＝社交、方＝體力、三角＝腦力
 enum FishType: String, Codable, CaseIterable, Identifiable {
     case social    // 圓形：社交
