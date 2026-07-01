@@ -26,6 +26,7 @@ struct SpanCardGrid: View {
                         CardFactory(cardType: item.type, size: item.size, ringSelectedID: $ringSelectedID)
                             .frame(width: width(for: item, maxColumns: maxColumns))
                             .frame(minHeight: item.size.height, alignment: .top)
+                            .macHoverHighlight()   // Mac 滑鼠 hover 回饋（其他平台 no-op）
                     }
                     Spacer(minLength: 0)
                 }
