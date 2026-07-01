@@ -163,6 +163,22 @@ struct LifeGameApp: App {
                 )
             }
         }
+        #if targetEnvironment(macCatalyst)
+        // Mac 選單列快捷鍵（其他平台不套用，維持 iPhone/iPad 行為不變）
+        .commands {
+            // 用 App 內的設定頁取代預設的「偏好設定…」選項（⌘,）
+            CommandGroup(replacing: .appSettings) {
+                Button("偏好設定…") { homeNavigator.go(to: .settings) }
+                    .keyboardShortcut(",", modifiers: .command)
+            }
+            CommandMenu("導覽") {
+                Button("回到主頁") { homeNavigator.popToRoot() }
+                    .keyboardShortcut("0", modifiers: .command)
+                Button("快速動作選單") { fab.requestToggle() }
+                    .keyboardShortcut("k", modifiers: .command)
+            }
+        }
+        #endif
     }
 
     // MARK: - Retry

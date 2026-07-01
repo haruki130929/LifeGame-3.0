@@ -176,6 +176,12 @@ final class FabStore: ObservableObject {
         if !isExpanded { hideSubMenu() }
     }
 
+    /// 外部（例如 Mac 選單列快捷鍵 ⌘K）請求開合 FAB。
+    /// 由 FabButton 觀察後走與點擊相同的展開/收合動畫序列 —— 直接改 `isExpanded`
+    /// 不會觸發 FabButton 的本地動畫狀態，選單項目會顯示不出來。
+    @Published var externalToggleRequest: Int = 0
+    func requestToggle() { externalToggleRequest &+= 1 }
+
     func selectFeature(_ feature: FeatureID) {
         selectedFeature = feature
         subActions = makeSubActions(for: feature)

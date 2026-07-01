@@ -367,6 +367,14 @@ private struct FabButtoniPad: View {
                 }
             }
         }
+        // 外部快捷鍵請求開合：走與實際點擊按鈕完全相同的動畫序列
+        .onChange(of: fab.externalToggleRequest) { _, _ in
+            if fab.isExpanded {
+                collapseSequence()
+            } else {
+                expandSequence()
+            }
+        }
     }
 
     @ViewBuilder private var mainMenuView: some View {
