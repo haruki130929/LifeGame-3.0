@@ -114,5 +114,7 @@ struct HomeRootContainerView: View {
         .environmentObject(todoStore)
         .environmentObject(updateChecker)
         .environmentObject(characterStore)
+        // Mac Catalyst：限制寬度並置中（其他平台 no-op）
+        .macCenteredContent(maxWidth: 1366)
     }
 }

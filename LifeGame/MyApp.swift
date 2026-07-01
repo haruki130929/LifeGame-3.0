@@ -118,6 +118,8 @@ struct LifeGameApp: App {
                         .id(storageConfig.currentMode)
                         // ✅ Window 層級再套一次，確保整個視窗（狀態列等）都切換深淺模式
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
+                        // Mac Catalyst：設定視窗最小尺寸（其他平台 no-op）
+                        .macWindowMinSize(width: 960, height: 680)
                         // 版本更新內容
                         .onAppear {
                             coordinator.deduplicateIfNeeded()
