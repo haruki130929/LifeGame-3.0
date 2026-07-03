@@ -14,8 +14,9 @@ final class AquariumStore: ObservableObject {
         didSet { if !isReloading { save() } }
     }
 
-    /// 浮動面板展開／收合（僅本機畫面狀態，不持久化、不同步）
-    @Published var isExpanded: Bool = false
+    // 註：面板展開/收合狀態改放在 AquariumPanelView 的 @State，
+    //     不放這裡 —— 否則每次展開/收合都會發出 objectWillChange，
+    //     讓觀察本 store 的 HomeRootView/首頁整個重繪 → 動畫卡頓。
 
     private var syncHelper: StoreSyncHelper?
     private var isReloading = false

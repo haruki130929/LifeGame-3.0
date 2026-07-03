@@ -31,10 +31,17 @@ final class AquariumTank: ObservableObject {
     private static let baseHeight: CGFloat = 40
 
     private var timer: Timer?
+    private var isVisible = false
 
     // MARK: - Lifecycle
 
-    func start() {
+    /// 水缸是否顯示中（展開）。只有「可見 且 有魚」時才跑 60fps 計時器。
+    func setVisible(_ visible: Bool) {
+        isVisible = visible
+        updateTimer()
+    }
+
+    private func startTimer() {
         guard timer == nil else { return }
         let t = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.step() }
@@ -43,9 +50,18 @@ final class AquariumTank: ObservableObject {
         timer = t
     }
 
-    func stop() {
+    private func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+
+    /// 沒魚或收合時完全不轉 —— 避免空轉 60fps 一直 ping 主執行緒（收合動畫才會更順）
+    private func updateTimer() {
+        if isVisible && !sprites.isEmpty {
+            startTimer()
+        } else {
+            stopTimer()
+        }
     }
 
     // MARK: - Reconcile
@@ -67,6 +83,7 @@ final class AquariumTank: ObservableObject {
             let s = scaleForCount(sprites.count)
             for i in sprites.indices { sprites[i].scale = s }
         }
+        updateTimer()
     }
 
     // MARK: - Private

@@ -11,6 +11,8 @@ struct AquariumPanelView: View {
     @State private var showComposer = false
     @State private var composerType: FishType = .social
     @State private var selectedFish: UUID?
+    /// 面板展開/收合 —— 本機畫面狀態，放這裡而非 store，避免收合時整個首頁重繪造成卡頓
+    @State private var isExpanded = false
 
     // 拖曳位置（相對於預設右中上；存本機、跨啟動保留、不跨裝置同步）
     @AppStorage("aquarium.offsetX") private var savedX: Double = 0
@@ -24,46 +26,65 @@ struct AquariumPanelView: View {
     private var tankHeight: CGFloat { AppLayout.isIPad ? 300 : 240 }
     /// 收合把手的概略寬度（用於左半邊往右展開時對齊把手左緣）
     private let handleWidthApprox: CGFloat = 90
+    /// 只有 iPad（畫面大）可長按拖曳；iPhone 畫面窄，固定在右上角工具按鈕下方
+    private var isDraggable: Bool { AppLayout.isIPad }
 
     var body: some View {
-        Group {
-            if aquarium.isExpanded {
-                expandedPanel
-                    .offset(x: panelHShift)
-                    .transition(.scale(scale: 0.9, anchor: expandAnchor).combined(with: .opacity))
-            } else {
-                collapsedHandle
-                    .transition(.scale(scale: 0.9, anchor: expandAnchor).combined(with: .opacity))
+        // 仿右側面板 HomeRightPanelHost：面板「常駐」，用 .offset 滑進滑出 + easeInOut，
+        // 完全不用 .transition（transition 的插入/移除成本與怪癖正是先前收合卡頓的來源）。
+        ZStack(alignment: .topTrailing) {
+            collapsedHandle
+                .allowsHitTesting(!isExpanded)
+
+            expandedPanel
+                .offset(x: panelHShift + (isExpanded ? 0 : panelSlideOffX))
+                .allowsHitTesting(isExpanded)
+        }
+        .animation(.easeInOut(duration: 0.28), value: isExpanded)
+        .offset(x: isDraggable ? savedX + liveDrag.width : 0,
+                y: isDraggable ? savedY + liveDrag.height : 0)
+        .background {
+            // 只有可拖曳（iPad）才需要追蹤位置判斷左右；iPhone 略過
+            if isDraggable {
+                GeometryReader { geo in
+                    Color.clear
+                        .onChange(of: geo.frame(in: .global).midX, initial: true) { _, m in
+                            baseMidX = m
+                        }
+                }
             }
         }
-        .offset(x: savedX + liveDrag.width, y: savedY + liveDrag.height)
-        .background(
-            GeometryReader { geo in
-                Color.clear
-                    .onChange(of: geo.frame(in: .global).midX, initial: true) { _, m in
-                        baseMidX = m
-                    }
-            }
-        )
         .scaleEffect(isDragging ? 1.05 : 1.0)
-        .animation(.easeOut(duration: 0.15), value: isDragging)
-        // 用 simultaneousGesture 讓「長按拖曳」與子層的「點擊展開/按鈕」並存，不互相搶
         .simultaneousGesture(dragGesture)
+        .onAppear {
+            tank.bounds = CGSize(width: panelWidth, height: tankHeight)
+            tank.reconcile(with: aquarium.tasks)
+            tank.setVisible(isExpanded)
+        }
+        .onChange(of: isExpanded) { _, expanded in
+            tank.setVisible(expanded)
+        }
         .onChange(of: aquarium.tasks) { _, newTasks in
             tank.reconcile(with: newTasks)
         }
+        // FAB「打開水缸」的訊號（用通知，不動 store → 不重繪首頁）
+        .onReceive(NotificationCenter.default.publisher(for: .aquariumOpenRequested)) { _ in
+            setExpanded(true)
+        }
+    }
+
+    /// 收合時面板滑出的方向與距離：右半往右滑出、左半往左滑出（完全離開畫面）
+    private var panelSlideOffX: CGFloat {
+        isOnLeftHalf ? -(panelWidth + 48) : (panelWidth + 48)
     }
 
     /// 面板實際中心是否在螢幕左半。
     /// GeometryReader 量到的是未位移的版面基準（.offset 不改變 frame），
     /// 所以要再加上目前的拖曳位移 savedX + liveDrag 才是真正位置。
     private var isOnLeftHalf: Bool {
-        guard let base = baseMidX else { return false }
+        guard isDraggable, let base = baseMidX else { return false }
         return base + CGFloat(savedX) + liveDrag.width < windowSize.width / 2
     }
-
-    /// 展開/收合以箭頭那一側為錨點成長（右半 → 右上角往左長；左半 → 左上角往右長），避免展開到螢幕外
-    private var expandAnchor: UnitPoint { isOnLeftHalf ? .topLeading : .topTrailing }
 
     /// 面板在左半邊時，往右位移讓左緣約對齊把手左緣（於是往右展開）
     private var panelHShift: CGFloat { isOnLeftHalf ? (panelWidth - handleWidthApprox) : 0 }
@@ -74,27 +95,29 @@ struct AquariumPanelView: View {
         LongPressGesture(minimumDuration: 0.35)
             .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .global))
             .onChanged { value in
+                guard isDraggable else { return }
                 switch value {
                 case .first(true):
                     if !isDragging {
-                        isDragging = true
+                        withAnimation(.easeOut(duration: 0.15)) { isDragging = true }
                         UIImpactFeedbackGenerator(style: .rigid).impactOccurred()
                     }
                 case .second(true, let drag):
-                    if !isDragging { isDragging = true }
+                    if !isDragging { withAnimation(.easeOut(duration: 0.15)) { isDragging = true } }
                     if let drag { liveDrag = drag.translation }
                 default:
                     break
                 }
             }
             .onEnded { value in
+                guard isDraggable else { return }
                 if case .second(_, let drag?) = value {
                     savedX += Double(drag.translation.width)
                     savedY += Double(drag.translation.height)
                     clampPosition()
                 }
                 liveDrag = .zero
-                isDragging = false
+                withAnimation(.easeOut(duration: 0.15)) { isDragging = false }
             }
     }
 
@@ -138,13 +161,13 @@ struct AquariumPanelView: View {
             tankView
         }
         .frame(width: panelWidth)
-        .background(.regularMaterial)
+        .background(Color(.secondarySystemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 18, style: .continuous))
         .overlay(
             RoundedRectangle(cornerRadius: 18, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.08))
+                .strokeBorder(Color.primary.opacity(0.12))
         )
-        .shadow(color: .black.opacity(0.14), radius: 14, y: 5)
+        // 不加陰影：動畫時大半徑陰影每幀重新柵格化，是收合卡頓的來源之一
     }
 
     private var header: some View {
@@ -194,41 +217,33 @@ struct AquariumPanelView: View {
     }
 
     private var tankView: some View {
-        GeometryReader { geo in
-            ZStack(alignment: .topLeading) {
-                AquariumPalette.waterColor(isDark: theme.isDark)
+        ZStack(alignment: .topLeading) {
+            AquariumPalette.waterColor(isDark: theme.isDark)
 
-                ForEach(tank.sprites) { sprite in
-                    FishView(type: sprite.type,
-                             color: AquariumPalette.bodyColor(for: sprite.type, isDark: theme.isDark),
-                             facingLeft: sprite.facingLeft)
-                        .frame(width: 58 * sprite.scale, height: 40 * sprite.scale)
-                        .position(sprite.pos)
-                        .onTapGesture { selectedFish = sprite.id }
-                        .transition(.asymmetric(
-                            insertion: .scale.combined(with: .opacity),
-                            removal: .move(edge: .top).combined(with: .opacity)))
-                }
+            ForEach(tank.sprites) { sprite in
+                FishView(type: sprite.type,
+                         color: AquariumPalette.bodyColor(for: sprite.type, isDark: theme.isDark),
+                         facingLeft: sprite.facingLeft)
+                    .frame(width: 58 * sprite.scale, height: 40 * sprite.scale)
+                    .position(sprite.pos)
+                    .onTapGesture { selectedFish = sprite.id }
+                    .transition(.asymmetric(
+                        insertion: .scale.combined(with: .opacity),
+                        removal: .move(edge: .top).combined(with: .opacity)))
+            }
 
-                if let tip = aquarium.imbalanceTip {
-                    tipBanner(tip)
-                }
+            if let tip = aquarium.imbalanceTip {
+                tipBanner(tip)
+            }
 
-                if let id = selectedFish, let task = aquarium.task(id) {
-                    fishCallout(task)
-                }
+            if let id = selectedFish, let task = aquarium.task(id) {
+                fishCallout(task)
             }
-            .onAppear {
-                tank.bounds = geo.size
-                tank.reconcile(with: aquarium.tasks)
-                tank.start()
-            }
-            .onChange(of: geo.size) { _, newSize in
-                tank.bounds = newSize
-            }
-            .onDisappear { tank.stop() }
         }
-        .frame(height: tankHeight)
+        // 固定尺寸，不用 GeometryReader —— GeometryReader 在 .transition 期間會跟 header 不同步，
+        // 收合時水缸瞬間消失、標題卻留在原地淡出（就是「卡卡糊掉」的成因）。尺寸本來就是固定的。
+        .frame(width: panelWidth, height: tankHeight)
+        .clipped()
     }
 
     // MARK: - 失衡提示
@@ -283,9 +298,9 @@ struct AquariumPanelView: View {
     // MARK: - Helpers
 
     private func setExpanded(_ expanded: Bool) {
-        withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
-            aquarium.isExpanded = expanded
-        }
+        // 動畫由 body 的 .animation(.easeInOut, value: isExpanded) 驅動；
+        // tank 計時器的啟停由 .onChange(of: isExpanded) 管理
+        isExpanded = expanded
     }
 
     private func complete(_ id: UUID) {
@@ -307,4 +322,9 @@ struct AquariumPanelView: View {
         savedX = min(max(savedX, -(s.width - 120)), 24)
         savedY = min(max(savedY, -120), s.height - 200)
     }
+}
+
+extension Notification.Name {
+    /// FAB「打開水缸」→ 通知 AquariumPanelView 展開（不經 store，避免首頁重繪）
+    static let aquariumOpenRequested = Notification.Name("aquariumOpenRequested")
 }

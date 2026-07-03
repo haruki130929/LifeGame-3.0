@@ -113,9 +113,8 @@ struct HomeRootView: View {
 
             // ── 任務水族箱 ──
             case .openAquarium:
-                withAnimation(.spring(response: 0.32, dampingFraction: 0.82)) {
-                    aquarium.isExpanded = true
-                }
+                // 用通知讓 AquariumPanelView 自己展開（不動 store → 不重繪首頁）
+                NotificationCenter.default.post(name: .aquariumOpenRequested, object: nil)
                 fab.route = nil
 
             case .addAquariumFish(let type):
