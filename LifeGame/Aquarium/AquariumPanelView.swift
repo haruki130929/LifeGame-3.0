@@ -34,10 +34,12 @@ struct AquariumPanelView: View {
         // 完全不用 .transition（transition 的插入/移除成本與怪癖正是先前收合卡頓的來源）。
         ZStack(alignment: .topTrailing) {
             collapsedHandle
+                .opacity(isExpanded ? 0 : 1)          // 展開時隱藏把手，避免面板與把手同時出現
                 .allowsHitTesting(!isExpanded)
 
             expandedPanel
                 .offset(x: panelHShift + (isExpanded ? 0 : panelSlideOffX))
+                .opacity(isExpanded ? 1 : 0)          // 收合時確實隱藏面板（不管滑多遠都保證不見）
                 .allowsHitTesting(isExpanded)
         }
         .animation(.easeInOut(duration: 0.28), value: isExpanded)
