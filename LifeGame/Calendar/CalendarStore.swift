@@ -267,13 +267,27 @@ final class CalendarStore: ObservableObject {
             }
         }
         if !newEvents.isEmpty { working.append(contentsOf: newEvents); changed = true }
+
+        // 刪除偵測：Apple 匯入的事件，若落在本次同步範圍內、但 Apple 那邊已經沒有這筆 → 移除。
+        // colorByKey 收錄了本次抓到的「所有」Apple 事件 occurrenceKey；不在裡面＝已被 Apple 刪除。
+        // 只動「Apple 匯入」的（isFromAppleCalendar != false 且有 appleEventIdentifier）；
+        // 手動在 App 建立的事件不受影響。範圍外的不判斷（本次沒抓，無從得知）。
+        let beforeCount = working.count
+        working.removeAll { e in
+            guard let appleID = e.appleEventIdentifier, e.isFromAppleCalendar != false else { return false }
+            guard e.start >= start, e.start <= end else { return false }
+            return colorByKey[Self.occurrenceKey(appleID, e.start)] == nil
+        }
+        let removedCount = beforeCount - working.count
+        if removedCount > 0 { changed = true }
+
         if changed { events = working }   // 一次寫入，避免逐筆存檔
 
         let importCount = newEvents.count
 
         lastSyncDate = Date()
         syncedCount = importCount
-        debugLog("✅ Apple 行事曆同步完成，匯入 \(importCount) 筆事件（範圍 \(start)～\(end)）")
+        debugLog("✅ Apple 行事曆同步完成，匯入 \(importCount) 筆、移除 \(removedCount) 筆已刪除（範圍 \(start)～\(end)）")
         return importCount
     }
     
