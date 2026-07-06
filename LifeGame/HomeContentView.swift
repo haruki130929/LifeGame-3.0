@@ -59,12 +59,19 @@ struct HomeContentView: View {
                 // 頁籤列會用 .offset(y: -tabH) 往上凸出面板本體，預留空間時必須把這段
                 // 高度也算進去，否則頁籤會升到跟左上/右上按鈕同高，造成「面板頂住按鈕」的錯視。
                 let panelTabHeight = LayoutTokens.tabHeight(forContainerWidth: w - sideInset * 2)
-                let panelTopReserved =
-                safeTop
-                + LayoutTokens.floatTopGap
-                + LayoutTokens.floatButtonSize
-                + panelTabHeight
-                + LayoutTokens.panelTopClearance
+                // 面板頂緣往上：頁籤與左右角落按鈕在水平上並不重疊（左側有 leftTopButtonReservedWidth
+                // 讓開選單鈕、右側→在最右），所以可以把面板整體往上收一點黑邊。
+                // 想再往上就把 panelTopRaise 調大、覺得太高頂到按鈕就調小。
+                let panelTopRaise: CGFloat = 28
+                let panelTopReserved = max(
+                    safeTop + LayoutTokens.floatTopGap + panelTabHeight, // 底線：頁籤不進安全區/標題列
+                    safeTop
+                    + LayoutTokens.floatTopGap
+                    + LayoutTokens.floatButtonSize
+                    + panelTabHeight
+                    + LayoutTokens.panelTopClearance
+                    - panelTopRaise
+                )
                 
                 let extraBottom = AppLayout.clamp(h * 0.008, 0, 8)
                 let panelBottomReserved = safeBottom + extraBottom

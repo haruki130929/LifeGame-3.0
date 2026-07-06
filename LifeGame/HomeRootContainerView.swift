@@ -114,7 +114,8 @@ struct HomeRootContainerView: View {
         .environmentObject(todoStore)
         .environmentObject(updateChecker)
         .environmentObject(characterStore)
-        // Mac Catalyst：限制寬度並置中（其他平台 no-op）
-        .macCenteredContent(maxWidth: 1366)
+        // Mac Catalyst：內容滿版填滿視窗，不限制寬度、不留左右黑邊（其他平台 no-op）
+        // 若日後想改回置中留白，把 .infinity 換回想要的寬度（例如 1366）即可。
+        .macCenteredContent(maxWidth: .infinity)
     }
 }

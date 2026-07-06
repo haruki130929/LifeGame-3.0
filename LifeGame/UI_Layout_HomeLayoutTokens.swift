@@ -72,6 +72,10 @@ enum LayoutTokens {
     // FAB
     static let fabSideGap: CGFloat = AppLayout.isIPad ? 16 : 20
     static let fabBottomGap: CGFloat = AppLayout.isIPad ? 16 : 20
+
+    /// Mac Catalyst 滿版視窗下，浮動按鈕額外離邊的內距（其他平台為 0，不影響 iPhone / iPad）。
+    /// 移除寬度上限後浮動按鈕會貼近視窗邊緣，用這個把它們往內推一點。想更靠內就調大。
+    static let macEdgeInset: CGFloat = AppLayout.isMacCatalyst ? 12 : 0
 }
 
 // MARK: - Drawer Panel rules（寬度自適應）
