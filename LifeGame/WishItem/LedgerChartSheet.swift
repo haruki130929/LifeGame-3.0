@@ -11,9 +11,9 @@ struct LedgerChartSheet: View {
         NavigationStack {
             List {
                 Section("總覽") {
-                    summaryRow(label: "收入", amount: store.totalIncome, color: .green)
-                    summaryRow(label: "支出", amount: store.totalExpense, color: .red)
-                    summaryRow(label: "收支", amount: balance, color: balance >= 0 ? .green : .red)
+                    summaryRow(label: String(localized: "收入"), amount: store.totalIncome, color: .green)
+                    summaryRow(label: String(localized: "支出"), amount: store.totalExpense, color: .red)
+                    summaryRow(label: String(localized: "收支"), amount: balance, color: balance >= 0 ? .green : .red)
                 }
 
                 if !expenseByTitle.isEmpty {

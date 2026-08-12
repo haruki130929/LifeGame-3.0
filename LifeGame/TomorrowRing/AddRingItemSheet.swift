@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 這個 Draft 只用在新增畫面，不會污染 RingItem 的模型
 struct RingItemDraft {
-    var title: String = "新時段"
+    var title: String = String(localized: "新時段")
     var slot: DaySlot = .morning
     var icon: String = "clock"
     var colorHex: String = "4DA3FF"
@@ -50,8 +50,8 @@ struct AddRingItemSheet: View {
                 }
                 
                 Section("時間") {
-                    timePickerRow(title: "開始", minute: $draft.startMinute)
-                    timePickerRow(title: "結束", minute: $draft.endMinute)
+                    timePickerRow(title: String(localized: "開始"), minute: $draft.startMinute)
+                    timePickerRow(title: String(localized: "結束"), minute: $draft.endMinute)
                     
                     Text("會用 10 分鐘為單位對齊")
                         .font(.footnote)

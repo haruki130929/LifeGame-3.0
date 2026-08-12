@@ -60,7 +60,7 @@ struct DailyLogExportSheet: View {
                     Section("匯出格式") {
                         Picker("格式", selection: $format) {
                             ForEach(ExportFormat.allCases) { f in
-                                Text(f.rawValue).tag(f)
+                                Text(f.displayName).tag(f)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -155,20 +155,20 @@ struct DailyLogExportSheet: View {
                     guard let data = DailyLogPDFRenderer.makePDF(for: entries,
                                                                  rangeTitle: title,
                                                                  moduleStore: moduleStore) else {
-                        errorMessage = "PDF 產生失敗，請稍後再試。"
+                        errorMessage = String(localized: "PDF 產生失敗，請稍後再試。")
                         return
                     }
                     url = try write(data: data, ext: "pdf", stamp: stamp)
                 }
                 shareURL = url
             } catch {
-                errorMessage = "檔案寫入失敗：\(error.localizedDescription)"
+                errorMessage = String(localized: "檔案寫入失敗：\(error.localizedDescription)")
             }
         }
     }
 
     private func write(data: Data, ext: String, stamp: String) throws -> URL {
-        let fileName = "每日紀錄_\(stamp).\(ext)"
+        let fileName = String(localized: "每日紀錄_\(stamp).\(ext)")
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(fileName)
         try? FileManager.default.removeItem(at: url)
         try data.write(to: url)
@@ -198,8 +198,8 @@ struct DailyLogExportSheet: View {
 
     private func rangeTitle(_ s: Date, _ e: Date) -> String {
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "zh_TW")
-        fmt.dateFormat = "yyyy/MM/dd"
+        fmt.locale = .current
+        fmt.setLocalizedDateFormatFromTemplate("yMMMd")
         return "\(fmt.string(from: s)) – \(fmt.string(from: e))"
     }
 

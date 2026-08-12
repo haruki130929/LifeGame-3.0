@@ -2,12 +2,12 @@ import SwiftUI
 
 struct BodySectionView: View {
     @Binding var entry: DailyLogEntry
-    var header: String = "身體狀況"
+    var header: String = String(localized: "身體狀況")
 
     var body: some View {
         Section(header) {
             // 疲勞（Slider）
-            ScoreSliderRow(title: "今日疲勞程度", value: $entry.fatigueScore)
+            ScoreSliderRow(title: String(localized: "今日疲勞程度"), value: $entry.fatigueScore)
 
             // 不舒服的地方（多選）
             VStack(alignment: .leading, spacing: 8) {
@@ -17,7 +17,7 @@ struct BodySectionView: View {
 
                 ForEach(PainArea.allCases) { area in
                     CheckboxRow(
-                        title: area.rawValue,
+                        title: area.displayName,
                         isChecked: bindingForSet($entry.painAreas, element: area)
                     )
 
@@ -34,7 +34,7 @@ struct BodySectionView: View {
 
             // 是否注意到身體狀況（單選）
             CheckboxSingleSelectList(
-                title: "是否注意到身體的狀況（單選）",
+                title: String(localized: "是否注意到身體的狀況（單選）"),
                 options: BodyNoticeTiming.allCases,
                 selection: $entry.bodyNoticeTiming
             )
@@ -42,7 +42,7 @@ struct BodySectionView: View {
             // 若選「沒有」：原因（多選 + 其他填空）
             if entry.bodyNoticeTiming == .none {
                 CheckboxMultiSelectList(
-                    title: "因為（可複選）",
+                    title: String(localized: "因為（可複選）"),
                     options: BodyLateReason.allCases,
                     selected: $entry.bodyLateReasons
                 )

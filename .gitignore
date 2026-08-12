@@ -1,19 +1,22 @@
 # macOS
 .DS_Store
 
-# Xcode 使用者個人狀態（不該進版控）
-xcuserdata/
-*.xcuserstate
-
-# 建置產物
-DerivedData/
+# Xcode build output
 build/
+DerivedData/
+*.xcuserstate
+xcuserdata/
+
+# Xcode misc
+*.moved-aside
+*.hmap
 *.ipa
 *.dSYM.zip
 *.dSYM
 
-# 備份壓縮檔
-*.zip
+# Swift Package Manager
+.build/
+.swiftpm/
 
-# Claude Code
-.claude/
+# Archives
+*.zip

@@ -450,15 +450,15 @@ struct TodoQuadrantBoardView: View {
     private func dueDateLabel(days: Int, dueDate: Date) -> some View {
         let (text, color): (String, Color) = {
             if days < 0 {
-                return ("已過期", .red)
+                return (String(localized: "已過期"), .red)
             } else if days == 0 {
-                return ("今天 \(dueDate.formatted(date: .omitted, time: .shortened)) 到期", .red)
+                return (String(localized: "今天 \(dueDate.formatted(date: .omitted, time: .shortened)) 到期"), .red)
             } else if days == 1 {
-                return ("明天到期", .orange)
+                return (String(localized: "明天到期"), .orange)
             } else if days <= 7 {
-                return ("剩 \(days) 天", .orange)
+                return (String(localized: "剩 \(days) 天"), .orange)
             } else {
-                return ("剩 \(days) 天", .secondary)
+                return (String(localized: "剩 \(days) 天"), .secondary)
             }
         }()
         return Text(text)

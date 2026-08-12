@@ -27,15 +27,15 @@ struct WeekReviewView: View {
                     
                     Grid(horizontalSpacing: gap, verticalSpacing: gap) {
                         GridRow {
-                            quadCard(title: "實際執行內容", text: $didText)
+                            quadCard(title: String(localized: "實際執行內容"), text: $didText)
                                 .frame(width: cellWidth, height: cellHeight)
-                            quadCard(title: "辦到 / 沒辦到（先寫辦到）", text: $resultText)
+                            quadCard(title: String(localized: "辦到 / 沒辦到（先寫辦到）"), text: $resultText)
                                 .frame(width: cellWidth, height: cellHeight)
                         }
                         GridRow {
-                            quadCard(title: "煩惱 / 課題", text: $issuesText)
+                            quadCard(title: String(localized: "煩惱 / 課題"), text: $issuesText)
                                 .frame(width: cellWidth, height: cellHeight)
-                            quadCard(title: "修正路線的行動計劃", text: $planText)
+                            quadCard(title: String(localized: "修正路線的行動計劃"), text: $planText)
                                 .frame(width: cellWidth, height: cellHeight)
                         }
                     }
@@ -88,9 +88,9 @@ struct WeekReviewView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("活用回顧的三個問題").font(.headline)
             
-            questionRow("該怎麼做才能更加接近自己的夢想與目標？", text: $q1)
-            questionRow("如果還能再加以改善，是哪一點可以改善？", text: $q2)
-            questionRow("如果想把這個經驗活用在下次行動，該怎麼做才好？", text: $q3)
+            questionRow(String(localized: "該怎麼做才能更加接近自己的夢想與目標？"), text: $q1)
+            questionRow(String(localized: "如果還能再加以改善，是哪一點可以改善？"), text: $q2)
+            questionRow(String(localized: "如果想把這個經驗活用在下次行動，該怎麼做才好？"), text: $q3)
         }
         .padding(12)
         .background(.thinMaterial)

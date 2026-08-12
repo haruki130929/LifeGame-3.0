@@ -67,17 +67,17 @@ struct WidgetSettingsView: View {
 
             // MARK: 可用的小工具
             Section("可用的小工具") {
-                widgetRow(icon: "heart.text.square", title: "今日狀態",
-                          desc: "一眼看今天的 HP / FP / MP")
-                widgetRow(icon: "checklist", title: "待辦",
-                          desc: "列出待辦、點一下打勾完成")
+                widgetRow(icon: "heart.text.square", title: String(localized: "今日狀態"),
+                          desc: String(localized: "一眼看今天的 HP / FP / MP"))
+                widgetRow(icon: "checklist", title: String(localized: "待辦"),
+                          desc: String(localized: "列出待辦、點一下打勾完成"))
             }
 
             // MARK: 如何加到桌面
             Section {
-                howToRow(1, "長按桌面空白處，直到圖示開始晃動")
-                howToRow(2, "點左上角的「＋」")
-                howToRow(3, "搜尋「LifeGame」，選擇小工具加入")
+                howToRow(1, String(localized: "長按桌面空白處，直到圖示開始晃動"))
+                howToRow(2, String(localized: "點左上角的「＋」"))
+                howToRow(3, String(localized: "搜尋「LifeGame」，選擇小工具加入"))
             } header: {
                 Text("如何加到桌面")
             }
@@ -160,9 +160,9 @@ enum WidgetAppearanceOption: Int, CaseIterable, Identifiable {
     var id: Int { rawValue }
     var title: String {
         switch self {
-        case .system: return "跟隨系統"
-        case .light:  return "淺色"
-        case .dark:   return "深色"
+        case .system: return String(localized: "跟隨系統")
+        case .light:  return String(localized: "淺色")
+        case .dark:   return String(localized: "深色")
         }
     }
 }

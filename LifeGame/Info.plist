@@ -6,6 +6,10 @@
 	<string>LifeGamer</string>
 	<key>NSSupportsLiveActivities</key>
 	<true/>
+	<!-- 讓 iOS 的 App 設定頁一定顯示「語言」列。沒有這個 key 時，只有偏好語言超過一種的
+	     使用者才看得到，設定頁裡「在系統設定中變更」的按鈕會變成死路。 -->
+	<key>UIPrefersShowingLanguageSettings</key>
+	<true/>
 	<key>NSCalendarsFullAccessUsageDescription</key>
 	<string>LifeGamer 需要存取你的行事曆，以便將事件同步到系統行事曆。</string>
 	<key>NSPhotoLibraryUsageDescription</key>

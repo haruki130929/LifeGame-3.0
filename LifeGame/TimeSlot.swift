@@ -26,15 +26,15 @@ enum TimeSlot: String, CaseIterable, Identifiable, Codable {
     func defaultName(for role: UserRole) -> String {
         switch self {
         case .beforeLeave:
-            return role == .student ? "出門前" : "上班前"
+            return role == .student ? String(localized: "出門前") : String(localized: "上班前")
         case .morning:
-            return "上午"
+            return String(localized: "上午")
         case .earlyAfternoon:
-            return "下午三點前"
+            return String(localized: "下午三點前")
         case .beforeEnd:
-            return role == .student ? "下課前" : "下班前"
+            return role == .student ? String(localized: "下課前") : String(localized: "下班前")
         case .bedtime:
-            return "睡前"
+            return String(localized: "睡前")
         }
     }
 

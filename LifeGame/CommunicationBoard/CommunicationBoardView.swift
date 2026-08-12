@@ -232,15 +232,15 @@ struct CommunicationBoardView: View {
     private func exportConversation() {
         var lines: [String] = []
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "zh_TW")
-        fmt.dateFormat = "yyyy/M/d HH:mm"
-        lines.append("溝通紀錄 — \(fmt.string(from: Date()))")
+        fmt.locale = .current
+        fmt.setLocalizedDateFormatFromTemplate("yMdjm")
+        lines.append(String(localized: "溝通紀錄 — \(fmt.string(from: Date()))"))
         lines.append("")
         for (i, msg) in messages.enumerated() {
             lines.append("\(i + 1). \(msg)")
         }
         if !currentInput.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            lines.append("\(messages.count + 1). \(currentInput)（輸入中）")
+            lines.append(String(localized: "\(messages.count + 1). \(currentInput)（輸入中）"))
         }
         exportText = lines.joined(separator: "\n")
         showExport = true

@@ -46,7 +46,7 @@ final class GanttStore: ObservableObject {
 
         // ── 父任務 A：App 設計（粉紅色系）──
         let parentA = GanttTask(
-            title: "App 設計",
+            title: String(localized: "App 設計"),
             start: today,
             end: cal.date(byAdding: .day, value: 10, to: today)!,
             colorHex: "E64980",
@@ -56,7 +56,7 @@ final class GanttStore: ObservableObject {
 
         // 子任務 A-1：使用者訪談（序列，3天）
         tasks.append(GanttTask(
-            title: "使用者訪談",
+            title: String(localized: "使用者訪談"),
             start: today,
             end: cal.date(byAdding: .day, value: 3, to: today)!,
             colorHex: "E64980",
@@ -68,7 +68,7 @@ final class GanttStore: ObservableObject {
         // 子任務 A-2：wireframe 設計（序列，4天，接在 A-1 後面）
         let a2Start = cal.date(byAdding: .day, value: 3, to: today)!
         tasks.append(GanttTask(
-            title: "Wireframe 設計",
+            title: String(localized: "Wireframe 設計"),
             start: a2Start,
             end: cal.date(byAdding: .day, value: 4, to: a2Start)!,
             colorHex: "E64980",
@@ -80,7 +80,7 @@ final class GanttStore: ObservableObject {
         // 子任務 A-3：UI 設計（序列，3天，接在 A-2 後面）
         let a3Start = cal.date(byAdding: .day, value: 4, to: a2Start)!
         tasks.append(GanttTask(
-            title: "UI 設計",
+            title: String(localized: "UI 設計"),
             start: a3Start,
             end: cal.date(byAdding: .day, value: 3, to: a3Start)!,
             colorHex: "E64980",
@@ -92,7 +92,7 @@ final class GanttStore: ObservableObject {
         // ── 父任務 B：開發（黃綠色系）──
         let bStart = cal.date(byAdding: .day, value: 5, to: today)!
         let parentB = GanttTask(
-            title: "開發",
+            title: String(localized: "開發"),
             start: bStart,
             end: cal.date(byAdding: .day, value: 14, to: bStart)!,
             colorHex: "82C91E",
@@ -102,7 +102,7 @@ final class GanttStore: ObservableObject {
 
         // 子任務 B-1：前端開發（6天）
         tasks.append(GanttTask(
-            title: "前端開發",
+            title: String(localized: "前端開發"),
             start: bStart,
             end: cal.date(byAdding: .day, value: 6, to: bStart)!,
             colorHex: "82C91E",
@@ -114,7 +114,7 @@ final class GanttStore: ObservableObject {
         // 子任務 B-2：後端 API（序列，5天）
         let b2Start = cal.date(byAdding: .day, value: 6, to: bStart)!
         tasks.append(GanttTask(
-            title: "後端 API",
+            title: String(localized: "後端 API"),
             start: b2Start,
             end: cal.date(byAdding: .day, value: 5, to: b2Start)!,
             colorHex: "82C91E",
@@ -126,7 +126,7 @@ final class GanttStore: ObservableObject {
         // 子任務 B-3：整合測試（序列，3天）
         let b3Start = cal.date(byAdding: .day, value: 5, to: b2Start)!
         tasks.append(GanttTask(
-            title: "整合測試",
+            title: String(localized: "整合測試"),
             start: b3Start,
             end: cal.date(byAdding: .day, value: 3, to: b3Start)!,
             colorHex: "82C91E",
@@ -138,7 +138,7 @@ final class GanttStore: ObservableObject {
         // ── 獨立任務 C：撰寫文件（青色，無子任務）──
         let cStart = cal.date(byAdding: .day, value: 15, to: today)!
         tasks.append(GanttTask(
-            title: "撰寫文件",
+            title: String(localized: "撰寫文件"),
             start: cStart,
             end: cal.date(byAdding: .day, value: 4, to: cStart)!,
             colorHex: "15AABF",
@@ -147,13 +147,13 @@ final class GanttStore: ObservableObject {
 
         // ── 里程碑 ──
         milestones.append(GanttMilestone(
-            title: "設計完成",
+            title: String(localized: "設計完成"),
             date: a3Start.addingTimeInterval(3 * 86400),
             colorHex: "BE4BDB"  // 紫色
         ))
 
         milestones.append(GanttMilestone(
-            title: "Beta 上線",
+            title: String(localized: "Beta 上線"),
             date: b3Start.addingTimeInterval(3 * 86400),
             colorHex: "F59F00"  // 橘黃色
         ))
@@ -333,20 +333,20 @@ final class GanttStore: ObservableObject {
     var dateRangeLabel: String {
         let range = visibleDateRange
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "zh_TW")
+        fmt.locale = .current
 
         switch timeScale {
         case .day:
-            fmt.dateFormat = "M月d日 (E)"
+            fmt.setLocalizedDateFormatFromTemplate("MMMdE")
             return fmt.string(from: range.lowerBound)
         case .week:
-            fmt.dateFormat = "M/d"
+            fmt.setLocalizedDateFormatFromTemplate("Md")
             let startStr = fmt.string(from: range.lowerBound)
             let endDate = cal.date(byAdding: .day, value: -1, to: range.upperBound)!
             let endStr = fmt.string(from: endDate)
             return "\(startStr) – \(endStr)"
         case .month:
-            fmt.dateFormat = "yyyy年M月"
+            fmt.setLocalizedDateFormatFromTemplate("yMMMM")
             return fmt.string(from: range.lowerBound)
         }
     }

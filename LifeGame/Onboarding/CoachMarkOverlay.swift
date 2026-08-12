@@ -237,21 +237,21 @@ struct CoachMarkOverlay: View {
     private func tipInfo(for mark: CoachMarkStore.Mark) -> TipInfo {
         switch mark {
         case .drawerButton:
-            return TipInfo(icon: "line.3.horizontal", title: "功能選單", desc: "點這裡打開所有功能分類")
+            return TipInfo(icon: "line.3.horizontal", title: String(localized: "功能選單"), desc: String(localized: "點這裡打開所有功能分類"))
         case .rightPanel:
-            return TipInfo(icon: "arrow.right.square", title: "工具面板", desc: "點這裡開啟右側工具面板")
+            return TipInfo(icon: "arrow.right.square", title: String(localized: "工具面板"), desc: String(localized: "點這裡開啟右側工具面板"))
         case .fabButton:
-            return TipInfo(icon: "plus.circle.fill", title: "快速操作", desc: "點這裡新增或操作功能")
+            return TipInfo(icon: "plus.circle.fill", title: String(localized: "快速操作"), desc: String(localized: "點這裡新增或操作功能"))
         case .tabEdit:
-            return TipInfo(icon: "pencil.circle.fill", title: "編輯卡片", desc: "點這裡自訂時段顯示的卡片")
+            return TipInfo(icon: "pencil.circle.fill", title: String(localized: "編輯卡片"), desc: String(localized: "點這裡自訂時段顯示的卡片"))
         case .openDrawer:
-            return TipInfo(icon: "line.3.horizontal", title: "打開選單", desc: "點擊這裡打開側邊選單")
+            return TipInfo(icon: "line.3.horizontal", title: String(localized: "打開選單"), desc: String(localized: "點擊這裡打開側邊選單"))
         case .tutorialLink:
-            return TipInfo(icon: "book.fill", title: "使用教學", desc: "這裡有完整的使用教學，隨時可以查看各功能的操作說明")
+            return TipInfo(icon: "book.fill", title: String(localized: "使用教學"), desc: String(localized: "這裡有完整的使用教學，隨時可以查看各功能的操作說明"))
         case .quickSwipe:
-            return TipInfo(icon: "hand.draw", title: "滑動卡片", desc: "左右滑動完成每張任務卡片")
+            return TipInfo(icon: "hand.draw", title: String(localized: "滑動卡片"), desc: String(localized: "左右滑動完成每張任務卡片"))
         case .quickSettings:
-            return TipInfo(icon: "gearshape.fill", title: "設定", desc: "點這裡開啟設定")
+            return TipInfo(icon: "gearshape.fill", title: String(localized: "設定"), desc: String(localized: "點這裡開啟設定"))
         }
     }
 }

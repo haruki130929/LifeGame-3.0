@@ -6,7 +6,7 @@ struct DailyLogCard: View {
     var body: some View {
         DashboardCardContainer {
             VStack(alignment: .leading, spacing: 10) {
-                CardHeader(title: "每日紀錄", icon: "square.and.pencil")
+                CardHeader(title: String(localized: "每日紀錄"), icon: "square.and.pencil")
                 Text(size == .small ? "快速記錄" : "快速記錄今天")
                     .foregroundStyle(.secondary)
             }
@@ -23,7 +23,7 @@ struct EditCardsCard: View {
     var body: some View {
         DashboardCardContainer {
             VStack(alignment: .leading, spacing: 10) {
-                CardHeader(title: "編輯卡片", icon: "square.grid.2x2")
+                CardHeader(title: String(localized: "編輯卡片"), icon: "square.grid.2x2")
                 Text("時段：\(timeSlotNameStore.displayName(for: slot))")
                     .foregroundStyle(.secondary)
             }

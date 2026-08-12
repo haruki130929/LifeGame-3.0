@@ -13,17 +13,17 @@ enum MoodTimePeriod: String, CaseIterable, Hashable {
 
     var title: String {
         switch self {
-        case .day:   return "日"
-        case .week:  return "週"
-        case .month: return "月"
+        case .day:   return String(localized: "日")
+        case .week:  return String(localized: "週")
+        case .month: return String(localized: "月")
         }
     }
 
     var chartTitle: String {
         switch self {
-        case .day:   return "今日心情溫度計"
-        case .week:  return "近 7 天每小時平均心情"
-        case .month: return "近 30 天每小時平均心情"
+        case .day:   return String(localized: "今日心情溫度計")
+        case .week:  return String(localized: "近 7 天每小時平均心情")
+        case .month: return String(localized: "近 30 天每小時平均心情")
         }
     }
 }

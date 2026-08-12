@@ -1,118 +1,121 @@
 import Foundation
 
 // MARK: - 集中管理的 UI 字串
-// 未來多語系時，只需在這裡替換成 String(localized:) 即可
+//
+// 一律用 computed var 而不是 static let：Swift 的 static let 在 process 內只會求值一次，
+// 使用者在 App 內切換語言後就會凍在舊語言。computed var 每次讀取都重新解析，
+// 成本可忽略，卻是即時切換能正確運作的前提。
 
 enum L10n {
 
     // MARK: - 通用動作
     enum Action {
-        static let done = "完成"
-        static let cancel = "取消"
-        static let save = "儲存"
-        static let delete = "刪除"
-        static let edit = "編輯"
-        static let add = "加入"
-        static let confirm = "確定"
-        static let retry = "重試"
-        static let close = "關閉"
-        static let back = "返回"
-        static let next = "下一步"
-        static let skip = "略過"
+        static var done: String { String(localized: "完成") }
+        static var cancel: String { String(localized: "取消") }
+        static var save: String { String(localized: "儲存") }
+        static var delete: String { String(localized: "刪除") }
+        static var edit: String { String(localized: "編輯") }
+        static var add: String { String(localized: "加入") }
+        static var confirm: String { String(localized: "確定") }
+        static var retry: String { String(localized: "重試") }
+        static var close: String { String(localized: "關閉") }
+        static var back: String { String(localized: "返回") }
+        static var next: String { String(localized: "下一步") }
+        static var skip: String { String(localized: "略過") }
     }
 
     // MARK: - 導航 / 頁面標題
     enum Title {
-        static let settings = "設定"
-        static let calendar = "行事曆"
-        static let diary = "日記"
-        static let wish = "願望"
-        static let ledger = "記帳"
-        static let dailyLog = "每日紀錄"
-        static let todoQuadrant = "待辦四象限"
-        static let tomorrowRing = "時間圓環"
-        static let bagRequired = "整理書包"
-        static let monthlyScore = "本月結算"
-        static let moodThermometer = "心情溫度計"
-        static let mandala = "曼陀羅圖表"
-        static let storageSettings = "儲存設定"
-        static let backupSettings = "資料備份"
-        static let themeSettings = "主題與配色"
+        static var settings: String { String(localized: "設定") }
+        static var calendar: String { String(localized: "行事曆") }
+        static var diary: String { String(localized: "日記") }
+        static var wish: String { String(localized: "願望") }
+        static var ledger: String { String(localized: "記帳") }
+        static var dailyLog: String { String(localized: "每日紀錄") }
+        static var todoQuadrant: String { String(localized: "待辦四象限") }
+        static var tomorrowRing: String { String(localized: "時間圓環") }
+        static var bagRequired: String { String(localized: "整理書包") }
+        static var monthlyScore: String { String(localized: "本月結算") }
+        static var moodThermometer: String { String(localized: "心情溫度計") }
+        static var mandala: String { String(localized: "曼陀羅圖表") }
+        static var storageSettings: String { String(localized: "儲存設定") }
+        static var backupSettings: String { String(localized: "資料備份") }
+        static var themeSettings: String { String(localized: "主題與配色") }
     }
 
     // MARK: - 設定頁
     enum Settings {
-        static let featureSettings = "功能設定"
-        static let appearance = "外觀設定"
-        static let dataStorage = "資料儲存"
-        static let storageMethod = "儲存方式"
-        static let feedback = "意見回饋"
-        static let shareFeedback = "分享使用體驗"
-        static let versionUpdate = "版本更新"
-        static let latestVersion = "已是最新版本"
-        static let about = "關於"
-        static let version = "版本"
-        static let developer = "開發者"
+        static var featureSettings: String { String(localized: "功能設定") }
+        static var appearance: String { String(localized: "外觀設定") }
+        static var dataStorage: String { String(localized: "資料儲存") }
+        static var storageMethod: String { String(localized: "儲存方式") }
+        static var feedback: String { String(localized: "意見回饋") }
+        static var shareFeedback: String { String(localized: "分享使用體驗") }
+        static var versionUpdate: String { String(localized: "版本更新") }
+        static var latestVersion: String { String(localized: "已是最新版本") }
+        static var about: String { String(localized: "關於") }
+        static var version: String { String(localized: "版本") }
+        static var developer: String { String(localized: "開發者") }
     }
 
     // MARK: - iCloud / 帳號
     enum Account {
-        static let accountStatus = "帳號狀態"
-        static let signedInICloud = "已登入 iCloud"
-        static let notSignedIn = "未登入 iCloud"
-        static let iCloudSync = "iCloud 同步"
-        static let iCloudSyncDesc = "資料會自動同步到 iCloud，可在多台裝置間共享"
-        static let localOnly = "僅限本機"
-        static let localOnlyDesc = "資料僅儲存在此裝置"
-        static let signInWithApple = "使用 Apple 登入"
+        static var accountStatus: String { String(localized: "帳號狀態") }
+        static var signedInICloud: String { String(localized: "已登入 iCloud") }
+        static var notSignedIn: String { String(localized: "未登入 iCloud") }
+        static var iCloudSync: String { String(localized: "iCloud 同步") }
+        static var iCloudSyncDesc: String { String(localized: "資料會自動同步到 iCloud，可在多台裝置間共享") }
+        static var localOnly: String { String(localized: "僅限本機") }
+        static var localOnlyDesc: String { String(localized: "資料僅儲存在此裝置") }
+        static var signInWithApple: String { String(localized: "使用 Apple 登入") }
     }
 
     // MARK: - Onboarding
     enum Onboarding {
-        static let welcome = "歡迎來到 LifeGame"
-        static let getStarted = "開始使用"
-        static let chooseRole = "選擇你的身份"
-        static let student = "學生"
-        static let worker = "上班族"
+        static var welcome: String { String(localized: "歡迎來到 LifeGame") }
+        static var getStarted: String { String(localized: "開始使用") }
+        static var chooseRole: String { String(localized: "選擇你的身份") }
+        static var student: String { String(localized: "學生") }
+        static var worker: String { String(localized: "上班族") }
     }
 
     // MARK: - 待辦
     enum Todo {
-        static let addTodo = "新增待辦事項"
-        static let noTodos = "尚無待辦"
-        static let inputPlaceholder = "輸入待辦事項"
+        static var addTodo: String { String(localized: "新增待辦事項") }
+        static var noTodos: String { String(localized: "尚無待辦") }
+        static var inputPlaceholder: String { String(localized: "輸入待辦事項") }
     }
 
     // MARK: - 心情
     enum Mood {
-        static let recordMood = "記錄心情"
-        static let todayMood = "今日心情"
+        static var recordMood: String { String(localized: "記錄心情") }
+        static var todayMood: String { String(localized: "今日心情") }
     }
 
     // MARK: - 錯誤訊息
     enum Error {
-        static let saveFailed = "資料儲存失敗"
-        static let loadFailed = "資料讀取失敗"
-        static let deleteFailed = "資料刪除失敗"
-        static let syncFailed = "同步失敗"
-        static let storageNotReady = "儲存系統尚未就緒"
-        static let unknownError = "未知錯誤"
+        static var saveFailed: String { String(localized: "資料儲存失敗") }
+        static var loadFailed: String { String(localized: "資料讀取失敗") }
+        static var deleteFailed: String { String(localized: "資料刪除失敗") }
+        static var syncFailed: String { String(localized: "同步失敗") }
+        static var storageNotReady: String { String(localized: "儲存系統尚未就緒") }
+        static var unknownError: String { String(localized: "未知錯誤") }
     }
 
     // MARK: - 空狀態
     enum Empty {
-        static let noData = "尚無資料"
-        static let noWish = "尚無願望清單"
-        static let noRecord = "尚無紀錄"
+        static var noData: String { String(localized: "尚無資料") }
+        static var noWish: String { String(localized: "尚無願望清單") }
+        static var noRecord: String { String(localized: "尚無紀錄") }
     }
 
     // MARK: - 使用教學
     enum Tutorial {
-        static let title = "使用教學"
-        static let concepts = "基本概念"
-        static let features = "功能介紹"
-        static let operationTips = "操作技巧"
-        static let replayCoachMark = "重新播放新手引導"
-        static let tip = "小技巧"
+        static var title: String { String(localized: "使用教學") }
+        static var concepts: String { String(localized: "基本概念") }
+        static var features: String { String(localized: "功能介紹") }
+        static var operationTips: String { String(localized: "操作技巧") }
+        static var replayCoachMark: String { String(localized: "重新播放新手引導") }
+        static var tip: String { String(localized: "小技巧") }
     }
 }

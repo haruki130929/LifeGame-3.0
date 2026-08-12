@@ -249,7 +249,7 @@ struct AddEquipmentView: View {
                 
                 Picker("部位", selection: $slot) {
                     ForEach(EquipSlot.allCases) { s in
-                        Text(s.rawValue).tag(s)
+                        Text(s.displayName).tag(s)
                     }
                 }
             }
@@ -286,8 +286,8 @@ struct AddEquipmentView: View {
     
     private var previewText: String {
         var parts: [String] = []
-        if mpMaxDelta != 0 { parts.append("MP上限 \(mpMaxDelta > 0 ? "+" : "")\(mpMaxDelta)") }
-        parts.append("重量 +\(weight)")
+        if mpMaxDelta != 0 { parts.append(String(localized: "MP上限 \(mpMaxDelta > 0 ? "+" : "")\(mpMaxDelta)")) }
+        parts.append(String(localized: "重量 +\(weight)"))
         return parts.joined(separator: "，")
     }
     

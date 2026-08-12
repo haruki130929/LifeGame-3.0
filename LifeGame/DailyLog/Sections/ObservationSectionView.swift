@@ -2,7 +2,7 @@ import SwiftUI
 
 struct ObservationSectionView: View {
     @Binding var entry: DailyLogEntry
-    var header: String = "特別觀察到的事情"
+    var header: String = String(localized: "特別觀察到的事情")
 
     var body: some View {
         Section(header) {

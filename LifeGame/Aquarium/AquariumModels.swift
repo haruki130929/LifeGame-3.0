@@ -11,9 +11,9 @@ enum FishType: String, Codable, CaseIterable, Identifiable {
 
     var label: String {
         switch self {
-        case .social:   return "社交"
-        case .physical: return "體力"
-        case .mental:   return "腦力"
+        case .social:   return String(localized: "社交")
+        case .physical: return String(localized: "體力")
+        case .mental:   return String(localized: "腦力")
         }
     }
 

@@ -60,7 +60,7 @@ struct CalendarSettingsView: View {
 
                 Picker(selection: $importRange) {
                     ForEach(CalendarImportRange.allCases) { r in
-                        Text(r.rawValue).tag(r)
+                        Text(r.displayName).tag(r)
                     }
                 } label: {
                     Label("匯入範圍", systemImage: "calendar.badge.clock")
@@ -162,10 +162,10 @@ struct CalendarSettingsView: View {
             isSyncing = false
             if count < 0 {
                 resultIsError = true
-                syncResult = "需要行事曆權限：請到「設定 → LifeGame → 行事曆」開啟"
+                syncResult = String(localized: "需要行事曆權限：請到「設定 → LifeGame → 行事曆」開啟")
             } else {
                 resultIsError = false
-                syncResult = count > 0 ? "已匯入 \(count) 筆行程" : "沒有新的行程"
+                syncResult = count > 0 ? String(localized: "已匯入 \(count) 筆行程") : String(localized: "沒有新的行程")
             }
         }
     }

@@ -11,8 +11,8 @@ enum UserRole: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .student: return "學生"
-        case .worker:  return "上班族"
+        case .student: return String(localized: "學生")
+        case .worker:  return String(localized: "上班族")
         }
     }
 }

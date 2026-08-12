@@ -11,9 +11,9 @@ enum RingCollisionEngine {
         var errorDescription: String? {
             switch self {
             case .overlapping(let title):
-                return "與「\(title)」時段重疊"
+                return String(localized: "與「\(title)」時段重疊")
             case .noValidPosition:
-                return "找不到可用的時間位置"
+                return String(localized: "找不到可用的時間位置")
             }
         }
     }

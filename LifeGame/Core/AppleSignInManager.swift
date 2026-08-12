@@ -104,6 +104,6 @@ final class AppleSignInManager: ObservableObject {
     var displayName: String {
         if let name = userName, !name.isEmpty { return name }
         if let email = userEmail, !email.isEmpty { return email }
-        return "Apple ID 使用者"
+        return String(localized: "Apple ID 使用者")
     }
 }

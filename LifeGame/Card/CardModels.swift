@@ -52,17 +52,17 @@ enum CardType: String, CaseIterable, Identifiable, Codable {
     
     var title: String {
         switch self {
-        case .quickStart: return "快速開始"
-        case .todayStatus: return "今日狀態"
-        case .calendar: return "行事曆"
-        case .dailyLog: return "每日紀錄"
-        case .editCards: return "編輯卡片"
-        case .todoQuadrant: return "待辦四象限"
-        case .tomorrowRing: return "時間圓環"
-        case .bagRequired: return "整理書包"
-        case .monthlyScoreCalendar: return "本月結算"
-        case .ganttChart: return "甘特圖"
-        case .copingNotes: return "動力筆記"
+        case .quickStart: return String(localized: "快速開始")
+        case .todayStatus: return String(localized: "今日狀態")
+        case .calendar: return String(localized: "行事曆")
+        case .dailyLog: return String(localized: "每日紀錄")
+        case .editCards: return String(localized: "編輯卡片")
+        case .todoQuadrant: return String(localized: "待辦四象限")
+        case .tomorrowRing: return String(localized: "時間圓環")
+        case .bagRequired: return String(localized: "整理書包")
+        case .monthlyScoreCalendar: return String(localized: "本月結算")
+        case .ganttChart: return String(localized: "甘特圖")
+        case .copingNotes: return String(localized: "動力筆記")
         }
     }
 

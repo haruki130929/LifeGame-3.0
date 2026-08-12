@@ -14,7 +14,7 @@ struct RingCardV2: View {
     var body: some View {
         DashboardCardContainer {
             VStack(alignment: .leading, spacing: 12) {
-                CardHeader(title: "時間圓環", icon: "clock")
+                CardHeader(title: String(localized: "時間圓環"), icon: "clock")
 
                 if size == .large {
                     DualRingCanvas(mode: .card, selectedItemID: $selectedItemID)

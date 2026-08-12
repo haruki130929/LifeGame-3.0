@@ -36,8 +36,8 @@ struct MonthlyScorePageWrapper: View {
         }
         .navigationTitle("本月結算")
         .fabMenu([
-            FabAction(title: "統計", systemImage: "chart.bar") { showStats = true },
-            FabAction(title: "設定", systemImage: "gearshape") { showSettings = true }
+            FabAction(title: String(localized: "統計"), systemImage: "chart.bar") { showStats = true },
+            FabAction(title: String(localized: "設定"), systemImage: "gearshape") { showSettings = true }
         ])
         .sheet(isPresented: $showStats) {
             NavigationStack {

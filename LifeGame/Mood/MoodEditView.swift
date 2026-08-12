@@ -56,17 +56,17 @@ struct MoodEditView: View {
                             let defaultScore = Double(moodSettings.minScore + moodSettings.maxScore) / 2
 
                             sliderRow(
-                                label: "情緒",
+                                label: String(localized: "情緒"),
                                 value: binding(for: entry, drafts: $scoreDrafts, keyPath: \.score, default: defaultScore),
                                 range: moodSettings.scoreRange
                             )
                             sliderRow(
-                                label: "專注力",
+                                label: String(localized: "專注力"),
                                 value: binding(for: entry, drafts: $focusDrafts, keyPath: \.focus, default: defaultScore),
                                 range: moodSettings.scoreRange
                             )
                             sliderRow(
-                                label: "疲勞度",
+                                label: String(localized: "疲勞度"),
                                 value: binding(for: entry, drafts: $fatigueDrafts, keyPath: \.fatigue, default: defaultScore),
                                 range: moodSettings.scoreRange
                             )

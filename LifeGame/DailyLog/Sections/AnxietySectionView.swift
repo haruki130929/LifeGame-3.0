@@ -2,13 +2,13 @@ import SwiftUI
 
 struct AnxietySectionView: View {
     @Binding var entry: DailyLogEntry
-    var header: String = "是否出現焦慮"
+    var header: String = String(localized: "是否出現焦慮")
 
     var body: some View {
         Section(header) {
             // 程度（單選）
             CheckboxSingleSelectList(
-                title: "程度（單選）",
+                title: String(localized: "程度（單選）"),
                 options: AnxietyLevel.allCases,
                 selection: $entry.anxietyLevel
             )
@@ -16,7 +16,7 @@ struct AnxietySectionView: View {
             if entry.anxietyLevel != .none {
                 // 原因（多選）
                 CheckboxMultiSelectList(
-                    title: "原因（可複選）",
+                    title: String(localized: "原因（可複選）"),
                     options: AnxietyReason.allCases,
                     selected: $entry.anxietyReasons
                 )
@@ -30,7 +30,7 @@ struct AnxietySectionView: View {
 
                 // 焦慮表現（多選）
                 CheckboxMultiSelectList(
-                    title: "焦慮表現（可複選）",
+                    title: String(localized: "焦慮表現（可複選）"),
                     options: AnxietySymptom.allCases,
                     selected: $entry.anxietySymptoms
                 )
@@ -41,7 +41,7 @@ struct AnxietySectionView: View {
 
                 // 穩定方式（多選）
                 CheckboxMultiSelectList(
-                    title: "用什麼方式穩定下來（可複選）",
+                    title: String(localized: "用什麼方式穩定下來（可複選）"),
                     options: StabilizeMethod.allCases,
                     selected: $entry.stabilizeMethodsForAnxiety
                 )

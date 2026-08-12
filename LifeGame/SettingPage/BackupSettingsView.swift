@@ -147,7 +147,7 @@ private extension BackupSettingsView {
                 exportedFileURL = fileURL
                 showShareSheet = true
             } catch {
-                alertTitle = "匯出失敗"
+                alertTitle = String(localized: "匯出失敗")
                 alertMessage = error.localizedDescription
                 showAlert = true
             }
@@ -161,7 +161,7 @@ private extension BackupSettingsView {
             pendingImportURL = url
             showImportConfirm = true
         case .failure(let error):
-            alertTitle = "無法開啟檔案"
+            alertTitle = String(localized: "無法開啟檔案")
             alertMessage = error.localizedDescription
             showAlert = true
         }
@@ -179,18 +179,18 @@ private extension BackupSettingsView {
             do {
                 guard url.startAccessingSecurityScopedResource() else {
                     throw NSError(domain: "BackupManager", code: -1,
-                                  userInfo: [NSLocalizedDescriptionKey: "無法存取檔案"])
+                                  userInfo: [NSLocalizedDescriptionKey: String(localized: "無法存取檔案")])
                 }
                 defer { url.stopAccessingSecurityScopedResource() }
 
                 let data = try Data(contentsOf: url)
                 let result = try BackupManager.importBackup(from: data, context: coordinator.mainContext)
 
-                alertTitle = "匯入成功"
-                alertMessage = "\(result.summary)\n\n請重新啟動 App 以載入所有資料。"
+                alertTitle = String(localized: "匯入成功")
+                alertMessage = String(localized: "\(result.summary)\n\n請重新啟動 App 以載入所有資料。")
                 showAlert = true
             } catch {
-                alertTitle = "匯入失敗"
+                alertTitle = String(localized: "匯入失敗")
                 alertMessage = error.localizedDescription
                 showAlert = true
             }

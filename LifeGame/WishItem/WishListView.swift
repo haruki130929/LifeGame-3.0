@@ -21,7 +21,7 @@ struct WishListView: View {
                             ledgerStore.addExpense(
                                 title: item.title,
                                 amount: amount,
-                                note: "來自願望清單",
+                                note: String(localized: "來自願望清單"),
                                 wishID: item.id
                             )
                         }

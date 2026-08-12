@@ -12,25 +12,36 @@ extension Calendar {
         df.calendar = self
         df.locale = locale
         df.timeZone = timeZone
-        df.dateFormat = "M月 yyyy"
+        // 這是日期格式樣板，不是可翻譯的文案；交給 CLDR 依語言決定年月排列
+        df.setLocalizedDateFormatFromTemplate("MMMMy")
         return df.string(from: date)
     }
     
-    // MARK: - 中文星期符號
+    // MARK: - 星期符號
 
-    /// 中文單字星期符號，依 firstWeekday 排列
-    /// firstWeekday=1 → ["日","一","二","三","四","五","六"]
-    /// firstWeekday=2 → ["一","二","三","四","五","六","日"]
-    var chineseWeekdaySymbols: [String] {
-        let base = ["日", "一", "二", "三", "四", "五", "六"]
+    /// 單字星期符號，取自系統，會跟著使用者語言走：
+    /// zh-Hant → 日 一 二 三 四 五 六；ja → 日 月 火 水 木 金 土；en → S M T W T F S
+    /// 不寫死字面值，一來各語言自動正確，二來避免「一」「三」這種單字被當成可翻譯字串。
+    private var veryShortWeekdaySymbolsForLocale: [String] {
+        let df = DateFormatter()
+        df.calendar = self
+        df.locale = locale ?? .current
+        return df.veryShortWeekdaySymbols ?? []
+    }
+
+    /// 依 firstWeekday 排列的單字星期符號
+    var localizedWeekdaySymbols: [String] {
+        let base = veryShortWeekdaySymbolsForLocale
+        guard base.count == 7 else { return base }
         let shift = firstWeekday - 1
         return Array(base[shift...]) + Array(base[..<shift])
     }
 
-    /// 取得某日的中文單字星期符號（日、一、二…六）
+    /// 取得某日的單字星期符號
     func shortWeekdaySymbol(for date: Date) -> String {
+        let base = veryShortWeekdaySymbolsForLocale
         let w = component(.weekday, from: date) // 1=Sun...7=Sat
-        let base = ["日", "一", "二", "三", "四", "五", "六"]
+        guard base.count == 7, (1...7).contains(w) else { return "" }
         return base[w - 1]
     }
     

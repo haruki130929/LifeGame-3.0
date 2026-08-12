@@ -46,7 +46,7 @@ struct DailyLogChartsSection: View {
                         Button {
                             withAnimation { selectedRange = range }
                         } label: {
-                            Text(range.rawValue)
+                            Text(range.displayName)
                                 .font(.caption.weight(selectedRange == range ? .semibold : .regular))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
@@ -78,19 +78,19 @@ struct DailyLogChartsSection: View {
     // MARK: - 1. 情緒趨勢（心情、焦慮、疲勞）
 
     private var moodChart: some View {
-        chartCard(title: "情緒趨勢") {
+        chartCard(title: String(localized: "情緒趨勢")) {
             Chart {
                 ForEach(filteredEntries) { entry in
-                    lineMark(date: entry.date, value: moodScore(entry), series: "心情", color: .orange)
-                    lineMark(date: entry.date, value: anxietyScore(entry), series: "焦慮", color: .red)
-                    lineMark(date: entry.date, value: fatigueScore(entry), series: "疲勞", color: .purple)
+                    lineMark(date: entry.date, value: moodScore(entry), series: String(localized: "心情"), color: .orange)
+                    lineMark(date: entry.date, value: anxietyScore(entry), series: String(localized: "焦慮"), color: .red)
+                    lineMark(date: entry.date, value: fatigueScore(entry), series: String(localized: "疲勞"), color: .purple)
                 }
             }
             .chartYScale(domain: 0...10)
             .chartForegroundStyleScale([
-                "心情": Color.orange,
-                "焦慮": Color.red,
-                "疲勞": Color.purple
+                String(localized: "心情"): Color.orange,
+                String(localized: "焦慮"): Color.red,
+                String(localized: "疲勞"): Color.purple
             ])
             .chartLegend(position: .bottom, spacing: 8)
             .chartXAxis {
@@ -124,7 +124,7 @@ struct DailyLogChartsSection: View {
             return (entry.id, entry.date, h)
         }
 
-        return chartCard(title: "睡眠時數") {
+        return chartCard(title: String(localized: "睡眠時數")) {
             Chart {
                 ForEach(sleepData, id: \.id) { item in
                     BarMark(
@@ -161,7 +161,7 @@ struct DailyLogChartsSection: View {
             }
         }
 
-        return chartCard(title: "身體不適") {
+        return chartCard(title: String(localized: "身體不適")) {
             if painData.isEmpty {
                 ContentUnavailableView("沒有不適紀錄", systemImage: "heart.fill", description: nil)
                     .frame(height: 200)
@@ -215,7 +215,7 @@ struct DailyLogChartsSection: View {
             return nil
         }
 
-        return chartCard(title: "待辦完成度") {
+        return chartCard(title: String(localized: "待辦完成度")) {
             if focusData.isEmpty {
                 ContentUnavailableView("沒有紀錄", systemImage: "checklist", description: nil)
                     .frame(height: 200)
@@ -296,7 +296,7 @@ struct DailyLogChartsSection: View {
             return (entry.id, entry.date, wake, bed)
         }
 
-        return chartCard(title: "起床 / 就寢時間") {
+        return chartCard(title: String(localized: "起床 / 就寢時間")) {
             if timeData.isEmpty {
                 ContentUnavailableView("沒有時間紀錄", systemImage: "clock", description: nil)
                     .frame(height: 200)
@@ -334,8 +334,8 @@ struct DailyLogChartsSection: View {
                 }
                 .chartYScale(domain: 0...24)
                 .chartForegroundStyleScale([
-                    "起床": Color.orange,
-                    "就寢": Color.indigo
+                    String(localized: "起床"): Color.orange,
+                    String(localized: "就寢"): Color.indigo
                 ])
                 .chartLegend(position: .bottom, spacing: 8)
                 .chartXAxis {
@@ -380,15 +380,15 @@ struct DailyLogChartsSection: View {
 
     /// 情緒分數（優先 customAnswers）
     private func moodScore(_ entry: DailyLogEntry) -> Int {
-        customInt(entry: entry, moduleKind: .moodMental, questionTitle: "整體情緒分數", fallback: entry.overallMoodScore)
+        customInt(entry: entry, moduleKind: .moodMental, questionTitle: String(localized: "整體情緒分數"), fallback: entry.overallMoodScore)
     }
 
     private func anxietyScore(_ entry: DailyLogEntry) -> Int {
-        customInt(entry: entry, moduleKind: .moodMental, questionTitle: "焦慮程度", fallback: entry.anxietyScore)
+        customInt(entry: entry, moduleKind: .moodMental, questionTitle: String(localized: "焦慮程度"), fallback: entry.anxietyScore)
     }
 
     private func fatigueScore(_ entry: DailyLogEntry) -> Int {
-        customInt(entry: entry, moduleKind: .body, questionTitle: "今日疲勞程度", fallback: entry.fatigueScore)
+        customInt(entry: entry, moduleKind: .body, questionTitle: String(localized: "今日疲勞程度"), fallback: entry.fatigueScore)
     }
 
     private func lineMark(date: Date, value: Int, series: String, color: Color) -> some ChartContent {

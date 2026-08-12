@@ -98,7 +98,7 @@ struct PracticeEntryListView: View {
                 let preview = strVal.prefix(15)
                 result.append("\(field.question.title): \(preview)")
             } else if let arr = answer.stringArrayValue, !arr.isEmpty {
-                result.append("\(field.question.title): \(arr.count) 項")
+                result.append(String(localized: "\(field.question.title): \(arr.count) 項"))
             }
             if result.count >= 2 { break }
         }

@@ -106,11 +106,11 @@ struct CalendarScreen: View {
         // ✅ 編輯行程
         .sheet(item: $editingEvent) { e in
             EditEventSheet(event: e, onSave: { newTitle, newStart, newEnd, newColorHex in
-                if let idx = calendarStore.events.firstIndex(where: { $0.id == e.id }) {
-                    calendarStore.events[idx] = CalendarEvent(id: e.id, title: newTitle, start: newStart, end: newEnd, colorHex: newColorHex)
+                Task {
+                    await calendarStore.update(e, title: newTitle, start: newStart, end: newEnd, colorHex: newColorHex)
                 }
             }, onDelete: {
-                calendarStore.events.removeAll { $0.id == e.id }
+                calendarStore.delete(e)
             })
         }
     }
@@ -126,9 +126,9 @@ struct CalendarScreen: View {
             let count = await calendarStore.syncFromAppleCalendar(start: start, end: end)
             isSyncing = false
             if count < 0 {
-                syncAlert = "需要行事曆權限，請到「設定 → LifeGame → 行事曆」開啟"
+                syncAlert = String(localized: "需要行事曆權限，請到「設定 → LifeGame → 行事曆」開啟")
             } else {
-                syncAlert = count > 0 ? "已同步，新增 \(count) 筆行程" : "已是最新，沒有新行程"
+                syncAlert = count > 0 ? String(localized: "已同步，新增 \(count) 筆行程") : String(localized: "已是最新，沒有新行程")
             }
         }
     }

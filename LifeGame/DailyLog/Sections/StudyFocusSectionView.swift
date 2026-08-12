@@ -2,13 +2,13 @@ import SwiftUI
 
 struct StudyFocusSectionView: View {
     @Binding var entry: DailyLogEntry
-    var header: String = "課業與專注力"
+    var header: String = String(localized: "課業與專注力")
 
     var body: some View {
         Section(header) {
             // 1) 是否完成今日待辦事項（單選）
             CheckboxSingleSelectList(
-                title: "是否完成今日待辦事項（單選）",
+                title: String(localized: "是否完成今日待辦事項（單選）"),
                 options: TodoCompletion.allCases,
                 selection: $entry.todoCompletion
             )
@@ -34,7 +34,7 @@ struct StudyFocusSectionView: View {
 
             // 2) 今日專注度（單選）
             CheckboxSingleSelectList(
-                title: "今日專注度（單選）",
+                title: String(localized: "今日專注度（單選）"),
                 options: FocusQuality.allCases,
                 selection: $entry.focusQuality
             )
@@ -42,7 +42,7 @@ struct StudyFocusSectionView: View {
             if entry.focusQuality == .cannotFocus {
                 // 可能原因（多選）
                 CheckboxMultiSelectList(
-                    title: "可能原因（可複選）",
+                    title: String(localized: "可能原因（可複選）"),
                     options: CannotFocusReason.allCases,
                     selected: $entry.cannotFocusReasons
                 )
@@ -59,7 +59,7 @@ struct StudyFocusSectionView: View {
                     .foregroundStyle(.secondary)
 
                 CheckboxRow(
-                    title: "無",
+                    title: String(localized: "無"),
                     isChecked: Binding(
                         get: { entry.unfinished == false },
                         set: { isOn in if isOn { entry.unfinished = false } }
@@ -67,7 +67,7 @@ struct StudyFocusSectionView: View {
                 )
 
                 CheckboxRow(
-                    title: "有",
+                    title: String(localized: "有"),
                     isChecked: Binding(
                         get: { entry.unfinished == true },
                         set: { isOn in if isOn { entry.unfinished = true } }
@@ -95,7 +95,7 @@ struct StudyFocusSectionView: View {
 
                 // 遇到的困難（多選）
                 CheckboxMultiSelectList(
-                    title: "遇到的困難（可複選）",
+                    title: String(localized: "遇到的困難（可複選）"),
                     options: DifficultyReason.allCases,
                     selected: $entry.difficultyReasons
                 )

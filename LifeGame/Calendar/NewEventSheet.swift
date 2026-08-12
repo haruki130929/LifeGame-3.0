@@ -26,7 +26,7 @@ struct NewEventSheet: View {
                 Section {
                     Picker("重複", selection: $frequency) {
                         ForEach(RecurringFrequency.allCases) { freq in
-                            Text(freq.rawValue).tag(freq)
+                            Text(freq.displayName).tag(freq)
                         }
                     }
 
@@ -35,7 +35,7 @@ struct NewEventSheet: View {
                     }
                 } footer: {
                     if frequency != .none {
-                        Text("將自動建立 \(repeatCount) 次\(frequency.rawValue)的重複行程")
+                        Text("將自動建立 \(repeatCount) 次\(frequency.displayName)的重複行程")
                     }
                 }
 

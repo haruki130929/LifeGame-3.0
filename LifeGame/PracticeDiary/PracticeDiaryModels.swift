@@ -12,10 +12,10 @@ enum ChartType: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .line:  return "折線圖"
-        case .pie:   return "圓餅圖"
-        case .bar:   return "長條圖"
-        case .radar: return "雷達圖"
+        case .line:  return String(localized: "折線圖")
+        case .pie:   return String(localized: "圓餅圖")
+        case .bar:   return String(localized: "長條圖")
+        case .radar: return String(localized: "雷達圖")
         }
     }
 

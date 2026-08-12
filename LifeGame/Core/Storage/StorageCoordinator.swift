@@ -288,9 +288,9 @@ final class StorageCoordinator {
         CKContainer(identifier: "iCloud.com.haruki.lifegame2").accountStatus { status, error in
             let statusText: String
             switch status {
-            case .available:      statusText = "✅ available（正常）"
-            case .noAccount:      statusText = "❌ noAccount（未登入）"
-            case .restricted:     statusText = "⚠️ restricted（受限）"
+            case .available:      statusText = String(localized: "✅ available（正常）")
+            case .noAccount:      statusText = String(localized: "❌ noAccount（未登入）")
+            case .restricted:     statusText = String(localized: "⚠️ restricted（受限）")
             case .couldNotDetermine: statusText = "❓ couldNotDetermine"
             case .temporarilyUnavailable: statusText = "⏳ temporarilyUnavailable"
             @unknown default:     statusText = "❓ unknown(\(status.rawValue))"
@@ -303,8 +303,8 @@ final class StorageCoordinator {
             // 已選 iCloud 模式但帳號不可用 → 主動提示使用者「資料其實沒在同步」
             let warning: String?
             switch status {
-            case .noAccount:  warning = "尚未登入 iCloud，資料暫時不會跨裝置同步"
-            case .restricted: warning = "iCloud 受到限制，資料暫時不會跨裝置同步"
+            case .noAccount:  warning = String(localized: "尚未登入 iCloud，資料暫時不會跨裝置同步")
+            case .restricted: warning = String(localized: "iCloud 受到限制，資料暫時不會跨裝置同步")
             default:          warning = nil
             }
             if let warning {
@@ -343,8 +343,8 @@ final class StorageCoordinator {
             let typeText: String
             switch event.type {
             case .setup:  typeText = "setup"
-            case .import: typeText = "import（從雲端拉取）"
-            case .export: typeText = "export（推送到雲端）"
+            case .import: typeText = String(localized: "import（從雲端拉取）")
+            case .export: typeText = String(localized: "export（推送到雲端）")
             @unknown default: typeText = "unknown"
             }
 

@@ -19,16 +19,16 @@ enum QuickFeatureType: String, Codable, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .bag:            return "整理書包"
-        case .mood:           return "心情溫度計"
-        case .todo:           return "待辦四象限"
-        case .dailyLog:       return "每日紀錄"
-        case .calendar:       return "行事曆"
-        case .tomorrowRing:   return "時間圓環"
-        case .monthlyScore:   return "本月結算"
-        case .diary:          return "日記"
-        case .finance:        return "財務"
-        case .ganttChart:     return "甘特圖"
+        case .bag:            return String(localized: "整理書包")
+        case .mood:           return String(localized: "心情溫度計")
+        case .todo:           return String(localized: "待辦四象限")
+        case .dailyLog:       return String(localized: "每日紀錄")
+        case .calendar:       return String(localized: "行事曆")
+        case .tomorrowRing:   return String(localized: "時間圓環")
+        case .monthlyScore:   return String(localized: "本月結算")
+        case .diary:          return String(localized: "日記")
+        case .finance:        return String(localized: "財務")
+        case .ganttChart:     return String(localized: "甘特圖")
         }
     }
 

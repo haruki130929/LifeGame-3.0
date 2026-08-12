@@ -96,7 +96,7 @@ struct CardFactory: View {
         case .quickStart:
             DashboardCardContainer {
                 VStack(alignment: .leading, spacing: 10) {
-                    CardHeader(title: "快速開始", icon: "bolt")
+                    CardHeader(title: String(localized: "快速開始"), icon: "bolt")
                     Text("開始你的一天")
                         .foregroundStyle(.secondary)
                 }
@@ -105,7 +105,7 @@ struct CardFactory: View {
         case .ganttChart:
             DashboardCardContainer {
                 VStack(alignment: .leading, spacing: 10) {
-                    CardHeader(title: "甘特圖", icon: "chart.bar.xaxis")
+                    CardHeader(title: String(localized: "甘特圖"), icon: "chart.bar.xaxis")
                     Text("查看行事曆與待辦時間線")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -115,7 +115,7 @@ struct CardFactory: View {
         case .copingNotes:
             DashboardCardContainer {
                 VStack(alignment: .leading, spacing: 10) {
-                    CardHeader(title: "動力筆記", icon: "lightbulb.fill")
+                    CardHeader(title: String(localized: "動力筆記"), icon: "lightbulb.fill")
                     Text("選擇你的狀況，找應對方法")
                         .font(.footnote)
                         .foregroundStyle(.secondary)

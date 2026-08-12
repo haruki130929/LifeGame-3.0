@@ -71,7 +71,7 @@ struct GanttChartView: View {
                     HStack(spacing: 0) {
                         Picker("", selection: $timeScale) {
                             ForEach(GanttTimeScale.allCases, id: \.self) { scale in
-                                Text(scale.rawValue).tag(scale)
+                                Text(scale.displayName).tag(scale)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -273,8 +273,8 @@ struct GanttChartView: View {
             let day = cal.component(.day, from: date)
             let weekday = cal.component(.weekday, from: date)
             let fmt = DateFormatter()
-            fmt.locale = Locale(identifier: "zh_TW")
-            fmt.dateFormat = "E"
+            fmt.locale = .current
+            fmt.setLocalizedDateFormatFromTemplate("E")
             topText = "\(day)"
             bottomText = fmt.string(from: date)
             isToday = cal.isDateInToday(date)
@@ -423,8 +423,8 @@ struct GanttChartView: View {
     private func visibleMonths() -> [MonthSpan] {
         let cal = Calendar.current
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "zh_TW")
-        fmt.dateFormat = "yyyy年M月"
+        fmt.locale = .current
+        fmt.setLocalizedDateFormatFromTemplate("yMMMM")
 
         var months: [MonthSpan] = []
         var current = dateRange.lowerBound

@@ -53,7 +53,7 @@ final class CustomTabStore: ObservableObject {
             // 初次安裝：預設一個「工具」切頁
             self.tabs = [
                 CustomTab(
-                    name: "工具",
+                    name: String(localized: "工具"),
                     icon: "wrench.and.screwdriver.fill",
                     cardTypes: [.tomorrowRing, .calendar, .todoQuadrant, .monthlyScoreCalendar]
                 )

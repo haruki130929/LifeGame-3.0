@@ -15,7 +15,9 @@ struct AbilitySet: Codable, Equatable {
 
     var values: [Int] { [stamina, focus, execution, awareness, timeManagement] }
 
-    static let labels = ["體力", "專注力", "執行力", "覺察力", "時間管理"]
+    static var labels: [String] {
+        [String(localized: "體力"), String(localized: "專注力"), String(localized: "執行力"), String(localized: "覺察力"), String(localized: "時間管理")]
+    }
     static let icons = ["figure.run", "eye", "bolt.fill", "brain.head.profile", "clock"]
     static let maxValue = 10
 }

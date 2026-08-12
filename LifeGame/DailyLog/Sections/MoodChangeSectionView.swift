@@ -2,13 +2,13 @@ import SwiftUI
 
 struct MoodChangeSectionView: View {
     @Binding var entry: DailyLogEntry
-    var header: String = "情緒變化"
+    var header: String = String(localized: "情緒變化")
 
     var body: some View {
         Section(header) {
             // 1) 狀態（單選）
             CheckboxSingleSelectList(
-                title: "狀態（單選）",
+                title: String(localized: "狀態（單選）"),
                 options: MoodChangeType.allCases,
                 selection: $entry.moodChangeType
             )
@@ -17,7 +17,7 @@ struct MoodChangeSectionView: View {
             if entry.moodChangeType == .higher {
                 // 原因（多選）
                 CheckboxMultiSelectList(
-                    title: "原因（可複選）",
+                    title: String(localized: "原因（可複選）"),
                     options: MoodChangeReason.allCases,
                     selected: $entry.moodChangeReasons
                 )
@@ -32,7 +32,7 @@ struct MoodChangeSectionView: View {
 
                 // 穩定方式（多選）
                 CheckboxMultiSelectList(
-                    title: "用什麼方式穩定下來（可複選）",
+                    title: String(localized: "用什麼方式穩定下來（可複選）"),
                     options: StabilizeMethod.allCases,
                     selected: $entry.stabilizeMethodsForMoodChange
                 )

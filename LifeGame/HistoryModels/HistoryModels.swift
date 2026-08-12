@@ -25,9 +25,9 @@ enum DayDifficulty: String, Codable {
     
     var title: String {
         switch self {
-        case .easy: return "輕鬆"
-        case .medium: return "中等"
-        case .hard: return "有點吃力"
+        case .easy: return String(localized: "輕鬆")
+        case .medium: return String(localized: "中等")
+        case .hard: return String(localized: "有點吃力")
         }
     }
 }

@@ -10,10 +10,10 @@ enum TodoQuadrant: Int, CaseIterable, Identifiable, Codable {
     
     var title: String {
         switch self {
-        case .importantNotUrgent: return "重要不緊急"
-        case .importantUrgent: return "重要又緊急"
-        case .notImportantNotUrgent: return "不重要不緊急"
-        case .urgentNotImportant: return "緊急不重要"
+        case .importantNotUrgent: return String(localized: "重要不緊急")
+        case .importantUrgent: return String(localized: "重要又緊急")
+        case .notImportantNotUrgent: return String(localized: "不重要不緊急")
+        case .urgentNotImportant: return String(localized: "緊急不重要")
         }
     }
 

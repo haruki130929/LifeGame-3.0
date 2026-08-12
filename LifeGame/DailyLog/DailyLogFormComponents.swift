@@ -40,7 +40,7 @@ struct ScoreSliderRow: View {
 
 /// 多選格子（含 other + 文字框）
 /// Option 必須是：Identifiable + Hashable + RawRepresentable(String)
-struct MultiSelectGrid<Option: Identifiable & Hashable & RawRepresentable>: View where Option.RawValue == String {
+struct MultiSelectGrid<Option: Identifiable & Hashable & RawRepresentable & LocalizedDisplayable>: View where Option.RawValue == String {
     let title: String
     let options: [Option]
     @Binding var selected: Set<Option>
@@ -56,7 +56,7 @@ struct MultiSelectGrid<Option: Identifiable & Hashable & RawRepresentable>: View
             LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(options) { opt in
                     Toggle(isOn: bindingForSet(element: opt)) {
-                        Text(opt.rawValue)
+                        Text(opt.displayName)
                     }
                 }
             }

@@ -68,7 +68,7 @@ final class CalendarSettingsStore: ObservableObject {
 
     var calendar: Calendar {
         var cal = Calendar(identifier: .gregorian)
-        cal.locale = Locale(identifier: "zh_TW")
+        cal.locale = .current
         cal.timeZone = .current
         cal.firstWeekday = firstWeekday
         return cal

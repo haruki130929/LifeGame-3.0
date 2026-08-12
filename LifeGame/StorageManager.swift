@@ -21,7 +21,7 @@ enum StorageManager {
 
             guard let context = mainContext else {
                 debugLog("StorageManager.save: coordinator 尚未初始化，跳過 key=\(key)")
-                ErrorManager.shared.showError("儲存系統尚未就緒，資料可能未儲存")
+                ErrorManager.shared.showError(String(localized: "儲存系統尚未就緒，資料可能未儲存"))
                 return
             }
 

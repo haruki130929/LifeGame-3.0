@@ -9,7 +9,7 @@ struct FeedbackMailView: UIViewControllerRepresentable {
         let mail = MFMailComposeViewController()
         mail.mailComposeDelegate = context.coordinator
         mail.setToRecipients(["harukiyang122@gmail.com"])
-        mail.setSubject("LifeGame 使用體驗回饋")
+        mail.setSubject(String(localized: "LifeGame 使用體驗回饋"))
         mail.setMessageBody(bodyTemplate, isHTML: false)
         return mail
     }

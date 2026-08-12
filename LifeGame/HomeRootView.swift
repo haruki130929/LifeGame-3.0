@@ -145,7 +145,7 @@ struct HomeRootView: View {
                 if navigator.path.isEmpty { navigator.path.append(FeatureID.practiceDiary) ; fab.route = nil }
             case .addQuestionModule, .questionModuleEditMode:
                 if navigator.path.isEmpty { navigator.path.append(FeatureID.questionModule) ; fab.route = nil }
-            case .reviewDailyLog, .exportDailyLog:
+            case .reviewDailyLog, .exportDailyLog, .dailyLogFontSize:
                 if navigator.path.isEmpty { navigator.path.append(FeatureID.dailyLog) ; fab.route = nil }
             case .addQuestion, .questionEditMode:
                 break // handled inside CustomModuleEditorView

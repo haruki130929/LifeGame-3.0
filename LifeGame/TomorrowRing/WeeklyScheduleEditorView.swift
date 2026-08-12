@@ -207,8 +207,8 @@ private struct ScheduleEditSheet: View {
                 }
 
                 Section("時間") {
-                    TimePicker(label: "開始", minute: $startMinute)
-                    TimePicker(label: "結束", minute: $endMinute)
+                    TimePicker(label: String(localized: "開始"), minute: $startMinute)
+                    TimePicker(label: String(localized: "結束"), minute: $endMinute)
                 }
 
                 Section("顏色") {

@@ -136,13 +136,15 @@ struct CustomModuleEditorView: View {
 
     // MARK: - 圖示選擇器
 
-    private static let iconOptions: [(String, [String])] = [
-        ("常用", ["square.grid.2x2", "list.bullet", "checklist", "doc.text", "note.text", "pencil.and.list.clipboard", "clipboard", "chart.bar", "chart.pie", "chart.line.uptrend.xyaxis"]),
-        ("心理", ["brain.head.profile", "heart", "heart.text.square", "face.smiling", "sun.max", "moon.stars", "cloud.rain", "bolt.heart", "waveform.path.ecg", "eye"]),
-        ("學習", ["book", "graduationcap", "pencil", "ruler", "lightbulb", "theatermasks", "music.note", "paintbrush", "globe", "questionmark.circle"]),
-        ("生活", ["fork.knife", "cup.and.saucer", "bed.double", "figure.walk", "figure.run", "dumbbell", "bicycle", "leaf", "pills", "cross.case"]),
-        ("其他", ["star", "flag", "bell", "tag", "bookmark", "calendar", "clock", "timer", "gamecontroller", "camera"]),
+    private static var iconOptions: [(String, [String])] {
+        [
+        (String(localized: "常用"), ["square.grid.2x2", "list.bullet", "checklist", "doc.text", "note.text", "pencil.and.list.clipboard", "clipboard", "chart.bar", "chart.pie", "chart.line.uptrend.xyaxis"]),
+        (String(localized: "心理"), ["brain.head.profile", "heart", "heart.text.square", "face.smiling", "sun.max", "moon.stars", "cloud.rain", "bolt.heart", "waveform.path.ecg", "eye"]),
+        (String(localized: "學習"), ["book", "graduationcap", "pencil", "ruler", "lightbulb", "theatermasks", "music.note", "paintbrush", "globe", "questionmark.circle"]),
+        (String(localized: "生活"), ["fork.knife", "cup.and.saucer", "bed.double", "figure.walk", "figure.run", "dumbbell", "bicycle", "leaf", "pills", "cross.case"]),
+        (String(localized: "其他"), ["star", "flag", "bell", "tag", "bookmark", "calendar", "clock", "timer", "gamecontroller", "camera"]),
     ]
+    }
 
     private var iconPicker: some View {
         let gridItems = Array(repeating: GridItem(.fixed(36), spacing: 8), count: 8)

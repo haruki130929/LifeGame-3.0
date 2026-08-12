@@ -178,6 +178,6 @@ struct ImportResult {
 
     var summary: String {
         let total = kvInserted + kvUpdated + dailyLogInserted + dailyLogUpdated + bagInserted + bagUpdated
-        return "已匯入 \(total) 筆資料"
+        return String(localized: "已匯入 \(total) 筆資料")
     }
 }

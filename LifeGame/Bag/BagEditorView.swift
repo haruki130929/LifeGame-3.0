@@ -137,7 +137,7 @@ struct IconPickerView: View {
             VStack(alignment: .leading, spacing: 12) {
                 Picker("分類", selection: $category) {
                     ForEach(IconCategory.allCases) { c in
-                        Text(c.rawValue).tag(c)
+                        Text(c.displayName).tag(c)
                     }
                 }
                 .pickerStyle(.segmented)

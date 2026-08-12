@@ -8,8 +8,8 @@ enum CalendarScope: String, CaseIterable, Identifiable {
     
     var title: String {
         switch self {
-        case .month: return "月"
-        case .week:  return "週"
+        case .month: return String(localized: "月")
+        case .week:  return String(localized: "週")
         }
     }
 }

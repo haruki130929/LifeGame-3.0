@@ -9,10 +9,12 @@ struct DailyLogHistoryView: View {
     @State private var collapsedMonths: Set<String> = []
     @State private var cachedGroups: [MonthGroup] = []
     @State private var lastEntryCount: Int = 0
+    /// 檢視紀錄字體大小（與「檢視紀錄」sheet 共用同一設定，由「＋」選單的「字體大小」調整）
+    @AppStorage(DailyLogTextSize.storageKey) private var textSizeIndex: Int = DailyLogTextSize.defaultIndex
 
     /// 統一用單一 sheet（避免多個 .sheet 疊在同一 view 互相閃爍）
     private enum ActiveSheet: Int, Identifiable {
-        case add, review, export
+        case add, review, export, fontSize
         var id: Int { rawValue }
     }
 
@@ -55,13 +57,13 @@ struct DailyLogHistoryView: View {
                             } label: {
                                 HStack {
                                     Text(group.key)
-                                        .font(.subheadline.weight(.semibold))
+                                        .font(DailyLogTextSize.font(15, weight: .semibold, forIndex: textSizeIndex))
                                     Text("\(group.entries.count) 筆")
-                                        .font(.caption)
+                                        .font(DailyLogTextSize.font(12, forIndex: textSizeIndex))
                                         .foregroundStyle(.secondary)
                                     Spacer()
                                     Image(systemName: collapsedMonths.contains(group.key) ? "chevron.right" : "chevron.down")
-                                        .font(.caption)
+                                        .font(DailyLogTextSize.font(12, forIndex: textSizeIndex))
                                         .foregroundStyle(.secondary)
                                 }
                             }
@@ -89,6 +91,9 @@ struct DailyLogHistoryView: View {
             case .exportDailyLog:
                 fab.route = nil
                 activeSheet = .export
+            case .dailyLogFontSize:
+                fab.route = nil
+                activeSheet = .fontSize
             default:
                 break
             }
@@ -103,6 +108,8 @@ struct DailyLogHistoryView: View {
                 DailyLogReviewRangeSheet(allEntries: store.entries)
             case .export:
                 DailyLogExportSheet(allEntries: store.entries)
+            case .fontSize:
+                DailyLogFontSizeSheet()
             }
         }
         .featureTutorial(.dailyLog)
@@ -115,8 +122,8 @@ struct DailyLogHistoryView: View {
         lastEntryCount = store.entries.count
 
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "zh_TW")
-        fmt.dateFormat = "yyyy年M月"
+        fmt.locale = .current
+        fmt.setLocalizedDateFormatFromTemplate("yMMMM")
 
         let grouped = Dictionary(grouping: store.entries) { entry in
             fmt.string(from: entry.date)
@@ -145,27 +152,30 @@ struct DailyLogHistoryView: View {
 private struct DailyLogRow: View {
     let entry: DailyLogEntry
     @EnvironmentObject private var moduleStore: QuestionModuleStore
+    /// 檢視紀錄字體大小（由「＋」選單的「字體大小」調整；@AppStorage 變動會即時重繪本列）
+    @AppStorage(DailyLogTextSize.storageKey) private var textSizeIndex: Int = DailyLogTextSize.defaultIndex
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 Text(entry.date, format: .dateTime.year().month().day())
-                    .font(.headline)
+                    .font(DailyLogTextSize.font(17, weight: .semibold, forIndex: textSizeIndex))
                 Spacer()
                 Text(displayWeather)
+                    .font(DailyLogTextSize.font(17, forIndex: textSizeIndex))
                     .foregroundStyle(.secondary)
             }
 
             if let summaryText = buildSummary() {
                 Text(summaryText)
-                    .font(.subheadline)
+                    .font(DailyLogTextSize.font(15, forIndex: textSizeIndex))
                     .foregroundStyle(.secondary)
             }
 
             let obs = entry.specialObservation.trimmingCharacters(in: .whitespacesAndNewlines)
             if !obs.isEmpty {
                 Text(obs)
-                    .font(.caption)
+                    .font(DailyLogTextSize.font(12, forIndex: textSizeIndex))
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
@@ -197,8 +207,8 @@ private struct DailyLogRow: View {
                 if parts.count >= 2 { break }
             }
         } else {
-            parts.append("情緒 \(entry.overallMoodScore)")
-            parts.append("焦慮 \(entry.anxietyScore)")
+            parts.append(String(localized: "情緒 \(entry.overallMoodScore)"))
+            parts.append(String(localized: "焦慮 \(entry.anxietyScore)"))
         }
 
         if let module = moduleStore.modules.first(where: { $0.kind == .body }),
@@ -211,7 +221,7 @@ private struct DailyLogRow: View {
                 }
             }
         } else {
-            parts.append("疲勞 \(entry.fatigueScore)")
+            parts.append(String(localized: "疲勞 \(entry.fatigueScore)"))
         }
 
         return parts.isEmpty ? nil : parts.joined(separator: "｜")

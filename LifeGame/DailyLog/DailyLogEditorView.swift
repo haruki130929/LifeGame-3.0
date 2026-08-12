@@ -14,8 +14,8 @@ struct DailyLogEditorView: View {
 
     private var title: String {
         switch mode {
-        case .add:  return "新增每日紀錄"
-        case .edit: return "編輯每日紀錄"
+        case .add:  return String(localized: "新增每日紀錄")
+        case .edit: return String(localized: "編輯每日紀錄")
         }
     }
 

@@ -23,6 +23,7 @@ struct LifeGameApp: App {
     @StateObject private var slotTimeStore = TimeSlotTimeStore()
     @StateObject private var homeNavigator = HomeNavigator()
     @StateObject private var appleSignIn = AppleSignInManager()
+    @StateObject private var languageStore = LanguageStore()
     @State private var tutorialTracker = FeatureTutorialTracker()
 
     // NOTE: 以下 Store 已移至 HomeRootContainerView（功能頁面層級）：
@@ -37,6 +38,10 @@ struct LifeGameApp: App {
 
         // 1b. 註冊各集合型 store 的同步合併策略（須在任何去重/載入之前）
         SyncMergeRegistration.registerAll()
+
+        // 1c. 在地化：記錄本次啟動實際生效的語言，並確認 String(localized:) 的遮蔽有生效
+        AppLocalization.bootstrap()
+        AppLocalization.verifyShadowingWorks()
 
         // 2. 讀取儲存模式偏好
         let config = StorageConfiguration()
@@ -82,6 +87,9 @@ struct LifeGameApp: App {
         // 註：先前 delegate 從未被指派，所以前景顯示與動作回呼都不會觸發 —— 一併修正。
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         NotificationManager.setupNotificationCategories()
+
+        // 使用者在設定頁換了語言並重新啟動後，把重複性通知改用新語言重排一次
+        NotificationManager.refreshLocalizedRemindersIfLanguageChanged()
     }
 
     @State private var onboardingCompleted = OnboardingTracker.isCompleted
@@ -112,7 +120,11 @@ struct LifeGameApp: App {
                         .environmentObject(slotTimeStore)
                         .environmentObject(homeNavigator)
                         .environmentObject(appleSignIn)
+                        .environmentObject(languageStore)
                         .environment(tutorialTracker)
+                        // 語言即時切換：Text(LocalizedStringKey) 吃 environment locale，
+                        // 而 .id() 讓語言一變就整棵重建，把已算好的畫面重新以新語言渲染。
+                        .environment(\.locale, languageStore.environmentLocale)
                         // SwiftData 容器（只在 coordinator 可用時掛載）
                         .modelContainer(coordinator.modelContainer)
                         .id(storageConfig.currentMode)
@@ -153,12 +165,14 @@ struct LifeGameApp: App {
                         .environmentObject(slotNameStore)
                         .environmentObject(slotTimeStore)
                         .environmentObject(appleSignIn)
+                        .environmentObject(languageStore)
                         .environment(tutorialTracker)
+                        .environment(\.locale, languageStore.environmentLocale)
                         .preferredColorScheme(theme.appearance.preferredColorScheme)
                 }
             } else {
                 StorageErrorView(
-                    errorMessage: startupError ?? "未知錯誤",
+                    errorMessage: startupError ?? String(localized: "未知錯誤"),
                     onRetry: retryInitialization
                 )
             }

@@ -17,10 +17,10 @@ final class ThemeStore: ObservableObject {
         
         var title: String {
             switch self {
-            case .blue: return "藍"
-            case .green: return "綠"
-            case .orange: return "橘"
-            case .purple: return "紫"
+            case .blue: return String(localized: "藍")
+            case .green: return String(localized: "綠")
+            case .orange: return String(localized: "橘")
+            case .purple: return String(localized: "紫")
             }
         }
         
@@ -43,9 +43,9 @@ final class ThemeStore: ObservableObject {
         
         var title: String {
             switch self {
-            case .system: return "系統"
-            case .gradient: return "漸層"
-            case .light: return "淡色"
+            case .system: return String(localized: "系統")
+            case .gradient: return String(localized: "漸層")
+            case .light: return String(localized: "淡色")
             }
         }
     }
@@ -59,9 +59,9 @@ final class ThemeStore: ObservableObject {
         
         var title: String {
             switch self {
-            case .system: return "跟隨系統"
-            case .light: return "淺色"
-            case .dark: return "深色"
+            case .system: return String(localized: "跟隨系統")
+            case .light: return String(localized: "淺色")
+            case .dark: return String(localized: "深色")
             }
         }
         
@@ -83,8 +83,8 @@ final class ThemeStore: ObservableObject {
 
         var title: String {
             switch self {
-            case .solid: return "實心"
-            case .glass: return "毛玻璃"
+            case .solid: return String(localized: "實心")
+            case .glass: return String(localized: "毛玻璃")
             }
         }
     }

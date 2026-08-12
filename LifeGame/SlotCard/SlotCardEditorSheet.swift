@@ -38,7 +38,7 @@ struct SlotCardEditorSheet: View {
                     Button("儲存") { saveAndDismiss() }
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    EditButton().environment(\.locale, Locale(identifier: "zh-Hant"))
+                    EditButton()
                 }
             }
             .onAppear {

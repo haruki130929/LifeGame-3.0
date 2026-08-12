@@ -8,7 +8,7 @@ struct MonthlyScoreCalendarCardLarge: View {
     private let title: String
     private let icon: String
 
-    init(title: String = "本月結算", icon: String = "calendar.badge.clock") {
+    init(title: String = String(localized: "本月結算"), icon: String = "calendar.badge.clock") {
         self.title = title
         self.icon = icon
     }
@@ -180,7 +180,7 @@ private extension MonthlyScoreCalendarCardLarge {
     }
 
     var weekdaySymbols: [String] {
-        cal.chineseWeekdaySymbols
+        cal.localizedWeekdaySymbols
     }
 
     var cells: [MSDayCell] {
@@ -227,8 +227,8 @@ private extension MonthlyScoreCalendarCardLarge {
     func yearMonthString(for date: Date) -> String {
         let f = DateFormatter()
         f.calendar = cal
-        f.locale = Locale(identifier: "zh_TW")
-        f.dateFormat = "yyyy年 M月"
+        f.locale = .current
+        f.setLocalizedDateFormatFromTemplate("yMMMM")
         return f.string(from: date)
     }
 }

@@ -109,8 +109,8 @@ struct OnboardingView: View {
             VStack(spacing: 14) {
                 deviceChoiceButton(
                     icon: "graduationcap.fill",
-                    title: "學生",
-                    desc: "上一堂課扣 HP、FP",
+                    title: String(localized: "學生"),
+                    desc: String(localized: "上一堂課扣 HP、FP"),
                     isSelected: slotNameStore.role == .student
                 ) {
                     withAnimation(.spring(response: 0.3)) {
@@ -120,8 +120,8 @@ struct OnboardingView: View {
 
                 deviceChoiceButton(
                     icon: "briefcase.fill",
-                    title: "上班族",
-                    desc: "工作一小時扣 HP、FP",
+                    title: String(localized: "上班族"),
+                    desc: String(localized: "工作一小時扣 HP、FP"),
                     isSelected: slotNameStore.role == .worker
                 ) {
                     withAnimation(.spring(response: 0.3)) {
@@ -157,8 +157,8 @@ struct OnboardingView: View {
             VStack(spacing: 14) {
                 deviceChoiceButton(
                     icon: "ipad",
-                    title: "我也有 iPad",
-                    desc: "iPhone 使用簡略模式，快速翻頁操作",
+                    title: String(localized: "我也有 iPad"),
+                    desc: String(localized: "iPhone 使用簡略模式，快速翻頁操作"),
                     isSelected: phoneModeStore.mode == .quick
                 ) {
                     withAnimation(.spring(response: 0.3)) {
@@ -168,8 +168,8 @@ struct OnboardingView: View {
 
                 deviceChoiceButton(
                     icon: "iphone",
-                    title: "只有 iPhone",
-                    desc: "完整功能，與 iPad 版相同的操作體驗",
+                    title: String(localized: "只有 iPhone"),
+                    desc: String(localized: "完整功能，與 iPad 版相同的操作體驗"),
                     isSelected: phoneModeStore.mode == .full
                 ) {
                     withAnimation(.spring(response: 0.3)) {

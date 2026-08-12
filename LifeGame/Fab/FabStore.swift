@@ -26,6 +26,7 @@ final class FabStore: ObservableObject {
         case addDailyLog
         case reviewDailyLog
         case exportDailyLog
+        case dailyLogFontSize
         // ── 財務專用 ──
         case addWish
         case editWishList
@@ -75,6 +76,7 @@ final class FabStore: ObservableObject {
             case .addDailyLog:              return "addDailyLog"
             case .reviewDailyLog:           return "reviewDailyLog"
             case .exportDailyLog:           return "exportDailyLog"
+            case .dailyLogFontSize:         return "dailyLogFontSize"
             case .addWish:                  return "addWish"
             case .editWishList:             return "editWishList"
             case .addLedgerEntry:           return "addLedgerEntry"
@@ -236,20 +238,20 @@ final class FabStore: ObservableObject {
 
     /// 任務水族箱的 FAB 動作：展開子選單（打開水缸 + 新增三種魚）
     private func aquariumHomeAction() -> FabAction {
-        FabAction(title: "水族箱", systemImage: "fish") { [weak self] in
+        FabAction(title: String(localized: "水族箱"), systemImage: "fish") { [weak self] in
             guard let self else { return }
             self.selectedFeature = nil
             self.subActions = [
-                FabAction(title: "打開水缸", systemImage: "rectangle.portrait", route: .openAquarium) { [weak self] in
+                FabAction(title: String(localized: "打開水缸"), systemImage: "rectangle.portrait", route: .openAquarium) { [weak self] in
                     self?.route = .openAquarium; self?.collapse()
                 },
-                FabAction(title: "新增社交魚", systemImage: "circle", route: .addAquariumFish(.social)) { [weak self] in
+                FabAction(title: String(localized: "新增社交魚"), systemImage: "circle", route: .addAquariumFish(.social)) { [weak self] in
                     self?.route = .addAquariumFish(.social); self?.collapse()
                 },
-                FabAction(title: "新增體力魚", systemImage: "square", route: .addAquariumFish(.physical)) { [weak self] in
+                FabAction(title: String(localized: "新增體力魚"), systemImage: "square", route: .addAquariumFish(.physical)) { [weak self] in
                     self?.route = .addAquariumFish(.physical); self?.collapse()
                 },
-                FabAction(title: "新增腦力魚", systemImage: "triangle", route: .addAquariumFish(.mental)) { [weak self] in
+                FabAction(title: String(localized: "新增腦力魚"), systemImage: "triangle", route: .addAquariumFish(.mental)) { [weak self] in
                     self?.route = .addAquariumFish(.mental); self?.collapse()
                 }
             ]
@@ -273,7 +275,7 @@ final class FabStore: ObservableObject {
         // 功能頁最後加「設定」，跳到該功能的設定頁（設定頁本身除外）
         if feature != .settings {
             result.append(
-                FabAction(title: "設定", systemImage: "gearshape", route: .featureSettings(feature)) { [weak self] in
+                FabAction(title: String(localized: "設定"), systemImage: "gearshape", route: .featureSettings(feature)) { [weak self] in
                     self?.route = .featureSettings(feature); self?.collapse()
                 }
             )
@@ -290,63 +292,66 @@ final class FabStore: ObservableObject {
         switch feature {
         case .calendar:
             result += [
-                FabAction(title: "新增行程", systemImage: "calendar.badge.plus", route: .addCalendarEvent) { [weak self] in
+                FabAction(title: String(localized: "新增行程"), systemImage: "calendar.badge.plus", route: .addCalendarEvent) { [weak self] in
                     self?.route = .addCalendarEvent; self?.collapse()
                 }
             ]
             // 只在使用者已開啟「自動同步」時，才在「新增行程」下面提供同步選項
             if UserDefaults.standard.bool(forKey: CalendarStore.autoSyncKey) {
                 result += [
-                    FabAction(title: "同步 Apple 行事曆", systemImage: "arrow.triangle.2.circlepath", route: .syncAppleCalendar) { [weak self] in
+                    FabAction(title: String(localized: "同步 Apple 行事曆"), systemImage: "arrow.triangle.2.circlepath", route: .syncAppleCalendar) { [weak self] in
                         self?.route = .syncAppleCalendar; self?.collapse()
                     }
                 ]
             }
         case .diary:
             result += [
-                FabAction(title: "新增日記", systemImage: "square.and.pencil", route: .navigate(.diary)) { [weak self] in
+                FabAction(title: String(localized: "新增日記"), systemImage: "square.and.pencil", route: .navigate(.diary)) { [weak self] in
                     self?.route = .navigate(.diary); self?.collapse()
                 }
             ]
         case .ledger:
             result += [
-                FabAction(title: "新增收支", systemImage: "plus.circle", route: .addLedgerEntry) { [weak self] in
+                FabAction(title: String(localized: "新增收支"), systemImage: "plus.circle", route: .addLedgerEntry) { [weak self] in
                     self?.route = .addLedgerEntry; self?.collapse()
                 },
-                FabAction(title: "檢視圖表", systemImage: "chart.pie", route: .viewLedgerChart) { [weak self] in
+                FabAction(title: String(localized: "檢視圖表"), systemImage: "chart.pie", route: .viewLedgerChart) { [weak self] in
                     self?.route = .viewLedgerChart; self?.collapse()
                 }
             ]
         case .wish:
             result += [
-                FabAction(title: "新增願望", systemImage: "sparkles", route: .addWish) { [weak self] in
+                FabAction(title: String(localized: "新增願望"), systemImage: "sparkles", route: .addWish) { [weak self] in
                     self?.route = .addWish; self?.collapse()
                 },
-                FabAction(title: "編輯", systemImage: "pencil", route: .editWishList) { [weak self] in
+                FabAction(title: String(localized: "編輯"), systemImage: "pencil", route: .editWishList) { [weak self] in
                     self?.route = .editWishList; self?.collapse()
                 }
             ]
         case .settings:
             result += [
-                FabAction(title: "偏好設定", systemImage: "gearshape", route: .navigate(.settings)) { [weak self] in
+                FabAction(title: String(localized: "偏好設定"), systemImage: "gearshape", route: .navigate(.settings)) { [weak self] in
                     self?.route = .navigate(.settings); self?.collapse()
                 }
             ]
         case .dailyLog:
             result += [
-                FabAction(title: "新增日記", systemImage: "plus.circle", route: .addDailyLog) { [weak self] in
+                FabAction(title: String(localized: "新增日記"), systemImage: "plus.circle", route: .addDailyLog) { [weak self] in
                     self?.route = .addDailyLog; self?.collapse()
                 },
-                FabAction(title: "檢視紀錄", systemImage: "calendar.day.timeline.left", route: .reviewDailyLog) { [weak self] in
+                FabAction(title: String(localized: "檢視紀錄"), systemImage: "calendar.day.timeline.left", route: .reviewDailyLog) { [weak self] in
                     self?.route = .reviewDailyLog; self?.collapse()
                 },
-                FabAction(title: "匯出資料", systemImage: "square.and.arrow.up", route: .exportDailyLog) { [weak self] in
+                FabAction(title: String(localized: "字體大小"), systemImage: "textformat.size", route: .dailyLogFontSize) { [weak self] in
+                    self?.route = .dailyLogFontSize; self?.collapse()
+                },
+                FabAction(title: String(localized: "匯出資料"), systemImage: "square.and.arrow.up", route: .exportDailyLog) { [weak self] in
                     self?.route = .exportDailyLog; self?.collapse()
                 }
             ]
         case .todoQuadrant:
             result += [
-                FabAction(title: "新增待辦事項", systemImage: "plus.circle") { [weak self] in
+                FabAction(title: String(localized: "新增待辦事項"), systemImage: "plus.circle") { [weak self] in
                     guard let self else { return }
                     self.subActions = TodoQuadrant.allCases.map { q in
                         FabAction(title: q.title, systemImage: q.fabIcon, route: .addTodoToQuadrant(q)) { [weak self] in
@@ -357,86 +362,86 @@ final class FabStore: ObservableObject {
                         self.showSubMenu = true
                     }
                 },
-                FabAction(title: "編輯", systemImage: "pencil", route: .todoEditMode) { [weak self] in
+                FabAction(title: String(localized: "編輯"), systemImage: "pencil", route: .todoEditMode) { [weak self] in
                     self?.route = .todoEditMode; self?.collapse()
                 }
             ]
         case .tomorrowRing:
             result += [
-                FabAction(title: "新增時段", systemImage: "plus.circle", route: .addRingItem) { [weak self] in
+                FabAction(title: String(localized: "新增時段"), systemImage: "plus.circle", route: .addRingItem) { [weak self] in
                     self?.route = .addRingItem; self?.collapse()
                 },
-                FabAction(title: "課表", systemImage: "calendar.badge.clock", route: .editSchedule) { [weak self] in
+                FabAction(title: String(localized: "課表"), systemImage: "calendar.badge.clock", route: .editSchedule) { [weak self] in
                     self?.route = .editSchedule
                     // 不呼叫 collapse()，讓 sheet 先呈現，sheet 的 onDismiss 會自然蓋住 FAB
                 }
             ]
         case .bagRequired:
             result += [
-                FabAction(title: "新增物品", systemImage: "plus.circle", route: .addBagItem) { [weak self] in
+                FabAction(title: String(localized: "新增物品"), systemImage: "plus.circle", route: .addBagItem) { [weak self] in
                     self?.route = .addBagItem; self?.collapse()
                 },
-                FabAction(title: "編輯", systemImage: "pencil", route: .bagEditMode) { [weak self] in
+                FabAction(title: String(localized: "編輯"), systemImage: "pencil", route: .bagEditMode) { [weak self] in
                     self?.route = .bagEditMode; self?.collapse()
                 }
             ]
         case .monthlyScoreCalendar:
             result += [
-                FabAction(title: "統計", systemImage: "chart.bar", route: .monthlyScoreStats) { [weak self] in
+                FabAction(title: String(localized: "統計"), systemImage: "chart.bar", route: .monthlyScoreStats) { [weak self] in
                     self?.route = .monthlyScoreStats; self?.collapse()
                 }
             ]
         case .moodThermometer:
             result += [
-                FabAction(title: "編輯", systemImage: "pencil.circle", route: .moodEdit) { [weak self] in
+                FabAction(title: String(localized: "編輯"), systemImage: "pencil.circle", route: .moodEdit) { [weak self] in
                     self?.route = .moodEdit; self?.collapse()
                 }
             ]
         case .mandala:
             result += [
-                FabAction(title: "新增圖表", systemImage: "plus.circle", route: .addMandalaChart) { [weak self] in
+                FabAction(title: String(localized: "新增圖表"), systemImage: "plus.circle", route: .addMandalaChart) { [weak self] in
                     self?.route = .addMandalaChart; self?.collapse()
                 },
-                FabAction(title: "編輯", systemImage: "pencil", route: .mandalaEditMode) { [weak self] in
+                FabAction(title: String(localized: "編輯"), systemImage: "pencil", route: .mandalaEditMode) { [weak self] in
                     self?.route = .mandalaEditMode; self?.collapse()
                 }
             ]
         case .practiceDiary:
             result += [
-                FabAction(title: "新增練習日記", systemImage: "plus.circle", route: .addPracticeDiary) { [weak self] in
+                FabAction(title: String(localized: "新增練習日記"), systemImage: "plus.circle", route: .addPracticeDiary) { [weak self] in
                     self?.route = .addPracticeDiary; self?.collapse()
                 },
-                FabAction(title: "編輯", systemImage: "pencil", route: .practiceDiaryEditMode) { [weak self] in
+                FabAction(title: String(localized: "編輯"), systemImage: "pencil", route: .practiceDiaryEditMode) { [weak self] in
                     self?.route = .practiceDiaryEditMode; self?.collapse()
                 }
             ]
         case .questionModule:
             result += [
-                FabAction(title: "新增模組", systemImage: "plus.circle", route: .addQuestionModule) { [weak self] in
+                FabAction(title: String(localized: "新增模組"), systemImage: "plus.circle", route: .addQuestionModule) { [weak self] in
                     self?.route = .addQuestionModule; self?.collapse()
                 },
-                FabAction(title: "排序", systemImage: "arrow.up.arrow.down", route: .questionModuleEditMode) { [weak self] in
+                FabAction(title: String(localized: "排序"), systemImage: "arrow.up.arrow.down", route: .questionModuleEditMode) { [weak self] in
                     self?.route = .questionModuleEditMode; self?.collapse()
                 }
             ]
         case .moduleEditor:
             result += [
-                FabAction(title: "新增問題", systemImage: "plus.circle", route: .addQuestion) { [weak self] in
+                FabAction(title: String(localized: "新增問題"), systemImage: "plus.circle", route: .addQuestion) { [weak self] in
                     self?.route = .addQuestion; self?.collapse()
                 },
-                FabAction(title: "排序", systemImage: "arrow.up.arrow.down", route: .questionEditMode) { [weak self] in
+                FabAction(title: String(localized: "排序"), systemImage: "arrow.up.arrow.down", route: .questionEditMode) { [weak self] in
                     self?.route = .questionEditMode; self?.collapse()
                 }
             ]
         case .ganttChart:
             result += [
-                FabAction(title: "新增任務", systemImage: "plus.circle", route: .addGanttTask) { [weak self] in
+                FabAction(title: String(localized: "新增任務"), systemImage: "plus.circle", route: .addGanttTask) { [weak self] in
                     self?.route = .addGanttTask; self?.collapse()
                 },
-                FabAction(title: "新增里程碑", systemImage: "diamond", route: .addMilestone) { [weak self] in
+                FabAction(title: String(localized: "新增里程碑"), systemImage: "diamond", route: .addMilestone) { [weak self] in
                     self?.route = .addMilestone; self?.collapse()
                 },
-                FabAction(title: "緩衝設定", systemImage: "clock.badge.questionmark", route: .toggleBuffer) { [weak self] in
+                FabAction(title: String(localized: "緩衝設定"), systemImage: "clock.badge.questionmark", route: .toggleBuffer) { [weak self] in
                     self?.route = .toggleBuffer; self?.collapse()
                 }
             ]
@@ -465,12 +470,12 @@ final class FabStore: ObservableObject {
         case .monthlyScoreCalendar:   return L10n.Title.monthlyScore
         case .moodThermometer:        return L10n.Title.moodThermometer
         case .mandala:                return L10n.Title.mandala
-        case .practiceDiary:          return "練習日記"
-        case .questionModule:         return "問題模組"
-        case .moduleEditor:           return "編輯模組"
-        case .ganttChart:             return "甘特圖"
-        case .copingNotes:            return "動力筆記"
-        case .communicationBoard:     return "選緘溝通板"
+        case .practiceDiary:          return String(localized: "練習日記")
+        case .questionModule:         return String(localized: "問題模組")
+        case .moduleEditor:           return String(localized: "編輯模組")
+        case .ganttChart:             return String(localized: "甘特圖")
+        case .copingNotes:            return String(localized: "動力筆記")
+        case .communicationBoard:     return String(localized: "選緘溝通板")
         }
     }
 

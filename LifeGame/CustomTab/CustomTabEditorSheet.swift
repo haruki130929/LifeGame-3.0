@@ -39,7 +39,7 @@ struct CustomTabEditorSheet: View {
                         .disabled(tabName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
                 ToolbarItem(placement: .primaryAction) {
-                    EditButton().environment(\.locale, Locale(identifier: "zh-Hant"))
+                    EditButton()
                 }
             }
             .onAppear {

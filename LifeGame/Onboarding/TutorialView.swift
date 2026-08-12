@@ -119,17 +119,17 @@ enum TutorialData {
     static let concepts: [TutorialItem] = [
         TutorialItem(
             icon: "heart.fill",
-            title: "HP / FP / MP 是什麼",
+            title: String(localized: "HP / FP / MP 是什麼"),
             color: .red,
             steps: [
-                TutorialStep(text: "LifeGame 把你的生活遊戲化，用三種數值來管理你每天的精力分配。"),
-                TutorialStep(text: "HP（Health Point）＝ 體力值：每天 100 點，上一堂課或工作一小時（50 分鐘）各消耗 10 點。"),
-                TutorialStep(text: "FP（Focus Point）＝ 專注力值：每天 100 點，需要集中注意力的活動會消耗 FP。"),
-                TutorialStep(text: "MP（Mood Point）＝ 心情值：每天早上 40 點起跳，目標是達到 60 點。每天要做一些能提升心情的事！"),
-                TutorialStep(text: "所有數值以 5 點為一個單位增減。有些事情會減少 HP、FP，但可以增加 MP。"),
-                TutorialStep(text: "注意：一天之中 HP、FP、MP 都不可以變成負值！"),
+                TutorialStep(text: String(localized: "LifeGame 把你的生活遊戲化，用三種數值來管理你每天的精力分配。")),
+                TutorialStep(text: String(localized: "HP（Health Point）＝ 體力值：每天 100 點，上一堂課或工作一小時（50 分鐘）各消耗 10 點。")),
+                TutorialStep(text: String(localized: "FP（Focus Point）＝ 專注力值：每天 100 點，需要集中注意力的活動會消耗 FP。")),
+                TutorialStep(text: String(localized: "MP（Mood Point）＝ 心情值：每天早上 40 點起跳，目標是達到 60 點。每天要做一些能提升心情的事！")),
+                TutorialStep(text: String(localized: "所有數值以 5 點為一個單位增減。有些事情會減少 HP、FP，但可以增加 MP。")),
+                TutorialStep(text: String(localized: "注意：一天之中 HP、FP、MP 都不可以變成負值！")),
             ],
-            tip: "假設上完課／下班後（8 小時 = 80 點），HP 和 FP 只剩 20 點，你就只能用這 20 點來分配晚上的活動。這個設計是避免做超過自己可以負荷的事情。",
+            tip: String(localized: "假設上完課／下班後（8 小時 = 80 點），HP 和 FP 只剩 20 點，你就只能用這 20 點來分配晚上的活動。這個設計是避免做超過自己可以負荷的事情。"),
             featureKey: .hpFpMp
         ),
     ]
@@ -142,11 +142,11 @@ enum TutorialData {
             title: L10n.Title.calendar,
             color: .blue,
             steps: [
-                TutorialStep(text: "行事曆讓你管理日程和行程，以月曆方式顯示。"),
-                TutorialStep(text: "點擊日期可以查看當天的行程，彩色橫條代表跨天的行程。"),
-                TutorialStep(text: "按右下角「＋」→「新增行程」來建立新的行程。"),
+                TutorialStep(text: String(localized: "行事曆讓你管理日程和行程，以月曆方式顯示。")),
+                TutorialStep(text: String(localized: "點擊日期可以查看當天的行程，彩色橫條代表跨天的行程。")),
+                TutorialStep(text: String(localized: "按右下角「＋」→「新增行程」來建立新的行程。")),
             ],
-            tip: "可以在設定中選擇一週的起始日（週日或週一）。",
+            tip: String(localized: "可以在設定中選擇一週的起始日（週日或週一）。"),
             featureKey: .calendar
         ),
         TutorialItem(
@@ -154,14 +154,14 @@ enum TutorialData {
             title: L10n.Title.todoQuadrant,
             color: .green,
             steps: [
-                TutorialStep(text: "待辦四象限用「重要」和「緊急」兩個維度來分類你的任務。"),
-                TutorialStep(text: "第一象限：重要又緊急 → 立刻做"),
-                TutorialStep(text: "第二象限：重要不緊急 → 安排時間做"),
-                TutorialStep(text: "第三象限：緊急不重要 → 委託別人或快速處理"),
-                TutorialStep(text: "第四象限：不重要不緊急 → 考慮是否需要做"),
-                TutorialStep(text: "完成任務後點擊打勾，會影響每日結算分數。"),
+                TutorialStep(text: String(localized: "待辦四象限用「重要」和「緊急」兩個維度來分類你的任務。")),
+                TutorialStep(text: String(localized: "第一象限：重要又緊急 → 立刻做")),
+                TutorialStep(text: String(localized: "第二象限：重要不緊急 → 安排時間做")),
+                TutorialStep(text: String(localized: "第三象限：緊急不重要 → 委託別人或快速處理")),
+                TutorialStep(text: String(localized: "第四象限：不重要不緊急 → 考慮是否需要做")),
+                TutorialStep(text: String(localized: "完成任務後點擊打勾，會影響每日結算分數。")),
             ],
-            tip: "優先處理第一象限，多花時間在第二象限，減少第三、四象限的事。",
+            tip: String(localized: "優先處理第一象限，多花時間在第二象限，減少第三、四象限的事。"),
             featureKey: .todoQuadrant
         ),
         TutorialItem(
@@ -169,14 +169,14 @@ enum TutorialData {
             title: L10n.Title.tomorrowRing,
             color: .orange,
             steps: [
-                TutorialStep(text: "時間圓環用「雙圈」呈現你的一天 — 內圈是你「預定」要做的事，外圈是你「實際」執行的情況，弧長差異一眼看出計畫與現實的落差。"),
-                TutorialStep(text: "時段不是連續的軌道，而是一段段獨立的「圓角膠囊」。有行程的時段用實心顏色顯示，空檔則用虛線框起來。"),
-                TutorialStep(text: "想在空檔新增行程，直接點虛線段中央的「＋」按鈕，系統會自動帶入該時段的起訖時間。"),
-                TutorialStep(text: "長按一個時段約 0.3 秒，時段會浮起並震動，這時候就可以拖曳它移動位置。相鄰的時段會自動避讓，放開後時段回到軌道上。"),
-                TutorialStep(text: "畫面右下角的「＋」FAB 按鈕可以新增時段或進入「課表」設定。課表是獨立的每週範本 — 設好每週固定課程後，系統每天會自動填入內圈。"),
-                TutorialStep(text: "圓環中央即時顯示當前時間，下方的 HP / FP 膠囊進度條會根據時段消耗即時扣減。已結束的時段會自動把消耗的點數從你的 HP/FP 扣掉。"),
+                TutorialStep(text: String(localized: "時間圓環用「雙圈」呈現你的一天 — 內圈是你「預定」要做的事，外圈是你「實際」執行的情況，弧長差異一眼看出計畫與現實的落差。")),
+                TutorialStep(text: String(localized: "時段不是連續的軌道，而是一段段獨立的「圓角膠囊」。有行程的時段用實心顏色顯示，空檔則用虛線框起來。")),
+                TutorialStep(text: String(localized: "想在空檔新增行程，直接點虛線段中央的「＋」按鈕，系統會自動帶入該時段的起訖時間。")),
+                TutorialStep(text: String(localized: "長按一個時段約 0.3 秒，時段會浮起並震動，這時候就可以拖曳它移動位置。相鄰的時段會自動避讓，放開後時段回到軌道上。")),
+                TutorialStep(text: String(localized: "畫面右下角的「＋」FAB 按鈕可以新增時段或進入「課表」設定。課表是獨立的每週範本 — 設好每週固定課程後，系統每天會自動填入內圈。")),
+                TutorialStep(text: String(localized: "圓環中央即時顯示當前時間，下方的 HP / FP 膠囊進度條會根據時段消耗即時扣減。已結束的時段會自動把消耗的點數從你的 HP/FP 扣掉。")),
             ],
-            tip: "建議先到「課表」把每週固定行程（上課、上班、固定運動）設好，之後每天只需要補上臨時行程，輕鬆掌握時間。",
+            tip: String(localized: "建議先到「課表」把每週固定行程（上課、上班、固定運動）設好，之後每天只需要補上臨時行程，輕鬆掌握時間。"),
             featureKey: .timeRingV2
         ),
         TutorialItem(
@@ -184,12 +184,12 @@ enum TutorialData {
             title: L10n.Title.dailyLog,
             color: .indigo,
             steps: [
-                TutorialStep(text: "每日紀錄讓你記錄當天的各種狀態和感受。"),
-                TutorialStep(text: "包含：心情、焦慮程度、身體狀況、睡眠品質、專注度等。"),
-                TutorialStep(text: "還可以附加照片，記錄生活中的重要時刻。"),
-                TutorialStep(text: "長期記錄可以幫助你發現自己的狀態模式。"),
+                TutorialStep(text: String(localized: "每日紀錄讓你記錄當天的各種狀態和感受。")),
+                TutorialStep(text: String(localized: "包含：心情、焦慮程度、身體狀況、睡眠品質、專注度等。")),
+                TutorialStep(text: String(localized: "還可以附加照片，記錄生活中的重要時刻。")),
+                TutorialStep(text: String(localized: "長期記錄可以幫助你發現自己的狀態模式。")),
             ],
-            tip: "可以在設定中自訂要顯示哪些問題模組。",
+            tip: String(localized: "可以在設定中自訂要顯示哪些問題模組。"),
             featureKey: .dailyLog
         ),
         TutorialItem(
@@ -197,11 +197,11 @@ enum TutorialData {
             title: L10n.Title.moodThermometer,
             color: .pink,
             steps: [
-                TutorialStep(text: "心情溫度計讓你每小時記錄當下的心情（0-10 分）。"),
-                TutorialStep(text: "可以看到一整天的心情變化趨勢圖。"),
-                TutorialStep(text: "在 Watch App 上也可以快速記錄心情。"),
+                TutorialStep(text: String(localized: "心情溫度計讓你每小時記錄當下的心情（0-10 分）。")),
+                TutorialStep(text: String(localized: "可以看到一整天的心情變化趨勢圖。")),
+                TutorialStep(text: String(localized: "在 Watch App 上也可以快速記錄心情。")),
             ],
-            tip: "開啟「每小時提醒」，系統會定時提醒你記錄心情。",
+            tip: String(localized: "開啟「每小時提醒」，系統會定時提醒你記錄心情。"),
             featureKey: .moodThermometer
         ),
         TutorialItem(
@@ -209,9 +209,9 @@ enum TutorialData {
             title: L10n.Title.bagRequired,
             color: .brown,
             steps: [
-                TutorialStep(text: "整理書包幫你建立出門前的物品清單。"),
-                TutorialStep(text: "可以設定哪些是「必帶」物品，確保不會忘記。"),
-                TutorialStep(text: "每天出門前打勾確認，養成整理的好習慣。"),
+                TutorialStep(text: String(localized: "整理書包幫你建立出門前的物品清單。")),
+                TutorialStep(text: String(localized: "可以設定哪些是「必帶」物品，確保不會忘記。")),
+                TutorialStep(text: String(localized: "每天出門前打勾確認，養成整理的好習慣。")),
             ],
             tip: nil,
             featureKey: .bag
@@ -221,11 +221,11 @@ enum TutorialData {
             title: L10n.Title.mandala,
             color: .teal,
             steps: [
-                TutorialStep(text: "曼陀羅圖表是一種目標設定工具，用 9 宮格方式展開。"),
-                TutorialStep(text: "中間放核心目標，周圍 8 格放達成核心目標所需的子目標。"),
-                TutorialStep(text: "每個子目標又可以再展開 8 個具體行動項目。"),
+                TutorialStep(text: String(localized: "曼陀羅圖表是一種目標設定工具，用 9 宮格方式展開。")),
+                TutorialStep(text: String(localized: "中間放核心目標，周圍 8 格放達成核心目標所需的子目標。")),
+                TutorialStep(text: String(localized: "每個子目標又可以再展開 8 個具體行動項目。")),
             ],
-            tip: "從核心目標開始，一層一層向外展開思考。",
+            tip: String(localized: "從核心目標開始，一層一層向外展開思考。"),
             featureKey: .mandala
         ),
         TutorialItem(
@@ -233,21 +233,21 @@ enum TutorialData {
             title: L10n.Title.monthlyScore,
             color: .mint,
             steps: [
-                TutorialStep(text: "本月結算以日曆方式顯示每天的結算分數。"),
-                TutorialStep(text: "顏色深淺代表當天的表現，一眼就能看出整月的趨勢。"),
-                TutorialStep(text: "點擊「統計」可以查看更詳細的數據分析。"),
+                TutorialStep(text: String(localized: "本月結算以日曆方式顯示每天的結算分數。")),
+                TutorialStep(text: String(localized: "顏色深淺代表當天的表現，一眼就能看出整月的趨勢。")),
+                TutorialStep(text: String(localized: "點擊「統計」可以查看更詳細的數據分析。")),
             ],
             tip: nil,
             featureKey: .monthlyScore
         ),
         TutorialItem(
             icon: "sparkles",
-            title: "願望 & 記帳",
+            title: String(localized: "願望 & 記帳"),
             color: .yellow,
             steps: [
-                TutorialStep(text: "願望清單讓你記錄想要的東西，設定目標金額。"),
-                TutorialStep(text: "記帳功能幫你追蹤收支，了解錢花到哪裡去了。"),
-                TutorialStep(text: "搭配使用，可以為願望存錢，達成目標時標記「買了！」。"),
+                TutorialStep(text: String(localized: "願望清單讓你記錄想要的東西，設定目標金額。")),
+                TutorialStep(text: String(localized: "記帳功能幫你追蹤收支，了解錢花到哪裡去了。")),
+                TutorialStep(text: String(localized: "搭配使用，可以為願望存錢，達成目標時標記「買了！」。")),
             ],
             tip: nil,
             featureKey: .finance
@@ -259,39 +259,39 @@ enum TutorialData {
     static let tips: [TutorialItem] = [
         TutorialItem(
             icon: "plus.circle.fill",
-            title: "FAB 選單",
+            title: String(localized: "FAB 選單"),
             color: .blue,
             steps: [
-                TutorialStep(text: "右下角的「＋」按鈕是 FAB（Floating Action Button），是你最常用的操作入口。"),
-                TutorialStep(text: "iPad / 一般模式：點擊展開選單，再點功能名稱進入。"),
-                TutorialStep(text: "iPhone 圓環模式：長按「＋」按鈕，手指滑向功能圖示放開即可。"),
-                TutorialStep(text: "進入功能頁面後，FAB 會變成該功能的快捷操作（新增、編輯等）。"),
+                TutorialStep(text: String(localized: "右下角的「＋」按鈕是 FAB（Floating Action Button），是你最常用的操作入口。")),
+                TutorialStep(text: String(localized: "iPad / 一般模式：點擊展開選單，再點功能名稱進入。")),
+                TutorialStep(text: String(localized: "iPhone 圓環模式：長按「＋」按鈕，手指滑向功能圖示放開即可。")),
+                TutorialStep(text: String(localized: "進入功能頁面後，FAB 會變成該功能的快捷操作（新增、編輯等）。")),
             ],
-            tip: "可以在 設定 → 介面操作 中切換「選單」和「圓環」兩種操作方式。"
+            tip: String(localized: "可以在 設定 → 介面操作 中切換「選單」和「圓環」兩種操作方式。")
         ),
         TutorialItem(
             icon: "rectangle.on.rectangle",
-            title: "簡略模式 vs 一般模式",
+            title: String(localized: "簡略模式 vs 一般模式"),
             color: .purple,
             steps: [
-                TutorialStep(text: "iPhone 有兩種顯示模式可以選擇。"),
-                TutorialStep(text: "一般模式：與 iPad 相同的完整功能，左側有選單按鈕。"),
-                TutorialStep(text: "簡略模式：左右滑動切換功能頁面，更適合快速操作。"),
-                TutorialStep(text: "可以在 設定 → 顯示模式 中切換。"),
+                TutorialStep(text: String(localized: "iPhone 有兩種顯示模式可以選擇。")),
+                TutorialStep(text: String(localized: "一般模式：與 iPad 相同的完整功能，左側有選單按鈕。")),
+                TutorialStep(text: String(localized: "簡略模式：左右滑動切換功能頁面，更適合快速操作。")),
+                TutorialStep(text: String(localized: "可以在 設定 → 顯示模式 中切換。")),
             ],
-            tip: "簡略模式下可以自訂要顯示哪些功能頁面。"
+            tip: String(localized: "簡略模式下可以自訂要顯示哪些功能頁面。")
         ),
         TutorialItem(
             icon: "icloud.fill",
-            title: "iCloud 同步 & 備份",
+            title: String(localized: "iCloud 同步 & 備份"),
             color: .cyan,
             steps: [
-                TutorialStep(text: "開啟 iCloud 同步後，資料會自動備份到雲端。"),
-                TutorialStep(text: "即使刪除 App 重新安裝，資料也會自動恢復。"),
-                TutorialStep(text: "同一個 Apple ID 登入的所有裝置都能同步資料。"),
-                TutorialStep(text: "到 設定 → 儲存方式 可以查看和管理同步狀態。"),
+                TutorialStep(text: String(localized: "開啟 iCloud 同步後，資料會自動備份到雲端。")),
+                TutorialStep(text: String(localized: "即使刪除 App 重新安裝，資料也會自動恢復。")),
+                TutorialStep(text: String(localized: "同一個 Apple ID 登入的所有裝置都能同步資料。")),
+                TutorialStep(text: String(localized: "到 設定 → 儲存方式 可以查看和管理同步狀態。")),
             ],
-            tip: "建議開啟 iCloud 同步，確保資料安全。"
+            tip: String(localized: "建議開啟 iCloud 同步，確保資料安全。")
         ),
     ]
 

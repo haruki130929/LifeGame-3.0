@@ -15,8 +15,8 @@ enum BagItemEditorMode {
     
     var title: String {
         switch self {
-        case .add: return "新增物品"
-        case .edit: return "編輯物品"
+        case .add: return String(localized: "新增物品")
+        case .edit: return String(localized: "編輯物品")
         }
     }
 }

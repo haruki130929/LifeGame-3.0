@@ -36,8 +36,8 @@ enum EquipEffect: Codable, Hashable {
     
     var displayText: String {
         switch self {
-        case .mpMax(let v): return "MP 上限 +\(v)"
-        case .weight(let v): return "重量 +\(v)"
+        case .mpMax(let v): return String(localized: "MP 上限 +\(v)")
+        case .weight(let v): return String(localized: "重量 +\(v)")
         }
     }
     
@@ -76,9 +76,9 @@ struct EquipItem: Identifiable, Codable, Hashable {
 }
 
 let sampleItems: [EquipItem] = [
-    EquipItem(slot: .head, name: "耳環", note: "亮亮的", effects: [.mpMax(5), .weight(2)]),
-    EquipItem(slot: .hand, name: "手錶", note: "提醒時間", effects: [.mpMax(3), .weight(2)]),
-    EquipItem(slot: .action, name: "手帳本", note: "更有掌控感", effects: [.mpMax(5), .weight(2)]),
-    EquipItem(slot: .care, name: "護手霜", note: "手舒服", effects: [.mpMax(2), .weight(2)]),
-    EquipItem(slot: .comfort, name: "耳塞", note: "降噪", effects: [.mpMax(4), .weight(2)])
+    EquipItem(slot: .head, name: String(localized: "耳環"), note: String(localized: "亮亮的"), effects: [.mpMax(5), .weight(2)]),
+    EquipItem(slot: .hand, name: String(localized: "手錶"), note: String(localized: "提醒時間"), effects: [.mpMax(3), .weight(2)]),
+    EquipItem(slot: .action, name: String(localized: "手帳本"), note: String(localized: "更有掌控感"), effects: [.mpMax(5), .weight(2)]),
+    EquipItem(slot: .care, name: String(localized: "護手霜"), note: String(localized: "手舒服"), effects: [.mpMax(2), .weight(2)]),
+    EquipItem(slot: .comfort, name: String(localized: "耳塞"), note: String(localized: "降噪"), effects: [.mpMax(4), .weight(2)])
 ]

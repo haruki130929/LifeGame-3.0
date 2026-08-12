@@ -30,7 +30,7 @@ struct TomorrowRingPlusMenu: View {
             slot: .morning,          // ⭐ 依你原本的 enum 改（morning / afternoon / night）
             startMinute: 9 * 60,
             endMinute: 10 * 60,
-            title: "新時段",
+            title: String(localized: "新時段"),
             icon: "clock",           // SF Symbol
             colorHex: "4DA3FF",
             hpCost: 0,

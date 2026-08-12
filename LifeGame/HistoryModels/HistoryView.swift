@@ -47,7 +47,7 @@ struct HistoryView: View {
         let days = makeCalendarDays(for: month, calendar: cal)
         
         return VStack(alignment: .leading, spacing: 10) {
-            let weekSymbols = cal.chineseWeekdaySymbols
+            let weekSymbols = cal.localizedWeekdaySymbols
             HStack {
                 ForEach(weekSymbols, id: \.self) { s in
                     Text(s)
@@ -94,9 +94,9 @@ struct HistoryView: View {
             }
             
             HStack(spacing: 10) {
-                LegendDot(color: .green, text: "輕鬆 70")
-                LegendDot(color: .orange, text: "中等 50")
-                LegendDot(color: .red, text: "有點吃力 30")
+                LegendDot(color: .green, text: String(localized: "輕鬆 70"))
+                LegendDot(color: .orange, text: String(localized: "中等 50"))
+                LegendDot(color: .red, text: String(localized: "有點吃力 30"))
             }
             .font(.footnote)
             .foregroundStyle(.secondary)

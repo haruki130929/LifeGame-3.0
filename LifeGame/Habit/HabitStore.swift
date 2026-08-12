@@ -30,9 +30,9 @@ final class HabitStore: ObservableObject {
         // 如果是第一次啟動，給一點預設（想空白也可以把這段刪掉）
         if habits.isEmpty {
             habits = [
-                Habit(name: "喝水", icon: "waterbottle", isActive: true),
-                Habit(name: "日文", icon: "character.book.closed", isActive: true),
-                Habit(name: "散步", icon: "figure.walk", isActive: true)
+                Habit(name: String(localized: "喝水"), icon: "waterbottle", isActive: true),
+                Habit(name: String(localized: "日文"), icon: "character.book.closed", isActive: true),
+                Habit(name: String(localized: "散步"), icon: "figure.walk", isActive: true)
             ]
         }
         syncHelper = StoreSyncHelper { [weak self] in self?.reloadFromStorage() }

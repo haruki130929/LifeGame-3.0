@@ -16,8 +16,8 @@ struct DiaryEditorView: View {
 
     private var title: String {
         switch mode {
-        case .add:  return "新增日記"
-        case .edit: return "編輯日記"
+        case .add:  return String(localized: "新增日記")
+        case .edit: return String(localized: "編輯日記")
         }
     }
 

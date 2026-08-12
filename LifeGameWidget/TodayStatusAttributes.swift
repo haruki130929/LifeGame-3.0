@@ -116,10 +116,10 @@ enum TodoLiveActivityShared {
         f.locale = Locale(identifier: "en_US_POSIX")
         f.dateFormat = "HH:mm"
         let time = f.string(from: date)
-        if cal.isDateInToday(date) { return "今天 \(time) 到期" }
-        if cal.isDateInTomorrow(date) { return "明天 \(time) 到期" }
+        if cal.isDateInToday(date) { return String(localized: "今天 \(time) 到期") }
+        if cal.isDateInTomorrow(date) { return String(localized: "明天 \(time) 到期") }
         f.dateFormat = "M/d HH:mm"
-        return "\(f.string(from: date)) 到期"
+        return String(localized: "\(f.string(from: date)) 到期")
     }
 }
 

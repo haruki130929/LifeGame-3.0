@@ -20,9 +20,9 @@ struct EquipPanel: View {
                     EquipmentPickerView(game: game, store: store, slot: slot)
                 } label: {
                     HStack {
-                        Text(slot.rawValue).frame(width: 80, alignment: .leading)
+                        Text(slot.displayName).frame(width: 80, alignment: .leading)
                         Spacer()
-                        Text(game.equipped[slot]?.name ?? "未裝備")
+                        Text(game.equipped[slot]?.name ?? String(localized: "未裝備"))
                             .foregroundStyle(.secondary)
                         Image(systemName: "chevron.right").foregroundStyle(.secondary)
                     }
@@ -58,7 +58,7 @@ struct EquipmentPickerView: View {
                 }
             }
             
-            Section(slot.rawValue) {
+            Section(slot.displayName) {
                 ForEach(allItemsForThisSlot) { item in
                     let allowed = game.canEquip(item, to: slot)
                     
@@ -102,7 +102,7 @@ struct EquipmentPickerView: View {
                 }
             }
         }
-        .navigationTitle(slot.rawValue)
+        .navigationTitle(slot.displayName)
     }
     
     private var allItemsForThisSlot: [EquipItem] {

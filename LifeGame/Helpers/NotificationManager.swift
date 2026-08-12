@@ -23,7 +23,7 @@ enum NotificationManager {
         // 待辦到期 → 一顆「完成」按鈕，背景處理、不開 App
         let complete = UNNotificationAction(
             identifier: Action.completeTodo,
-            title: "完成",
+            title: String(localized: "完成"),
             options: []
         )
         let todoCategory = UNNotificationCategory(
@@ -36,9 +36,9 @@ enum NotificationManager {
         // 心情提醒 → 直接在通知裡輸入 0–10，背景記錄、不開 App
         let logMood = UNTextInputNotificationAction(
             identifier: Action.logMood,
-            title: "記錄心情",
+            title: String(localized: "記錄心情"),
             options: [],
-            textInputButtonTitle: "記錄",
+            textInputButtonTitle: String(localized: "記錄"),
             textInputPlaceholder: "0–10"
         )
         let moodCategory = UNNotificationCategory(
@@ -75,6 +75,70 @@ enum NotificationManager {
         }
     }
     
+    // MARK: - 語言切換後重排
+
+    /// 通知的文字是「排程當下」就寫死進 UNMutableNotificationContent 的，而「每日結算」與
+    /// 「每小時心情」兩個提醒都是 repeats: true —— 使用者換語言之後若不重排，
+    /// 它們會永遠用舊語言跳出來。
+    ///
+    /// 這裡在啟動時比對「上次排程時的語言」，不同才重排。重排是以相同 identifier 覆寫，
+    /// 冪等且安全。動作按鈕標題不需處理：setupNotificationCategories() 每次啟動都會重新註冊。
+    ///
+    /// 待辦到期提醒（todo_due_*）的標題同樣是排程當下寫死的，也會一併重排 ——
+    /// 那批綁定的是各自的到期時間，不重排的話換語言後好幾天內都還會跳出舊語言的通知。
+    static func refreshLocalizedRemindersIfLanguageChanged() {
+        let languageKey = "notifications.localizedFor_v1"
+        let current = Bundle.main.preferredLocalizations.first ?? "zh-Hant"
+        let previous = UserDefaults.standard.string(forKey: languageKey)
+
+        guard previous != current else { return }
+
+        // 儲存層還沒就緒時，下面讀開關一律拿到 nil，會靜靜地不重排。
+        // 若此時就把語言標記更新掉，下次啟動就會因為「語言沒變」而永遠不再重排，
+        // 通知會一直卡在舊語言。所以還沒就緒就直接返回，留到下次啟動再處理。
+        guard StorageManager.coordinator != nil else { return }
+
+        UserDefaults.standard.set(current, forKey: languageKey)
+        guard previous != nil else { return }   // 首次啟動沒有舊排程，不必重排
+
+        if StorageManager.load(Bool.self, forKey: "settleReminderEnabled_v1") ?? false {
+            let hour = StorageManager.load(Int.self, forKey: "settleReminderHour") ?? 22
+            let minute = StorageManager.load(Int.self, forKey: "settleReminderMinute") ?? 0
+            scheduleDailySettleReminder(hour: hour, minute: minute)
+        }
+        if StorageManager.load(Bool.self, forKey: "hourlyMoodReminderEnabled_v1") ?? false {
+            scheduleHourlyMoodReminder(minute: 0)
+        }
+        relocalizePendingTodoReminders()
+        debugLog("🌐 語言由 \(previous ?? "-") 改為 \(current)，已重排通知")
+    }
+
+    /// 把已排程的待辦到期通知改用新語言的標題重排。
+    ///
+    /// 待辦名稱（body）是使用者資料，原樣保留；只有「待辦到期」這個標題要換語言。
+    /// pending request 本身就帶著 trigger / body / userInfo，用相同 identifier 重新 add
+    /// 即覆寫，冪等，不需要回頭去碰 TodoStore。
+    private static func relocalizePendingTodoReminders() {
+        let center = UNUserNotificationCenter.current()
+        center.getPendingNotificationRequests { requests in
+            let todos = requests.filter { $0.identifier.hasPrefix("todo_due_") }
+            guard !todos.isEmpty else { return }
+
+            for old in todos {
+                let content = UNMutableNotificationContent()
+                content.title = String(localized: "待辦到期")
+                content.body = old.content.body
+                content.sound = old.content.sound
+                content.categoryIdentifier = old.content.categoryIdentifier
+                content.userInfo = old.content.userInfo
+                center.add(UNNotificationRequest(identifier: old.identifier,
+                                                 content: content,
+                                                 trigger: old.trigger))
+            }
+            debugLog("🌐 已用新語言重排 \(todos.count) 則待辦到期通知")
+        }
+    }
+
     /// 開啟開關或改時間時用：確保有權限才排「每日提醒」
     static func ensurePermissionThenScheduleDaily(hour: Int, minute: Int, onDenied: @escaping () -> Void) {
         requestPermissionIfNeeded { granted in
@@ -96,8 +160,8 @@ enum NotificationManager {
         center.removePendingNotificationRequests(withIdentifiers: [settleReminderID])
         
         let content = UNMutableNotificationContent()
-        content.title = "今日結算提醒"
-        content.body = "今天要不要按一下「今日結算」"
+        content.title = String(localized: "今日結算提醒")
+        content.body = String(localized: "今天要不要按一下「今日結算」")
         content.sound = .default
         
         var comps = DateComponents()
@@ -148,8 +212,8 @@ enum NotificationManager {
             }
             
             let content = UNMutableNotificationContent()
-            content.title = "測試通知"
-            content.body = "10 秒測試"
+            content.title = String(localized: "測試通知")
+            content.body = String(localized: "10 秒測試")
             content.sound = .default
             
             let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 10, repeats: false)
@@ -176,8 +240,8 @@ enum NotificationManager {
             .removePendingNotificationRequests(withIdentifiers: [hourlyMoodReminderID])
         
         let content = UNMutableNotificationContent()
-        content.title = "心情溫度計提醒"
-        content.body = "補記上一小時的心情（0～10）"
+        content.title = String(localized: "心情溫度計提醒")
+        content.body = String(localized: "補記上一小時的心情（0～10）")
         content.sound = .default
         content.categoryIdentifier = Category.hourlyMood   // → 通知內可直接輸入 0–10
 
@@ -213,7 +277,7 @@ enum NotificationManager {
         guard dueDate > Date() else { return }
 
         let content = UNMutableNotificationContent()
-        content.title = "待辦到期"
+        content.title = String(localized: "待辦到期")
         content.body = title
         content.sound = .default
         content.categoryIdentifier = Category.todoDue          // → 通知上出現「完成」按鈕

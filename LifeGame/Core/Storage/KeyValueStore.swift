@@ -101,7 +101,7 @@ struct TypedKey<Value: Codable>: Sendable where Value: Sendable {
 // MARK: - App-wide keys
 
 extension TypedKey where Value == String {
-    static let userName = TypedKey("app.userName", default: "冒險者")
+    static let userName = TypedKey("app.userName", default: String(localized: "冒險者"))
 }
 
 extension TypedKey where Value == Bool {

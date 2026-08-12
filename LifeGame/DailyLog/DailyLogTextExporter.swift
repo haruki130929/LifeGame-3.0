@@ -8,9 +8,9 @@ struct DailyLogTextExporter {
     // MARK: - 對外入口
 
     func makeText(for entries: [DailyLogEntry], rangeTitle: String) -> String {
-        var out = "每日紀錄匯出\n"
+        var out = String(localized: "每日紀錄匯出\n")
         out += "\(rangeTitle)\n"
-        out += "共 \(entries.count) 筆\n"
+        out += String(localized: "共 \(entries.count) 筆\n")
         out += String(repeating: "=", count: 32) + "\n\n"
 
         let sorted = entries.sorted { $0.date < $1.date }
@@ -27,7 +27,7 @@ struct DailyLogTextExporter {
         var lines: [String] = []
 
         // 標題
-        lines.append("【\(dateText(entry.date))】　天氣：\(entry.weather.rawValue)")
+        lines.append(String(localized: "【\(dateText(entry.date))】　天氣：\(entry.weather.displayName)"))
         lines.append("")
 
         func append(_ block: [String]) {
@@ -60,7 +60,7 @@ struct DailyLogTextExporter {
 
         // 照片
         if !entry.photos.isEmpty {
-            var block = ["照片（\(entry.photos.count)）"]
+            var block = [String(localized: "照片（\(entry.photos.count)）")]
             for (i, p) in entry.photos.enumerated() {
                 let caption = p.caption.trimmingCharacters(in: .whitespacesAndNewlines)
                 block.append("  ［\(i + 1)］\(caption.isEmpty ? "（無說明）" : caption)")
@@ -74,108 +74,108 @@ struct DailyLogTextExporter {
     // MARK: - 內建區塊（純文字版，對應卡片）
 
     private func basicBlock(_ e: DailyLogEntry) -> [String] {
-        ["基本",
-         "  起床：\(timeText(e.wakeTime))",
-         "  上床：\(timeText(e.bedTime))"]
+        [String(localized: "基本"),
+         String(localized: "  起床：\(timeText(e.wakeTime))"),
+         String(localized: "  上床：\(timeText(e.bedTime))")]
     }
 
     private func moodBlock(_ e: DailyLogEntry) -> [String] {
-        var lines = ["情緒與心理狀態",
-                     "  情緒 \(e.overallMoodScore)/10、焦慮 \(e.anxietyScore)/10、疲勞 \(e.fatigueScore)/10"]
+        var lines = [String(localized: "情緒與心理狀態"),
+                     String(localized: "  情緒 \(e.overallMoodScore)/10、焦慮 \(e.anxietyScore)/10、疲勞 \(e.fatigueScore)/10")]
         if e.moodChangeType == .higher {
-            lines.append("  情緒變化：變高")
+            lines.append(String(localized: "  情緒變化：變高"))
             if !e.moodChangeReasons.isEmpty {
-                lines.append("  原因：\(join(e.moodChangeReasons.map{$0.rawValue}, otherText: e.moodChangeReasons.contains(.other) ? e.moodChangeOtherText : ""))")
+                lines.append(String(localized: "  原因：\(join(e.moodChangeReasons.map{$0.displayName}, otherText: e.moodChangeReasons.contains(.other) ? e.moodChangeOtherText : ""))"))
             }
             if !e.moodChangeDurationText.isEmpty {
-                lines.append("  持續時間：\(e.moodChangeDurationText)")
+                lines.append(String(localized: "  持續時間：\(e.moodChangeDurationText)"))
             }
             if !e.stabilizeMethodsForMoodChange.isEmpty {
-                lines.append("  穩定方式：\(join(e.stabilizeMethodsForMoodChange.map{$0.rawValue}, otherText: e.stabilizeMethodsForMoodChange.contains(.other) ? e.stabilizeOtherTextForMoodChange : ""))")
+                lines.append(String(localized: "  穩定方式：\(join(e.stabilizeMethodsForMoodChange.map{$0.displayName}, otherText: e.stabilizeMethodsForMoodChange.contains(.other) ? e.stabilizeOtherTextForMoodChange : ""))"))
             }
         } else {
-            lines.append("  情緒變化：穩定")
+            lines.append(String(localized: "  情緒變化：穩定"))
         }
         return lines
     }
 
     private func anxietyBlock(_ e: DailyLogEntry) -> [String] {
-        var lines = ["是否出現焦慮",
-                     "  程度：\(e.anxietyLevel.rawValue)"]
+        var lines = [String(localized: "是否出現焦慮"),
+                     String(localized: "  程度：\(e.anxietyLevel.rawValue)")]
         if e.anxietyLevel != .none {
             if !e.anxietyReasons.isEmpty {
-                lines.append("  原因：\(join(e.anxietyReasons.map{$0.rawValue}, otherText: e.anxietyReasons.contains(.other) ? e.anxietyOtherText : ""))")
+                lines.append(String(localized: "  原因：\(join(e.anxietyReasons.map{$0.displayName}, otherText: e.anxietyReasons.contains(.other) ? e.anxietyOtherText : ""))"))
             }
             if !e.anxietyDurationText.isEmpty {
-                lines.append("  持續時間：\(e.anxietyDurationText)")
+                lines.append(String(localized: "  持續時間：\(e.anxietyDurationText)"))
             }
             if !e.anxietySymptoms.isEmpty {
-                lines.append("  表現：\(join(e.anxietySymptoms.map{$0.rawValue}, otherText: e.anxietySymptoms.contains(.other) ? e.anxietySymptomOtherText : ""))")
+                lines.append(String(localized: "  表現：\(join(e.anxietySymptoms.map{$0.displayName}, otherText: e.anxietySymptoms.contains(.other) ? e.anxietySymptomOtherText : ""))"))
             }
             if !e.stabilizeMethodsForAnxiety.isEmpty {
-                lines.append("  穩定方式：\(join(e.stabilizeMethodsForAnxiety.map{$0.rawValue}, otherText: e.stabilizeMethodsForAnxiety.contains(.other) ? e.stabilizeOtherTextForAnxiety : ""))")
+                lines.append(String(localized: "  穩定方式：\(join(e.stabilizeMethodsForAnxiety.map{$0.displayName}, otherText: e.stabilizeMethodsForAnxiety.contains(.other) ? e.stabilizeOtherTextForAnxiety : ""))"))
             }
         }
         return lines
     }
 
     private func impulseBlock(_ e: DailyLogEntry) -> [String] {
-        var lines = ["衝動行為"]
+        var lines = [String(localized: "衝動行為")]
         if e.impulseSeverities.isEmpty {
-            lines.append("  無")
+            lines.append(String(localized: "  無"))
         } else {
             for sev in e.impulseSeverities.sorted(by: { $0.rawValue < $1.rawValue }) {
                 let set = e.impulseTypesBySeverity[sev] ?? []
                 let names = set.map { $0.rawValue }
                 let other = set.contains(.other) ? (e.impulseOtherTextBySeverity[sev] ?? "") : ""
-                lines.append("  \(sev.rawValue)：\(join(names, otherText: other))")
+                lines.append("  \(sev.displayName)：\(join(names, otherText: other))")
             }
         }
         return lines
     }
 
     private func sleepBlock(_ e: DailyLogEntry) -> [String] {
-        ["睡眠狀況",
-         "  入睡所需時間：\(e.sleepLatency.rawValue)",
-         "  睡眠時長：\(sleepHoursText(e))",
-         "  睡眠品質：\(e.sleepQuality.rawValue.components(separatedBy: "（").first ?? e.sleepQuality.rawValue)"]
+        [String(localized: "睡眠狀況"),
+         String(localized: "  入睡所需時間：\(e.sleepLatency.rawValue)"),
+         String(localized: "  睡眠時長：\(sleepHoursText(e))"),
+         String(localized: "  睡眠品質：\(e.sleepQuality.shortDisplayName)")]
     }
 
     private func studyBlock(_ e: DailyLogEntry) -> [String] {
-        var lines = ["課業與專注力",
-                     "  待辦完成：\(e.todoCompletion.rawValue)"]
+        var lines = [String(localized: "課業與專注力"),
+                     String(localized: "  待辦完成：\(e.todoCompletion.rawValue)")]
         if e.todoCompletion == .partial {
-            lines.append("  部分完成：\(e.todoPartialDone)/\(e.todoPartialTotal) 項")
+            lines.append(String(localized: "  部分完成：\(e.todoPartialDone)/\(e.todoPartialTotal) 項"))
         }
-        lines.append("  專注度：\(e.focusQuality.rawValue)")
+        lines.append(String(localized: "  專注度：\(e.focusQuality.displayName)"))
         if e.focusQuality == .cannotFocus, !e.cannotFocusReasons.isEmpty {
-            lines.append("  可能原因：\(join(e.cannotFocusReasons.map{$0.rawValue}, otherText: e.cannotFocusReasons.contains(.other) ? e.cannotFocusOtherText : ""))")
+            lines.append(String(localized: "  可能原因：\(join(e.cannotFocusReasons.map{$0.displayName}, otherText: e.cannotFocusReasons.contains(.other) ? e.cannotFocusOtherText : ""))"))
         }
         if e.unfinished {
-            lines.append("  未完成：\(e.unfinishedCount)/\(e.unfinishedTotal) 項")
+            lines.append(String(localized: "  未完成：\(e.unfinishedCount)/\(e.unfinishedTotal) 項"))
             if !e.difficultyReasons.isEmpty {
-                lines.append("  困難：\(join(e.difficultyReasons.map{$0.rawValue}, otherText: e.difficultyReasons.contains(.other) ? e.difficultyOtherText : ""))")
+                lines.append(String(localized: "  困難：\(join(e.difficultyReasons.map{$0.displayName}, otherText: e.difficultyReasons.contains(.other) ? e.difficultyOtherText : ""))"))
             }
         } else {
-            lines.append("  未完成事項：無")
+            lines.append(String(localized: "  未完成事項：無"))
         }
         return lines
     }
 
     private func bodyBlock(_ e: DailyLogEntry) -> [String] {
-        var lines = ["身體狀況"]
+        var lines = [String(localized: "身體狀況")]
         if e.painAreas.isEmpty {
-            lines.append("  不適：無")
+            lines.append(String(localized: "  不適：無"))
         } else {
             let list = e.painAreas.map { area -> String in
                 let score = e.painScoreByArea[area] ?? 1
                 return "\(area.rawValue)（\(score)/10）"
             }
-            lines.append("  不適：\(list.joined(separator: "、"))")
+            lines.append(String(localized: "  不適：\(list.joined(separator: "、"))"))
         }
-        lines.append("  注意到身體狀況：\(e.bodyNoticeTiming.rawValue)")
+        lines.append(String(localized: "  注意到身體狀況：\(e.bodyNoticeTiming.displayName)"))
         if e.bodyNoticeTiming == .none, !e.bodyLateReasons.isEmpty {
-            lines.append("  原因：\(join(e.bodyLateReasons.map{$0.rawValue}, otherText: e.bodyLateReasons.contains(.other) ? e.bodyLateOtherText : ""))")
+            lines.append(String(localized: "  原因：\(join(e.bodyLateReasons.map{$0.displayName}, otherText: e.bodyLateReasons.contains(.other) ? e.bodyLateOtherText : ""))"))
         }
         return lines
     }
@@ -183,7 +183,7 @@ struct DailyLogTextExporter {
     private func observationBlock(_ e: DailyLogEntry) -> [String] {
         let obs = e.specialObservation.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !obs.isEmpty else { return [] }
-        return ["特別觀察", "  \(obs)"]
+        return [String(localized: "特別觀察"), "  \(obs)"]
     }
 
     // MARK: - 自訂模組
@@ -260,34 +260,38 @@ struct DailyLogTextExporter {
 
     private func dateText(_ date: Date) -> String {
         let fmt = DateFormatter()
-        fmt.locale = Locale(identifier: "zh_TW")
-        fmt.dateFormat = "yyyy年M月d日 (EEE)"
+        fmt.locale = .current
+        fmt.setLocalizedDateFormatFromTemplate("yMMMMdEEE")
         return fmt.string(from: date)
     }
 
     private func timeText(_ t: OptionalLogTime) -> String {
         switch t {
-        case .unknown: return "忘記"
+        case .unknown: return String(localized: "忘記")
         case .time(let d): return d.formatted(date: .omitted, time: .shortened)
         }
     }
 
     private func sleepHoursText(_ e: DailyLogEntry) -> String {
         switch e.sleepHours {
-        case .unknown: return "忘記"
-        case .value(let h): return "\(String(format: "%.1f", h)) 小時"
+        case .unknown: return String(localized: "忘記")
+        case .value(let h): return String(localized: "\(String(format: "%.1f", h)) 小時")
         }
     }
 
     private func join(_ items: [String], otherText: String) -> String {
         let trimmed = otherText.trimmingCharacters(in: .whitespacesAndNewlines)
-        var base = items.filter { $0 != "其他" }
-        if items.contains("其他"), !trimmed.isEmpty {
-            base.append("其他：\(trimmed)")
-        } else if items.contains("其他") {
-            base.append("其他")
+        // items 可能是 enum 的 displayName（已在地化）或使用者資料裡的原始字串（永遠是「其他」），
+        // 兩種都要認得，否則切到英文/日文時「其他」會篩不掉。
+        let otherLabel = String(localized: "其他")
+        let isOther: (String) -> Bool = { $0 == otherLabel || $0 == "其他" }
+        var base = items.filter { !isOther($0) }
+        if items.contains(where: isOther), !trimmed.isEmpty {
+            base.append(String(localized: "其他：\(trimmed)"))
+        } else if items.contains(where: isOther) {
+            base.append(otherLabel)
         }
-        return base.isEmpty ? "--" : base.joined(separator: "、")
+        return base.isEmpty ? "--" : base.joined(separator: String(localized: "、"))
     }
 
     private func joinCustom(_ items: [String], otherText: String) -> String {

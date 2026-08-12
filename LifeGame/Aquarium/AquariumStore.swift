@@ -73,9 +73,9 @@ final class AquariumStore: ObservableObject {
         let ratio = Double(maxCount) / Double(total)
         if ratio > 0.55 && !zeros.isEmpty {
             let missing = zeros.map(\.label).joined(separator: "、")
-            return "\(maxType.label)魚偏多，\(missing)魚一隻都沒有 — 換個方向吧"
+            return String(localized: "\(maxType.label)魚偏多，\(missing)魚一隻都沒有 — 換個方向吧")
         } else if ratio > 0.65 {
-            return "\(maxType.label)任務堆很多，記得均衡一下其他類型"
+            return String(localized: "\(maxType.label)任務堆很多，記得均衡一下其他類型")
         }
         return nil
     }

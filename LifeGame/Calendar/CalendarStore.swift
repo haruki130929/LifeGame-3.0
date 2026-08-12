@@ -180,9 +180,45 @@ final class CalendarStore: ObservableObject {
             .sorted { $0.start < $1.start }
     }
     
-    func update(_ event: CalendarEvent) {
+    /// 編輯既有事件：保留 appleEventIdentifier / isFromAppleCalendar / 週期欄位，
+    /// 只改動 title / start / end / colorHex，並把修改同步回 Apple 行事曆（若有連結）。
+    func update(_ event: CalendarEvent, title: String, start: Date, end: Date, colorHex: String) async {
         guard let idx = events.firstIndex(where: { $0.id == event.id }) else { return }
-        events[idx] = event
+
+        var updated = events[idx]
+        updated.title = title
+        updated.start = start
+        updated.end = end
+        updated.colorHex = colorHex
+
+        // 若連結到 Apple 行事曆事件，一併更新對應的 EKEvent，讓修改同步回 Apple。
+        // occurrenceKey = appleEventIdentifier + start；改了 start，key 也會變，
+        // 只要 EKEvent 的 startDate 一併更新，下次同步就對得上、不會重複匯入。
+        if let appleID = updated.appleEventIdentifier {
+            let granted = await requestAccessIfNeeded()
+            if granted, let ekEvent = eventStore.event(withIdentifier: appleID) {
+                ekEvent.title = title
+                ekEvent.startDate = start
+                ekEvent.endDate = end
+                do {
+                    try eventStore.save(ekEvent, span: .thisEvent)
+                } catch {
+                    debugLog("更新 Apple 行事曆事件失敗：\(error)")
+                }
+            } else if granted {
+                // Apple 端已無此事件 → 斷開連結，避免下次同步被誤判為重複或已刪除
+                updated.appleEventIdentifier = nil
+                updated.isFromAppleCalendar = false
+            }
+        }
+
+        events[idx] = updated
+    }
+
+    /// 刪除單筆事件（含連結的 Apple 行事曆 EKEvent）。
+    func delete(_ event: CalendarEvent) {
+        guard let idx = events.firstIndex(where: { $0.id == event.id }) else { return }
+        delete(at: IndexSet(integer: idx))
     }
 
     // MARK: - 同步 Apple 行事曆
@@ -237,7 +273,7 @@ final class CalendarStore: ObservableObject {
             guard !seen.contains(key) else { continue }
             seen.insert(key)
             newEvents.append(CalendarEvent(
-                title: ek.title ?? "（無標題）",
+                title: ek.title ?? String(localized: "（無標題）"),
                 start: ekStart,
                 end: ek.endDate ?? ekStart,
                 colorHex: hex,

@@ -22,7 +22,7 @@ struct SlotCardEditorView: View {
                         Image(systemName: item.type.icon)
                         Text(item.type.title)
                         Spacer()
-                        Text(item.size.rawValue)
+                        Text(item.size.displayName)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -58,6 +58,6 @@ struct SlotCardEditorView: View {
             }
         }
         .navigationTitle("編輯卡片")
-        .toolbar { EditButton().environment(\.locale, Locale(identifier: "zh-Hant")) }
+        .toolbar { EditButton() }
     }
 }

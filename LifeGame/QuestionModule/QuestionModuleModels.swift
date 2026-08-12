@@ -22,16 +22,16 @@ enum ModuleKind: String, Codable, CaseIterable, Identifiable {
     /// 內建模組的預設標題
     var defaultTitle: String {
         switch self {
-        case .basic:       return "基本"
-        case .moodMental:  return "情緒與心理狀態"
-        case .moodChange:  return "情緒變化"
-        case .anxiety:     return "是否出現焦慮"
-        case .impulse:     return "衝動行為"
-        case .sleep:       return "睡眠狀況"
-        case .studyFocus:  return "課業與專注力"
-        case .body:        return "身體狀況"
-        case .observation: return "特別觀察"
-        case .custom:      return "自訂"
+        case .basic:       return String(localized: "基本")
+        case .moodMental:  return String(localized: "情緒與心理狀態")
+        case .moodChange:  return String(localized: "情緒變化")
+        case .anxiety:     return String(localized: "是否出現焦慮")
+        case .impulse:     return String(localized: "衝動行為")
+        case .sleep:       return String(localized: "睡眠狀況")
+        case .studyFocus:  return String(localized: "課業與專注力")
+        case .body:        return String(localized: "身體狀況")
+        case .observation: return String(localized: "特別觀察")
+        case .custom:      return String(localized: "自訂")
         }
     }
 
@@ -63,59 +63,59 @@ enum ModuleKind: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .basic:
             return [
-                QuestionDefinition(type: .singleSelect, title: "天氣", options: ["晴", "雨"]),
-                QuestionDefinition(type: .timePicker, title: "起床時間"),
-                QuestionDefinition(type: .timePicker, title: "昨晚上床時間"),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "天氣"), options: [String(localized: "晴"), String(localized: "雨")]),
+                QuestionDefinition(type: .timePicker, title: String(localized: "起床時間")),
+                QuestionDefinition(type: .timePicker, title: String(localized: "昨晚上床時間")),
             ]
         case .moodMental:
             return [
-                QuestionDefinition(type: .slider, title: "整體情緒分數", rangeMin: 1, rangeMax: 10),
-                QuestionDefinition(type: .slider, title: "焦慮程度", rangeMin: 1, rangeMax: 10),
+                QuestionDefinition(type: .slider, title: String(localized: "整體情緒分數"), rangeMin: 1, rangeMax: 10),
+                QuestionDefinition(type: .slider, title: String(localized: "焦慮程度"), rangeMin: 1, rangeMax: 10),
             ]
         case .moodChange:
             return [
-                QuestionDefinition(type: .singleSelect, title: "狀態（單選）", options: ["穩定", "變高"]),
-                QuestionDefinition(type: .multiSelect, title: "原因（可複選）", options: ["焦慮", "突發狀況", "其他"]),
-                QuestionDefinition(type: .freeText, title: "持續時間"),
-                QuestionDefinition(type: .multiSelect, title: "用什麼方式穩定下來（可複選）", options: ["深呼吸", "聽音樂", "活動身體", "其他"]),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "狀態（單選）"), options: [String(localized: "穩定"), String(localized: "變高")]),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "原因（可複選）"), options: [String(localized: "焦慮"), String(localized: "突發狀況"), String(localized: "其他")]),
+                QuestionDefinition(type: .freeText, title: String(localized: "持續時間")),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "用什麼方式穩定下來（可複選）"), options: [String(localized: "深呼吸"), String(localized: "聽音樂"), String(localized: "活動身體"), String(localized: "其他")]),
             ]
         case .anxiety:
             return [
-                QuestionDefinition(type: .singleSelect, title: "程度（單選）", options: ["無", "輕微", "中等", "嚴重"]),
-                QuestionDefinition(type: .multiSelect, title: "原因（可複選）", options: ["環境", "課業", "突發狀況", "其他"]),
-                QuestionDefinition(type: .freeText, title: "持續時間"),
-                QuestionDefinition(type: .multiSelect, title: "焦慮表現（可複選）", options: ["心跳快", "顫抖", "冒汗", "其他"]),
-                QuestionDefinition(type: .multiSelect, title: "用什麼方式穩定下來（可複選）", options: ["深呼吸", "聽音樂", "活動身體", "其他"]),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "程度（單選）"), options: [String(localized: "無"), String(localized: "輕微"), String(localized: "中等"), String(localized: "嚴重")]),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "原因（可複選）"), options: [String(localized: "環境"), String(localized: "課業"), String(localized: "突發狀況"), String(localized: "其他")]),
+                QuestionDefinition(type: .freeText, title: String(localized: "持續時間")),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "焦慮表現（可複選）"), options: [String(localized: "心跳快"), String(localized: "顫抖"), String(localized: "冒汗"), String(localized: "其他")]),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "用什麼方式穩定下來（可複選）"), options: [String(localized: "深呼吸"), String(localized: "聽音樂"), String(localized: "活動身體"), String(localized: "其他")]),
             ]
         case .impulse:
             return [
-                QuestionDefinition(type: .multiSelect, title: "程度（可複選）", options: ["輕微", "中等", "嚴重"]),
-                QuestionDefinition(type: .multiSelect, title: "衝動行為（可複選）", options: ["上網", "做喜歡的事", "衝動購物", "熬夜", "其他"]),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "程度（可複選）"), options: [String(localized: "輕微"), String(localized: "中等"), String(localized: "嚴重")]),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "衝動行為（可複選）"), options: [String(localized: "上網"), String(localized: "做喜歡的事"), String(localized: "衝動購物"), String(localized: "熬夜"), String(localized: "其他")]),
             ]
         case .sleep:
             return [
-                QuestionDefinition(type: .singleSelect, title: "入睡所需時間（單選）", options: ["30分鐘以內", "30分鐘～1小時內", "超過1小時以上"]),
-                QuestionDefinition(type: .numberInput, title: "睡眠時長（小時）", rangeMin: 0, rangeMax: 16),
-                QuestionDefinition(type: .singleSelect, title: "睡眠品質（單選）", options: ["不錯（起床之後很有動力做事，情緒穩定，不太感到疲勞）", "普通（起床之後可以做事）", "不好（難以起床做事或容易感到疲勞）"]),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "入睡所需時間（單選）"), options: [String(localized: "30分鐘以內"), String(localized: "30分鐘～1小時內"), String(localized: "超過1小時以上")]),
+                QuestionDefinition(type: .numberInput, title: String(localized: "睡眠時長（小時）"), rangeMin: 0, rangeMax: 16),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "睡眠品質（單選）"), options: [String(localized: "不錯（起床之後很有動力做事，情緒穩定，不太感到疲勞）"), String(localized: "普通（起床之後可以做事）"), String(localized: "不好（難以起床做事或容易感到疲勞）")]),
             ]
         case .studyFocus:
             return [
-                QuestionDefinition(type: .singleSelect, title: "是否完成今日待辦事項（單選）", options: ["是，全部完成", "否，全部沒完成", "部分完成"]),
-                QuestionDefinition(type: .singleSelect, title: "今日專注度（單選）", options: ["不錯（可以順利做完該做的事，並有餘力做想做的事）", "普通（可以順利做完該做的事）", "容易分心（勉強做完該做的事）", "無法專注"]),
-                QuestionDefinition(type: .multiSelect, title: "可能原因（可複選）", options: ["疲勞", "一直想想做的事", "其他"]),
-                QuestionDefinition(type: .singleSelect, title: "今日未完成事項（單選）", options: ["無", "有"]),
-                QuestionDefinition(type: .multiSelect, title: "遇到的困難（可複選）", options: ["時間不夠", "忘記作業內容", "不會做", "無法專注", "疲勞", "做想做的事", "其他"]),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "是否完成今日待辦事項（單選）"), options: [String(localized: "是，全部完成"), String(localized: "否，全部沒完成"), String(localized: "部分完成")]),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "今日專注度（單選）"), options: [String(localized: "不錯（可以順利做完該做的事，並有餘力做想做的事）"), String(localized: "普通（可以順利做完該做的事）"), String(localized: "容易分心（勉強做完該做的事）"), String(localized: "無法專注")]),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "可能原因（可複選）"), options: [String(localized: "疲勞"), String(localized: "一直想想做的事"), String(localized: "其他")]),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "今日未完成事項（單選）"), options: [String(localized: "無"), String(localized: "有")]),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "遇到的困難（可複選）"), options: [String(localized: "時間不夠"), String(localized: "忘記作業內容"), String(localized: "不會做"), String(localized: "無法專注"), String(localized: "疲勞"), String(localized: "做想做的事"), String(localized: "其他")]),
             ]
         case .body:
             return [
-                QuestionDefinition(type: .slider, title: "今日疲勞程度", rangeMin: 1, rangeMax: 10),
-                QuestionDefinition(type: .multiSelect, title: "不舒服的地方（可複選）", options: ["頭痛", "肚子痛", "肌肉緊繃", "經痛", "眼睛乾澀"]),
-                QuestionDefinition(type: .singleSelect, title: "是否注意到身體的狀況（單選）", options: ["有，很快就注意到", "有，經過一段時間才注意到", "沒有"]),
-                QuestionDefinition(type: .multiSelect, title: "因為（可複選）", options: ["手受傷", "肢體僵硬", "無法開口", "疲勞", "拔頭髮", "其他"]),
+                QuestionDefinition(type: .slider, title: String(localized: "今日疲勞程度"), rangeMin: 1, rangeMax: 10),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "不舒服的地方（可複選）"), options: [String(localized: "頭痛"), String(localized: "肚子痛"), String(localized: "肌肉緊繃"), String(localized: "經痛"), String(localized: "眼睛乾澀")]),
+                QuestionDefinition(type: .singleSelect, title: String(localized: "是否注意到身體的狀況（單選）"), options: [String(localized: "有，很快就注意到"), String(localized: "有，經過一段時間才注意到"), String(localized: "沒有")]),
+                QuestionDefinition(type: .multiSelect, title: String(localized: "因為（可複選）"), options: [String(localized: "手受傷"), String(localized: "肢體僵硬"), String(localized: "無法開口"), String(localized: "疲勞"), String(localized: "拔頭髮"), String(localized: "其他")]),
             ]
         case .observation:
             return [
-                QuestionDefinition(type: .freeText, title: "特別觀察到的事情"),
+                QuestionDefinition(type: .freeText, title: String(localized: "特別觀察到的事情")),
             ]
         case .custom:
             return []
@@ -187,14 +187,14 @@ enum QuestionType: String, Codable, CaseIterable, Identifiable {
 
     var displayName: String {
         switch self {
-        case .slider:            return "滑桿 (1-10)"
-        case .singleSelect:      return "單選"
-        case .multiSelect:       return "多選"
-        case .freeText:          return "自由文字"
-        case .timePicker:        return "時間選擇"
-        case .numberInput:       return "數字輸入"
-        case .photo:             return "照片"
-        case .nestedMultiSelect: return "巢狀多選"
+        case .slider:            return String(localized: "滑桿 (1-10)")
+        case .singleSelect:      return String(localized: "單選")
+        case .multiSelect:       return String(localized: "多選")
+        case .freeText:          return String(localized: "自由文字")
+        case .timePicker:        return String(localized: "時間選擇")
+        case .numberInput:       return String(localized: "數字輸入")
+        case .photo:             return String(localized: "照片")
+        case .nestedMultiSelect: return String(localized: "巢狀多選")
         }
     }
 }

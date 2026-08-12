@@ -14,6 +14,10 @@ struct SettingsView: View {
     @EnvironmentObject private var appleSignIn: AppleSignInManager
     @Environment(StorageCoordinator.self) private var coordinator: StorageCoordinator?
 
+    // MARK: - 語言
+    // 由 MyApp 注入：切換語言要讓整個 App 立刻重新渲染，所以 store 必須是 App 層級的。
+    @EnvironmentObject private var languageStore: LanguageStore
+
     // MARK: - 通知
     @State private var hourlyMoodEnabled: Bool = false
     private let hourlyMoodEnabledKey = "hourlyMoodReminderEnabled_v1"
@@ -35,6 +39,7 @@ struct SettingsView: View {
             dailyLogSection
             featureSection
             widgetSection
+            languageSection
             appearanceSection
             accountSection
             storageSection
@@ -199,7 +204,33 @@ private extension SettingsView {
         }
     }
 
+    // MARK: 語言
+    var languageSection: some View {
+        Section {
+            Picker(selection: $languageStore.selected) {
+                ForEach(AppLanguage.allCases) { lang in
+                    Text(lang.displayName).tag(lang)
+                }
+            } label: {
+                Label("介面語言", systemImage: "globe")
+            }
+            // Mac Catalyst 上 Picker 底層是 UIKit 的 pull-down menu，選單項目建好之後會被快取，
+            // 語言換了也不會重建 —— 「跟隨系統」會卡在切換當下的語言（其餘三項是各語言的
+            // 固定寫法，看不出來）。綁上語言當 id，語言一變就重建這個 Picker（連同它的選單）。
+            // 只加在 Picker 上，不會像根視圖那樣把導覽狀態清掉。
+            .id(languageStore.viewID)
+        } header: {
+            Text("語言")
+        } footer: {
+            // 桌面小工具與 Watch 是各自獨立的處理程序，讀的是系統語言，拿不到這裡的設定，
+            // 主畫面上的 App 名稱也由系統顯示 —— 講清楚可以省掉「怎麼沒跟著變」的困惑。
+            Text("主畫面的 App 名稱、桌面小工具與 Apple Watch 會跟著系統語言。")
+        }
+    }
+
     // MARK: 外觀設定
+
+    // MARK: 外觀
     var appearanceSection: some View {
         Section(L10n.Settings.appearance) {
             NavigationLink {

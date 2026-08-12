@@ -5,7 +5,7 @@ struct LedgerEntry: Identifiable, Codable {
         case expense = 0
         case income = 1
         
-        var title: String { self == .expense ? "支出" : "收入" }
+        var title: String { self == .expense ? String(localized: "支出") : String(localized: "收入") }
     }
     
     let id: UUID

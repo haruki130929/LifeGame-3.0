@@ -2,13 +2,13 @@ import SwiftUI
 
 struct ImpulseSectionView: View {
     @Binding var entry: DailyLogEntry
-    var header: String = "衝動行為"
+    var header: String = String(localized: "衝動行為")
 
     var body: some View {
         Section(header) {
             // 「無」：勾了就清空其他
             CheckboxRow(
-                title: "無",
+                title: String(localized: "無"),
                 isChecked: Binding(
                     get: { entry.impulseSeverities.isEmpty },
                     set: { isOn in
@@ -29,7 +29,7 @@ struct ImpulseSectionView: View {
 
                 ForEach(ImpulseSeverity.allCases) { sev in
                     CheckboxRow(
-                        title: sev.rawValue,
+                        title: sev.displayName,
                         isChecked: Binding(
                             get: { entry.impulseSeverities.contains(sev) },
                             set: { isOn in
@@ -47,7 +47,7 @@ struct ImpulseSectionView: View {
                     // 勾了某個程度 → 顯示該程度的衝動行為選項
                     if entry.impulseSeverities.contains(sev) {
                         CheckboxMultiSelectList(
-                            title: "\(sev.rawValue) 的衝動行為（可複選）",
+                            title: String(localized: "\(sev.displayName) 的衝動行為（可複選）"),
                             options: ImpulseType.allCases,
                             selected: Binding(
                                 get: { entry.impulseTypesBySeverity[sev] ?? [] },

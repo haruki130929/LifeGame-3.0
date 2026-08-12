@@ -18,7 +18,6 @@ struct HomeDrawerView: View {
 
             Text("一天")
                 .font(.headline)
-                .padding(.top, 48)
 
             ForEach(TimeSlot.allCases) { slot in
                 Button {
@@ -42,11 +41,11 @@ struct HomeDrawerView: View {
             Text("功能")
                 .font(.headline)
             
-            categoryLink(.tools,  label: "工具功能", systemImage: "wrench.and.screwdriver")
-            categoryLink(.roles,  label: "角色設定", systemImage: "person.crop.circle")
-            categoryLink(.growth, label: "自我成長", systemImage: "chart.line.uptrend.xyaxis")
-            categoryLink(.help,   label: "困難幫助", systemImage: "lifepreserver")
-            categoryLink(.diary,  label: "日記",     systemImage: "book")
+            categoryLink(.tools,  label: String(localized: "工具功能"), systemImage: "wrench.and.screwdriver")
+            categoryLink(.roles,  label: String(localized: "角色設定"), systemImage: "person.crop.circle")
+            categoryLink(.growth, label: String(localized: "自我成長"), systemImage: "chart.line.uptrend.xyaxis")
+            categoryLink(.help,   label: String(localized: "困難幫助"), systemImage: "lifepreserver")
+            categoryLink(.diary,  label: String(localized: "日記"),     systemImage: "book")
             
             Spacer()
 

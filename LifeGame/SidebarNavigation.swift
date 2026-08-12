@@ -22,11 +22,11 @@ enum SidebarCategory: String, CaseIterable, Identifiable {
     
     var subtitle: String {
         switch self {
-        case .periods: return "依時段安排與執行"
-        case .tools: return "溝通、財務等工具"
-        case .roles: return "能力、特性、裝備系統"
-        case .growth: return "每日紀錄、回顧與圖表"
-        case .help: return "動力、在意清單與支援"
+        case .periods: return String(localized: "依時段安排與執行")
+        case .tools: return String(localized: "溝通、財務等工具")
+        case .roles: return String(localized: "能力、特性、裝備系統")
+        case .growth: return String(localized: "每日紀錄、回顧與圖表")
+        case .help: return String(localized: "動力、在意清單與支援")
         }
     }
 }
@@ -43,32 +43,32 @@ extension SidebarCategory {
         switch self {
         case .periods:
             return [
-                FeatureItem(title: "早上", systemImage: "sunrise"),
-                FeatureItem(title: "中午", systemImage: "sun.max"),
-                FeatureItem(title: "下午", systemImage: "sun.haze"),
-                FeatureItem(title: "晚上", systemImage: "moon.stars")
+                FeatureItem(title: String(localized: "早上"), systemImage: "sunrise"),
+                FeatureItem(title: String(localized: "中午"), systemImage: "sun.max"),
+                FeatureItem(title: String(localized: "下午"), systemImage: "sun.haze"),
+                FeatureItem(title: String(localized: "晚上"), systemImage: "moon.stars")
             ]
         case .tools:
             return [
-                FeatureItem(title: "選緘溝通板", systemImage: "bubble.left.and.bubble.right"),
-                FeatureItem(title: "財務", systemImage: "creditcard")
+                FeatureItem(title: String(localized: "選緘溝通板"), systemImage: "bubble.left.and.bubble.right"),
+                FeatureItem(title: String(localized: "財務"), systemImage: "creditcard")
             ]
         case .roles:
             return [
-                FeatureItem(title: "能力五角圖", systemImage: "pentagon"),
-                FeatureItem(title: "角色優勢 / 特性", systemImage: "bolt.heart"),
-                FeatureItem(title: "裝備系統", systemImage: "backpack")
+                FeatureItem(title: String(localized: "能力五角圖"), systemImage: "pentagon"),
+                FeatureItem(title: String(localized: "角色優勢 / 特性"), systemImage: "bolt.heart"),
+                FeatureItem(title: String(localized: "裝備系統"), systemImage: "backpack")
             ]
         case .growth:
             return [
-                FeatureItem(title: "每日紀錄", systemImage: "square.and.pencil"),
-                FeatureItem(title: "曼陀羅圖表", systemImage: "square.grid.3x3"),
-                FeatureItem(title: "近況檢視（折線圖）", systemImage: "chart.line.uptrend.xyaxis")
+                FeatureItem(title: String(localized: "每日紀錄"), systemImage: "square.and.pencil"),
+                FeatureItem(title: String(localized: "曼陀羅圖表"), systemImage: "square.grid.3x3"),
+                FeatureItem(title: String(localized: "近況檢視（折線圖）"), systemImage: "chart.line.uptrend.xyaxis")
             ]
         case .help:
             return [
-                FeatureItem(title: "動力筆記", systemImage: "note.text"),
-                FeatureItem(title: "在意清單", systemImage: "checklist")
+                FeatureItem(title: String(localized: "動力筆記"), systemImage: "note.text"),
+                FeatureItem(title: String(localized: "在意清單"), systemImage: "checklist")
             ]
         }
     }
@@ -84,7 +84,7 @@ struct ContentView: View {
                 Section("大分類") {
                     ForEach(SidebarCategory.allCases) { category in
                         NavigationLink(value: category) {
-                            Label(category.rawValue, systemImage: category.systemImage)
+                            Label(category.displayName, systemImage: category.systemImage)
                         }
                     }
                 }
@@ -116,7 +116,7 @@ struct CategoryHomeView: View {
                     ForEach(category.features) { feature in
                         NavigationLink {
                             FeaturePlaceholderView(
-                                categoryTitle: category.rawValue,
+                                categoryTitle: category.displayName,
                                 featureTitle: feature.title,
                                 systemImage: feature.systemImage
                             )
@@ -126,7 +126,7 @@ struct CategoryHomeView: View {
                     }
                 }
             }
-            .navigationTitle(category.rawValue)
+            .navigationTitle(category.displayName)
         }
     }
 }

@@ -64,7 +64,7 @@ final class DailyLogMigrator {
             let failCount = (StorageManager.load(Int.self, forKey: failKey) ?? 0) + 1
             StorageManager.save(failCount, forKey: failKey)
             if failCount >= 3 {
-                ErrorManager.shared.showError("每日紀錄遷移多次失敗，請聯繫開發者")
+                ErrorManager.shared.showError(String(localized: "每日紀錄遷移多次失敗，請聯繫開發者"))
             }
         }
     }

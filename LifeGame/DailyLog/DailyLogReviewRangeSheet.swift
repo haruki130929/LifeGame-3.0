@@ -80,7 +80,9 @@ struct DailyLogReviewRangeSheet: View {
 // MARK: - 滾動清單頁
 private struct DailyLogReviewListView: View {
     let entries: [DailyLogEntry]
-    
+    /// 與主列表共用的檢視字體大小（由「＋」選單的「字體大小」調整）
+    @AppStorage(DailyLogTextSize.storageKey) private var textSizeIndex: Int = DailyLogTextSize.defaultIndex
+
     var body: some View {
         if entries.isEmpty {
             ContentUnavailableView("沒有資料", systemImage: "tray", description: Text("此期間沒有每日紀錄。"))
@@ -89,7 +91,8 @@ private struct DailyLogReviewListView: View {
             ScrollView {
                 LazyVStack(spacing: 12) {
                     ForEach(entries) { entry in
-                        DailyLogFullReviewCard(entry: entry)
+                        DailyLogFullReviewCard(entry: entry,
+                                               textScale: DailyLogTextSize.scale(forIndex: textSizeIndex))
                     }
                 }
                 .padding(.horizontal, 12)
@@ -104,7 +107,14 @@ struct DailyLogFullReviewCard: View {
     let entry: DailyLogEntry
     /// 匯出 PDF 用：照片改用不滑動的換行格狀排列（ScrollView 在離螢幕渲染時抓不到內容）
     var forExport: Bool = false
+    /// 檢視字級倍率（匯出 PDF 不傳 → 維持 1.0 固定字級）
+    var textScale: Double = 1.0
     @EnvironmentObject private var moduleStore: QuestionModuleStore
+
+    /// 內文字體（footnote 13 級 × 倍率）
+    private var fBody: Font { .system(size: 13 * textScale) }
+    /// 小字體（caption 12 級 × 倍率）
+    private var fSmall: Font { .system(size: 12 * textScale) }
 
     // ✅ 照片放大預覽狀態
     @State private var isPreviewPresented = false
@@ -137,7 +147,7 @@ struct DailyLogFullReviewCard: View {
             }
             
             if !entry.photos.isEmpty {
-                SectionTitle("照片（\(entry.photos.count)）")
+                SectionTitle(String(localized: "照片（\(entry.photos.count)）"))
                 if forExport {
                     exportPhotosGrid
                 } else {
@@ -156,7 +166,7 @@ struct DailyLogFullReviewCard: View {
 
                                             // ✅ 放大提示圖示
                                             Image(systemName: "arrow.up.left.and.arrow.down.right")
-                                                .font(.caption)
+                                                .font(fSmall)
                                                 .foregroundStyle(.white)
                                                 .padding(5)
                                                 .background(.black.opacity(0.35))
@@ -171,7 +181,7 @@ struct DailyLogFullReviewCard: View {
                                     }
                                     if !p.caption.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                                         Text(p.caption)
-                                            .font(.caption)
+                                            .font(fSmall)
                                             .foregroundStyle(.secondary)
                                             .frame(width: 160, alignment: .leading)
                                     }
@@ -185,6 +195,8 @@ struct DailyLogFullReviewCard: View {
         .padding(12)
         .background(.thinMaterial)
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        // 把字級倍率往下傳，讓 SectionTitle 等子元件跟著縮放
+        .environment(\.dailyLogTextScale, textScale)
         // ✅ 全螢幕預覽（複用 DailyLogPhotosSection 裡的 PhotoFullscreenPreview）
         .fullScreenCover(isPresented: $isPreviewPresented) {
             PhotoFullscreenPreview(
@@ -225,7 +237,7 @@ struct DailyLogFullReviewCard: View {
             }
             if !p.caption.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                 Text(p.caption)
-                    .font(.caption)
+                    .font(fSmall)
                     .foregroundStyle(.secondary)
                     .frame(width: 160, alignment: .leading)
             }
@@ -235,10 +247,10 @@ struct DailyLogFullReviewCard: View {
     private var header: some View {
         HStack {
             Text(entry.date, format: .dateTime.year().month().day())
-                .font(.headline)
+                .font(.system(size: 17 * textScale, weight: .semibold))
             Spacer()
-            Text(entry.weather.rawValue)
-                .font(.subheadline)
+            Text(entry.weather.displayName)
+                .font(.system(size: 15 * textScale))
                 .foregroundStyle(.secondary)
         }
     }
@@ -247,81 +259,81 @@ struct DailyLogFullReviewCard: View {
     
     private var basicBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionTitle("基本")
+            SectionTitle(String(localized: "基本"))
             Text("起床：\(timeText(entry.wakeTime))")
             Text("上床：\(timeText(entry.bedTime))")
         }
-        .font(.footnote)
+        .font(fBody)
         .foregroundStyle(.secondary)
     }
     
     private var moodBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionTitle("情緒與心理狀態")
+            SectionTitle(String(localized: "情緒與心理狀態"))
             chipLine([
-                "情緒 \(entry.overallMoodScore)/10",
-                "焦慮 \(entry.anxietyScore)/10",
-                "疲勞 \(entry.fatigueScore)/10"
+                String(localized: "情緒 \(entry.overallMoodScore)/10"),
+                String(localized: "焦慮 \(entry.anxietyScore)/10"),
+                String(localized: "疲勞 \(entry.fatigueScore)/10")
             ])
             
             if entry.moodChangeType == .higher {
                 Text("情緒變化：變高")
                 if !entry.moodChangeReasons.isEmpty {
-                    Text("原因：\(join(entry.moodChangeReasons.map{$0.rawValue}, otherText: entry.moodChangeReasons.contains(.other) ? entry.moodChangeOtherText : ""))")
+                    Text("原因：\(join(entry.moodChangeReasons.map{$0.displayName}, otherText: entry.moodChangeReasons.contains(.other) ? entry.moodChangeOtherText : ""))")
                 }
                 if !entry.moodChangeDurationText.isEmpty {
                     Text("持續時間：\(entry.moodChangeDurationText)")
                 }
                 if !entry.stabilizeMethodsForMoodChange.isEmpty {
-                    Text("穩定方式：\(join(entry.stabilizeMethodsForMoodChange.map{$0.rawValue}, otherText: entry.stabilizeMethodsForMoodChange.contains(.other) ? entry.stabilizeOtherTextForMoodChange : ""))")
+                    Text("穩定方式：\(join(entry.stabilizeMethodsForMoodChange.map{$0.displayName}, otherText: entry.stabilizeMethodsForMoodChange.contains(.other) ? entry.stabilizeOtherTextForMoodChange : ""))")
                 }
             } else {
                 Text("情緒變化：穩定")
             }
         }
-        .font(.footnote)
+        .font(fBody)
         .foregroundStyle(.secondary)
     }
     
     private var anxietyBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionTitle("是否出現焦慮")
-            Text("程度：\(entry.anxietyLevel.rawValue)")
+            SectionTitle(String(localized: "是否出現焦慮"))
+            Text("程度：\(entry.anxietyLevel.displayName)")
             
             if entry.anxietyLevel != .none {
                 if !entry.anxietyReasons.isEmpty {
-                    Text("原因：\(join(entry.anxietyReasons.map{$0.rawValue}, otherText: entry.anxietyReasons.contains(.other) ? entry.anxietyOtherText : ""))")
+                    Text("原因：\(join(entry.anxietyReasons.map{$0.displayName}, otherText: entry.anxietyReasons.contains(.other) ? entry.anxietyOtherText : ""))")
                 }
                 if !entry.anxietyDurationText.isEmpty {
                     Text("持續時間：\(entry.anxietyDurationText)")
                 }
                 if !entry.anxietySymptoms.isEmpty {
-                    Text("表現：\(join(entry.anxietySymptoms.map{$0.rawValue}, otherText: entry.anxietySymptoms.contains(.other) ? entry.anxietySymptomOtherText : ""))")
+                    Text("表現：\(join(entry.anxietySymptoms.map{$0.displayName}, otherText: entry.anxietySymptoms.contains(.other) ? entry.anxietySymptomOtherText : ""))")
                 }
                 if !entry.stabilizeMethodsForAnxiety.isEmpty {
-                    Text("穩定方式：\(join(entry.stabilizeMethodsForAnxiety.map{$0.rawValue}, otherText: entry.stabilizeMethodsForAnxiety.contains(.other) ? entry.stabilizeOtherTextForAnxiety : ""))")
+                    Text("穩定方式：\(join(entry.stabilizeMethodsForAnxiety.map{$0.displayName}, otherText: entry.stabilizeMethodsForAnxiety.contains(.other) ? entry.stabilizeOtherTextForAnxiety : ""))")
                 }
             }
         }
-        .font(.footnote)
+        .font(fBody)
         .foregroundStyle(.secondary)
     }
     
     private var impulseBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionTitle("衝動行為")
+            SectionTitle(String(localized: "衝動行為"))
             
             if entry.impulseSeverities.isEmpty {
                 Text("無")
-                    .font(.footnote)
+                    .font(fBody)
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(entry.impulseSeverities.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { sev in
                     let set = entry.impulseTypesBySeverity[sev] ?? []
                     let names = set.map { $0.rawValue }
                     let other = set.contains(.other) ? (entry.impulseOtherTextBySeverity[sev] ?? "") : ""
-                    Text("\(sev.rawValue)：\(join(names, otherText: other))")
-                        .font(.footnote)
+                    Text("\(sev.displayName)：\(join(names, otherText: other))")
+                        .font(fBody)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -330,48 +342,48 @@ struct DailyLogFullReviewCard: View {
     
     private var sleepBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionTitle("睡眠狀況")
-            Text("入睡所需時間：\(entry.sleepLatency.rawValue)")
+            SectionTitle(String(localized: "睡眠狀況"))
+            Text("入睡所需時間：\(entry.sleepLatency.displayName)")
             Text("睡眠時長：\(sleepHoursText)")
-            Text("睡眠品質：\(entry.sleepQuality.rawValue.components(separatedBy: "（").first ?? entry.sleepQuality.rawValue)")
+            Text("睡眠品質：\(entry.sleepQuality.shortDisplayName)")
         }
-        .font(.footnote)
+        .font(fBody)
         .foregroundStyle(.secondary)
     }
     
     private var studyBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionTitle("課業與專注力")
-            Text("待辦完成：\(entry.todoCompletion.rawValue)")
+            SectionTitle(String(localized: "課業與專注力"))
+            Text("待辦完成：\(entry.todoCompletion.displayName)")
             
             if entry.todoCompletion == .partial {
                 Text("部分完成：\(entry.todoPartialDone)/\(entry.todoPartialTotal) 項")
             }
             
-            Text("專注度：\(entry.focusQuality.rawValue)")
+            Text("專注度：\(entry.focusQuality.displayName)")
             
             if entry.focusQuality == .cannotFocus {
                 if !entry.cannotFocusReasons.isEmpty {
-                    Text("可能原因：\(join(entry.cannotFocusReasons.map{$0.rawValue}, otherText: entry.cannotFocusReasons.contains(.other) ? entry.cannotFocusOtherText : ""))")
+                    Text("可能原因：\(join(entry.cannotFocusReasons.map{$0.displayName}, otherText: entry.cannotFocusReasons.contains(.other) ? entry.cannotFocusOtherText : ""))")
                 }
             }
             
             if entry.unfinished {
                 Text("未完成：\(entry.unfinishedCount)/\(entry.unfinishedTotal) 項")
                 if !entry.difficultyReasons.isEmpty {
-                    Text("困難：\(join(entry.difficultyReasons.map{$0.rawValue}, otherText: entry.difficultyReasons.contains(.other) ? entry.difficultyOtherText : ""))")
+                    Text("困難：\(join(entry.difficultyReasons.map{$0.displayName}, otherText: entry.difficultyReasons.contains(.other) ? entry.difficultyOtherText : ""))")
                 }
             } else {
                 Text("未完成事項：無")
             }
         }
-        .font(.footnote)
+        .font(fBody)
         .foregroundStyle(.secondary)
     }
     
     private var bodyBlock: some View {
         VStack(alignment: .leading, spacing: 6) {
-            SectionTitle("身體狀況")
+            SectionTitle(String(localized: "身體狀況"))
 
             if entry.painAreas.isEmpty {
                 Text("不適：無")
@@ -383,12 +395,12 @@ struct DailyLogFullReviewCard: View {
                 Text("不適：\(list.joined(separator: "、"))")
             }
 
-            Text("注意到身體狀況：\(entry.bodyNoticeTiming.rawValue)")
+            Text("注意到身體狀況：\(entry.bodyNoticeTiming.displayName)")
             if entry.bodyNoticeTiming == .none && !entry.bodyLateReasons.isEmpty {
-                Text("原因：\(join(entry.bodyLateReasons.map{$0.rawValue}, otherText: entry.bodyLateReasons.contains(.other) ? entry.bodyLateOtherText : ""))")
+                Text("原因：\(join(entry.bodyLateReasons.map{$0.displayName}, otherText: entry.bodyLateReasons.contains(.other) ? entry.bodyLateOtherText : ""))")
             }
         }
-        .font(.footnote)
+        .font(fBody)
         .foregroundStyle(.secondary)
     }
 
@@ -396,10 +408,10 @@ struct DailyLogFullReviewCard: View {
     private var observationBlock: some View {
         if !entry.specialObservation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             VStack(alignment: .leading, spacing: 6) {
-                SectionTitle("特別觀察")
+                SectionTitle(String(localized: "特別觀察"))
                 Text(entry.specialObservation)
             }
-            .font(.footnote)
+            .font(fBody)
             .foregroundStyle(.secondary)
         }
     }
@@ -441,7 +453,7 @@ struct DailyLogFullReviewCard: View {
                 }
             }
         }
-        .font(.footnote)
+        .font(fBody)
         .foregroundStyle(.secondary)
     }
 
@@ -493,47 +505,53 @@ struct DailyLogFullReviewCard: View {
     /// 合併多選文字（處理「其他」）
     private func joinCustom(_ items: [String], otherText: String) -> String {
         let trimmed = otherText.trimmingCharacters(in: .whitespacesAndNewlines)
-        var base = items.filter { $0 != "其他" }
-        if items.contains("其他"), !trimmed.isEmpty {
-            base.append("其他：\(trimmed)")
-        } else if items.contains("其他") {
-            base.append("其他")
+        // items 可能是 enum 的 displayName（已在地化）或使用者資料裡的原始字串（永遠是「其他」），
+        // 兩種都要認得，否則切到英文/日文時「其他」會篩不掉。
+        let otherLabel = String(localized: "其他")
+        let isOther: (String) -> Bool = { $0 == otherLabel || $0 == "其他" }
+        var base = items.filter { !isOther($0) }
+        if items.contains(where: isOther), !trimmed.isEmpty {
+            base.append(String(localized: "其他：\(trimmed)"))
+        } else if items.contains(where: isOther) {
+            base.append(otherLabel)
         }
-        return base.isEmpty ? "--" : base.joined(separator: "、")
+        return base.isEmpty ? "--" : base.joined(separator: String(localized: "、"))
     }
 
     // MARK: - Helpers
     
     private func timeText(_ t: OptionalLogTime) -> String {
         switch t {
-        case .unknown: return "忘記"
+        case .unknown: return String(localized: "忘記")
         case .time(let d): return d.formatted(date: .omitted, time: .shortened)
         }
     }
     
     private var sleepHoursText: String {
         switch entry.sleepHours {
-        case .unknown: return "忘記"
-        case .value(let h): return "\(String(format: "%.1f", h)) 小時"
+        case .unknown: return String(localized: "忘記")
+        case .value(let h): return String(localized: "\(String(format: "%.1f", h)) 小時")
         }
     }
     
     private func join(_ items: [String], otherText: String) -> String {
         let trimmedOther = otherText.trimmingCharacters(in: .whitespacesAndNewlines)
-        var base = items.filter { $0 != "其他" }
-        if items.contains("其他"), !trimmedOther.isEmpty {
-            base.append("其他：\(trimmedOther)")
-        } else if items.contains("其他") {
-            base.append("其他")
+        let otherLabel = String(localized: "其他")
+        let isOther: (String) -> Bool = { $0 == otherLabel || $0 == "其他" }
+        var base = items.filter { !isOther($0) }
+        if items.contains(where: isOther), !trimmedOther.isEmpty {
+            base.append(String(localized: "其他：\(trimmedOther)"))
+        } else if items.contains(where: isOther) {
+            base.append(otherLabel)
         }
-        return base.isEmpty ? "--" : base.joined(separator: "、")
+        return base.isEmpty ? "--" : base.joined(separator: String(localized: "、"))
     }
     
     private func chipLine(_ items: [String]) -> some View {
         HStack(spacing: 8) {
             ForEach(items, id: \.self) { s in
                 Text(s)
-                    .font(.caption)
+                    .font(fSmall)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
                     .background(.ultraThinMaterial)
@@ -546,11 +564,13 @@ struct DailyLogFullReviewCard: View {
 
 private struct SectionTitle: View {
     let text: String
+    /// 由檢視卡片透過 environment 傳入的字級倍率（預設 1.0）
+    @Environment(\.dailyLogTextScale) private var scale
     init(_ text: String) { self.text = text }
-    
+
     var body: some View {
         Text(text)
-            .font(.subheadline.weight(.semibold))
+            .font(.system(size: 15 * scale, weight: .semibold))
             .foregroundStyle(.primary)
     }
 }

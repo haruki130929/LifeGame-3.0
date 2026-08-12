@@ -48,8 +48,8 @@ final class DailyLogStore: ObservableObject {
             let fallback = Self.makeInMemoryContext()
             self.context = fallback
             self.initError = fallback == nil
-                ? "儲存系統無法初始化，每日紀錄暫時無法使用"
-                : "儲存系統尚未就緒，資料暫存於記憶體中"
+                ? String(localized: "儲存系統無法初始化，每日紀錄暫時無法使用")
+                : String(localized: "儲存系統尚未就緒，資料暫存於記憶體中")
         }
         // 同步載入，確保 entries 立刻有值（避免空狀態閃爍）
         loadSync()
@@ -75,7 +75,7 @@ final class DailyLogStore: ObservableObject {
     
     func upsert(_ entry: DailyLogEntry) {
         guard let context else {
-            ErrorManager.shared.showError(initError ?? "儲存系統尚未就緒")
+            ErrorManager.shared.showError(initError ?? String(localized: "儲存系統尚未就緒"))
             return
         }
         do {

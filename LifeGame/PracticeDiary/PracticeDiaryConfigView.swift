@@ -70,7 +70,7 @@ struct PracticeDiaryConfigView: View {
                     } label: {
                         HStack {
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(field.question.title.isEmpty ? "（未命名）" : field.question.title)
+                                Text(field.question.title.isEmpty ? String(localized: "（未命名）") : field.question.title)
                                 HStack(spacing: 4) {
                                     Text(field.question.type.displayName)
                                     if let chart = field.effectiveChartType {

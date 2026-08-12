@@ -7,7 +7,7 @@ struct TodayStatusContentCard: View {
 
     /// 依角色顯示不同按鈕文字
     private var actionButtonTitle: String {
-        slotNameStore.role == .worker ? "工作一小時" : "上一堂課"
+        slotNameStore.role == .worker ? String(localized: "工作一小時") : String(localized: "上一堂課")
     }
 
     /// 上一堂課：記錄按下的時間，1 小時內可取消

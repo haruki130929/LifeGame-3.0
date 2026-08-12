@@ -32,7 +32,7 @@ struct LGCategoryHubView: View {
                 contentLinks
             }
         }
-        .navigationTitle(category.rawValue)
+        .navigationTitle(category.displayName)
     }
 
     /// 點功能 → 讓該功能頁成為堆疊唯一一層（取代目前的分類頁），
@@ -40,28 +40,28 @@ struct LGCategoryHubView: View {
     @ViewBuilder private var contentLinks: some View {
         switch category {
         case .tools:
-            featureLink(.wish, "財務", systemImage: "creditcard")
-            featureLink(.ganttChart, "甘特圖", systemImage: "chart.bar.xaxis")
-            featureLink(.communicationBoard, "選緘溝通板", systemImage: "bubble.left.and.bubble.right")
+            featureLink(.wish, String(localized: "財務"), systemImage: "creditcard")
+            featureLink(.ganttChart, String(localized: "甘特圖"), systemImage: "chart.bar.xaxis")
+            featureLink(.communicationBoard, String(localized: "選緘溝通板"), systemImage: "bubble.left.and.bubble.right")
 
         case .roles:
-            comingSoonRow("能力五角圖", systemImage: "pentagon")
-            comingSoonRow("角色優勢 / 特性", systemImage: "bolt.heart")
-            comingSoonRow("裝備系統", systemImage: "backpack")
+            comingSoonRow(String(localized: "能力五角圖"), systemImage: "pentagon")
+            comingSoonRow(String(localized: "角色優勢 / 特性"), systemImage: "bolt.heart")
+            comingSoonRow(String(localized: "裝備系統"), systemImage: "backpack")
 
         case .growth:
-            featureLink(.dailyLog, "每日紀錄", systemImage: "square.and.pencil")
-            featureLink(.moodThermometer, "心情溫度計", systemImage: "heart.text.square")
-            featureLink(.mandala, "曼陀羅圖表", systemImage: "square.grid.3x3")
-            comingSoonRow("近況檢視（折線圖）", systemImage: "chart.line.uptrend.xyaxis")
+            featureLink(.dailyLog, String(localized: "每日紀錄"), systemImage: "square.and.pencil")
+            featureLink(.moodThermometer, String(localized: "心情溫度計"), systemImage: "heart.text.square")
+            featureLink(.mandala, String(localized: "曼陀羅圖表"), systemImage: "square.grid.3x3")
+            comingSoonRow(String(localized: "近況檢視（折線圖）"), systemImage: "chart.line.uptrend.xyaxis")
 
         case .help:
-            featureLink(.copingNotes, "動力筆記", systemImage: "lightbulb.fill")
-            comingSoonRow("在意清單", systemImage: "checklist")
+            featureLink(.copingNotes, String(localized: "動力筆記"), systemImage: "lightbulb.fill")
+            comingSoonRow(String(localized: "在意清單"), systemImage: "checklist")
 
         case .diary:
-            featureLink(.diary, "日記", systemImage: "book")
-            featureLink(.practiceDiary, "練習日記", systemImage: "pencil.and.list.clipboard")
+            featureLink(.diary, String(localized: "日記"), systemImage: "book")
+            featureLink(.practiceDiary, String(localized: "練習日記"), systemImage: "pencil.and.list.clipboard")
         }
     }
 

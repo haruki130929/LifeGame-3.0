@@ -5,15 +5,15 @@ import SwiftData
 
 enum BagSeeder {
     static let defaults: [(name: String, icon: String, isRequired: Bool)] = [
-        ("錢包", "wallet.bifold", true),
-        ("鑰匙", "key", true),
-        ("耳機", "airpods.pro", true),
-        ("充電線", "cable.connector", false),
-        ("行動電源", "bolt.batteryblock", false),
-        ("水壺", "waterbottle.fill", true),
-        ("筆袋", "applepencil", true),
-        ("手帳本", "book", false),
-        ("課本／講義", "books.vertical.fill", false)
+        (String(localized: "錢包"), "wallet.bifold", true),
+        (String(localized: "鑰匙"), "key", true),
+        (String(localized: "耳機"), "airpods.pro", true),
+        (String(localized: "充電線"), "cable.connector", false),
+        (String(localized: "行動電源"), "bolt.batteryblock", false),
+        (String(localized: "水壺"), "waterbottle.fill", true),
+        (String(localized: "筆袋"), "applepencil", true),
+        (String(localized: "手帳本"), "book", false),
+        (String(localized: "課本／講義"), "books.vertical.fill", false)
     ]
 
     @MainActor

@@ -7,13 +7,13 @@ final class MandalaStore: ObservableObject {
 
     struct Document: Identifiable, Codable, Equatable {
         var id: UUID = UUID()
-        var name: String = "圖表 1"
+        var name: String = String(localized: "圖表 1")
         var goal: String
         var themes: [String]              // 8 個
         var actions: [[String]]           // 8 組，每組 8 個
         var cellColors: [String: String] = [:]  // "row-col" → hex color
 
-        static func empty(name: String = "圖表 1") -> Document {
+        static func empty(name: String = String(localized: "圖表 1")) -> Document {
             Document(
                 name: name,
                 goal: "",
@@ -57,7 +57,7 @@ final class MandalaStore: ObservableObject {
         // 遷移 v1
         else if let legacy = StorageManager.load(LegacyDocument.self, forKey: keyV1) {
             let migrated = Document(
-                name: "圖表 1",
+                name: String(localized: "圖表 1"),
                 goal: legacy.goal,
                 themes: legacy.themes,
                 actions: legacy.actions
@@ -86,7 +86,7 @@ final class MandalaStore: ObservableObject {
     // MARK: - 多圖表操作
 
     func addDocument() {
-        let name = "圖表 \(documents.count + 1)"
+        let name = String(localized: "圖表 \(documents.count + 1)")
         documents.append(.empty(name: name))
         currentIndex = documents.count - 1
     }

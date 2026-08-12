@@ -52,7 +52,7 @@ struct MonthlyScoreChartView: View {
             Spacer()
             Picker("", selection: $period) {
                 ForEach(Period.allCases, id: \.self) { p in
-                    Text(p.rawValue).tag(p)
+                    Text(p.displayName).tag(p)
                 }
             }
             .pickerStyle(.segmented)

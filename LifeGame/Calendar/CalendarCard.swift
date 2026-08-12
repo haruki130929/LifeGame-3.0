@@ -446,7 +446,7 @@ struct CalendarCard: View {
     
     /// 中文星期符號，依 firstWeekday 設定排列
     private var weekdaySymbols: [String] {
-        cal.chineseWeekdaySymbols
+        cal.localizedWeekdaySymbols
     }
     
     /// Month cells（補齊到滿週數）

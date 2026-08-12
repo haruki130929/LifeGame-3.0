@@ -10,15 +10,15 @@ enum FabStyle: String, CaseIterable, Identifiable, Codable {
 
     var title: String {
         switch self {
-        case .ring: return "手勢圓環"
-        case .menu: return "展開選單"
+        case .ring: return String(localized: "手勢圓環")
+        case .menu: return String(localized: "展開選單")
         }
     }
 
     var description: String {
         switch self {
-        case .ring: return "長按「＋」後滑動選取功能"
-        case .menu: return "點擊「＋」展開選單按鈕"
+        case .ring: return String(localized: "長按「＋」後滑動選取功能")
+        case .menu: return String(localized: "點擊「＋」展開選單按鈕")
         }
     }
 
@@ -66,15 +66,15 @@ enum FabHandedness: String, CaseIterable, Identifiable {
 
     var title: String {
         switch self {
-        case .right: return "右下角（右手）"
-        case .left:  return "左下角（左手）"
+        case .right: return String(localized: "右下角（右手）")
+        case .left:  return String(localized: "左下角（左手）")
         }
     }
 
     var description: String {
         switch self {
-        case .right: return "「＋」按鈕放在螢幕右下角"
-        case .left:  return "「＋」按鈕放在螢幕左下角"
+        case .right: return String(localized: "「＋」按鈕放在螢幕右下角")
+        case .left:  return String(localized: "「＋」按鈕放在螢幕左下角")
         }
     }
 

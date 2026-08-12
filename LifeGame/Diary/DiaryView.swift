@@ -48,10 +48,10 @@ struct DiaryView: View {
         }
         .navigationTitle("日記")
         .fabMenu([
-            FabAction(title: "新增日記", systemImage: "plus") {
+            FabAction(title: String(localized: "新增日記"), systemImage: "plus") {
                 showingAdd = true
             },
-            FabAction(title: "設定", systemImage: "gearshape") {
+            FabAction(title: String(localized: "設定"), systemImage: "gearshape") {
                 fab.route = .featureSettings(.diary)
                 fab.collapse()
             }

@@ -29,7 +29,7 @@ struct CheckboxRow: View {
 }
 
 // MARK: - 多選清單（Set）
-struct CheckboxMultiSelectList<Option: Identifiable & Hashable & RawRepresentable>: View where Option.RawValue == String {
+struct CheckboxMultiSelectList<Option: Identifiable & Hashable & RawRepresentable & LocalizedDisplayable>: View where Option.RawValue == String {
     let title: String
     let options: [Option]
     @Binding var selected: Set<Option>
@@ -39,7 +39,7 @@ struct CheckboxMultiSelectList<Option: Identifiable & Hashable & RawRepresentabl
             Text(title).font(.subheadline).foregroundStyle(.secondary)
             ForEach(options) { opt in
                 CheckboxRow(
-                    title: opt.rawValue,
+                    title: opt.displayName,
                     isChecked: Binding(
                         get: { selected.contains(opt) },
                         set: { isOn in
@@ -53,7 +53,7 @@ struct CheckboxMultiSelectList<Option: Identifiable & Hashable & RawRepresentabl
 }
 
 // MARK: - 單選清單（一次只能選一個）
-struct CheckboxSingleSelectList<Option: Identifiable & Hashable & RawRepresentable>: View where Option.RawValue == String {
+struct CheckboxSingleSelectList<Option: Identifiable & Hashable & RawRepresentable & LocalizedDisplayable>: View where Option.RawValue == String {
     let title: String
     let options: [Option]
     @Binding var selection: Option
@@ -63,7 +63,7 @@ struct CheckboxSingleSelectList<Option: Identifiable & Hashable & RawRepresentab
             Text(title).font(.subheadline).foregroundStyle(.secondary)
             ForEach(options) { opt in
                 CheckboxRow(
-                    title: opt.rawValue,
+                    title: opt.displayName,
                     isChecked: Binding(
                         get: { selection == opt },
                         set: { isOn in if isOn { selection = opt } }
