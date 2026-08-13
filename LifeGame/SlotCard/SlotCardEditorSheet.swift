@@ -90,24 +90,34 @@ struct SlotCardEditorSheet: View {
                 ForEach(selectedItems) { item in
                     HStack {
                         Label(item.type.title, systemImage: item.type.icon)
-                        Spacer()
-                        Picker("", selection: sizeBinding(for: item)) {
-                            Text("小").tag(CardSize.small)
-                            Text("中").tag(CardSize.medium)
-                            Text("大").tag(CardSize.large)
+                        if ReleaseFlags.cardSizePickerEnabled {
+                            Spacer()
+                            Picker("", selection: sizeBinding(for: item)) {
+                                Text("小").tag(CardSize.small)
+                                Text("中").tag(CardSize.medium)
+                                Text("大").tag(CardSize.large)
+                            }
+                            .pickerStyle(.segmented)
+                            .labelsHidden()
+                            .frame(width: 150)
                         }
-                        .pickerStyle(.segmented)
-                        .labelsHidden()
-                        .frame(width: 150)
                     }
                 }
                 .onMove { from, to in
                     selectedItems.move(fromOffsets: from, toOffset: to)
                 }
             } header: {
-                Text("卡片大小與順序（可拖曳排序）")
+                // 兩個字面值分開寫，不用三元運算子：Text(cond ? "a" : "b") 會走到
+                // 非在地化的 StringProtocol overload，英日版會直接顯示中文原文。
+                if ReleaseFlags.cardSizePickerEnabled {
+                    Text("卡片大小與順序（可拖曳排序）")
+                } else {
+                    Text("卡片順序（可拖曳排序）")
+                }
             } footer: {
-                Text("大＝整排、中＝半排、小＝一格（僅 iPad 版面）")
+                if ReleaseFlags.cardSizePickerEnabled {
+                    Text("大＝整排、中＝半排、小＝一格（僅 iPad 版面）")
+                }
             }
         }
     }
