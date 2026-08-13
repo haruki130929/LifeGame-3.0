@@ -131,7 +131,7 @@ struct WhatsNewView: View {
                     color: .purple
                 ),
                 WhatsNewItem(
-                    icon: "ladybug.fill",
+                    icon: "wrench.and.screwdriver.fill",
                     title: String(localized: "穩定性大幅提升"),
                     description: String(localized: "修復右下角按鈕導致畫面閃爍、天氣與圖表數據顯示錯誤、跨裝置同步、課表未即時顯示等多項問題。"),
                     color: .red
