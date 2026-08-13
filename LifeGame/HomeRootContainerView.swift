@@ -39,8 +39,13 @@ struct HomeRootContainerView: View {
     @StateObject private var updateChecker = AppUpdateChecker()
     @StateObject private var characterStore = CharacterStore()
 
-    // MARK: - Non-observable (不需要 UI 更新就維持 let)
-    private let dailyLogStore = DailyLogStore()
+    // ⚠️ 必須是 @StateObject，不能寫成 `let`。
+    // View 是 struct，普通的 `let` 屬性每次 struct 重建都會重跑初始化，
+    // 而 DailyLogStore.init 會同步解析整個資料庫（實測 372 MB）。
+    // MyApp 有 13 個 App 層級的 @StateObject，任何一個發布（例如每次點 FAB）
+    // 都會重建這裡，等於在主執行緒上重新解析一次全部資料 → 畫面卡住。
+    // @StateObject 的初始值是 @autoclosure，每個視窗只求值一次。
+    @StateObject private var dailyLogStore = DailyLogStore()
 
     var body: some View {
         Group {

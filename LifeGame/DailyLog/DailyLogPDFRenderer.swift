@@ -34,10 +34,14 @@ enum DailyLogPDFRenderer {
         }
 
         // 每筆紀錄各自渲染一塊（forExport: 照片改用不滑動的格狀排列）
+        // autoreleasepool：每筆渲染會解碼該日的照片原檔（實測單張 24 MP 就要 24.5 MB），
+        // 沒有 pool 的話這些暫時性配置會累積到整個迴圈結束才釋放。
         for entry in sorted {
-            let card = DailyLogFullReviewCard(entry: entry, forExport: true)
-            if let img = renderBlock(card, width: contentWidth, scale: scale, moduleStore: moduleStore) {
-                blocks.append(img)
+            autoreleasepool {
+                let card = DailyLogFullReviewCard(entry: entry, forExport: true)
+                if let img = renderBlock(card, width: contentWidth, scale: scale, moduleStore: moduleStore) {
+                    blocks.append(img)
+                }
             }
         }
 
