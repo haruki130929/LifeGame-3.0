@@ -66,7 +66,8 @@
 		EB6A19922FE2A423001F1724 /* LifeGameWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = LifeGameWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB6A19942FE2A423001F1724 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		EB6A19962FE2A423001F1724 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		EB6A19AA2FE2A49C001F1724 /* LifeGameWidgetExtensionDebug.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LifeGameWidgetExtensionDebug.entitlements; sourceTree = "<group>"; };
+		EB6A19AA2FE2A49C001F1724 /* LifeGameWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LifeGameWidgetExtension.entitlements; sourceTree = "<group>"; };
+		EB6A19AB2FE2A49C001F1724 /* LifeGameWidgetExtensionMac.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = LifeGameWidgetExtensionMac.entitlements; sourceTree = "<group>"; };
 		EB9AEE642FD802FD004FDDF8 /* LifeGame.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LifeGame.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EBDBFF382FF15A33009D9148 /* LGWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "LGWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -172,8 +173,9 @@
 		EB7D27542F5DAA2500E67CBE = {
 			isa = PBXGroup;
 			children = (
-				EB6A19AA2FE2A49C001F1724 /* LifeGameWidgetExtensionDebug.entitlements */,
+				EB6A19AA2FE2A49C001F1724 /* LifeGameWidgetExtension.entitlements */,
 				EB7D275F2F5DAA2500E67CBE /* LifeGame */,
+				EB6A19AB2FE2A49C001F1724 /* LifeGameWidgetExtensionMac.entitlements */,
 				EB05F3C52FD2B77600D2B5A5 /* LifeGameTests.xctest */,
 				EB05F3C62FD2B77600D2B5A5 /* LifeGameTests */,
 				EB9AEE642FD802FD004FDDF8 /* LifeGame.app */,
