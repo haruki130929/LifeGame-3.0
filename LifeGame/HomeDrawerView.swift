@@ -18,6 +18,7 @@ struct HomeDrawerView: View {
 
             Text("一天")
                 .font(.headline)
+                .padding(.top, 48)
 
             ForEach(TimeSlot.allCases) { slot in
                 Button {

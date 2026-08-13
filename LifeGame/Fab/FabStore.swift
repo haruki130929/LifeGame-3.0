@@ -232,7 +232,9 @@ final class FabStore: ObservableObject {
             }
         }
         // 任務水族箱：常駐一個「水族箱」動作（不依賴卡片設定），點開後可打開水缸或新增各類型的魚
-        actions.append(aquariumHomeAction())
+        if ReleaseFlags.aquariumEnabled {
+            actions.append(aquariumHomeAction())
+        }
         return actions
     }
 

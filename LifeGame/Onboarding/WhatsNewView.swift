@@ -83,27 +83,57 @@ struct WhatsNewView: View {
                     color: .cyan
                 ),
                 WhatsNewItem(
+                    icon: "desktopcomputer",
+                    title: String(localized: "Mac 版登場"),
+                    description: String(localized: "LifeGame 現在可以在 Mac 上使用。支援視窗縮放、選單列鍵盤快捷鍵、滑鼠移過卡片的高亮回饋。"),
+                    color: .indigo
+                ),
+                WhatsNewItem(
+                    icon: "square.grid.2x2",
+                    title: String(localized: "桌面小工具"),
+                    description: String(localized: "把今日狀態與待辦事項放到主畫面。待辦小工具可直接勾選完成，不必打開 App；還能自選要顯示哪個象限與淺色深色。"),
+                    color: .teal
+                ),
+                WhatsNewItem(
+                    icon: "bolt.badge.clock",
+                    title: String(localized: "即時動態與通知"),
+                    description: String(localized: "今日狀態與待辦可顯示在鎖定畫面和動態島，隨時看到進度。通知也能直接操作，不用進 App。"),
+                    color: .pink
+                ),
+                WhatsNewItem(
+                    icon: "globe",
+                    title: String(localized: "支援繁體中文、英文、日文"),
+                    description: String(localized: "全 App 介面完成三語在地化，可在設定中切換語言。"),
+                    color: .blue
+                ),
+                WhatsNewItem(
                     icon: "chart.xyaxis.line",
                     title: String(localized: "每日紀錄圖表"),
-                    description: String(localized: "情緒趨勢、睡眠時數、身體不適、待辦完成度、起床就寢時間，5 張圖表一目了然。可選 1 週到 3 個月的時間區間。"),
+                    description: String(localized: "情緒趨勢、睡眠時數、身體不適、待辦完成度、起床就寢時間，5 張圖表一目了然。時間區間可選 1 週到全部。也支援匯出紀錄與調整文字大小。"),
                     color: .orange
                 ),
                 WhatsNewItem(
+                    icon: "lightbulb",
+                    title: String(localized: "動力筆記"),
+                    description: String(localized: "把「遇到什麼情況」和「當時什麼方法有效」記下來，下次卡住時可以直接翻出來用。"),
+                    color: .yellow
+                ),
+                WhatsNewItem(
                     icon: "calendar.badge.plus",
-                    title: String(localized: "行事曆重複行程"),
-                    description: String(localized: "新增行程時可設定重複頻率：每天、每週、每兩週、每月，自訂重複次數。"),
+                    title: String(localized: "行事曆大幅強化"),
+                    description: String(localized: "新增重複行程（每天、每週、每兩週、每月）、Apple 風格月檢視、同步 Apple 行事曆的顏色與範圍設定，文字大小也可調整。"),
                     color: .green
                 ),
                 WhatsNewItem(
-                    icon: "clock.badge.checkmark",
-                    title: String(localized: "時間圓環即時顯示課表"),
-                    description: String(localized: "修復開啟 App 時卡片不顯示課表的問題，現在一開啟就能看到今天的課表。"),
+                    icon: "checklist",
+                    title: String(localized: "待辦更好用"),
+                    description: String(localized: "到期日與時間分開設定，完成的待辦會在一週後自動收起，時段時間也可以自訂。"),
                     color: .purple
                 ),
                 WhatsNewItem(
                     icon: "ladybug.fill",
                     title: String(localized: "穩定性大幅提升"),
-                    description: String(localized: "修復右下角按鈕導致畫面閃爍、天氣與圖表數據顯示錯誤、跨裝置同步等多項問題。"),
+                    description: String(localized: "修復右下角按鈕導致畫面閃爍、天氣與圖表數據顯示錯誤、跨裝置同步、課表未即時顯示等多項問題。"),
                     color: .red
                 ),
             ]
