@@ -142,8 +142,8 @@ private struct CourseEditSheet: View {
                 CompactPaletteColorPicker(selectedHex: $colorHex)
 
                 Section("時間") {
-                    DatePicker("開始", selection: $startDate, displayedComponents: .hourAndMinute)
-                    DatePicker("結束", selection: $endDate, displayedComponents: .hourAndMinute)
+                    RingTimeField(title: "開始", date: $startDate)
+                    RingTimeField(title: "結束", date: $endDate)
                 }
 
                 Section("資源消耗") {

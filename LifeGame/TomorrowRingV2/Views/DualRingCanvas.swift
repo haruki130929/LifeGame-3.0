@@ -418,10 +418,15 @@ private struct StatBar: View {
 
     var body: some View {
         HStack(spacing: compact ? 5 : 6) {
+            // 固定寬度讓 HP／FP 兩條進度條對齊；寬度須容得下最寬的標籤，
+            // Mac Catalyst 的 .caption2 不受 dynamicTypeSize 縮放（11pt），
+            // 「HP」實寬 16.3pt 會撐破舊的 16pt 框而折成兩行。
             Text(label)
                 .font(compact ? .caption2.weight(.bold) : .caption2.weight(.semibold))
                 .foregroundStyle(color)
-                .frame(width: compact ? 18 : 16, alignment: .leading)
+                .lineLimit(1)
+                .fixedSize(horizontal: true, vertical: false)
+                .frame(width: compact ? 20 : 22, alignment: .leading)
 
             GeometryReader { geo in
                 ZStack(alignment: .leading) {
