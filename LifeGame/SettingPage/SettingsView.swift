@@ -4,7 +4,6 @@ import AuthenticationServices
 
 struct SettingsView: View {
 
-    @EnvironmentObject private var fab: FabStore
     @EnvironmentObject private var theme: ThemeStore
     @EnvironmentObject private var updateChecker: AppUpdateChecker
     @EnvironmentObject private var calendarSettings: CalendarSettingsStore
@@ -48,12 +47,12 @@ struct SettingsView: View {
             aboutSection
         }
         .navigationTitle(L10n.Title.settings)
+        // 直接寫 fab.isHidden 會有兩個問題：push 子頁時本頁的 onDisappear 晚於子頁的
+        // onAppear，把子頁的隱藏蓋掉；退回首頁時又會無視抽屜是否開著硬把「＋」放出來。
+        // 交給 .hidesFab() 的計數處理，兩者都不會發生。
+        .hidesFab()
         .onAppear {
             hourlyMoodEnabled = StorageManager.load(Bool.self, forKey: hourlyMoodEnabledKey) ?? false
-            fab.isHidden = true
-        }
-        .onDisappear {
-            fab.isHidden = false
         }
         .sheet(isPresented: $showFeedbackMail) {
             FeedbackMailView()
@@ -354,7 +353,7 @@ private extension SettingsView {
 
     // MARK: 關於
     var aboutSection: some View {
-        Section(L10n.Settings.about) {
+        Section {
             HStack {
                 Text(L10n.Settings.version)
                 Spacer()
@@ -367,6 +366,20 @@ private extension SettingsView {
                 Text("はるき")
                     .foregroundStyle(.secondary)
             }
+            NavigationLink {
+                DeveloperNoteView()
+            } label: {
+                Label(L10n.Settings.developerNote, systemImage: "quote.bubble")
+            }
+            NavigationLink {
+                ChangelogView()
+            } label: {
+                Label(L10n.Settings.changelog, systemImage: "list.bullet.rectangle.portrait")
+            }
+        } header: {
+            Text(L10n.Settings.about)
+        } footer: {
+            Text("這個 App 是一個人做的。這裡放了它為什麼存在，以及一路上改了些什麼。")
         }
     }
 

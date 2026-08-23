@@ -3458,6 +3458,52 @@
         }
       }
     },
+    "LifeGame 現在可以在 Mac 上使用。支援視窗縮放、選單列鍵盤快捷鍵、滑鼠移過卡片的高亮回饋。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LifeGame now runs on your Mac, with resizable windows, menu bar keyboard shortcuts and hover highlighting on cards."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LifeGameがMacで使えるようになりました。ウインドウのサイズ変更、メニューバーのキーボードショートカット、カードのホバーハイライトに対応しています。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LifeGame 現在可以在 Mac 上使用。支援視窗縮放、選單列鍵盤快捷鍵、滑鼠移過卡片的高亮回饋。"
+          }
+        }
+      }
+    },
+    "Mac 版登場" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "LifeGame comes to Mac"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac版が登場"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mac 版登場"
+          }
+        }
+      }
+    },
     "MP" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -3756,6 +3802,9 @@
           }
         }
       }
+    },
+    "v%@" : {
+
     },
     "v%@ 可更新" : {
       "extractionState" : "manual",
@@ -6241,6 +6290,29 @@
         }
       }
     },
+    "今日狀態與待辦可顯示在鎖定畫面和動態島，隨時看到進度。通知也能直接操作，不用進 App。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Today's status and your to-dos can appear on the Lock Screen and in the Dynamic Island so progress is always visible. Notifications are interactive too, so you can act without opening the app."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日のステータスとToDoをロック画面とダイナミックアイランドに表示でき、進捗をいつでも確認できます。通知からそのまま操作することもできます。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日狀態與待辦可顯示在鎖定畫面和動態島，隨時看到進度。通知也能直接操作，不用進 App。"
+          }
+        }
+      }
+    },
     "今日疲勞程度" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7065,6 +7137,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "修復了功能頁「＋」按鈕無法選取的問題，圓環選單在所有頁面都能正常使用。"
+          }
+        }
+      }
+    },
+    "修復右下角按鈕導致畫面閃爍、天氣與圖表數據顯示錯誤、跨裝置同步、課表未即時顯示等多項問題。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fixed screen flicker caused by the bottom-right button, wrong weather and chart data, cross-device sync, the class schedule not showing immediately, and more."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "右下のボタンによる画面のちらつき、天気とグラフのデータの誤表示、デバイス間の同期、時間割がすぐに表示されない問題などを修正しました。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "修復右下角按鈕導致畫面閃爍、天氣與圖表數據顯示錯誤、跨裝置同步、課表未即時顯示等多項問題。"
           }
         }
       }
@@ -8150,6 +8245,29 @@
         }
       }
     },
+    "全 App 介面完成三語在地化，可在設定中切換語言。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "The whole app is now localised in all three languages. Switch language in Settings."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "アプリ全体が3言語にローカライズされました。設定から言語を切り替えられます。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全 App 介面完成三語在地化，可在設定中切換語言。"
+          }
+        }
+      }
+    },
     "全新「練習日記」" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8307,6 +8425,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "公司或家裡太吵沒辦法工作的人"
+          }
+        }
+      }
+    },
+    "共 %lld 個版本，從 %@ 開始。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld releases, starting %@."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "全 %lld バージョン、%@ から。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "共 %lld 個版本，從 %@ 開始。"
           }
         }
       }
@@ -9024,6 +9165,29 @@
         }
       }
     },
+    "分鐘" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "minutes"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "分鐘"
+          }
+        }
+      }
+    },
     "分開看這三種聲音，而不是全部混在一起。" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -9572,6 +9736,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "到 設定 → 儲存方式 可以查看和管理同步狀態。"
+          }
+        }
+      }
+    },
+    "到期日與時間分開設定，完成的待辦會在一週後自動收起，時段時間也可以自訂。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Set the due date and time separately, completed to-dos tidy themselves away after a week, and you can customise the times of each slot."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "期限の日付と時刻を別々に設定でき、完了したToDoは1週間後に自動で片付きます。各時間帯の時刻もカスタマイズできます。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "到期日與時間分開設定，完成的待辦會在一週後自動收起，時段時間也可以自訂。"
           }
         }
       }
@@ -10611,6 +10798,29 @@
         }
       }
     },
+    "即時動態與通知" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Live Activities and notifications"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ライブアクティビティと通知"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "即時動態與通知"
+          }
+        }
+      }
+    },
     "原因：%@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -11596,6 +11806,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "告訴我你的使用體驗、建議或遇到的問題"
+          }
+        }
+      }
+    },
+    "告訴我你的想法" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tell me what you think"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "感想を聞かせてください"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "告訴我你的想法"
           }
         }
       }
@@ -17028,6 +17261,29 @@
         }
       }
     },
+    "待辦更好用" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "To-dos made easier"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ToDoがもっと使いやすく"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "待辦更好用"
+          }
+        }
+      }
+    },
     "很在意失敗、容易整體否定自己的時候" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -18243,6 +18499,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "情緒趨勢、睡眠時數、身體不適、待辦完成度、起床就寢時間，5 張圖表一目了然。可選 1 週到 3 個月的時間區間。"
+          }
+        }
+      }
+    },
+    "情緒趨勢、睡眠時數、身體不適、待辦完成度、起床就寢時間，5 張圖表一目了然。時間區間可選 1 週到全部。也支援匯出紀錄與調整文字大小。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Five charts at a glance: mood trend, hours slept, physical discomfort, to-do completion, and wake/bed times. Choose any range from one week to all time. You can also export your records and adjust the text size."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "気分の推移、睡眠時間、体調、ToDo達成度、起床・就寝時刻の5つのグラフを一覧できます。期間は1週間から全期間まで選べます。記録の書き出しと文字サイズの調整にも対応しています。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "情緒趨勢、睡眠時數、身體不適、待辦完成度、起床就寢時間，5 張圖表一目了然。時間區間可選 1 週到全部。也支援匯出紀錄與調整文字大小。"
           }
         }
       }
@@ -19489,6 +19768,29 @@
         }
       }
     },
+    "把「遇到什麼情況」和「當時什麼方法有效」記下來，下次卡住時可以直接翻出來用。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Write down the situations you run into and what actually helped, so you can look it up next time you get stuck."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「どんな状況だったか」と「そのとき何が効いたか」を書き留めておけば、次に行き詰まったときにすぐ見返せます。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "把「遇到什麼情況」和「當時什麼方法有效」記下來，下次卡住時可以直接翻出來用。"
+          }
+        }
+      }
+    },
     "把一天切成大約五個時段，例如早上、下午、晚上等。" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -19531,6 +19833,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "把不立刻行動會增加的「風險」寫出來"
+          }
+        }
+      }
+    },
+    "把今日狀態與待辦事項放到主畫面。待辦小工具可直接勾選完成，不必打開 App；還能自選要顯示哪個象限與淺色深色。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Put today's status and your to-dos on the Home Screen. Tick off to-dos straight from the widget without opening the app, and choose which quadrant to show and whether it uses light or dark appearance."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今日のステータスとToDoをホーム画面に配置できます。アプリを開かなくてもウィジェットから直接ToDoにチェックを入れられ、表示する象限とライト/ダークの外観も選べます。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "把今日狀態與待辦事項放到主畫面。待辦小工具可直接勾選完成，不必打開 App；還能自選要顯示哪個象限與淺色深色。"
           }
         }
       }
@@ -20566,6 +20891,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "支援 Sign in with Apple，資料自動同步到 iCloud，刪除 App 重裝也不怕遺失資料。"
+          }
+        }
+      }
+    },
+    "支援繁體中文、英文、日文" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Traditional Chinese, English and Japanese"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繁体字中国語・英語・日本語に対応"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "支援繁體中文、英文、日文"
           }
         }
       }
@@ -21762,6 +22110,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "新增里程碑"
+          }
+        }
+      }
+    },
+    "新增重複行程（每天、每週、每兩週、每月）、Apple 風格月檢視、同步 Apple 行事曆的顏色與範圍設定，文字大小也可調整。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repeating events (daily, weekly, fortnightly, monthly), an Apple-style month view, synced Apple Calendar colours with a configurable sync range, and adjustable text size."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繰り返し予定（毎日・毎週・隔週・毎月）、Apple風の月表示、Appleカレンダーの色の同期と同期範囲の設定、文字サイズの調整に対応しました。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "新增重複行程（每天、每週、每兩週、每月）、Apple 風格月檢視、同步 Apple 行事曆的顏色與範圍設定，文字大小也可調整。"
           }
         }
       }
@@ -24388,6 +24759,29 @@
         }
       }
     },
+    "桌面小工具" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Home Screen widgets"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ホーム画面ウィジェット"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "桌面小工具"
+          }
+        }
+      }
+    },
     "桌面工具" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -25488,6 +25882,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "每 15 分鐘專注一件事，結束後休息 3～5 分鐘。"
+          }
+        }
+      }
+    },
+    "每一版的更新內容都留在這裡。想知道某個功能是什麼時候加的、或是哪個問題是哪一版修掉的，往下翻就找得到。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Every release is kept here. Scroll down to find when a feature was added, or which version fixed a problem."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "各バージョンの更新内容をすべて残しています。どの機能がいつ追加されたか、どの不具合がどのバージョンで直ったかは、下にスクロールすれば見つかります。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "每一版的更新內容都留在這裡。想知道某個功能是什麼時候加的、或是哪個問題是哪一版修掉的，往下翻就找得到。"
           }
         }
       }
@@ -30502,6 +30919,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "目前沒有待辦"
+          }
+        }
+      }
+    },
+    "目前版本" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Current"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在のバージョン"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目前版本"
           }
         }
       }
@@ -35635,6 +36075,29 @@
         }
       }
     },
+    "行事曆大幅強化" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A much better calendar"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カレンダーが大幅に進化"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行事曆大幅強化"
+          }
+        }
+      }
+    },
     "行事曆新增行程時可選「每週固定行程」，自動建立 12 週重複行程，也會同步到 Apple 行事曆。" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -39177,6 +39640,52 @@
         }
       }
     },
+    "這個 App 改過什麼" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "What has changed"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "これまでの変更"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這個 App 改過什麼"
+          }
+        }
+      }
+    },
+    "這個 App 是一個人做的。這裡放了它為什麼存在，以及一路上改了些什麼。" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "This app is made by one person. Here's why it exists, and what has changed along the way."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "このアプリは一人で作っています。なぜ作ったのか、これまで何を変えてきたのかをここにまとめました。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這個 App 是一個人做的。這裡放了它為什麼存在，以及一路上改了些什麼。"
+          }
+        }
+      }
+    },
     "這個時段要顯示的卡片（可拖曳排序、可刪除）" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -41799,6 +42308,29 @@
         }
       }
     },
+    "開發日誌" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Development Log"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開発ログ"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開發日誌"
+          }
+        }
+      }
+    },
     "開發者" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -41818,6 +42350,29 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "開發者"
+          }
+        }
+      }
+    },
+    "開發者的話" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A Note from the Developer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開発者からのひとこと"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "開發者的話"
           }
         }
       }
@@ -44670,351 +45225,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "點選模組可編輯，左滑可刪除"
-          }
-        }
-      }
-    },
-    "Mac 版登場" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LifeGame comes to Mac"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mac版が登場"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Mac 版登場"
-          }
-        }
-      }
-    },
-    "LifeGame 現在可以在 Mac 上使用。支援視窗縮放、選單列鍵盤快捷鍵、滑鼠移過卡片的高亮回饋。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LifeGame now runs on your Mac, with resizable windows, menu bar keyboard shortcuts and hover highlighting on cards."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LifeGameがMacで使えるようになりました。ウインドウのサイズ変更、メニューバーのキーボードショートカット、カードのホバーハイライトに対応しています。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "LifeGame 現在可以在 Mac 上使用。支援視窗縮放、選單列鍵盤快捷鍵、滑鼠移過卡片的高亮回饋。"
-          }
-        }
-      }
-    },
-    "桌面小工具" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Home Screen widgets"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ホーム画面ウィジェット"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "桌面小工具"
-          }
-        }
-      }
-    },
-    "把今日狀態與待辦事項放到主畫面。待辦小工具可直接勾選完成，不必打開 App；還能自選要顯示哪個象限與淺色深色。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Put today's status and your to-dos on the Home Screen. Tick off to-dos straight from the widget without opening the app, and choose which quadrant to show and whether it uses light or dark appearance."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "今日のステータスとToDoをホーム画面に配置できます。アプリを開かなくてもウィジェットから直接ToDoにチェックを入れられ、表示する象限とライト/ダークの外観も選べます。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把今日狀態與待辦事項放到主畫面。待辦小工具可直接勾選完成，不必打開 App；還能自選要顯示哪個象限與淺色深色。"
-          }
-        }
-      }
-    },
-    "即時動態與通知" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Live Activities and notifications"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ライブアクティビティと通知"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "即時動態與通知"
-          }
-        }
-      }
-    },
-    "今日狀態與待辦可顯示在鎖定畫面和動態島，隨時看到進度。通知也能直接操作，不用進 App。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Today's status and your to-dos can appear on the Lock Screen and in the Dynamic Island so progress is always visible. Notifications are interactive too, so you can act without opening the app."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "今日のステータスとToDoをロック画面とダイナミックアイランドに表示でき、進捗をいつでも確認できます。通知からそのまま操作することもできます。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "今日狀態與待辦可顯示在鎖定畫面和動態島，隨時看到進度。通知也能直接操作，不用進 App。"
-          }
-        }
-      }
-    },
-    "支援繁體中文、英文、日文" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Traditional Chinese, English and Japanese"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "繁体字中国語・英語・日本語に対応"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "支援繁體中文、英文、日文"
-          }
-        }
-      }
-    },
-    "全 App 介面完成三語在地化，可在設定中切換語言。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "The whole app is now localised in all three languages. Switch language in Settings."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "アプリ全体が3言語にローカライズされました。設定から言語を切り替えられます。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "全 App 介面完成三語在地化，可在設定中切換語言。"
-          }
-        }
-      }
-    },
-    "把「遇到什麼情況」和「當時什麼方法有效」記下來，下次卡住時可以直接翻出來用。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Write down the situations you run into and what actually helped, so you can look it up next time you get stuck."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "「どんな状況だったか」と「そのとき何が効いたか」を書き留めておけば、次に行き詰まったときにすぐ見返せます。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "把「遇到什麼情況」和「當時什麼方法有效」記下來，下次卡住時可以直接翻出來用。"
-          }
-        }
-      }
-    },
-    "行事曆大幅強化" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "A much better calendar"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "カレンダーが大幅に進化"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行事曆大幅強化"
-          }
-        }
-      }
-    },
-    "新增重複行程（每天、每週、每兩週、每月）、Apple 風格月檢視、同步 Apple 行事曆的顏色與範圍設定，文字大小也可調整。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Repeating events (daily, weekly, fortnightly, monthly), an Apple-style month view, synced Apple Calendar colours with a configurable sync range, and adjustable text size."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "繰り返し予定（毎日・毎週・隔週・毎月）、Apple風の月表示、Appleカレンダーの色の同期と同期範囲の設定、文字サイズの調整に対応しました。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "新增重複行程（每天、每週、每兩週、每月）、Apple 風格月檢視、同步 Apple 行事曆的顏色與範圍設定，文字大小也可調整。"
-          }
-        }
-      }
-    },
-    "待辦更好用" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "To-dos made easier"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ToDoがもっと使いやすく"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "待辦更好用"
-          }
-        }
-      }
-    },
-    "到期日與時間分開設定，完成的待辦會在一週後自動收起，時段時間也可以自訂。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Set the due date and time separately, completed to-dos tidy themselves away after a week, and you can customise the times of each slot."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "期限の日付と時刻を別々に設定でき、完了したToDoは1週間後に自動で片付きます。各時間帯の時刻もカスタマイズできます。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "到期日與時間分開設定，完成的待辦會在一週後自動收起，時段時間也可以自訂。"
-          }
-        }
-      }
-    },
-    "情緒趨勢、睡眠時數、身體不適、待辦完成度、起床就寢時間，5 張圖表一目了然。時間區間可選 1 週到全部。也支援匯出紀錄與調整文字大小。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Five charts at a glance: mood trend, hours slept, physical discomfort, to-do completion, and wake/bed times. Choose any range from one week to all time. You can also export your records and adjust the text size."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "気分の推移、睡眠時間、体調、ToDo達成度、起床・就寝時刻の5つのグラフを一覧できます。期間は1週間から全期間まで選べます。記録の書き出しと文字サイズの調整にも対応しています。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "情緒趨勢、睡眠時數、身體不適、待辦完成度、起床就寢時間，5 張圖表一目了然。時間區間可選 1 週到全部。也支援匯出紀錄與調整文字大小。"
-          }
-        }
-      }
-    },
-    "修復右下角按鈕導致畫面閃爍、天氣與圖表數據顯示錯誤、跨裝置同步、課表未即時顯示等多項問題。" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "en" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fixed screen flicker caused by the bottom-right button, wrong weather and chart data, cross-device sync, the class schedule not showing immediately, and more."
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "右下のボタンによる画面のちらつき、天気とグラフのデータの誤表示、デバイス間の同期、時間割がすぐに表示されない問題などを修正しました。"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "修復右下角按鈕導致畫面閃爍、天氣與圖表數據顯示錯誤、跨裝置同步、課表未即時顯示等多項問題。"
           }
         }
       }

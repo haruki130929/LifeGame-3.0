@@ -56,6 +56,9 @@ enum L10n {
         static var about: String { String(localized: "關於") }
         static var version: String { String(localized: "版本") }
         static var developer: String { String(localized: "開發者") }
+        static var developerNote: String { String(localized: "開發者的話") }
+        static var changelog: String { String(localized: "開發日誌") }
+        static var tellMeWhatYouThink: String { String(localized: "告訴我你的想法") }
     }
 
     // MARK: - iCloud / 帳號
