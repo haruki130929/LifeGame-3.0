@@ -10,7 +10,10 @@ import SwiftUI
 /// 所以選單裡看到的時間就是實際會存下去的時間。
 /// iPhone / iPad 維持原本的 `DatePicker`。
 struct RingTimeField: View {
-    let title: String
+    /// 必須是 `LocalizedStringKey`：宣告成 `String` 會挑到 `Text` / `DatePicker` 的
+    /// `StringProtocol` overload，那是逐字顯示、不查 String Catalog 的版本，
+    /// 「開始」「結束」就會在英日版原封不動印出中文。
+    let title: LocalizedStringKey
     @Binding var date: Date
 
     /// 顯示用：先吸附到級距，既有的非整點資料（例如匯入的課表）才不會落在選項之外變成空白選單
