@@ -8,7 +8,7 @@ struct FabFloatingLayer: View {
     @AppStorage(FabHandedness.storageKey) private var handedness: FabHandedness = .right
 
     var body: some View {
-        if !fab.isHidden {
+        if fab.isVisible {
             GeometryReader { proxy in
                 let safeBottom = proxy.safeAreaInsets.bottom
                 let safeTrailing = proxy.safeAreaInsets.trailing

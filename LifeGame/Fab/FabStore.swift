@@ -106,6 +106,26 @@ final class FabStore: ObservableObject {
     }
 
     @Published var isHidden: Bool = false
+
+    /// 有幾個子頁正在要求隱藏 FAB（見 `HidesFabModifier`）。
+    ///
+    /// 刻意與 `isHidden` 分開而不是共用同一個 Bool：push 子頁時 SwiftUI 的順序是
+    /// 「子頁 onAppear → 父頁 onDisappear」，兩邊寫同一個 Bool 的話，父頁的還原
+    /// 一定會蓋掉子頁的隱藏（設定頁 push 子頁時「＋」浮回來就是這樣來的）。
+    /// 改成計數就與呼叫順序無關：只要還有人要求隱藏，就維持隱藏。
+    @Published private(set) var hideRequestCount: Int = 0
+
+    /// FAB 該不該畫出來。
+    var isVisible: Bool { !isHidden && hideRequestCount == 0 }
+
+    func requestHide() {
+        hideRequestCount += 1
+    }
+
+    func releaseHide() {
+        hideRequestCount = max(0, hideRequestCount - 1)
+    }
+
     @Published var isExpanded: Bool = false
     @Published private(set) var actions: [FabAction] = []
     @Published private(set) var subActions: [FabAction] = []

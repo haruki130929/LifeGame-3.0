@@ -8,13 +8,16 @@ import SwiftUI
 ///
 /// 注意：請套在「push 的目的地」（NavigationLink 內），不要套在被當成 sheet 用的同一個 view，
 /// 以確保 `fab` 環境物件一定取得到（sheet 本來就會蓋住 FAB，無需處理）。
+///
+/// 用計數而不是直接寫 `fab.isHidden`：push 時父頁的 `onDisappear` 會晚於子頁的
+/// `onAppear`，共用同一個 Bool 會被父頁的還原蓋掉。詳見 `FabStore.hideRequestCount`。
 struct HidesFabModifier: ViewModifier {
     @EnvironmentObject private var fab: FabStore
 
     func body(content: Content) -> some View {
         content
-            .onAppear { fab.isHidden = true }
-            .onDisappear { fab.isHidden = false }
+            .onAppear { fab.requestHide() }
+            .onDisappear { fab.releaseHide() }
     }
 }
 
