@@ -136,6 +136,12 @@ struct LifeGameApp: App {
                         .onAppear {
                             coordinator.deduplicateIfNeeded()
                             coordinator.diagnoseiCloudSync()
+                            // 冷啟動要在這裡推一次：這棵畫面是等 coordinator 備妥後才建立的，
+                            // 那時 scenePhase 早就是 .active，下面的 onChange 收不到轉換
+                            // ——實測過，冷啟動只會寫進 shared.stats，心情與待辦不會被推出去。
+                            // 順序與 onChange 相同：先合併外部變更，再推快照。
+                            WatchChangeObserver.shared.checkForWatchChanges()
+                            WatchSyncHelper.pushSnapshotFromStorage()
                             if VersionTracker.shouldShowWhatsNew {
                                 showWhatsNew = true
                             }
@@ -152,6 +158,8 @@ struct LifeGameApp: App {
                         .onChange(of: scenePhase) { _, phase in
                             if phase == .active {
                                 WatchChangeObserver.shared.checkForWatchChanges()
+                                // 合併完外部變更之後才推，順序不能對調（見 pushSnapshotFromStorage 的說明）。
+                                WatchSyncHelper.pushSnapshotFromStorage()
                                 LiveActivityController.reconcile()
                                 TodoLiveActivityController.reconcile()
                             }

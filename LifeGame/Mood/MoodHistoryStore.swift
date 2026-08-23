@@ -224,16 +224,22 @@ final class MoodHistoryStore: ObservableObject {
 
     /// 將今日的心情記錄同步到 Watch
     private func syncMoodToWatch() {
+        WatchSyncHelper.syncMoodEntries(Self.todayEntries(from: points))
+    }
+
+    /// 今日的心情，轉成共享用的整點形式。
+    /// 抽成 static 是為了讓 `WatchSyncHelper.pushSnapshotFromStorage()` 用同一份轉換 ——
+    /// 兩邊各寫一份的話，hourKey 的格式遲早會走鐘，而讀的那端是用字串比對整點的。
+    static func todayEntries(from points: [MoodPoint], now: Date = Date()) -> [MoodEntry] {
         let calendar = Calendar.current
-        let todayEntries = points
-            .filter { calendar.isDateInToday($0.timestamp) }
+        let fmt = DateFormatter()
+        fmt.dateFormat = "yyyy-MM-dd HH"
+        return points
+            .filter { calendar.isDate($0.timestamp, inSameDayAs: now) }
             .map { point -> MoodEntry in
-                let fmt = DateFormatter()
-                fmt.dateFormat = "yyyy-MM-dd HH"
                 let hourKey = fmt.string(from: point.timestamp)
                 return MoodEntry(id: hourKey, hourKey: hourKey, value: Int(point.score))
             }
-        WatchSyncHelper.syncMoodEntries(todayEntries)
     }
 
     private func load() {

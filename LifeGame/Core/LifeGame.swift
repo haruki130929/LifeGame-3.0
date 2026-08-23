@@ -34,6 +34,11 @@ final class LifeGame: ObservableObject {
                 guard let self else { return }
                 WatchSyncHelper.syncStats(hp: self.hp, fp: self.fp, mp: self.mp)
             }
+
+        // 啟動時先推一次快照。上面的 sink 只在資料「變動」時才寫，所以在從沒改過
+        // 這些資料的裝置上（例如都在手機操作的 Mac），shared.stats 會一直不存在，
+        // widget、Watch 與桌寵就永遠讀不到東西。
+        WatchSyncHelper.syncStats(hp: hp, fp: fp, mp: mp)
     }
     
     func weight(of item: EquipItem) -> Int {
