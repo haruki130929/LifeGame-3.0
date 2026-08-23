@@ -56,10 +56,11 @@ private struct FabButtoniPhone: View {
     var body: some View {
         ZStack {
             if isRingActive {
-                Color.black.opacity(0.3)
+                // 透明遮罩：只負責「點空白處關閉」，不變暗背景
+                Color.clear
+                    .contentShape(Rectangle())
                     .ignoresSafeArea()
                     .onTapGesture { dismissRing() }
-                    .transition(.opacity)
             }
 
             fabButton
