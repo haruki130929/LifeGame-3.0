@@ -28,13 +28,6 @@
 			remoteGlobalIDString = EB6A19912FE2A423001F1724;
 			remoteInfo = LifeGameWidgetExtension;
 		};
-		EBDBFF402FF15A34009D9148 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = EB7D27552F5DAA2500E67CBE /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = EBDBFF372FF15A33009D9148;
-			remoteInfo = "LGWatch Watch App";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
